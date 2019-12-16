@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.notima.generic.businessobjects.adapter</groupId>
+	<version>0.0.3-SNAPSHOT</version>
+	<name>Svea Webpay Business Objects Adapter</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+
+
+		<resources>
+			<resource>
+				<directory>src/test/resources</directory>
+				<excludes>
+					<exclude>config-test*</exclude>
+					<exclude>*.json</exclude>
+					<exclude>test-details-properties</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.notima.api.webpay</groupId>
+			<artifactId>pmt-admin-api</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.svea</groupId>
+			<artifactId>webpayadmin-reports</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+	</dependencies>
+
+
+	<artifactId>sveaWebpayAdapter</artifactId>
+	<description>Converts Webpay Objects.
+0.0.3 is first version using Webpay's libraries on github.</description>
+	<parent>
+		<artifactId>businessObjectAdapters</artifactId>
+		<version>1.8.7-SNAPSHOT</version>
+		<groupId>org.notima.generic.businessobjects</groupId>
+	</parent>
+</project>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Rename this to test-config3.xml and enter real credentials to test -->
+<configuration>
+
+	<authCode>11111</authCode>
+	<clientSecret>ef76b40f1ad34ffffffffffffffffff2</clientSecret>
+	<clientId>CCIIILL</clientId>
+	<accessToken>ffffffff-43c0-4941-bc5f-xxxxxxxxxx</accessToken>
+	
+</configuration>
