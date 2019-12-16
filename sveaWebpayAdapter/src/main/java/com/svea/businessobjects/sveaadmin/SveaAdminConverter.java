@@ -37,11 +37,21 @@ import com.svea.webpayadminservice.client.OrderType;
 /**
  * Converts to and from Svea Formats to Business Objects
  * 
- * @author daniel
+ * @author Daniel Tamm
  *
  */
 public class SveaAdminConverter {
 
+	/**
+	 * Creates an order request including payment plan details
+	 * 
+	 * 
+	 * @param src		The request
+	 * @param ot		Order type
+	 * @param cpp		Payment Plan details
+	 * @return			An Order request
+	 * @throws Exception		If something goes wrong
+	 */
 	@SuppressWarnings("unchecked")
 	public static CreateOrderRequest convert(Order<CreateOrderRequest> src, OrderType ot, CreatePaymentPlanDetails cpp) throws Exception {
 		
@@ -119,8 +129,8 @@ public class SveaAdminConverter {
 	/**
 	 * Converts Svea's webpay order to business object order
 	 * 
-	 * @param src
-	 * @return
+	 * @param src	A webpay order.
+	 * @return		An order in business objects format.
 	 */
 	public static org.notima.generic.businessobjects.Order<com.svea.webpayadminservice.client.Order> convert(com.svea.webpayadminservice.client.Order src) throws Exception {
 		
@@ -208,8 +218,8 @@ public class SveaAdminConverter {
 	/**
 	 * Converts one order row
 	 * 
-	 * @param src
-	 * @return
+	 * @param src		The line
+	 * @return			An order row
 	 */
 	public static OrderRow convert(OrderInvoiceLine src) {
 		
@@ -245,9 +255,9 @@ public class SveaAdminConverter {
 	 * Converts a location and person into a Svea Address.
 	 * Use co, street and house number to create the adress.
 	 * 
-	 * @param src
-	 * @param p
-	 * @return
+	 * @param src		A location object
+	 * @param p			The person
+	 * @return			A Svea address structure.
 	 */
 	public static Address convert(Location src, Person p) {
 		Address dst = new Address();
@@ -273,6 +283,13 @@ public class SveaAdminConverter {
 		
 	}
 	
+	/**
+	 * Converts a customer identity to a business partner object
+	 * 
+	 * @param src			The customer identity
+	 * @return				A business partner customer.
+	 * @throws Exception	If something goes wrong
+	 */
 	public static BusinessPartner<CustomerIdentity> convert(CustomerIdentity src) throws Exception {
 	
 		BusinessPartner<CustomerIdentity> dst = new BusinessPartner<CustomerIdentity>();
@@ -286,6 +303,8 @@ public class SveaAdminConverter {
 		}
 		dst.setName(src.getFullName());
 
+		dst.setIsCustomer(true);
+		
 		Location address = new Location();
 		address.setCo(src.getCoAddress());
 		address.setStreet(src.getStreet());
@@ -302,12 +321,12 @@ public class SveaAdminConverter {
 	
 	/**
 	 * Use co, street and house number to create the address (don't use address1-4).
-	 * Set contact->attribute->birthDate to include birth date of
+	 * Set contact - attribute - birthDate to include birth date of
 	 * individual identity.
 	 * 
-	 * @param bp
-	 * @return
-	 * @throws Exception
+	 * @param bp			The business partner
+	 * @return				A customer identity (Svea Format)
+	 * @throws Exception	If something goes wrong
 	 */
 	public static CustomerIdentity convert(BusinessPartner<CustomerIdentity> bp) throws Exception {
 		
@@ -365,10 +384,18 @@ public class SveaAdminConverter {
 		
 	}
 	
-	public List<Payment> convert(PaymentReportGroup group, boolean retriesOnly) throws ParseException {
+	/**
+	 * Converts a payment report group to a list of payments (business objects format).
+	 * 
+	 * @param group			A payment report group
+	 * @param retriesOnly	Only convert payments marked with retry.
+	 * @return				A list of payments.
+	 * @throws ParseException	If report can't be parsed.
+	 */
+	public List<Payment<PaymentReportDetail>> convert(PaymentReportGroup group, boolean retriesOnly) throws ParseException {
 		
-		List<Payment> dstList = new ArrayList<Payment>();
-		Payment p;
+		List<Payment<PaymentReportDetail>> dstList = new ArrayList<Payment<PaymentReportDetail>>();
+		Payment<PaymentReportDetail> p;
 		
 		if (group==null || group.getPaymentReportDetail()==null) return dstList;
 		
@@ -387,10 +414,17 @@ public class SveaAdminConverter {
 		
 	}
 	
-	
-	public Payment convert(PaymentReportDetail src, PaymentReportGroup group) throws ParseException {
+	/**
+	 * Converts a payment report detail in given group to a single payment
+	 * 
+	 * @param src			The payment to be converted
+	 * @param group			The group of the payment (src)
+	 * @return				A payment
+	 * @throws ParseException	If something goes wrong
+	 */
+	public Payment<PaymentReportDetail> convert(PaymentReportDetail src, PaymentReportGroup group) throws ParseException {
 		
-		Payment dst = new Payment();
+		Payment<PaymentReportDetail> dst = new Payment<PaymentReportDetail>();
 		
 		dst.setPaymentDate(JsonUtil.dfmt.parse(group.getReconciliationDate()));
 		dst.setCurrency(group.getCurrency());
@@ -399,7 +433,7 @@ public class SveaAdminConverter {
 		dst.setAmount(src.getReceivedAmt());
 		dst.setBusinessPartnerKey(src.getCustomerId());
 		dst.setInvoiceNo(src.getInvoiceId());
-		BusinessPartner bp = new BusinessPartner();
+		BusinessPartner<?> bp = new BusinessPartner<Object>();
 		dst.setBusinessPartner(bp);
 		bp.setName(src.getPayerName());
 		bp.setIdentityNo(src.getPayerOrgNo());

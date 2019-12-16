@@ -18,7 +18,7 @@
 				<excludes>
 					<exclude>config-test*</exclude>
 					<exclude>*.json</exclude>
-					<exclude>test-details-properties</exclude>
+					<exclude>test-details.properties</exclude>
 				</excludes>
 			</resource>
 		</resources>

@@ -76,14 +76,13 @@ public class SveaUtility {
 	 * It's up to the caller to determine what kind of address it is and set it correctly
 	 * on the info object.
 	 * 
-	 * @param customer
-	 * @param user
-	 * @param location
-	 * @param info
-	 * @return
-	 * @throws Exception
+	 * @param customer		The customer
+	 * @param user			The user / person
+	 * @param location		The location
+	 * @return				A map of String,String.
+	 * @throws Exception	If something goes wrong.
 	 */
-	public static Map<String,String> setFromLocation(BusinessPartner customer, Person user, Location location) throws Exception {
+	public static Map<String,String> setFromLocation(BusinessPartner<?> customer, Person user, Location location) throws Exception {
 
 		String countryCode = location.getCountryCode();
 		boolean isCompany = false;
