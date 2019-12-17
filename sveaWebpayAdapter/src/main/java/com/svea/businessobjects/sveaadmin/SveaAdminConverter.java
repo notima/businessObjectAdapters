@@ -16,12 +16,12 @@ import org.notima.generic.businessobjects.PaymentWriteOffs;
 import org.notima.generic.businessobjects.Person;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 
-import com.svea.businessobjects.SveaUtility;
-import com.svea.webpay.common.conv.JsonUtil;
 import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportGroup;
+import com.svea.webpay.common.conv.JsonUtil;
 import com.svea.webpayadminservice.client.Address;
+import com.svea.webpayadminservice.client.ArrayOfNumberedOrderRow;
 import com.svea.webpayadminservice.client.ArrayOfOrderRow;
 import com.svea.webpayadminservice.client.CompanyIdentity;
 import com.svea.webpayadminservice.client.CreateOrderInformation;
@@ -31,8 +31,11 @@ import com.svea.webpayadminservice.client.CustomerIdentity;
 import com.svea.webpayadminservice.client.CustomerType;
 import com.svea.webpayadminservice.client.IndividualIdentity;
 import com.svea.webpayadminservice.client.NumberedOrderRow;
+import com.svea.webpayadminservice.client.OrderDeliveryStatus;
 import com.svea.webpayadminservice.client.OrderRow;
 import com.svea.webpayadminservice.client.OrderType;
+
+import com.svea.businessobjects.SveaUtility;
 
 /**
  * Converts to and from Svea Formats to Business Objects
@@ -99,7 +102,7 @@ public class SveaAdminConverter {
 		}
 		
 		dst.setClientOrderNumber(src.getDocumentKey());
-		dst.setCustomerIdentity(convert((BusinessPartner<CustomerIdentity>)src.getBillBpartner()));
+		dst.setCustomerIdentity(convert(src.getBillBpartner()));
 		dst.setOrderDeliveryAddress(convert(src.getShipLocation(), p));
 		dst.setOrderDate(SveaUtility.getXMLDate(src.getDateOrdered()));
 		dst.setCustomerReference(p.getName());
@@ -143,21 +146,21 @@ public class SveaAdminConverter {
 		dst.setSalesOrder(true);
 		dst.setDocumentDate(src.getCreatedDate().toGregorianCalendar().getTime());
 		
-		BusinessPartner<com.svea.webpayadminservice.client.CustomerIdentity> bp = convert(src.getCustomer());
+		BusinessPartner<CustomerIdentity> bp = convert(src.getCustomer());
 		
 		dst.setBpartner(bp);
 		
 		// TODO: This number is wrong for payment plans
-		if (!src.getOrderType().equals(com.svea.webpayadminservice.client.OrderType.PAYMENT_PLAN.value())) {
+		if (!src.getOrderType().equals(OrderType.PAYMENT_PLAN.value())) {
 			bp.setIdentityNo(Long.toString(src.getCustomerId()));
 		}
 		
-		com.svea.webpayadminservice.client.ArrayOfNumberedOrderRow orderArray = src.getOrderRows();
-		List<com.svea.webpayadminservice.client.NumberedOrderRow> rows = orderArray.getNumberedOrderRow();
+		ArrayOfNumberedOrderRow orderArray = src.getOrderRows();
+		List<NumberedOrderRow> rows = orderArray.getNumberedOrderRow();
 		
-		for (com.svea.webpayadminservice.client.NumberedOrderRow r : rows) {
+		for (NumberedOrderRow r : rows) {
 			// Only add non-cancelled rows
-			if (!com.svea.webpayadminservice.client.OrderDeliveryStatus.CANCELLED.value().equals(r.getStatus())) 
+			if (!OrderDeliveryStatus.CANCELLED.value().equals(r.getStatus())) 
 				dst.addOrderLine(convert(r));
 		}
 		
@@ -328,7 +331,7 @@ public class SveaAdminConverter {
 	 * @return				A customer identity (Svea Format)
 	 * @throws Exception	If something goes wrong
 	 */
-	public static CustomerIdentity convert(BusinessPartner<CustomerIdentity> bp) throws Exception {
+	public static CustomerIdentity convert(BusinessPartner<?> bp) throws Exception {
 		
 		CustomerIdentity dst = new CustomerIdentity();
 		dst.setNationalIdNumber(bp.getTaxId());
@@ -392,7 +395,7 @@ public class SveaAdminConverter {
 	 * @return				A list of payments.
 	 * @throws ParseException	If report can't be parsed.
 	 */
-	public List<Payment<PaymentReportDetail>> convert(PaymentReportGroup group, boolean retriesOnly) throws ParseException {
+	public List<Payment<PaymentReportDetail>> convert(PaymentReportGroup group, boolean retriesOnly, boolean includeFees) throws ParseException {
 		
 		List<Payment<PaymentReportDetail>> dstList = new ArrayList<Payment<PaymentReportDetail>>();
 		Payment<PaymentReportDetail> p;
@@ -403,7 +406,7 @@ public class SveaAdminConverter {
 			if (d==null) continue;
 			if ((retriesOnly && d.getRetry()!=null && d.getRetry().booleanValue())
 					|| !retriesOnly) {
-				p = convert(d, group);
+				p = convert(d, group, includeFees);
 				p.setNativePayment(d);
 				dstList.add(p);
 			}
@@ -411,8 +414,8 @@ public class SveaAdminConverter {
 		
 		return dstList;
 		
-		
 	}
+	
 	
 	/**
 	 * Converts a payment report detail in given group to a single payment
@@ -422,18 +425,18 @@ public class SveaAdminConverter {
 	 * @return				A payment
 	 * @throws ParseException	If something goes wrong
 	 */
-	public Payment<PaymentReportDetail> convert(PaymentReportDetail src, PaymentReportGroup group) throws ParseException {
+	public Payment convert(PaymentReportDetail src, PaymentReportGroup group, boolean includeFees) throws ParseException {
 		
-		Payment<PaymentReportDetail> dst = new Payment<PaymentReportDetail>();
+		Payment dst = new Payment();
 		
 		dst.setPaymentDate(JsonUtil.dfmt.parse(group.getReconciliationDate()));
 		dst.setCurrency(group.getCurrency());
 		
 		dst.setAccountNo(group.getDstAcct());
-		dst.setAmount(src.getReceivedAmt());
+		dst.setAmount(includeFees ? src.getReceivedAmt() : src.getPaidAmt());
 		dst.setBusinessPartnerKey(src.getCustomerId());
 		dst.setInvoiceNo(src.getInvoiceId());
-		BusinessPartner<?> bp = new BusinessPartner<Object>();
+		BusinessPartner bp = new BusinessPartner();
 		dst.setBusinessPartner(bp);
 		bp.setName(src.getPayerName());
 		bp.setIdentityNo(src.getPayerOrgNo());
@@ -446,8 +449,8 @@ public class SveaAdminConverter {
 			dst.setInvoiceNo(src.getClientOrderNo());
 		}
 
-		if (src.getPaidAmt()!=src.getReceivedAmt()) {
-			
+		if (includeFees && src.getPaidAmt()!=src.getReceivedAmt()) {
+
 			double vatOnPaymentFee = 0;
 			
 			// Write offs
@@ -481,7 +484,7 @@ public class SveaAdminConverter {
 				pw.setAmount(vatOnPaymentFee);
 				dst.getPaymentWriteOffs().getPaymentWriteOff().add(pw);
 			}
-			
+				
 		}
 		
 		return dst;
