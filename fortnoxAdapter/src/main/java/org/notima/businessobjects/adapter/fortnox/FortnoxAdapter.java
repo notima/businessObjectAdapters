@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.entities3.CompanySetting;
@@ -22,6 +20,7 @@ import org.notima.api.fortnox.entities3.InvoiceRow;
 import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
+import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.DunningEntry;
 import org.notima.generic.businessobjects.DunningRun;
@@ -36,6 +35,8 @@ import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adapter class to communicate with Fortnox using the Business Objects format.
@@ -58,8 +59,7 @@ import org.notima.generic.ifacebusinessobjects.FactoringReservation;
  *
  */
 
-public class FortnoxAdapter implements 
-	org.notima.generic.ifacebusinessobjects.BusinessObjectFactory<
+public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		FortnoxClient3,
 		org.notima.api.fortnox.entities3.Invoice,
 		org.notima.api.fortnox.entities3.Order,

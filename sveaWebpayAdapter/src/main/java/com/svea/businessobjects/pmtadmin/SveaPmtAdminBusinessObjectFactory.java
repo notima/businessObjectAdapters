@@ -3,6 +3,8 @@ package com.svea.businessobjects.pmtadmin;
 import java.util.List;
 import java.util.Map;
 
+import org.notima.api.webpay.pmtapi.PmtApiClientRF;
+import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
@@ -12,10 +14,7 @@ import org.notima.generic.businessobjects.PriceList;
 import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
-
-import org.notima.api.webpay.pmtapi.PmtApiClientRF;
 
 /**
  * Business object factory used to convert orders from 
@@ -24,7 +23,7 @@ import org.notima.api.webpay.pmtapi.PmtApiClientRF;
  * @author Daniel Tamm
  *
  */
-public class SveaPmtAdminBusinessObjectFactory implements BusinessObjectFactory<
+public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactory<
 		PmtApiClientRF, 
 		org.notima.api.webpay.pmtapi.entity.Invoice, 
 		org.notima.api.webpay.pmtapi.entity.Order,

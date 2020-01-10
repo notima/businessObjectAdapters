@@ -8,6 +8,7 @@ import org.notima.factoring.AbstractAddress;
 import org.notima.factoring.FactoringEngine;
 import org.notima.factoring.FactoringReply;
 import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
+import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BasicFactoringReservation;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Currency;
@@ -21,7 +22,6 @@ import org.notima.generic.businessobjects.PriceList;
 import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.notima.generic.ifacebusinessobjects.OrderInvoice;
 
@@ -54,19 +54,34 @@ import com.svea.webpayadminservice.client.SearchOrdersResponse2;
 import com.svea.webpayadminservice.client.TextMatchType3;
 
 
-public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements 
-		BusinessObjectFactory<IAdminService,
+public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<IAdminService,
 							  Object,
 							  com.svea.webpayadminservice.client.Order,
 							  Object,
-							  Object>, FactoringEngine {
+							  Object> implements FactoringEngine {
 
+	protected IAdminService		adminServicePort;
+	
+	private WebpayAdminBase webpayAdminBase;
+	
 	public SveaAdminBusinessObjectFactory() {
-		super();
+		webpayAdminBase = new WebpayAdminBase();
+		adminServicePort = webpayAdminBase.getAdminServicePort();
 	}
 
 	public IAdminService getAdminClient() {
 		return adminServicePort;
+	}
+	
+	/**
+	 * Initialize the business object factory with credentials
+	 * This must be called before any operations can be performed.
+	 * 
+	 * @param aCre		The credentials.
+	 */
+	public void initCredentials(SveaCredential aCre) {
+		webpayAdminBase.initCredentials(aCre);
+		
 	}
 	
 	public CreateOrderResponse2 createOrder(CreateOrderRequest request) {
@@ -76,6 +91,7 @@ public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements
 		
 	}
 
+	
 	/**
 	 * Returns order type based on given credentials.
 	 * Order type for credit card doesn't exist, in that case null is returned.
@@ -85,7 +101,7 @@ public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements
 	 */
 	public OrderType getOrderType() {
 		
-		switch (cre.getAccountType()) {
+		switch (webpayAdminBase.getCredentials().getAccountType()) {
 		
 		case SveaCredential.ACCOUNTTYPE_INVOICE:
 			return OrderType.INVOICE;
@@ -119,8 +135,8 @@ public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements
 		
 		dst = SveaAdminConverter.convert(src, getOrderType(), cpp);
 		
-		dst.setAuthentication(auth);
-		dst.setClientId(Long.parseLong(cre.getAccountNo()));
+		dst.setAuthentication(webpayAdminBase.getAuth());
+		dst.setClientId(Long.parseLong(webpayAdminBase.getCredentials().getAccountNo()));
 
 		
 		return dst;
@@ -135,14 +151,14 @@ public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements
 	public DeliveryResponse deliverOrder(Long sveaOrderId, OrderType ot) {
 		
 		DeliveryRequest req = new DeliveryRequest();
-		req.setAuthentication(auth);
+		req.setAuthentication(webpayAdminBase.getAuth());
 		
 		ArrayOfDeliverOrderInformation orders = new ArrayOfDeliverOrderInformation();
 		List<DeliverOrderInformation> olist = orders.getDeliverOrderInformation();
 		
 		DeliverOrderInformation order;
 		order = new DeliverOrderInformation();
-		order.setClientId(Long.parseLong(cre.getAccountNo()));
+		order.setClientId(Long.parseLong(webpayAdminBase.getCredentials().getAccountNo()));
 		order.setSveaOrderId(sveaOrderId);
 		order.setOrderType(ot);
 		olist.add(order);
@@ -228,19 +244,19 @@ public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements
 		oi.setSveaOrderId(Integer.parseInt(key));
 		ogl.add(oi);
 		
-		req.setAuthentication(auth);
+		req.setAuthentication(webpayAdminBase.getAuth());
 		OrderType ot = null;
-		if (SveaCredential.ACCOUNTTYPE_INVOICE.equals(cre.getAccountType())) {
+		if (SveaCredential.ACCOUNTTYPE_INVOICE.equals(webpayAdminBase.getCredentials().getAccountType())) {
 			ot = OrderType.INVOICE;
-		} else if (SveaCredential.ACCOUNTTYPE_PAYMENTPLAN.equals(cre.getAccountType())) {
+		} else if (SveaCredential.ACCOUNTTYPE_PAYMENTPLAN.equals(webpayAdminBase.getCredentials().getAccountType())) {
 			ot = OrderType.PAYMENT_PLAN;
-		} else if (SveaCredential.ACCOUNTTYPE_ACCOUNT_CREDIT.equals(cre.getAccountType())) {
+		} else if (SveaCredential.ACCOUNTTYPE_ACCOUNT_CREDIT.equals(webpayAdminBase.getCredentials().getAccountType())) {
 			ot = OrderType.ACCOUNT_CREDIT;
-		} else if (SveaCredential.ACCOUNTTYPE_LOAN.equals(cre.getAccountType())) {
+		} else if (SveaCredential.ACCOUNTTYPE_LOAN.equals(webpayAdminBase.getCredentials().getAccountType())) {
 			ot = OrderType.LOAN;
 		}
 		
-		oi.setClientId(Long.parseLong(cre.getAccountNo()));
+		oi.setClientId(Long.parseLong(webpayAdminBase.getCredentials().getAccountNo()));
 		oi.setOrderType(ot);
 		
 		GetOrdersResponse2 response = client.getOrders(req);
@@ -270,7 +286,7 @@ public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements
 		IAdminService client = getAdminClient();
 		
 		SearchOrdersRequest req = new SearchOrdersRequest();
-		req.setAuthentication(auth);
+		req.setAuthentication(webpayAdminBase.getAuth());
 		
 		SearchOrderFilter sof = new SearchOrderFilter();
 		req.setSearchOrderFilter(sof);
@@ -294,7 +310,7 @@ public class SveaAdminBusinessObjectFactory extends WebpayAdminBase implements
 		
 		ArrayOflong clientIds = new ArrayOflong();
 		sof.setClientIds(clientIds);
-		clientIds.getLong().add(Long.parseLong(cre.getAccountNo()));
+		clientIds.getLong().add(Long.parseLong(webpayAdminBase.getCredentials().getAccountNo()));
 		
 		sof.setTextMatchType(TextMatchType3.CLIENT_ORDER_NUMBER);
 		sof.setTextMatch(clientOrderId);
