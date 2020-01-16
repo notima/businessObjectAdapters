@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<invoice>
+    <bankAccountDetails/>
+    <billBpartner>
+        <attributes>
+            <key>AD_Client_ID</key>
+            <object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:int">1000000</object>
+            <value>1000000</value>
+        </attributes>
+        <attributes>
+            <key>AD_Org_ID</key>
+            <object xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xsi:type="xs:int">1000000</object>
+            <value>1000000</value>
+        </attributes>
+        <company>false</company>
+        <emailInvoice>false</emailInvoice>
+        <identityNo>341835</identityNo>
+        <language>sv_SE</language>
+        <name>Notima System Integration AB</name>
+        <taxId>555555-5555</taxId>
+        <bPartnerId>1179982</bPartnerId>
+    </billBpartner>
+    <billLocation>
+        <address1>LÄRJUNGEVÄGEN 6</address1>
+        <city>VENDELSÖ</city>
+        <countryCode>SE</countryCode>
+        <locationId>0</locationId>
+        <name>VENDELSÖ LÄRJUNGEVÄGEN 6</name>
+        <postal>13669</postal>
+    </billLocation>
+    <billPerson>
+        <email>daniel@nospam.com</email>
+        <name>Daniel Tamm</name>
+        <personId>0</personId>
+    </billPerson>
+    <currency>SEK</currency>
+    <documentDate>2016-08-17T00:00:00+02:00</documentDate>
+    <documentKey>8532355</documentKey>
+    <dueDate>2016-09-16T00:00:00+02:00</dueDate>
+    <grandTotal>4967.0</grandTotal>
+    <invoiceDate>2016-08-17T00:00:00+02:00</invoiceDate>
+    <invoiceKey>8532355</invoiceKey>
+    <lineNet>0.0</lineNet>
+    <lineNo>0</lineNo>
+    <lines>
+        <description>Följesedel: 951006 - 2016-08-17</description>
+        <lineNet>0.0</lineNet>
+        <lineNo>8</lineNo>
+        <priceActual>0.0</priceActual>
+        <priceNormal>0.0</priceNormal>
+        <qtyDelivered>0.0</qtyDelivered>
+        <qtyEntered>0.0</qtyEntered>
+        <taxAmount>0.0</taxAmount>
+        <taxIncludedInPrice>false</taxIncludedInPrice>
+        <taxKey>0</taxKey>
+        <taxPercent>0.0</taxPercent>
+        <theirTotal>0.0</theirTotal>
+        <UOM>EA</UOM>
+    </lines>
+    <lines>
+        <lineNet>3280.0</lineNet>
+        <lineNo>10</lineNo>
+        <name>Nexus 6P 32GB Silver</name>
+        <priceActual>3280.0</priceActual>
+        <priceNormal>3280.0</priceNormal>
+        <productKey>nexus6p32v</productKey>
+        <qtyDelivered>0.0</qtyDelivered>
+        <qtyEntered>1.0</qtyEntered>
+        <taxAmount>820.0</taxAmount>
+        <taxIncludedInPrice>false</taxIncludedInPrice>
+        <taxKey>1000004</taxKey>
+        <taxPercent>25.0</taxPercent>
+        <theirTotal>0.0</theirTotal>
+        <UOM>EA</UOM>
+    </lines>
+    <lines>
+        <lineNet>319.2</lineNet>
+        <lineNo>20</lineNo>
+        <name>Event Messenger 250 svart</name>
+        <priceActual>319.2</priceActual>
+        <priceNormal>319.2</priceNormal>
+        <productKey>5400036464</productKey>
+        <qtyDelivered>0.0</qtyDelivered>
+        <qtyEntered>1.0</qtyEntered>
+        <taxAmount>79.8</taxAmount>
+        <taxIncludedInPrice>false</taxIncludedInPrice>
+        <taxKey>1000004</taxKey>
+        <taxPercent>25.0</taxPercent>
+        <theirTotal>0.0</theirTotal>
+        <UOM>EA</UOM>
+    </lines>
+    <lines>
+        <lineNet>239.2</lineNet>
+        <lineNo>30</lineNo>
+        <name>Format 160  </name>
+        <priceActual>239.2</priceActual>
+        <priceNormal>239.2</priceNormal>
+        <productKey>5400036512</productKey>
+        <qtyDelivered>0.0</qtyDelivered>
+        <qtyEntered>1.0</qtyEntered>
+        <taxAmount>59.8</taxAmount>
+        <taxIncludedInPrice>false</taxIncludedInPrice>
+        <taxKey>1000004</taxKey>
+        <taxPercent>25.0</taxPercent>
+        <theirTotal>0.0</theirTotal>
+        <UOM>EA</UOM>
+    </lines>
+    <lines>
+        <lineNet>135.0</lineNet>
+        <lineNo>40</lineNo>
+        <name>PostNord Parcel (f.d. Företagspaket)</name>
+        <priceActual>135.0</priceActual>
+        <priceNormal>135.0</priceNormal>
+        <productKey>frakt1600</productKey>
+        <qtyDelivered>0.0</qtyDelivered>
+        <qtyEntered>1.0</qtyEntered>
+        <taxAmount>33.75</taxAmount>
+        <taxIncludedInPrice>false</taxIncludedInPrice>
+        <taxKey>1000004</taxKey>
+        <taxPercent>25.0</taxPercent>
+        <theirTotal>0.0</theirTotal>
+        <UOM>EA</UOM>
+    </lines>
+    <lines>
+        <lineNet>0.0</lineNet>
+        <lineNo>50</lineNo>
+        <name>Glass Google Nexus 6P</name>
+        <priceActual>0.0</priceActual>
+        <priceNormal>0.0</priceNormal>
+        <productKey>N6PGLS-F00</productKey>
+        <qtyDelivered>0.0</qtyDelivered>
+        <qtyEntered>1.0</qtyEntered>
+        <taxAmount>0.0</taxAmount>
+        <taxIncludedInPrice>false</taxIncludedInPrice>
+        <taxKey>1000004</taxKey>
+        <taxPercent>25.0</taxPercent>
+        <theirTotal>0.0</theirTotal>
+        <UOM>EA</UOM>
+    </lines>
+    <lines>
+        <lineNet>0.5</lineNet>
+        <lineNo>60</lineNo>
+        <name>Öresutjämning</name>
+        <priceActual>0.5</priceActual>
+        <priceNormal>0.5</priceNormal>
+        <qtyDelivered>0.0</qtyDelivered>
+        <qtyEntered>1.0</qtyEntered>
+        <taxAmount>0.0</taxAmount>
+        <taxIncludedInPrice>false</taxIncludedInPrice>
+        <taxKey>1000000</taxKey>
+        <taxPercent>0.0</taxPercent>
+        <theirTotal>0.0</theirTotal>
+        <UOM>EA</UOM>
+    </lines>
+    <netTotal>3973.4</netTotal>
+    <openAmt>0.0</openAmt>
+    <roundingDecimals>2</roundingDecimals>
+    <sender>
+        <addressOfficial>
+            <address1>Huvudvägen 5</address1>
+            <city>Huvudstaden</city>
+            <countryCode>SE</countryCode>
+            <locationId>0</locationId>
+            <postal>111 11</postal>
+        </addressOfficial>
+        <company>true</company>
+        <emailInvoice>false</emailInvoice>
+        <name>The Fictive Company AB</name>
+        <taxId>555555-5555</taxId>
+        <bPartnerId>0</bPartnerId>
+    </sender>
+    <status>CO</status>
+    <vatTotal>993.60</vatTotal>
+</invoice>

@@ -21,6 +21,7 @@
 	<modules>
 		<module>fortnoxAdapter</module>
 		<module>sveaWebpayAdapter</module>
+		<module>ublAdapter</module>
 	</modules>
 
 	<dependencies>
