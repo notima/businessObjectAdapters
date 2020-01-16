@@ -1023,7 +1023,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		result.setName(cs.getName());
 		result.setTaxId(cs.getOrganizationNumber());
 		result.setVatNo(cs.getVatNumber());
-		result.setIdentityNo(cs.getDatabaseNubmer());
+		result.setIdentityNo(cs.getDatabaseNumber());
 		result.setNativeBusinessPartner(cs);
 		Location officialAddress = new Location();
 		officialAddress.setAddress1(cs.getAdress());
