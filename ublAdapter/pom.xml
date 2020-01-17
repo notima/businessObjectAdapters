@@ -8,7 +8,7 @@
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>.generic.businessobjects.adapter</groupId>
+	<groupId>org.generic.businessobjects.adapter</groupId>
 	<artifactId>ublAdapter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>UBL for Business Objects</name>
@@ -55,6 +55,8 @@
 										org.hamcrest,
 										org.hamcrest.core</Export-Package>
 						<Private-Package>org.hamcrest.internal</Private-Package>
+						<Embed-Dependency>artifactId=joda-time;scope=compile|runtime</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
 			</plugin>
