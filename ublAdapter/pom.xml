@@ -11,6 +11,7 @@
 	<groupId>org.generic.businessobjects.adapter</groupId>
 	<artifactId>ublAdapter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>bundle</packaging>
 	<name>UBL for Business Objects</name>
 
 
@@ -18,14 +19,21 @@
 		<dependency>
 			<groupId>com.helger</groupId>
 			<artifactId>ph-ubl21</artifactId>
-			<version>6.1.1</version>
+			<version>6.2.0</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.helger</groupId>
 			<artifactId>ph-ubl21-codelists</artifactId>
-			<version>6.1.1</version>
+			<version>6.2.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.helger</groupId>
+			<artifactId>ph-commons</artifactId>
+			<version>9.3.9</version>
+		</dependency>
+		
 
 		<dependency>
 			<groupId>com.phloc</groupId>
@@ -48,14 +56,17 @@
 										oasis.names.specification.*,
 										com.helger.*,
 										com.phloc.*,
-										javax.annotation.*,
-										org.junit,
-										org.junit.*,
-										junit.*,
 										org.hamcrest,
 										org.hamcrest.core</Export-Package>
-						<Private-Package>org.hamcrest.internal</Private-Package>
-						<Embed-Dependency>artifactId=joda-time;scope=compile|runtime</Embed-Dependency>
+						<Import-Package>!org.joda.convert,
+										javax.xml.bind,
+										javax.xml.bind.annotation,
+										com.sun.xml.bind.marshaller,
+										org.slf4j,
+										org.notima.generic.ifacebusinessobjects,
+										org.notima.generic.businessobjects
+										</Import-Package>
+						<Embed-Dependency>!businessobjects|bankgiro-api|log4j|slf4j-api|slf4j-log4j12,scope=compile|runtime;artifactId=!ph-jaxb-pom</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
