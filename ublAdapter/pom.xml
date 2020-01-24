@@ -59,15 +59,20 @@
 										org.hamcrest,
 										org.hamcrest.core</Export-Package>
 						<Import-Package>!org.joda.convert,
-										javax.xml.bind,
-										javax.xml.bind.annotation,
-										com.sun.xml.bind.marshaller,
+										javax.xml,
+										javax.xml.*,
+										org.w3c.dom,
+										org.w3c.dom.*,
+										org.xml.sax,
+										org.xml.sax.*,
+										com.sun.xml.bind.*,
+										com.sun.xml.bind.v2.model.impl,
 										org.slf4j,
 										org.notima.generic.ifacebusinessobjects,
 										org.notima.generic.businessobjects,
 										org.notima.generic.businessobjects.util
 										</Import-Package>
-						<Embed-Dependency>!businessobjects|bankgiro-api|log4j|slf4j-api|slf4j-log4j12,scope=compile|runtime;artifactId=!ph-jaxb-pom</Embed-Dependency>
+						<Embed-Dependency>!businessobjects|bankgiro-api|log4j|slf4j-api|slf4j-log4j12|jaxb-core|jaxb-api|jaxb-runtime,scope=compile|runtime;artifactId=!ph-jaxb-pom</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
