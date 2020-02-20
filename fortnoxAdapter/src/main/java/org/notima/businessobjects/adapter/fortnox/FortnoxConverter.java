@@ -133,11 +133,18 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		
 		VoucherRow r = new VoucherRow();
 		r.setAccount(Integer.parseInt(creditAcct));
-		r.setCredit(amount);
+		if (amount>0)
+			r.setCredit(amount);
+		else
+			r.setDebit(-amount);
 		result.addVoucherRow(r);
 		r = new VoucherRow();
 		r.setAccount(Integer.parseInt(debitAcct));
-		r.setDebit(amount);
+		if (amount>0)
+			r.setDebit(amount);
+		else
+			r.setCredit(-amount);
+		
 		result.addVoucherRow(r);
 		
 		return result;
