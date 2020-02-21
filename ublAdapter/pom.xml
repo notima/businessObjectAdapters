@@ -10,7 +10,6 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.generic.businessobjects.adapter</groupId>
 	<artifactId>ublAdapter</artifactId>
-	<version>0.0.1</version>
 	<packaging>bundle</packaging>
 	<name>UBL for Business Objects</name>
 

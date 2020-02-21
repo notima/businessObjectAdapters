@@ -4,8 +4,8 @@
 
 	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>sveaWebpayAdapter</artifactId>
-	<description>Converts Webpay Objects.
-0.0.3 is first version using Webpay's libraries on github.</description>
+	<packaging>bundle</packaging>
+	<description>Converts Webpay Objects.</description>
 
 	<parent>
 		<artifactId>businessObjectAdapters</artifactId>
@@ -13,7 +13,6 @@
 		<groupId>org.notima.generic.businessobjects</groupId>
 	</parent>
 
-	<version>0.0.4</version>
 	<name>Svea Webpay Business Objects Adapter</name>
 
 	<properties>
@@ -44,6 +43,22 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>4.2.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>com.svea.businessobjects,
+						com.svea.businessobjects.pmtadmin,
+						com.svea.businessobjects.sveaadmin
+										</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			
 		</plugins>
 	</build>
 
