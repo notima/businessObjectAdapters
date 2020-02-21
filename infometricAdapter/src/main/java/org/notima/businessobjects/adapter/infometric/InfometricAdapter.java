@@ -35,7 +35,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
-import org.notima.generic.ifacebusinessobjects.OrderInvoice;
+import org.notima.generic.businessobjects.InvoiceList;
 
 /**
  * Converts an Infometric billing file to a list of Business objects OrderInvoice records
@@ -60,7 +60,7 @@ public class InfometricAdapter {
 	 * @throws IOException 			If something goes wrong.
 	 * @throws ParseException       If the numbers can't be parsed.
 	 */
-	public List<OrderInvoice> splitBillingFile(
+	public InvoiceList splitBillingFile(
 								String productKey, 
 								double price, 
 								String invoiceLineText, 
@@ -70,7 +70,9 @@ public class InfometricAdapter {
 		nsyms.setDecimalSeparator(',');
 		nfmt = new DecimalFormat("##.##", nsyms);
 		
-		List<OrderInvoice> result = new ArrayList<OrderInvoice>();
+		InvoiceList list = new InvoiceList();
+		List<Invoice<?>> result = new ArrayList<Invoice<?>>();
+		list.setInvoiceList(result);
 		
 		CSVFormat fmt = CSVFormat.EXCEL.withDelimiter(';');
 		
@@ -103,7 +105,7 @@ public class InfometricAdapter {
 			
 		}
 		
-		return result;
+		return list;
 		
 	}
 	

@@ -4,13 +4,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.notima.businessobjects.adapter.infometric.InfometricAdapter;
+import org.notima.generic.businessobjects.InvoiceList;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
-import org.notima.generic.ifacebusinessobjects.OrderInvoice;
 import org.slf4j.Logger;
 
 public class TestInfometricAdapter {
@@ -41,8 +40,9 @@ public class TestInfometricAdapter {
 		String content = new String ( Files.readAllBytes( Paths.get(csvTestFile.toURI())));
 		
 		InfometricAdapter adapter = new InfometricAdapter();
-		List<OrderInvoice> result = adapter.splitBillingFile("105", 1.50, "Testresource", content);
-		log.info("{} invoices created.", result.size());
+		InvoiceList result = adapter.splitBillingFile("105", 1.50, "Testresource", content);
+		
+		log.info("{} invoices created.", result.getInvoiceList().size());
 		
 	}
 	
