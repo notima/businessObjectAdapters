@@ -41,7 +41,7 @@
 		<dependency>
 			<groupId>org.notima.generic</groupId>
 			<artifactId>businessobjects</artifactId>
-			<version>0.1.15</version>
+			<version>0.1.17</version>
 		</dependency>
 
 		<dependency>
