@@ -2,15 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>sveaWebpayAdapter</artifactId>
 	<packaging>bundle</packaging>
 	<description>Converts Webpay Objects.</description>
 
 	<parent>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.8.9-SNAPSHOT</version>
-		<groupId>org.notima.generic.businessobjects</groupId>
+		<version>1.8.9</version>
+		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	</parent>
 
 	<name>Svea Webpay Business Objects Adapter</name>

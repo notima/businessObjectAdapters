@@ -3,13 +3,12 @@
 	<name>Fortnox Business Objects Adapter</name>
 	
 	<parent>
-		<groupId>org.notima.generic.businessobjects</groupId>
+		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.8.9-SNAPSHOT</version>
+		<version>1.8.9</version>
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>fortnoxAdapter</artifactId>
 	<packaging>bundle</packaging>
 
@@ -23,7 +22,7 @@
 		<dependency>
 			<groupId>org.notima.api</groupId>
 			<artifactId>fortnox4j</artifactId>
-			<version>1.8.9-SNAPSHOT</version>
+			<version>1.8.9</version>
 		</dependency>
 	</dependencies>
 
@@ -33,8 +32,7 @@
 			<resource>
 				<directory>src/test/resources</directory>
 				<excludes>
-					<exclude>test-config*</exclude>
-					<exclude>config3-template.xml</exclude>
+					<exclude>fortnoxClients.xml</exclude>
 					<exclude>log4j.xml</exclude>
 				</excludes>
 			</resource>
