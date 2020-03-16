@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.InvoicePayment;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherRow;
@@ -120,34 +121,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			double amount, 
 			String description) {
 
-		Voucher result = new Voucher();
-		
-		if (acctDate==null) {
-			acctDate = Calendar.getInstance().getTime();
-		}
-		
-		result.setDescription(description);
-		result.setTransactionDate(FortnoxClient3.s_dfmt.format(acctDate));
-		if (voucherSeries!=null)
-			result.setVoucherSeries(voucherSeries);
-		
-		VoucherRow r = new VoucherRow();
-		r.setAccount(Integer.parseInt(creditAcct));
-		if (amount>0)
-			r.setCredit(amount);
-		else
-			r.setDebit(-amount);
-		result.addVoucherRow(r);
-		r = new VoucherRow();
-		r.setAccount(Integer.parseInt(debitAcct));
-		if (amount>0)
-			r.setDebit(amount);
-		else
-			r.setCredit(-amount);
-		
-		result.addVoucherRow(r);
-		
-		return result;
+		return FortnoxUtil.createSingleTransactionVoucher(voucherSeries, acctDate, creditAcct, debitAcct, amount, description);
 		
 	}
 	
