@@ -8,7 +8,7 @@
 
 	<parent>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.8.9</version>
+		<version>1.8.10-SNAPSHOT</version>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	</parent>
 
