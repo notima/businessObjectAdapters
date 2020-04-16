@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.KeyValue;
 import org.notima.generic.businessobjects.Location;
@@ -16,10 +17,11 @@ import org.notima.generic.businessobjects.PaymentWriteOffs;
 import org.notima.generic.businessobjects.Person;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 
+import com.svea.businessobjects.SveaUtility;
+import com.svea.webpay.common.conv.JsonUtil;
 import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportGroup;
-import com.svea.webpay.common.conv.JsonUtil;
 import com.svea.webpayadminservice.client.Address;
 import com.svea.webpayadminservice.client.ArrayOfNumberedOrderRow;
 import com.svea.webpayadminservice.client.ArrayOfOrderRow;
@@ -34,8 +36,6 @@ import com.svea.webpayadminservice.client.NumberedOrderRow;
 import com.svea.webpayadminservice.client.OrderDeliveryStatus;
 import com.svea.webpayadminservice.client.OrderRow;
 import com.svea.webpayadminservice.client.OrderType;
-
-import com.svea.businessobjects.SveaUtility;
 
 /**
  * Converts to and from Svea Formats to Business Objects
@@ -128,6 +128,46 @@ public class SveaAdminConverter {
 		return req;
 		
 	}
+
+	/**
+	 * Converts Svea's webpay invoice to business object invoice
+	 * 
+	 * @param src	A webpay invoice.
+	 * @return		An invoice in business objects format.
+	 */
+	public static org.notima.generic.businessobjects.Invoice<com.svea.webpayadminservice.client.Invoice> convert(com.svea.webpayadminservice.client.Invoice src) throws Exception {
+		
+		if (src==null) return null;
+		
+		org.notima.generic.businessobjects.Invoice<com.svea.webpayadminservice.client.Invoice> dst = new org.notima.generic.businessobjects.Invoice<com.svea.webpayadminservice.client.Invoice>(); 
+
+		dst.setDocumentKey(src.getClientOrderId());
+		dst.setCurrency(src.getCurrency());
+		dst.setOrderKey(Long.toString(src.getSveaOrderId()));
+		dst.setDocumentDate(src.getInvoiceDate().toGregorianCalendar().getTime());
+		
+		BusinessPartner<CustomerIdentity> bp = convert(src.getCustomer());
+		dst.setBusinessPartner(bp);
+		
+		ArrayOfNumberedOrderRow orderArray = src.getInvoiceRows();
+		List<NumberedOrderRow> rows = orderArray.getNumberedOrderRow();
+		
+		OrderLine ol = null;
+		BasicBusinessObjectConverter<?,?> conv = new BasicBusinessObjectConverter();
+		
+		for (NumberedOrderRow r : rows) {
+			// Only add non-cancelled rows
+			if (!OrderDeliveryStatus.CANCELLED.value().equals(r.getStatus()))
+				ol = convert(r);
+				dst.addInvoiceLine(conv.toInvoiceLine(ol));
+		}
+		
+		dst.calculateGrandTotal();
+		dst.setNativeInvoice(src);
+		
+		return dst;
+	}
+	
 	
 	/**
 	 * Converts Svea's webpay order to business object order

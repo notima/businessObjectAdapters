@@ -28,7 +28,9 @@ import org.notima.generic.ifacebusinessobjects.OrderInvoice;
 import com.svea.webpay.common.auth.SveaCredential;
 import com.svea.webpayadmin.WebpayAdminBase;
 import com.svea.webpayadminservice.client.ArrayOfDeliverOrderInformation;
+import com.svea.webpayadminservice.client.ArrayOfGetInvoiceInformation;
 import com.svea.webpayadminservice.client.ArrayOfGetOrderInformation;
+import com.svea.webpayadminservice.client.ArrayOfInvoice;
 import com.svea.webpayadminservice.client.ArrayOfOrder;
 import com.svea.webpayadminservice.client.ArrayOfOrderDeliveryStatus;
 import com.svea.webpayadminservice.client.ArrayOfOrderListItem;
@@ -40,6 +42,9 @@ import com.svea.webpayadminservice.client.CreatePaymentPlanDetails;
 import com.svea.webpayadminservice.client.DeliverOrderInformation;
 import com.svea.webpayadminservice.client.DeliveryRequest;
 import com.svea.webpayadminservice.client.DeliveryResponse;
+import com.svea.webpayadminservice.client.GetInvoiceInformation;
+import com.svea.webpayadminservice.client.GetInvoicesRequest;
+import com.svea.webpayadminservice.client.GetInvoicesResponse2;
 import com.svea.webpayadminservice.client.GetOrderInformation;
 import com.svea.webpayadminservice.client.GetOrdersRequest;
 import com.svea.webpayadminservice.client.GetOrdersResponse2;
@@ -55,7 +60,7 @@ import com.svea.webpayadminservice.client.TextMatchType3;
 
 
 public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<IAdminService,
-							  Object,
+							  com.svea.webpayadminservice.client.Invoice,
 							  com.svea.webpayadminservice.client.Order,
 							  Object,
 							  Object> implements FactoringEngine {
@@ -197,13 +202,13 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 	}
 
 	@Override
-	public Object lookupNativeInvoice(String key) throws Exception {
+	public com.svea.webpayadminservice.client.Invoice lookupNativeInvoice(String key) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Object persistNativeInvoice(Object invoice) throws Exception {
+	public com.svea.webpayadminservice.client.Invoice persistNativeInvoice(com.svea.webpayadminservice.client.Invoice invoice) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -221,9 +226,36 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 	}
 
 	@Override
-	public Invoice<Object> lookupInvoice(String key) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public Invoice<com.svea.webpayadminservice.client.Invoice> lookupInvoice(String key) throws Exception {
+		
+		IAdminService client = getAdminClient();
+		
+		GetInvoicesRequest req = new GetInvoicesRequest();
+		ArrayOfGetInvoiceInformation aog = new ArrayOfGetInvoiceInformation();
+		req.setInvoicesToRetrieve(aog);
+		List<GetInvoiceInformation> ogl = aog.getGetInvoiceInformation();
+		GetInvoiceInformation oi = new GetInvoiceInformation();
+		oi.setInvoiceId(Integer.parseInt(key));
+		ogl.add(oi);
+		
+		req.setAuthentication(webpayAdminBase.getAuth());
+		
+		oi.setClientId(Long.parseLong(webpayAdminBase.getCredentials().getAccountNo()));
+		
+		GetInvoicesResponse2 response = client.getInvoices(req);
+		if (response.getErrorMessage()!=null) {
+			throw new Exception(response.toString());
+		}
+		
+		ArrayOfInvoice result = response.getInvoices();
+		com.svea.webpayadminservice.client.Invoice resultInvoice = null;
+		if (result.getInvoice()!=null && !result.getInvoice().isEmpty()) {
+			resultInvoice = result.getInvoice().get(0);
+		}
+		
+		return SveaAdminConverter.convert(resultInvoice);
+		
+		
 	}
 
 	/**
@@ -234,7 +266,6 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 	public Order<com.svea.webpayadminservice.client.Order> lookupOrder(String key) throws Exception {
 		
 		IAdminService client = getAdminClient();
-		
 		
 		GetOrdersRequest req = new GetOrdersRequest();
 		ArrayOfGetOrderInformation aog = new ArrayOfGetOrderInformation();

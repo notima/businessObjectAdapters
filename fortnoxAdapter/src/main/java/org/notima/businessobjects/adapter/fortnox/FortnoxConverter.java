@@ -30,7 +30,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 * 
 	 */
 	@Override
-	public Invoice<org.notima.api.fortnox.entities3.Invoice> fromNativeInvoice(Object src) throws Exception {
+	public Invoice<org.notima.api.fortnox.entities3.Invoice> fromNativeInvoice(org.notima.api.fortnox.entities3.Invoice src) throws Exception {
 		return FortnoxAdapter.convert((org.notima.api.fortnox.entities3.Invoice)src);
 	}
 

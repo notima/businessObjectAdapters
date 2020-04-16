@@ -100,6 +100,7 @@ public class SveaPmtAdminConverter {
 			}
 		}
 		dst.setLines(ol);
+		dst.calculateGrandTotal();
 		
 		return dst;
 	}

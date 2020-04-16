@@ -24,6 +24,7 @@
 		<module>sveaWebpayAdapter</module>
 		<module>ublAdapter</module>
 		<module>infometricAdapter</module>
+		<module>csvAdapter</module>
 	</modules>
 
 	<dependencies>
