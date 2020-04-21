@@ -62,8 +62,16 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Bundle-Activator>org.notima.businessobjects.adapter.fortnox.Activator</Bundle-Activator>
 						<Export-Package>org.notima.businessobjects.adapter.fortnox.*
 										</Export-Package>
+		        		<Private-Package>
+        					org.apache.karaf.util.tracker,
+        					org.apache.karaf.util.tracker.annotation
+        				</Private-Package>
+        				<Import-Package>
+        					javax.xml.bind;version="[2.2,3)",*
+        				</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

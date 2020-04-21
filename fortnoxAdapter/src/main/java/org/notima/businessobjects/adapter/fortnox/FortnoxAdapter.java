@@ -10,6 +10,8 @@ import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.clients.FortnoxClientInfo;
+import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
@@ -22,6 +24,7 @@ import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.DunningEntry;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
@@ -78,6 +81,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	private FortnoxClient3 client;
 	
+	private FortnoxClientManager clientManager;
+	
 	private String exportRevenueAccount = null;
 	private String defaultRevenueAccount = "3001";
 	private String defaultFreightRevenue = "3591";
@@ -117,6 +122,20 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 */
 	public FortnoxClient3 getClient() {
 		return client;
+	}
+
+	
+	/**
+	 * Gets client manager for this adapter.
+	 * 
+	 * @return
+	 */
+	public FortnoxClientManager getClientManager() {
+		return clientManager;
+	}
+
+	public void setClientManager(FortnoxClientManager clientManager) {
+		this.clientManager = clientManager;
 	}
 
 	/**
@@ -1049,6 +1068,53 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			boolean customers, boolean suppliers) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public BusinessPartnerList<Customer> listTenants() {
+
+		BusinessPartnerList<Customer> result = new BusinessPartnerList<Customer>();
+		List<BusinessPartner<Customer>> listOfBp = new ArrayList<BusinessPartner<Customer>>();
+		result.setBusinessPartner(listOfBp);
+		
+		BusinessPartner<Customer> bp = null;
+		
+		if (clientManager!=null && clientManager.getFortnoxClients()!=null) {
+			
+			for (FortnoxClientInfo fi : clientManager.getFortnoxClients()) {
+				
+				bp = new BusinessPartner<Customer>();
+				bp.setName(fi.getOrgName());
+				bp.setTaxId(fi.getOrgNo());
+				listOfBp.add(bp);
+				
+			}
+			
+		}
+		
+		if (bp==null && client.hasCredentials()) {
+			
+			CompanySetting cs;
+			try {
+				cs = client.getCompanySetting();
+				if (cs!=null) {
+					bp = new BusinessPartner<Customer>();
+					bp.setName(cs.getName());
+					bp.setTaxId(cs.getOrganizationNumber());
+					listOfBp.add(bp);
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			
+		}
+		
+		return result;
+	}
+
+	@Override
+	public String getSystemName() {
+		return "Fortnox";
 	}
 	
 

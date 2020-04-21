@@ -17,6 +17,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<businessobjects.version>0.1.18-SNAPSHOT</businessobjects.version>
+		<karaf.version>4.2.7</karaf.version>
 	</properties>
 
 	<modules>
@@ -39,6 +40,26 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.29</version>
 		</dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.core</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>osgi.cmpn</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        
+	    <dependency>
+	    	<groupId>org.apache.karaf</groupId>
+	    	<artifactId>org.apache.karaf.util</artifactId>
+	    	<version>${karaf.version}</version>
+	    </dependency>
 
 		<dependency>
 			<groupId>org.notima.generic</groupId>

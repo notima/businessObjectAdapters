@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.Order;
@@ -180,6 +181,17 @@ public class UBL21Factory extends BasicBusinessObjectFactory{
 	public BusinessPartner lookupThisCompanyInformation() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public BusinessPartnerList listTenants() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSystemName() {
+		return "UBL21";
 	}
 
 }

@@ -11,6 +11,7 @@ import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BasicFactoringReservation;
 import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.Currency;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
@@ -565,6 +566,17 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 			boolean customers, boolean suppliers) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public BusinessPartnerList<Object> listTenants() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSystemName() {
+		return "Webpay-AdminService";
 	}
 
 
