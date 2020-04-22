@@ -18,6 +18,18 @@ import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 public class UBL21Factory extends BasicBusinessObjectFactory{
 
 	@Override
+	public void setTenant(String orgNo, String countryCode) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getTenantOrgNo() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public BusinessPartner lookupBusinessPartner(String key) throws Exception {
 		// TODO Auto-generated method stub
 		return null;

@@ -62,6 +62,17 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 		return SveaPmtAdminConverter.convert(o);
 	}
 
+	@Override
+	public void setTenant(String orgNo, String countryCode) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public String getTenantOrgNo() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	@Override
 	public PmtApiClientRF getClient() {

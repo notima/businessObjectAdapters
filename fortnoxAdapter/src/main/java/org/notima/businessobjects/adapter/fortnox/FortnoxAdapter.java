@@ -37,6 +37,7 @@ import org.notima.generic.businessobjects.PriceList;
 import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
+import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -968,6 +969,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 					continue;
 				de.addInvoice(invoice);
 				dr.addDunningEntry(de);
+				invoice.setNativeInvoice(null);
 			}
 		}
 		
@@ -1069,6 +1071,61 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public void setTenant(String orgNo, String countryCode) throws NoSuchTenantException {
+
+		CompanySetting cs = null;
+		
+		if (client.hasCredentials()) {
+
+			try {
+				cs = client.getCompanySetting();
+				if (cs.getOrganizationNumber().equalsIgnoreCase(orgNo)) {
+					return;
+				} else {
+					
+					
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		if (clientManager!=null) {
+			
+			FortnoxClientInfo fi = clientManager.getClientInfoByOrgNo(orgNo);
+			if (fi==null) {
+				throw new NoSuchTenantException("No such tenant " + orgNo);
+			} else {
+				client.setAccessToken(fi.getAccessToken(), fi.getClientSecret());
+			}
+			
+		} else {
+			throw new NoSuchTenantException("Can't find a client manager with tenants");
+		}
+		
+	}
+
+	@Override
+	public String getTenantOrgNo() {
+		
+		if (client.hasCredentials()) {
+			CompanySetting cs;
+			try {
+				cs = client.getCompanySetting();
+				return cs.getOrganizationNumber();				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		
+		return null;
+	}
 
 	@Override
 	public BusinessPartnerList<Customer> listTenants() {
@@ -1086,6 +1143,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				bp = new BusinessPartner<Customer>();
 				bp.setName(fi.getOrgName());
 				bp.setTaxId(fi.getOrgNo());
+				bp.setCountryCode("SE");
 				listOfBp.add(bp);
 				
 			}
@@ -1101,6 +1159,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 					bp = new BusinessPartner<Customer>();
 					bp.setName(cs.getName());
 					bp.setTaxId(cs.getOrganizationNumber());
+					bp.setCountryCode(cs.getCountryCode());
 					listOfBp.add(bp);
 				}
 			} catch (Exception e) {
