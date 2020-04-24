@@ -2,7 +2,6 @@ package org.notima.businessobjects.adapter.fortnox;
 
 import java.net.URL;
 import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.apache.karaf.util.tracker.BaseActivator;
@@ -48,11 +47,6 @@ public class Activator extends BaseActivator {
                 if (configuration != null) {
                     Dictionary<String, Object> properties = configuration.getProperties();
                     if (properties!=null) {
-	                    Enumeration<String> keys = properties.keys();
-	                    while (keys.hasMoreElements()) {
-	                        String key = keys.nextElement();
-	                        System.out.println(key + " = " + properties.get(key));
-	                    }
 	                    fortnoxClientsFile = (String)properties.get("fortnoxClientsFile");
                     }
                 }

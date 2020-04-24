@@ -56,10 +56,15 @@
 							com.svea.webpay.common.reconciliation,
 							com.svea.webpay.common.reconciliation.conv,
 							com.svea.webpayadmin,
-							com.svea.webpayadmin.report,						
+							com.svea.webpayadmin.report,
+							com.svea.webpay.paymentgw,
+							com.svea.webpay.paymentgw.entity,
+							com.svea.webpay.paymentgw.util,
+							com.svea.webpay.paymentgw.xmladapter,
 							com.svea.businessobjects,
 							com.svea.businessobjects.pmtadmin,
-							com.svea.businessobjects.sveaadmin
+							com.svea.businessobjects.sveaadmin,
+							com.svea.businessobjects.paymentgw
 						</Export-Package>
 						<Import-Package>
 										com.svea.webpayadminservice.client,
@@ -78,8 +83,11 @@
 										com.google.gson.annotations,
 										javax.xml.ws,
 										javax.xml.namespace,
+			        					javax.xml.bind;version="[2.2,3)",
+			        					javax.xml.bind.annotation;version="[2.2,3)",
 										javax.xml.*,
-										javax.net.*
+										javax.net.*,
+										javax.naming
 										</Import-Package>
 						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
