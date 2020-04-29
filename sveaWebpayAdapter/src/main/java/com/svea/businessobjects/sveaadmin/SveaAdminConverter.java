@@ -175,7 +175,7 @@ public class SveaAdminConverter {
 	 * @param src	A webpay order.
 	 * @return		An order in business objects format.
 	 */
-	public static org.notima.generic.businessobjects.Order<com.svea.webpayadminservice.client.Order> convert(com.svea.webpayadminservice.client.Order src) throws Exception {
+	public static org.notima.generic.businessobjects.Order<com.svea.webpayadminservice.client.Order> convert(com.svea.webpayadminservice.client.Order src, boolean includeCancelled) throws Exception {
 		
 		if (src==null) return null;
 		
@@ -200,7 +200,7 @@ public class SveaAdminConverter {
 		
 		for (NumberedOrderRow r : rows) {
 			// Only add non-cancelled rows
-			if (!OrderDeliveryStatus.CANCELLED.value().equals(r.getStatus())) 
+			if (includeCancelled || !OrderDeliveryStatus.CANCELLED.value().equals(r.getStatus())) 
 				dst.addOrderLine(convert(r));
 		}
 		

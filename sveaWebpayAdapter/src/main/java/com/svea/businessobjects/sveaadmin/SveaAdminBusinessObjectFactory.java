@@ -66,6 +66,10 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 							  Object,
 							  Object> implements FactoringEngine {
 
+	public static String SETTING_INCLUDE_CANCELLED_ROWS = "includeCancelledRows";
+	
+	private boolean includeCancelledRows = false;
+	
 	protected IAdminService		adminServicePort;
 	
 	private WebpayAdminBase webpayAdminBase;
@@ -87,7 +91,12 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 	 */
 	public void initCredentials(SveaCredential aCre) {
 		webpayAdminBase.initCredentials(aCre);
-		
+		refreshSettings();
+	}
+	
+	private void refreshSettings() {
+		String ic = this.getSetting(SETTING_INCLUDE_CANCELLED_ROWS);
+		includeCancelledRows = ic!=null ? Boolean.parseBoolean(ic) : false; 
 	}
 	
 	public CreateOrderResponse2 createOrder(CreateOrderRequest request) {
@@ -315,7 +324,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 			resultOrder = result.getOrder().get(0);
 		}
 		
-		return SveaAdminConverter.convert(resultOrder);
+		return SveaAdminConverter.convert(resultOrder, includeCancelledRows);
 	}
 
 	
