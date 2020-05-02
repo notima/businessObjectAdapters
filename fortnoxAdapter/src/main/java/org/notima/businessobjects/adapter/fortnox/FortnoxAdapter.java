@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxClient3;
@@ -137,6 +138,56 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 	public void setClientManager(FortnoxClientManager clientManager) {
 		this.clientManager = clientManager;
+	}
+
+
+	/**
+	 * Adds a new tenant to the adapter.
+	 * 
+	 * @param orgNo
+	 * @param countryCode
+	 * @param props
+	 * @return		The tenant represented as a business partner.
+	 */
+	@Override
+	public BusinessPartner<Customer> addTenant(String orgNo, String countryCode, Properties props) {
+		
+		FortnoxClientInfo fi = null;
+		
+		// Get properties
+		String accessToken = null;
+		String apiCode = null;
+		String clientSecret = null;
+		String clientId = null;
+
+		if (props!=null) {
+			accessToken = props.getProperty("accessToken");
+			apiCode = props.getProperty("apiCode");
+			clientSecret = props.getProperty("clientSecret");
+			clientId = props.getProperty("clientId");
+		}
+
+		if (clientManager!=null) {
+			fi = clientManager.getClientInfoByOrgNo(orgNo);
+		}
+
+		BusinessPartner<Customer> bp = null;
+
+		// TODO Method to add tenant
+
+		if (fi==null) {
+			// Create new tenant
+			fi = new FortnoxClientInfo();
+			fi.setOrgNo(orgNo);
+			fi.setAccessToken(accessToken);
+			fi.setApiCode(apiCode);
+			fi.setClientSecret(clientSecret);
+			fi.setClientId(clientId);
+		} else {
+
+		}
+		
+		return bp;
 	}
 
 	/**

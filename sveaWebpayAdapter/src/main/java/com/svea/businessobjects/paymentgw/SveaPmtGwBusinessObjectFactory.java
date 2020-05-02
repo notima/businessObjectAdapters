@@ -1,6 +1,5 @@
 package com.svea.businessobjects.paymentgw;
 
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
