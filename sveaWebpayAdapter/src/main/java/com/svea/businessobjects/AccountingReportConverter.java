@@ -71,12 +71,27 @@ public class AccountingReportConverter {
 						avl.setTaxKey(pl.getTaxKey());
 						dst.addVoucherLine(avl);
 					}
-					if (pl.getPaidOut()!=0) {
+					if (pl.getOpeningBalance()<0) {
+						if (pl.getPaidOut()>0) {
+							 avl = new AccountingVoucherLine(BigDecimal.valueOf(-pl.getOpeningBalance()), AccountingType.LIABILITY_OTHER);
+						} else {
+							avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getPaidByCustomer()), AccountingType.LIABILITY_OTHER);
+						}
+						dst.addVoucherLine(avl);
+					}
+					if (pl.getPaidOut()>0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getPaidOut()), AccountingType.LIQUID_ASSET_CASH);
 						dst.addVoucherLine(avl);
 					}
 					
 				}
+			}
+			
+			// TODO: Have a better rounding algorithm.
+			if (dst.getBalance().abs().doubleValue() > 4) {
+				dst.balanceWithLine(AccountingType.UNKNOWN_BALANCE_TRX);
+			} else {
+				dst.balanceWithLine(AccountingType.ROUNDING);
 			}
 			
 		}
