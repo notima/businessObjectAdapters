@@ -23,6 +23,7 @@ import org.notima.api.fortnox.entities3.InvoiceRow;
 import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
+import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
@@ -93,6 +94,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	private Date	currentDate = null;
 	
 	private Map<String,Integer> revenueAccountMap = null;
+	private Map<String, PreDefinedAccountSubset> preDefinedAccountMap = null;
 
 	protected static Logger	logger = LoggerFactory.getLogger(FortnoxAdapter.class);
 	
@@ -228,6 +230,43 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		if (account == 0) return null;
 		
 		return account.toString();
+	}
+	
+	/**
+	 * Gets corresponding account in chart of accounts.
+	 * 
+	 * @param type		Should be a Fortnox predefined type.
+	 * @return			An account number if defined. Null if not defined.
+	 * @throws Exception
+	 */
+	public String getPredefinedAccount(String type) throws Exception {
+		if (preDefinedAccountMap==null) {
+			preDefinedAccountMap = client.getPredefinedAccountMap();  
+		}
+		
+		PreDefinedAccountSubset pdas = preDefinedAccountMap.get(type);
+		
+		if (pdas==null) return null;
+		
+		Integer account = pdas.getAccount();
+		if (account==0) return null;
+		
+		return account.toString();
+	}
+	
+
+	/**
+	 * Returns the default outVAT (tax due) account.
+	 * 
+	 * @param taxKey	Must be any of MP1, MP2, MP3 or MP4.
+	 * @return		
+	 * @throws Exception
+	 */
+	public String getOutVatAccount(String taxKey) throws Exception {
+
+		String account = getPredefinedAccount("OUTVAT_" + taxKey.toUpperCase());
+		return account;
+		
 	}
 	
 	/**
@@ -548,6 +587,70 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	}
 	
+	/**
+	 * Returns revenue account number for given taxKey and/or taxPercent.
+	 * If taxKey can be mapped, this is used first.
+	 * If there no match on taxKey, taxPercent is used.
+	 * 
+	 * Possible taxKeys are:
+	 * MP1
+	 * MP2
+	 * MP3
+	 * FTEU
+	 * VTEU
+	 * E
+	 * ES
+	 * 
+	 * @param taxKey		
+	 * @param taxPercent
+	 * @return				A revenue account for given taxKey and/or taxPercent.
+	 * @throws Exception
+	 */
+	public String getRevenueAcctNo(String taxKey, Double taxPercent) throws Exception {
+		
+		String accountNo = null;
+		
+		if (taxKey!=null) {
+			if ("MP1".equals(taxKey)) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP1);
+			} else if ("MP2".equals(taxKey)) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP2);
+			} else if ("MP3".equals(taxKey)) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP3);
+			} else if ("MP0".equals(taxKey)) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP0);
+			} else if ("FTEU".equals(taxKey)) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EU_SERVICE);
+			} else if ("VTEU".equals(taxKey)) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EU);
+			} else if ("E".equals(taxKey)) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EXPORT);
+			} else if ("ES".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EXPORT_SERVICE);
+			}
+		}
+
+		if (accountNo == null && taxPercent!=null) {
+
+			// TODO: Make tax percentage check dynamic (and depend on current date)
+			if (taxPercent==0)
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_NO_VAT);
+			else if (taxPercent==6) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP3);
+			} else if (taxPercent==12) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP2);
+			} else if (taxPercent==25) {
+				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP1);
+			}
+		}
+		
+		if (accountNo == null) {
+			accountNo = defaultRevenueAccount;
+		}
+		
+		return accountNo;
+	}
+	
 	
 	/**
 	 * Converts from a generic business object to a Fortnox Invoice
@@ -646,43 +749,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			// Try to set default account number if not set
 			if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
 
-				String accountNo = null;
-				
-				if ("MP1".equals(il.getTaxKey())) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP1);
-				} else if ("MP2".equals(il.getTaxKey())) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP2);
-				} else if ("MP3".equals(il.getTaxKey())) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP3);
-				} else if ("MP0".equals(il.getTaxKey())) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP0);
-				} else if ("FTEU".equals(il.getTaxKey())) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EU_SERVICE);
-				} else if ("VTEU".equals(il.getTaxKey())) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EU);
-				} else if ("E".equals(il.getTaxKey())) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EXPORT);
-				} else if ("ES".equals(il.getTaxKey())) {
-						accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EXPORT_SERVICE);
-				}
-
-				if (accountNo == null) {
-
-					// TODO: Make tax percentage check dynamic (and depend on current date)
-					if (il.getTaxPercent()==0)
-						accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_NO_VAT);
-					else if (il.getTaxPercent()==6) {
-						accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP3);
-					} else if (il.getTaxPercent()==12) {
-						accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP2);
-					} else if (il.getTaxPercent()==25) {
-						accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP1);
-					}
-				}
-				
-				if (accountNo == null) {
-					accountNo = defaultRevenueAccount;
-				}
+				String accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
 				
 				row.setAccountNumber(accountNo);
 					

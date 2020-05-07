@@ -3,16 +3,12 @@ package com.svea.businessobjects;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.notima.generic.businessobjects.AccountingType;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 
-import com.svea.webpay.common.auth.SveaCredential;
 import com.svea.webpay.common.reconciliation.AccountingReport;
 import com.svea.webpay.common.reconciliation.AccountingVoucher;
-import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PayoutLine;
 import com.svea.webpay.common.reconciliation.RevenueLine;
 

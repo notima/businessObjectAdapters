@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.fortnox;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,10 +13,14 @@ import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherRow;
 import org.notima.api.fortnox.entities3.WriteOff;
 import org.notima.api.fortnox.entities3.WriteOffs;
+import org.notima.generic.businessobjects.AccountingType;
+import org.notima.generic.businessobjects.AccountingVoucher;
+import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
+import org.notima.generic.businessobjects.util.LocalDateUtils;
 
 /**
  * Converts Fortnox entities to/from Business Objects entities.
@@ -24,7 +29,7 @@ import org.notima.generic.businessobjects.PaymentWriteOff;
  *
  */
 public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.notima.api.fortnox.entities3.Invoice> {
-
+	
 	/**
 	 * Converts a Fortnox Invoice to a Business Objects Invoice
 	 * 
@@ -34,6 +39,126 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		return FortnoxAdapter.convert((org.notima.api.fortnox.entities3.Invoice)src);
 	}
 
+	/**
+	 * Takes an accounting voucher and converts it into a Fortnox Voucher.
+	 * If account numbers are not set in the source, default accounts from Fortnox are
+	 * tried using the accountType and taxKey of the source lines.
+	 * 
+	 * @param   fa				FortnoxAdapter
+	 * @param	voucherSeries	Voucher Series
+	 * @param	src				The source to be converted
+	 * 
+	 */
+	public Voucher mapFromBusinessObjectVoucher(
+			FortnoxAdapter fa, 
+			String voucherSeries,
+			AccountingVoucher src) throws Exception {
+		
+		Voucher dst = new Voucher();
+		if (src.getAcctDate()==null) {
+			src.setAcctDate(LocalDate.now());
+		}
+		
+		dst.setDescription(src.getDescription());
+		dst.setTransactionDate(FortnoxClient3.s_dfmt.format(LocalDateUtils.asDate(src.getAcctDate())));
+		
+		if (voucherSeries!=null) {
+			dst.setVoucherSeries(voucherSeries);
+		}
+		
+		if (src.getLines()==null || src.getLines().size()==0) {
+			throw new Exception("Can't convert a voucher without lines.");
+		}
+
+		VoucherRow r = null;
+		String taxKey = null;
+		
+		for (AccountingVoucherLine avl : src.getLines()) {
+			
+			r = new VoucherRow();
+			// Try to map accountNo on account type
+			if ((avl.getAcctNo()==null || avl.getAcctNo().trim().length()==0) 
+					&& avl.getAcctType()!=null && avl.getAcctType().trim().length()>0) {
+				
+				taxKey = convertTaxKey(avl.getTaxKey());
+				
+				switch (avl.getAcctType()) {
+					case AccountingType.REVENUE:
+						avl.setAcctNo(fa.getRevenueAcctNo(taxKey, null));
+						break;
+					case AccountingType.LIABILITY_VAT:
+						avl.setAcctNo(fa.getOutVatAccount(taxKey));
+						break;
+					case AccountingType.CLAIM_VAT:
+						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_INVAT));
+						break;
+					case AccountingType.ROUNDING:
+						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_ROUNDING));
+						break;
+					case AccountingType.OTHER_EXPENSES_SALES:
+						avl.setAcctNo("6061");
+						break;
+					case AccountingType.LIQUID_ASSET_CASH:
+						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_CASHBYCARD));
+				}
+				
+			} else {
+				throw new Exception("Unable to map empty account / accountType");
+			}
+			
+			if (avl.getAcctNo()!=null && avl.getAcctNo().trim().length()>0) {
+				r.setAccount(Integer.parseInt(avl.getAcctNo()));
+			}			
+
+			r.setCredit(avl.getCreditAmount().doubleValue());
+			r.setDebit(avl.getDebitAmount().doubleValue());
+			if (avl.getDescription()!=null && avl.getDescription().trim().length()>0) {
+				r.setDescription(avl.getDescription());
+			}
+			dst.addVoucherRow(r);
+			
+		}
+		
+		return dst;
+		
+	}
+	
+	/**
+	 * Converts tax key from numeric vat rate to Fortnox tax key
+	 * 
+	 * @param taxKey
+	 * @return	A converted tax key.
+	 */
+	public String convertTaxKey(String taxKey) {
+		
+		if (taxKey==null) return null;
+		
+		double vatRate = 0;
+		try {
+			vatRate = Double.parseDouble(taxKey);
+		} catch (NumberFormatException pe) {
+			return taxKey;
+		}
+		
+		if (vatRate>16) {
+			return "MP1";
+		}
+		if (vatRate>10) {
+			return "MP2";
+		}
+		if (vatRate>5) {
+			return "MP3";
+		}
+		
+		if (vatRate==0) {
+			return "MP4";
+		}
+		
+		return "MP4";
+		
+	}
+	
+	
 	/**
 	 * Creates a single transaction voucher with a vat amount. 
 	 * 
