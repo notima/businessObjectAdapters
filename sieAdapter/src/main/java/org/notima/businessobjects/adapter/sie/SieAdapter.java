@@ -16,9 +16,9 @@ import org.notima.generic.businessobjects.PriceList;
 import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
-import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.notima.sie.SIEFileType4;
+import org.notima.sie.SIEUtil;
 import org.notima.sie.VerRec;
 
 public class SieAdapter extends BasicBusinessObjectFactory<
@@ -47,6 +47,17 @@ Object> {
 		}
 		
 		SIEFileType4 sie4file = new SIEFileType4(destinationFile); 
+		
+		BusinessPartner<?> tenant = getCurrentTenant();
+		
+		if (tenant!=null) {
+			if (tenant.getTaxId()!=null)
+				sie4file.setOrgNr(tenant.getTaxId());
+			if (tenant.getName()!=null)
+				sie4file.setFNamn(tenant.getName());
+		}
+		
+		sie4file.setProgram(SIEUtil.SIEFileLibString);
 		
 		VerRec vr;
 		
