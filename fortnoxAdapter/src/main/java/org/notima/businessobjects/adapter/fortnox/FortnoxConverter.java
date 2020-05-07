@@ -96,7 +96,8 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_ROUNDING));
 						break;
 					case AccountingType.OTHER_EXPENSES_SALES:
-						avl.setAcctNo("6061");
+						// TODO: Below must be configurable
+						avl.setAcctNo("6590");
 						break;
 					case AccountingType.LIQUID_ASSET_CASH:
 						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_CASHBYCARD));
