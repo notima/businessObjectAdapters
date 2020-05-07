@@ -26,6 +26,7 @@
 		<module>ublAdapter</module>
 		<module>infometricAdapter</module>
 		<module>csvAdapter</module>
+		<module>sieAdapter</module>
 	</modules>
 
 	<dependencies>

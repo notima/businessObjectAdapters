@@ -24,6 +24,7 @@ import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
+import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
@@ -1292,6 +1293,12 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public String getSystemName() {
 		return "Fortnox";
+	}
+
+	@Override
+	public List<AccountingVoucher> writeVouchers(List<AccountingVoucher> vouchers) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 
