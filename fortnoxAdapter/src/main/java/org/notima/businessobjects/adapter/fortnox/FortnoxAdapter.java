@@ -153,7 +153,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @return		The tenant represented as a business partner.
 	 */
 	@Override
-	public BusinessPartner<Customer> addTenant(String orgNo, String countryCode, Properties props) {
+	public BusinessPartner<Customer> addTenant(String orgNo, String countryCode, String name, Properties props) {
 		
 		FortnoxClientInfo fi = null;
 		
@@ -182,6 +182,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			// Create new tenant
 			fi = new FortnoxClientInfo();
 			fi.setOrgNo(orgNo);
+			fi.setOrgName(name);
 			fi.setAccessToken(accessToken);
 			fi.setApiCode(apiCode);
 			fi.setClientSecret(clientSecret);
@@ -1229,13 +1230,17 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	}
 
 	@Override
-	public String getTenantOrgNo() {
+	public BusinessPartner<Customer> getCurrentTenant() {
 		
 		if (client.hasCredentials()) {
 			CompanySetting cs;
 			try {
 				cs = client.getCompanySetting();
-				return cs.getOrganizationNumber();				
+				BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
+				bp.setTaxId(cs.getOrganizationNumber());
+				bp.setName(cs.getName());
+				bp.setCountryCode(cs.getCountryCode());
+				return bp;				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

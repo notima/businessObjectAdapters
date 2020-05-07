@@ -19,7 +19,6 @@ import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.notima.sie.SIEFileType4;
-import org.notima.sie.TransRec;
 import org.notima.sie.VerRec;
 
 public class SieAdapter extends BasicBusinessObjectFactory<
@@ -62,18 +61,6 @@ Object> {
 
 	@Override
 	public BusinessPartnerList<Object> listTenants() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setTenant(String orgNo, String countryCode) throws NoSuchTenantException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getTenantOrgNo() {
 		// TODO Auto-generated method stub
 		return null;
 	}

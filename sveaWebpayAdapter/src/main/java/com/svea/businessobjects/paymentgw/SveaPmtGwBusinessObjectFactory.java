@@ -58,18 +58,6 @@ public class SveaPmtGwBusinessObjectFactory extends BasicBusinessObjectFactory <
 	}
 
 	@Override
-	public void setTenant(String orgNo, String countryCode) throws NoSuchTenantException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getTenantOrgNo() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public BusinessPartner<Customer> lookupBusinessPartner(String key) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
