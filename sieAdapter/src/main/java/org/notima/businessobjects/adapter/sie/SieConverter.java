@@ -23,6 +23,8 @@ public class SieConverter {
 		
 		TransRec tr = null;
 		for (AccountingVoucherLine al : src.getLines()) {
+			if (Math.round(al.getBalance().doubleValue()*100)==0)
+				continue;
 			tr = new TransRec();
 			tr.setBelopp(al.getBalance().doubleValue());
 			tr.setKontoNr(al.getAcctNo());

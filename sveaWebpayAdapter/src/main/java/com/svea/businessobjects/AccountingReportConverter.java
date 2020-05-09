@@ -9,11 +9,35 @@ import org.notima.generic.businessobjects.AccountingVoucherLine;
 
 import com.svea.webpay.common.reconciliation.AccountingReport;
 import com.svea.webpay.common.reconciliation.AccountingVoucher;
+import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PayoutLine;
 import com.svea.webpay.common.reconciliation.RevenueLine;
 
 public class AccountingReportConverter {
 
+	// Default accounting precision.
+	public static final int DEFAULT_PRECISION = 2;
+	
+	public static AccountingVoucherLine mapWebpayFeeTypesToAccountingType(String feeType, AccountingVoucherLine avl) {
+		
+		switch(feeType) {
+		
+			case FeeDetail.FEETYPE_KICKBACK:
+				avl.setAcctType(AccountingType.REVENUE);
+				avl.setTaxKey("0");
+				break;
+			case FeeDetail.FEETYPE_DEVIATIONS:
+				avl.setAcctType(AccountingType.UNKNOWN_BALANCE_TRX);
+				break;
+			default:
+				avl.setAcctType(AccountingType.OTHER_EXPENSES_SALES);
+		
+		}
+		
+		return avl;
+		
+	}
+	
 	/**
 	 * Converts an accounting report to a list of accounting vouchers that can be used to map accounting to 
 	 * an ERP-system.
@@ -32,6 +56,7 @@ public class AccountingReportConverter {
 		List<AccountingVoucher> srcList = ar.getVouchers();
 		for (AccountingVoucher src : srcList) {
 			dst = new org.notima.generic.businessobjects.AccountingVoucher();
+			// dst.setPrecision(DEFAULT_PRECISION);
 			dst.setDescription(src.getPaymentTypeReference());
 			
 			dst.setAcctDate(src.getAcctDate());
@@ -58,9 +83,32 @@ public class AccountingReportConverter {
 				for (PayoutLine pl : src.getPayouts()) {
 					
 					if (pl.getFeeAmount()!=0) {
-						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getFeeAmount()), AccountingType.OTHER_EXPENSES_SALES);
-						avl.setTaxKey(pl.getTaxKey());
-						dst.addVoucherLine(avl);
+						
+						if (pl.getFeeSpecification()==null || pl.getFeeSpecification().isEmpty()) {
+							avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getFeeAmount()), AccountingType.OTHER_EXPENSES_SALES);
+							avl.setTaxKey(pl.getTaxKey());
+							dst.addVoucherLine(avl);
+						} else {
+							// We have a fee specification
+							double unspecifiedFee = pl.getFeeAmount() - pl.getSpecifiedFeeAmount();
+							if (unspecifiedFee!=0) {
+								avl = new AccountingVoucherLine(BigDecimal.valueOf(unspecifiedFee), AccountingType.OTHER_EXPENSES_SALES);
+								avl.setTaxKey(pl.getTaxKey());
+								dst.addVoucherLine(avl);
+							}
+							
+							// Iterate through fee specifications
+							for (FeeDetail fd : pl.getFeeSpecification()) {
+								
+								avl = new AccountingVoucherLine(BigDecimal.valueOf(fd.getFee()), null);
+								avl.setTaxKey(pl.getTaxKey());
+								mapWebpayFeeTypesToAccountingType(fd.getFeeType(), avl);
+								dst.addVoucherLine(avl);
+								
+							}
+							
+						}
+						
 					}
 					if (pl.getTaxAmount()!=0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getTaxAmount()), AccountingType.CLAIM_VAT);

@@ -104,7 +104,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 				}
 				
 			} else {
-				throw new Exception("Unable to map empty account / accountType");
+				throw new Exception("Unable to map accountType. Account: " + avl.getAcctNo());
 			}
 			
 			if (avl.getAcctNo()!=null && avl.getAcctNo().trim().length()>0) {
@@ -152,10 +152,10 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		}
 		
 		if (vatRate==0) {
-			return "MP4";
+			return "MP0";
 		}
 		
-		return "MP4";
+		return "MP0";
 		
 	}
 	
