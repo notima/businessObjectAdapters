@@ -30,6 +30,7 @@ Object> {
 
 	public static final String SYSTEM_NAME = "SIE";
 	public static final String PROP_SIE_FILE_PATH = "SieFilePath";
+	public static final String PROP_SIE_FILE_PREFIX = "SieFilePrefix";
 	
 	@Override
 	public String getSystemName() {
@@ -38,15 +39,21 @@ Object> {
 	
 	@Override
 	public List<AccountingVoucher> writeVouchers(List<AccountingVoucher> vouchers) throws Exception {
-		String destinationFile = this.getSetting(PROP_SIE_FILE_PATH);
-		if (destinationFile==null) {
-			destinationFile = System.getProperty("user.home") + File.separator + "SIE4.si";
+		String destinationPath = this.getSetting(PROP_SIE_FILE_PATH);
+		String filePrefix = this.getSetting(PROP_SIE_FILE_PREFIX);
+		if (filePrefix==null) {
+			filePrefix = "";
 		}
-		if (!destinationFile.toUpperCase().endsWith(".SI")) {
-			destinationFile += ".si";
+		if (destinationPath==null) {
+			destinationPath = System.getProperty("user.home") + File.separator + filePrefix + "SIE4.si";
+		}
+		if (!destinationPath.toUpperCase().endsWith(".SI")) {
+			if (!destinationPath.endsWith(File.separator))
+				destinationPath += File.separator;
+			destinationPath += filePrefix + "SIE4.si";
 		}
 		
-		SIEFileType4 sie4file = new SIEFileType4(destinationFile); 
+		SIEFileType4 sie4file = new SIEFileType4(destinationPath); 
 		
 		BusinessPartner<?> tenant = getCurrentTenant();
 		

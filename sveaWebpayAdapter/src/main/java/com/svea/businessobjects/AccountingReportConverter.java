@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.notima.generic.businessobjects.AccountingType;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
+import org.notima.generic.businessobjects.util.Translator;
 
 import com.svea.webpay.common.reconciliation.AccountingReport;
 import com.svea.webpay.common.reconciliation.AccountingVoucher;
@@ -43,9 +44,11 @@ public class AccountingReportConverter {
 	 * an ERP-system.
 	 * 
 	 * @param ar		An accounting report.
+	 * @param lang		Language to use for texts in voucher. Can be null.
+	 * 
 	 * @return	A list of accounting vouchers.
 	 */
-	public static List<org.notima.generic.businessobjects.AccountingVoucher> toBoVouchers(AccountingReport ar) {
+	public static List<org.notima.generic.businessobjects.AccountingVoucher> toBoVouchers(AccountingReport ar, String lang) {
 		
 		List<org.notima.generic.businessobjects.AccountingVoucher> result = new ArrayList<org.notima.generic.businessobjects.AccountingVoucher>();
 		if (ar==null || ar.getVouchers()==null) return result;
@@ -57,7 +60,8 @@ public class AccountingReportConverter {
 		for (AccountingVoucher src : srcList) {
 			dst = new org.notima.generic.businessobjects.AccountingVoucher();
 			// dst.setPrecision(DEFAULT_PRECISION);
-			dst.setDescription(src.getPaymentTypeReference());
+			dst.setDescription("Svea Webpay " +  
+					src.getPaymentTypeReference() + " " + Translator.getTranslation(src.getPaymentType(), lang));
 			
 			dst.setAcctDate(src.getAcctDate());
 			result.add(dst);
