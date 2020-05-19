@@ -83,6 +83,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public static final String LIST_UNPAID = "InvoiceSubset-Unpaid";
 	public static final String LIST_UNPAIDOVERDUE = "InvoiceSubset-UnPaidOverDue";
 	
+	public static final String SYSTEMNAME = "Fortnox";
+	
 	private FortnoxClient3 client;
 	
 	private FortnoxClientManager clientManager;
@@ -1297,7 +1299,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 	@Override
 	public String getSystemName() {
-		return "Fortnox";
+		return SYSTEMNAME;
 	}
 
 	@Override

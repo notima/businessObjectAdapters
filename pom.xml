@@ -27,6 +27,7 @@
 		<module>infometricAdapter</module>
 		<module>csvAdapter</module>
 		<module>sieAdapter</module>
+		<module>adapterTools</module>
 	</modules>
 
 	<dependencies>
@@ -61,6 +62,12 @@
 	    	<artifactId>org.apache.karaf.util</artifactId>
 	    	<version>${karaf.version}</version>
 	    </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.core</artifactId>
+            <version>${karaf.version}</version>
+        </dependency>
 
 		<dependency>
 			<groupId>org.notima.generic</groupId>

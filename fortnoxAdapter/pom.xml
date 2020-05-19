@@ -24,6 +24,13 @@
 			<artifactId>fortnox4j</artifactId>
 			<version>1.8.10-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>
+				org.notima.generic.businessobjects.adapter
+			</groupId>
+			<artifactId>adapterTools</artifactId>
+			<version>${version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -63,12 +70,14 @@
 				<configuration>
 					<instructions>
 						<Bundle-Activator>org.notima.businessobjects.adapter.fortnox.Activator</Bundle-Activator>
-						<Export-Package>org.notima.businessobjects.adapter.fortnox.*
+						<Export-Package>org.notima.businessobjects.adapter.fortnox.*,
+										org.notima.fortnox.command*
 										</Export-Package>
 		        		<Private-Package>
         					org.apache.karaf.util.tracker,
         					org.apache.karaf.util.tracker.annotation
         				</Private-Package>
+						<Karaf-Commands>org.notima.fortnox.command*</Karaf-Commands>        				
         				<Import-Package>
         					javax.xml.bind;version="[2.2,3)",*
         				</Import-Package>
