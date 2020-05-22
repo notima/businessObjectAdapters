@@ -40,7 +40,7 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<includes>
-					<include>*.jasper</include>
+					<include>**/*.jasper</include>
 				</includes>
 			</resource>
 		</resources>

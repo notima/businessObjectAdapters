@@ -68,7 +68,7 @@ public class JasperOrderListFormatter implements OrderListFormatter {
 			}
 		} else {
 			// Lookup default jasper file as a resource
-			URL url = ClassLoader.getSystemResource("OrderList.jasper");
+			URL url = ClassLoader.getSystemResource("reports/OrderList.jasper");
 			if (url!=null) {
 				jasperFile = url.getFile();
 			} else {

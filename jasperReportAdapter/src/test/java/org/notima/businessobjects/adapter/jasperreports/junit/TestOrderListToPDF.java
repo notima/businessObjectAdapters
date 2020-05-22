@@ -1,11 +1,14 @@
 package org.notima.businessobjects.adapter.jasperreports.junit;
 
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
+
+import javax.xml.bind.JAXB;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +29,22 @@ public class TestOrderListToPDF {
 	public void test() {
 
 		try {
-			
-			Collection<Order<?>> list = OrderListXmlDataSource.getOrderList();
+
+			OrderList ol = null;
+			Collection<Order<?>> list = null; 
+			try {
+				list = OrderListXmlDataSource.getOrderList();
+				ol = new OrderList();
+				List<Order<?>> orderList = new ArrayList<Order<?>>();
+				orderList.addAll(list);
+				ol.setOrderList(orderList);
+			} catch (Exception e) {
+				// Try to find orderlist as resource
+				InputStream is = ClassLoader.getSystemResourceAsStream("orders-example.xml");
+				if (is!=null) {
+					ol = JAXB.unmarshal(is, OrderList.class);
+				}
+			}
 			
 			Properties props = new Properties();
 
@@ -37,10 +54,6 @@ public class TestOrderListToPDF {
 			props.put(JasperOrderListFormatter.JASPER_REPORT_NAME, dfmt.format(Calendar.getInstance().getTime()) + " - The ultimate report");
 			props.put(JasperOrderListFormatter.JASPER_TAX_ID, "555555-5555");
 			
-			OrderList ol = new OrderList();
-			List<Order<?>> orderList = new ArrayList<Order<?>>();
-			orderList.addAll(list);
-			ol.setOrderList(orderList);
 			JasperOrderListFormatter formatter = new JasperOrderListFormatter();
 			String path = formatter.formatOrderList(ol, formatter.getFormats()[0], props);
 
