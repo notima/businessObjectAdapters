@@ -28,6 +28,7 @@
 		<module>csvAdapter</module>
 		<module>sieAdapter</module>
 		<module>adapterTools</module>
+		<module>jasperReportAdapter</module>
 	</modules>
 
 	<dependencies>
