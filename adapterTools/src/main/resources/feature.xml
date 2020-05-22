@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="notima-business-objects">
+
+	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}">
+	
+		<bundle>mvn:com.google.code.gson/gson/2.8.1</bundle>
+<!--         <bundle>mvn:com.sun.xml.bind/jaxb-core/2.3.0.1</bundle>
+        <bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
+        <bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle> -->
+	
+	</feature>
+
+	<feature name="notima-businessobjects" description="Notima Business Objects" version="${project.version}">
+		<!-- 
+        <feature prerequisite="true" dependency="false">wrap</feature>
+         -->
+        <feature>notima-common</feature>
+		<bundle>mvn:org.notima.bg/bankgiro-api/1.3.7</bundle>
+		<bundle>mvn:org.notima.generic/businessobjects/0.1.18-SNAPSHOT</bundle>
+		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
+	</feature>
+
+	<feature name="notima-ubl" description="Notima UBL Adapter" version="${project.version}">
+
+        <feature>notima-businessobjects</feature>	
+        <bundle>mvn:org.notima.generic.businessobjects.adapter/ublAdapter/${project.version}</bundle>
+	
+	</feature>
+
+    <feature name="notima-fortnox4j" description="Notima Fortnox4J Adapter" version="${project.version}">
+        <feature prerequisite="true" dependency="false">wrap</feature>
+        <feature>notima-businessobjects</feature>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.12</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.5.10</bundle>
+        <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
+        <bundle>mvn:org.notima.api/fortnox4j/1.8.10-SNAPSHOT</bundle>
+        <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
+
+        <config name="FortnoxProperties">
+            fortnoxClientsFile = ~/private/fortnoxClients.xml
+        </config>
+
+    </feature>
+    
+    <feature name="notima-sveawebpay" description="Notima SveaWebPay Adapter" version="${project.version}">
+    
+    	<feature>notima-businessobjects</feature>
+    	<bundle>mvn:org.apache.commons/commons-csv/1.6</bundle>
+    	<bundle>mvn:org.notima.api.webpay/pmt-admin-api</bundle>
+    	<bundle>mvn:com.svea/webpayadminservice-client</bundle>
+		<bundle>mvn:org.notima.generic.businessobjects.adapter/csvAdapter/${project.version}</bundle>
+    	<bundle>mvn:org.notima.generic.businessobjects.adapter/sveaWebpayAdapter/${project.version}</bundle>
+    
+    </feature>
+    
+    <feature name="notima-infometric" description="Notima Infometric Adapter" version="${project.version}">
+    
+    	<feature>notima-businessobjects</feature>
+    	<bundle>mvn:org.notima.generic.businessobjects.adapter/infometricAdapter/${project.version}</bundle>
+    
+    </feature>
+    
+</features>

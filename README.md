@@ -14,3 +14,9 @@ https://github.com/sveawebpay/webpay-common
 https://github.com/sveawebpay/webpayadminreports
 
 If the project is a release version, you'll only have to checkout and compile the sveawebpay projects.
+
+## Installation in Karaf
+
+	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/LATEST/xml/features
+	
+	feature:install notima-fortnox4j
