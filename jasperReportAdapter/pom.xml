@@ -75,6 +75,7 @@
         				<Import-Package>
         					javax.xml.bind;version="[2.2,3)",*
         				</Import-Package>
+        				<Karaf-Commands>org.notima.businessobjects.adapter.jasperreports.cmd*</Karaf-Commands>
 					</instructions>
 				</configuration>
 			</plugin>
