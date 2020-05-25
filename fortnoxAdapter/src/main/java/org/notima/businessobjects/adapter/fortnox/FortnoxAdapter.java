@@ -19,11 +19,15 @@ import org.notima.api.fortnox.entities3.CustomerSubset;
 import org.notima.api.fortnox.entities3.Customers;
 import org.notima.api.fortnox.entities3.DefaultDeliveryTypes;
 import org.notima.api.fortnox.entities3.EmailInformation;
+import org.notima.api.fortnox.entities3.FinancialYearSubset;
+import org.notima.api.fortnox.entities3.FortnoxFile;
 import org.notima.api.fortnox.entities3.InvoiceRow;
 import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
+import org.notima.api.fortnox.entities3.Voucher;
+import org.notima.api.fortnox.entities3.VoucherFileConnection;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
@@ -41,6 +45,7 @@ import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.businessobjects.util.LocalDateUtils;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1302,10 +1307,56 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return SYSTEMNAME;
 	}
 
+	/**
+	 * Writes a list of vouchers to Fortnox
+	 * 
+	 * The returned list contains the voucher numbers that were set by Fortnox.
+	 *
+	 * @param	vouchers		The vouchers to write.
+	 */
 	@Override
 	public List<AccountingVoucher> writeVouchers(List<AccountingVoucher> vouchers) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		
+		List<AccountingVoucher> result = new ArrayList<AccountingVoucher>();
+
+		if (vouchers==null) return result;
+		
+		Voucher target;
+		Voucher fortnoxVoucher;
+		FortnoxConverter conv = new FortnoxConverter();
+		for (AccountingVoucher v : vouchers) {
+			target = conv.mapFromBusinessObjectVoucher(this, v.getVoucherSeries(), v);
+			try {
+				fortnoxVoucher = client.setVoucher(target);
+				v.setVoucherNo(fortnoxVoucher.getVoucherNumber().toString());
+				result.add(v);
+			} catch (Exception e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Attaches a file to a given voucher.
+	 * 
+	 * @param		voucher		The voucher to attach to.
+	 * @param		fileName	The file to attach.
+	 * @return		The fileId of the attached file.
+	 * @throws		Exception if something goes wrong.
+	 * 
+	 */
+	@Override
+	public String attachFileToVoucher(AccountingVoucher voucher, String fileName) throws Exception {
+		
+		FortnoxFile ff = client.uploadFile(fileName, FortnoxClient3.INBOX_VOUCHERS);
+		FinancialYearSubset fys = client.getFinancialYear(LocalDateUtils.asDate(voucher.getAcctDate()));
+		VoucherFileConnection vfc =  client.setVoucherFileConnection(ff.getId(), voucher.getVoucherNo(), voucher.getVoucherSeries(), fys.getId());
+
+		return vfc.getFileId();
+		
 	}
 	
 

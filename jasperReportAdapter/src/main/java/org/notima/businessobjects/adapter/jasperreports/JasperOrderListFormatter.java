@@ -29,7 +29,8 @@ public class JasperOrderListFormatter implements OrderListFormatter {
 	public final static String JASPER_TAX_ID = "JasperTaxId";
 	public final static String JASPER_LANG = "JasperLang";
 	public final static String JASPER_REPORT_NAME = "JasperReportName";
-	public final static String OUTPUT_DIR = "OutputDir";
+	public final static String JASPER_OUTPUT_DIR = "JasperOutputDir";
+	public final static String JASPER_OUTPUT_FILENAME = "JasperOutputFilename";
 
 	@Override
 	public String[] getFormats() {
@@ -49,18 +50,25 @@ public class JasperOrderListFormatter implements OrderListFormatter {
 		String jasperTaxId = null;
 		String jasperLang = null;
 		String jasperReportName = null;
+		String jasperOutputFilename = null;
 		
 		if (props!=null) {
 			jasperFile = props.getProperty(JASPER_FILE);
-			outputDir = props.getProperty(OUTPUT_DIR);
+			outputDir = props.getProperty(JASPER_OUTPUT_DIR);
 			jasperCompanyName = props.getProperty(JASPER_COMPANY_NAME);
 			jasperTaxId = props.getProperty(JASPER_TAX_ID);
 			jasperLang = props.getProperty(JASPER_LANG);
 			jasperReportName = props.getProperty(JASPER_REPORT_NAME);
-			if (outputDir==null) {
-				outputDir = System.getenv("user.home");
-			}
+			jasperOutputFilename = props.getProperty(JASPER_OUTPUT_FILENAME);
 		}
+		
+		if (outputDir==null) {
+			outputDir = System.getenv("user.home");
+		}
+		if (jasperOutputFilename==null) {
+			jasperOutputFilename = "OrderList";
+		}
+		
 		if (jasperFile!=null) {
 			File f = new File(jasperFile);
 			if (!f.canRead()) {
@@ -90,7 +98,7 @@ public class JasperOrderListFormatter implements OrderListFormatter {
 		
 		JasperPrint print = JasperFillManager.fillReport(is, parameters, new JRBeanArrayDataSource(orderList.getOrderList().toArray()));
 		
-		File resultPdf = createPdfFile(print, outputDir, null, "OrderList");
+		File resultPdf = createPdfFile(print, outputDir, null, jasperOutputFilename);
 		
 		return resultPdf.getAbsolutePath();
 	}
