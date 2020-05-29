@@ -21,6 +21,8 @@ public class SieConverter {
 		dst.setVerDatum(LocalDateUtils.asDate(src.getAcctDate()));
 		dst.setVerText(src.getDescription());
 		
+		if (src.getLines()==null) return dst;
+		
 		TransRec tr = null;
 		for (AccountingVoucherLine al : src.getLines()) {
 			if (Math.round(al.getBalance().doubleValue()*100)==0)
