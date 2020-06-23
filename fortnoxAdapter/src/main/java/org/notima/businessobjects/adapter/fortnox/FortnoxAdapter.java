@@ -429,6 +429,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		if (o instanceof org.notima.generic.businessobjects.BusinessPartner) {
 			return persistBusinessPartner((org.notima.generic.businessobjects.BusinessPartner)o);
 		}
+		
 		return null;
 	}
 	
@@ -1352,8 +1353,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public String attachFileToVoucher(AccountingVoucher voucher, String fileName) throws Exception {
 		
 		FortnoxFile ff = client.uploadFile(fileName, FortnoxClient3.INBOX_VOUCHERS);
-		FinancialYearSubset fys = client.getFinancialYear(LocalDateUtils.asDate(voucher.getAcctDate()));
-		VoucherFileConnection vfc =  client.setVoucherFileConnection(ff.getId(), voucher.getVoucherNo(), voucher.getVoucherSeries(), fys.getId());
+		VoucherFileConnection vfc =  client.setVoucherFileConnection(ff.getId(), voucher.getVoucherNo(), voucher.getVoucherSeries(), LocalDateUtils.asDate(voucher.getAcctDate()));
 
 		return vfc.getFileId();
 		

@@ -104,12 +104,14 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 				}
 				
 			} else {
-				throw new Exception("Unable to map accountType. Account: " + avl.getAcctNo());
+				if (avl.getAcctNo()==null || avl.getAcctNo().trim().length()==0) {
+					throw new Exception("Unable to map accountType. AccountType: " + avl.getAcctType());
+				}
 			}
 			
 			if (avl.getAcctNo()!=null && avl.getAcctNo().trim().length()>0) {
 				r.setAccount(Integer.parseInt(avl.getAcctNo()));
-			}			
+			}
 
 			r.setCredit(avl.getCreditAmount().doubleValue());
 			r.setDebit(avl.getDebitAmount().doubleValue());
