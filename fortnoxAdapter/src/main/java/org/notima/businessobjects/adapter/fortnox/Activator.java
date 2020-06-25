@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.fortnox;
 
+import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -7,6 +8,8 @@ import java.util.Hashtable;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.api.fortnox.FortnoxUtil;
+import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.osgi.framework.ServiceReference;
@@ -72,7 +75,23 @@ public class Activator extends BaseActivator {
 		
 		if (fortnoxClientsFile!=null) {
 			
-			FortnoxClientManager mgr = new FortnoxClientManager(fortnoxClientsFile);
+			FortnoxClientManager mgr = null;
+			
+			try {
+				mgr = new FortnoxClientManager(fortnoxClientsFile);
+			} catch (FileNotFoundException fne) {
+				
+				// Create the file
+				try {
+					FortnoxUtil.writeFortnoxClientListToFile(new FortnoxClientList(), fortnoxClientsFile);
+					log.info("Creating new empty Fortnox Clients file: " + fortnoxClientsFile);
+					mgr = new FortnoxClientManager(fortnoxClientsFile);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
 			
 			FortnoxAdapter fapt = new FortnoxAdapter();
 			fapt.setClientManager(mgr);

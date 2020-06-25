@@ -37,7 +37,7 @@
         <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
 
         <config name="FortnoxProperties">
-            fortnoxClientsFile = ~/private/fortnoxClients.xml
+            fortnoxClientsFile = private/fortnoxClients.xml
         </config>
 
     </feature>
