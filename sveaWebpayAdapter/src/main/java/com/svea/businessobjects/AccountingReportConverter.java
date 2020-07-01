@@ -132,7 +132,7 @@ public class AccountingReportConverter {
 					
 					// Ending balance is negative
 					if (pl.getEndingBalance()<0) {
-						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getEndingBalance()), AccountingType.LIABILITY_OTHER);
+						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getEndingBalance()-pl.getOpeningBalance()), AccountingType.LIABILITY_OTHER);
 						dst.addVoucherLine(avl);
 					}
 					
