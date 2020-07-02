@@ -18,7 +18,7 @@ import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.businessobjects.adapter.tools.FactorySelector;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
-@Command(scope = "fortnox", name = "process-voucher", description = "Process a Fortnox voucher")
+@Command(scope = "fortnox", name = "process-fortnox-voucher", description = "Process a Fortnox voucher")
 @Service
 @SuppressWarnings("rawtypes")
 public class ProcessVoucher implements Action {

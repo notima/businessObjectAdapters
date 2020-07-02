@@ -1,12 +1,13 @@
 package org.notima.businessobjects.adapter.tools;
 
-import org.notima.generic.businessobjects.BusinessPartner;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 /**
  * Helper class to choose appropriate factory for a tenant.
@@ -103,7 +104,7 @@ public class FactorySelector {
 	 * @return	The factory. Null if none is found.
 	 */
 	@SuppressWarnings("unchecked")
-	public BusinessObjectFactory getFactoryWithTenant(String systemName, String taxId, String countryCode) {
+	public BusinessObjectFactory getFactoryWithTenant(String systemName, String taxId, String countryCode) throws NoSuchTenantException {
 		
 		if (systemName==null)
 			return null;
@@ -129,6 +130,7 @@ public class FactorySelector {
 			bps = bf.listTenants().getBusinessPartner();
 			for (BusinessPartner b : bps) {
 				if (isThisTenant(taxId, countryCode, b)) {
+					bf.setTenant(taxId, countryCode);
 					return bf;
 				}
 			}

@@ -10,7 +10,7 @@ import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
-@Command(scope = "fortnox", name = "list-clients", description = "Lists current Fortnox clients")
+@Command(scope = "fortnox", name = "list-fortnox-clients", description = "Lists current Fortnox clients")
 @Service
 public class ListClients implements Action {
 

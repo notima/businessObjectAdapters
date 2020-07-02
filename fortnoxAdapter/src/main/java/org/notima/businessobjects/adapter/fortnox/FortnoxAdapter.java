@@ -83,6 +83,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * Available lists
 	 * @see lookupList(String)
 	 */
+	public static final String LIST_EXTERNAL_INVOICE_REFERENCE1 = "InvoiceSubset-ExternalInvoiceReference1";	
 	public static final String LIST_EXTERNAL_INVOICE_REFERENCE2 = "InvoiceSubset-ExternalInvoiceReference2";
 	public static final String LIST_UNPOSTED = "InvoiceSubset-Unposted";
 	public static final String LIST_UNPAID = "InvoiceSubset-Unpaid";
@@ -997,6 +998,21 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public Map<Object, Object> lookupList(String listName) throws Exception {
 
 		// Invoice subset
+		if (LIST_EXTERNAL_INVOICE_REFERENCE1.equalsIgnoreCase(listName)) {
+			
+			Invoices invoices = client.getInvoices(null);
+			
+			Map<Object, Object> result = new TreeMap<Object,Object>();
+			if (invoices!=null && invoices.getInvoiceSubset()!=null) {
+				for (InvoiceSubset is : invoices.getInvoiceSubset()) {
+					if (is.getExternalInvoiceReference1()!=null) 
+						result.put(is.getExternalInvoiceReference1(), is);
+				}
+			}
+			
+			return result;
+		}
+		
 		if (LIST_EXTERNAL_INVOICE_REFERENCE2.equalsIgnoreCase(listName)) {
 			
 			Invoices invoices = client.getInvoices(null);
@@ -1012,10 +1028,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			return result;
 		}
 		
+		
 		// Invoice subset - unposted
 		if (LIST_UNPOSTED.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered("unbooked");
+			Map<Object,Object> result = getFiltered(FortnoxClient3.FILTER_UNBOOKED);
 			
 			return result;
 		}
@@ -1023,9 +1040,17 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Invoice subset - unpaid overdue
 		if (LIST_UNPAIDOVERDUE.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered("unpaidoverdue");
+			Map<Object,Object> result = getFiltered(FortnoxClient3.FILTER_UNPAID_OVERDUE);
 			
 			return result;
+		}
+		
+		if (LIST_UNPAID.equalsIgnoreCase(listName)) {
+			
+			Map<Object,Object> result = getFiltered(FortnoxClient3.FILTER_UNPAID);
+			
+			return result;
+			
 		}
 		
 		return null;
