@@ -14,6 +14,12 @@ import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PayoutLine;
 import com.svea.webpay.common.reconciliation.RevenueLine;
 
+/**
+ * Class that takes a webpay accounting report and translates it into business objects vouchers (common format).  
+ * 
+ * @author Daniel Tamm
+ *
+ */
 public class AccountingReportConverter {
 
 	// Default accounting precision.
@@ -29,6 +35,9 @@ public class AccountingReportConverter {
 				break;
 			case FeeDetail.FEETYPE_DEVIATIONS:
 				avl.setAcctType(AccountingType.UNKNOWN_BALANCE_TRX);
+				break;
+			case FeeDetail.ACCTTYPE_DEPOSIT:
+				avl.setAcctType(AccountingType.ASSET_DEPOSIT);
 				break;
 			default:
 				avl.setAcctType(AccountingType.OTHER_EXPENSES_SALES);
