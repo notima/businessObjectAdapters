@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
@@ -29,8 +30,15 @@ public class ListInvoices implements Action {
 	@Reference
 	private List<BusinessObjectFactory> bofs;
 	
+	@Option(name = "-e", aliases = {
+	"--enrich" }, description = "Read the complete invoice, not just the subset", required = false, multiValued = false)
+	private boolean enrich;
+	
+	@Option(name = "--unbooked", description = "Show unbooked invoices", required = false, multiValued = false)
+	private boolean unbooked;
+	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
-	String orgNo = "";
+	private String orgNo = "";
 	
 	@Override
 	public Object execute() throws Exception {
@@ -45,23 +53,32 @@ public class ListInvoices implements Action {
 		}
 		
 		@SuppressWarnings("unchecked")
-		Map<Object, Object> unpaidMap = bf.lookupList(FortnoxAdapter.LIST_UNPAID);
-
-		List<Invoice> invoices = new ArrayList<Invoice>();
+		Map<Object, Object> invoicesMap = null;
 		
-		if (unpaidMap!=null) {
+		if (unbooked) {
+			invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPOSTED);
+		} else {
+			invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPAID);
+		}
+
+		List<Object> invoices = new ArrayList<Object>();
+		
+		if (invoicesMap!=null) {
 			
-			Collection<Object> invoiceObjects = unpaidMap.values();
+			Collection<Object> invoiceObjects = invoicesMap.values();
 			
 			Invoice inv = null;
 			for (Object oo : invoiceObjects) {
 				if (oo instanceof Invoice) {
-					inv = (Invoice)oo;
-					invoices.add(inv);
+					invoices.add(oo);
 				}
 				if (oo instanceof InvoiceSubset) {
-					inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)oo).getDocumentNumber());
-					invoices.add(inv);
+					if (enrich) {
+						inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)oo).getDocumentNumber());
+						invoices.add(inv);
+					} else {
+						invoices.add(oo);
+					}
 				}
 				
 			}
