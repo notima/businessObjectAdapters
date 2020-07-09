@@ -301,7 +301,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		
 		GetOrdersResponse2 response = client.getOrders(req);
 		if (response.getErrorMessage()!=null) {
-			throw new Exception(response.toString());
+			throw new Exception("Order " + key + " : " + response.getErrorMessage());
 		}
 		
 		ArrayOfOrder result = response.getOrders();
