@@ -14,21 +14,19 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.Account;
 import org.notima.api.fortnox.entities3.AccountSubset;
 import org.notima.api.fortnox.entities3.Accounts;
-import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
-import org.notima.businessobjects.adapter.tools.FactorySelector;
 import org.notima.fortnox.command.table.AccountTable;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "show-fortnox-coa", description = "List chart of accounts for given client.")
 @Service
-@SuppressWarnings("rawtypes")
-public class ShowChartOfAccounts implements Action {
+public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 
-	@Reference 
-	Session sess;
-	
+	@SuppressWarnings("rawtypes")
 	@Reference
 	private List<BusinessObjectFactory> bofs;
+	
+	@Reference 
+	Session sess;
 	
 	@Option(name = "--all", description = "Include in active accounts", required = false, multiValued = false)
 	private boolean showInactive;
@@ -44,22 +42,12 @@ public class ShowChartOfAccounts implements Action {
 
 	@Override
 	public Object execute() throws Exception {
-
-		FactorySelector selector = new FactorySelector(bofs);
 		
-		BusinessObjectFactory bf = selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
-
-		if (bf==null) {
-			sess.getConsole().println("No tenant found with orgNo [" + orgNo + "]");
-			return null;
-		}
+		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
 		
-		FortnoxAdapter fa = (FortnoxAdapter)bf;
-		
-		FortnoxClient3 fc = fa.getClient();
 		int yearId = fc.getFinancialYear(null).getId();
 		
-		Accounts accts = fa.getClient().getAccounts(yearId);
+		Accounts accts = fc.getAccounts(yearId);
 		Account acct;
 		
 		List<Object> acctList = new ArrayList<Object>();
