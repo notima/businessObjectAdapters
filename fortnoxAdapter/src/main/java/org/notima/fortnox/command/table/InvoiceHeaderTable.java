@@ -58,7 +58,7 @@ public class InvoiceHeaderTable extends ShellTable {
 
 		addRow().addContent(
 				is.getInvoiceDate(),
-				is.getDocumentNumber(),
+				is.getDocumentNumber() + (is.isCancelled() ? " **" : ""),
 				is.getCustomerName(),
 				"N/A",
 				"N/A",
@@ -74,7 +74,7 @@ public class InvoiceHeaderTable extends ShellTable {
 
 		addRow().addContent(
 				invoice.getInvoiceDate(),
-				invoice.getDocumentNumber(),
+				invoice.getDocumentNumber() + (invoice.isCancelled() ? " **" : ""),
 				invoice.getCustomerName(),
 				invoice.getOrderReference(),
 				invoice.getYourOrderNumber(),
@@ -83,7 +83,6 @@ public class InvoiceHeaderTable extends ShellTable {
 				nfmt.format(invoice.getTotal()),
 				invoice.getTermsOfPayment())
 				;
-		
 		
 	}
 	

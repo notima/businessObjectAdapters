@@ -37,6 +37,9 @@ public class ListInvoices implements Action {
 	@Option(name = "--unbooked", description = "Show unbooked invoices", required = false, multiValued = false)
 	private boolean unbooked;
 	
+	@Option(name = "--show-cancelled", description = "Show cancelled invoices", required = false, multiValued = false)
+	private boolean showCancelled = false;
+	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
 	
@@ -68,16 +71,23 @@ public class ListInvoices implements Action {
 			Collection<Object> invoiceObjects = invoicesMap.values();
 			
 			Invoice inv = null;
+			InvoiceSubset invs = null;
 			for (Object oo : invoiceObjects) {
 				if (oo instanceof Invoice) {
-					invoices.add(oo);
+					inv = (Invoice)oo;
+					if (!inv.isCancelled() || showCancelled) {
+						invoices.add(oo);
+					}
 				}
 				if (oo instanceof InvoiceSubset) {
-					if (enrich) {
-						inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)oo).getDocumentNumber());
-						invoices.add(inv);
-					} else {
-						invoices.add(oo);
+					invs = (InvoiceSubset)oo;
+					if (!invs.isCancelled() || showCancelled) {
+						if (enrich) {
+							inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)oo).getDocumentNumber());
+							invoices.add(inv);
+						} else {
+							invoices.add(oo);
+						}
 					}
 				}
 				
@@ -89,6 +99,8 @@ public class ListInvoices implements Action {
 
 			InvoiceHeaderTable iht = new InvoiceHeaderTable(invoices);
 			iht.print(sess.getConsole());
+			
+			sess.getConsole().println("\n" + invoices.size() + " invoice(s).");
 			
 		}
 		
