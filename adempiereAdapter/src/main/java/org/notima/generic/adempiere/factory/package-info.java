@@ -1,0 +1,1 @@
+package org.notima.generic.adempiere.factory;

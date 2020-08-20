@@ -59,6 +59,42 @@
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/infometricAdapter/${project.version}</bundle>
     </feature>
+    
+    <feature name="notima-adempiere" description="Notima ADempiere Adapter" version="${project.version}">
+
+
+    	<feature>notima-businessobjects</feature>
+        <feature>transaction</feature>
+        <feature>jndi</feature>
+        <feature>pax-jdbc-config</feature>
+        <feature>pax-jdbc-postgresql</feature>
+        <feature>pax-jdbc-pool-dbcp2</feature>
+        <feature>jdbc</feature>
+
+		<!-- Update below settings in the KARAF_HOME/etc directory to suit your database -->
+
+        <config name="AdempiereProperties">
+        
+			clientId=1000000
+			orgId=1000000
+			
+        </config>
+
+		<config name="org.ops4j.datasource-adempiere">
+            osgi.jdbc.driver.class=org.postgresql.Driver
+            dataSourceName=adempiere
+            url=jdbc:postgresql://localhost:5439/adempiere
+            user=adempiere
+            password=adempiere
+        </config>
+        
+ 		<capability>
+            osgi.service;objectClass=javax.sql.DataSource;effective:=active;osgi.jndi.service.name=adempiere
+        </capability>        
+
+    	<bundle>mvn:org.notima.generic.businessobjects.adapter/adempiereAdapter/${project.version}</bundle>
+    	
+    </feature>
 
     <feature name="notima-jasperreport" description="Notima JasperReports Adapter" version="${project.version}">
     	<feature prerequisite="true">wrap</feature>

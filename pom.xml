@@ -29,6 +29,7 @@
 		<module>sieAdapter</module>
 		<module>adapterTools</module>
 		<module>jasperReportAdapter</module>
+		<module>adempiereAdapter</module>
 	</modules>
 
 	<dependencies>

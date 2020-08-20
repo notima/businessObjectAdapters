@@ -8,8 +8,7 @@ import org.notima.generic.businessobjects.BusinessPartner;
 
 public class TenantTable extends ShellTable {
 
-	@SuppressWarnings("rawtypes")
-	public TenantTable(List<BusinessPartner> bpl) {
+	public TenantTable(List<BusinessPartner<Object>> bpl) {
 		
 		Col col = new Col("Tax id");
 		column(col);
@@ -21,7 +20,7 @@ public class TenantTable extends ShellTable {
 			return;
 		}
 		
-		for (BusinessPartner p : bpl) {
+		for (BusinessPartner<Object> p : bpl) {
 			addRow().addContent(p.getTaxId(), p.getName());
 		}
 		
