@@ -67,6 +67,12 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		adClientId = clientId;
 		adOrgId = orgId;
 		
+		BusinessPartnerList bpl = listTenants();
+		BusinessPartner bp = (BusinessPartner) bpl.getBusinessPartner().get(0);
+		
+		// Add tenant
+		this.addTenant(Integer.toString(adClientId), null, bp.getName(), null);
+		
 	}
 	
 	public AdempiereJdbcFactory(String jdbcUrl, String user, String pass, int clientId, int orgId) throws Exception {
@@ -526,6 +532,7 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 	public String getSystemName() {
 		return SYSTEMNAME;
 	}
+	
 
 	@Override
 	public BusinessPartnerList listTenants() {
