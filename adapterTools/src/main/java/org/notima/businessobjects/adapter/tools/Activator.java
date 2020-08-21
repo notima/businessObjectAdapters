@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(FormatterFactory.class),
+				@ProvideService(CanonicalObjectFactory.class),
 		}
 )
 public class Activator extends BaseActivator {
@@ -22,6 +23,10 @@ public class Activator extends BaseActivator {
 		FormatterFactory formatterFactory = new FormatterFactoryImpl();
 		log.info("Created FormatterFactory");
 		register(FormatterFactory.class, formatterFactory);
+		
+		CanonicalObjectFactory cof = new CanonicalObjectFactoryImpl();
+		log.info("Created Canonical Object Factory");
+		register(CanonicalObjectFactory.class, cof);
 		
 	}
 	

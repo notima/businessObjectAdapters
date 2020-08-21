@@ -77,6 +77,9 @@
         					org.apache.karaf.util.tracker.annotation
         				</Private-Package>
         				<Karaf-Commands>org.notima.businessobjects.adapter.tools.command*</Karaf-Commands>
+        				<Import-Package>
+        					javax.xml.bind;version="[2.2,3)",*
+        				</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
