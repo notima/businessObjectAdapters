@@ -10,6 +10,18 @@ import java.util.TreeMap;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
+import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.businessobjects.InvoiceLine;
+import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.util.InvalidTaxIdFormatException;
+import org.notima.generic.businessobjects.util.TaxIdStructure;
+import org.notima.generic.businessobjects.util.UnknownTaxIdFormatException;
+
+import com.helger.ubl21.UBL21Reader;
+import com.helger.ubl21.UBL21Writer;
+import com.phloc.datetime.xml.PDTXMLConverter;
+
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.AddressType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.BranchType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.CountryType;
@@ -42,24 +54,13 @@ import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.Taxable
 import oasis.names.specification.ubl.schema.xsd.creditnote_21.CreditNoteType;
 import oasis.names.specification.ubl.schema.xsd.invoice_21.InvoiceType;
 
-import org.notima.generic.businessobjects.Invoice;
-import org.notima.generic.businessobjects.InvoiceLine;
-import org.notima.generic.businessobjects.Location;
-import org.notima.generic.businessobjects.util.InvalidTaxIdFormatException;
-import org.notima.generic.businessobjects.util.TaxIdStructure;
-import org.notima.generic.businessobjects.util.UnknownTaxIdFormatException;
-
-import com.helger.ubl21.UBL21Reader;
-import com.helger.ubl21.UBL21Writer;
-import com.phloc.datetime.xml.PDTXMLConverter;
-
 /**
  * Helper class to convert business objects to UBL objects.
  * 
  * @author daniel
  *
  */
-public class UBL21Converter {
+public class UBL21Converter extends BasicBusinessObjectConverter<Object, InvoiceType> {
 
 	public static final String BIS30_CUSTOMIZATION_ID="urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0";
 	public static final String BIS30_PROFILE_ID="urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
@@ -409,6 +410,11 @@ public class UBL21Converter {
 		
 	}
 	
+	@Override
+	public InvoiceType toNativeInvoice(Invoice<InvoiceType> src) throws Exception {
+		return convert(src);
+	}
+
 	/**
 	 * Converts a business objects invoice to an UBL InvoiceType
 	 * 

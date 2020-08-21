@@ -50,6 +50,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Bundle-Activator>org.notima.generic.ubl.factory.Activator</Bundle-Activator>
 						<Export-Package>org.notima.generic.ubl.factory,
 										oasis.names.specification.*,
 										com.helger.*,
@@ -59,13 +60,13 @@
 						<Import-Package>!org.joda.convert,
 										javax.xml,
 										javax.xml.*,
+										javax.xml.bind;version="[2.2,3)",
 										org.w3c.dom,
 										org.w3c.dom.*,
 										org.xml.sax,
 										org.xml.sax.*,
-										com.sun.xml.bind.*,
-										com.sun.xml.bind.v2.model.impl,
 										org.slf4j,
+										org.osgi*,
 										org.notima.generic.ifacebusinessobjects,
 										org.notima.generic.businessobjects,
 										org.notima.generic.businessobjects.util
