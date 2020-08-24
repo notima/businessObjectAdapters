@@ -67,14 +67,13 @@ public class Activator extends BaseActivator {
 			
 			props.put("SystemName", adapter.getSystemName());
 	
-			log.info("Created UBL21Adapter");
+			log.info("Created UBL21Adapter with systemName " + adapter.getSystemName());
 			register(BusinessObjectFactory.class, adapter, props);
 			
 			UBL21Converter converter = new UBL21Converter();
 			
-			log.info("Created UBL21Converter");
+			log.info("Created UBL21Converter with systemName " + adapter.getSystemName());
 			register(BusinessObjectConverter.class, converter, props);
-			
 				
 		} catch (Exception ee) {
 			log.error("Failed to create UBL21Adapter/converter", ee);

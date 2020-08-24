@@ -1,5 +1,6 @@
 package org.notima.generic.ubl.factory;
 
+import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -855,6 +856,22 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		InvoiceType result = UBL21Reader.invoice().read(sr);
 		
 		return result;
+	}
+
+	
+	
+	@Override
+	public String getSystemName() {
+		return UBL21Factory.SYSTEMNAME;
+	}
+	
+	@Override
+	public String nativeInvoiceToString(InvoiceType src) throws Exception {
+
+		StringWriter sw = new StringWriter();
+		UBL21Writer.invoice().write(src, sw);
+		
+		return sw.toString();
 	}
 
 	/**

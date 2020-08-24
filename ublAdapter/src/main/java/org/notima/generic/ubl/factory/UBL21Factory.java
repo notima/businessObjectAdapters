@@ -17,6 +17,8 @@ import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 
 public class UBL21Factory extends BasicBusinessObjectFactory{
 
+	public final static String SYSTEMNAME = "UBL21";
+	
 	@Override
 	public BusinessPartner lookupBusinessPartner(String key) throws Exception {
 		// TODO Auto-generated method stub
@@ -191,7 +193,7 @@ public class UBL21Factory extends BasicBusinessObjectFactory{
 
 	@Override
 	public String getSystemName() {
-		return "UBL21";
+		return SYSTEMNAME;
 	}
 
 }

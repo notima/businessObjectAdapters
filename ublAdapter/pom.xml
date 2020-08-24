@@ -12,27 +12,38 @@
 	<packaging>bundle</packaging>
 	<name>UBL for Business Objects</name>
 
+	<dependencyManagement>
+	
+		<dependencies>
+			<dependency>
+	  			<groupId>com.helger.ubl</groupId>
+	  			<artifactId>ph-ubl-parent-pom</artifactId>
+				  <version>6.3.0</version>
+	  			<type>pom</type>
+	  			<scope>import</scope>
+			</dependency>
+		</dependencies>
+	
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
-			<groupId>com.helger</groupId>
+			<groupId>com.helger.ubl</groupId>
 			<artifactId>ph-ubl21</artifactId>
-			<version>6.2.0</version>
 		</dependency>
 		
 		<dependency>
-			<groupId>com.helger</groupId>
+			<groupId>com.helger.ubl</groupId>
 			<artifactId>ph-ubl21-codelists</artifactId>
-			<version>6.2.0</version>
 		</dependency>
 
+		<!-- 
 		<dependency>
 			<groupId>com.helger</groupId>
 			<artifactId>ph-commons</artifactId>
 			<version>9.3.9</version>
 		</dependency>
-		
-
+		 -->
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-datetime</artifactId>
@@ -57,21 +68,31 @@
 										com.phloc.*,
 										org.hamcrest,
 										org.hamcrest.core</Export-Package>
-						<Import-Package>!org.joda.convert,
-										javax.xml,
-										javax.xml.*,
-										javax.xml.bind;version="[2.2,3)",
-										org.w3c.dom,
-										org.w3c.dom.*,
-										org.xml.sax,
-										org.xml.sax.*,
-										org.slf4j,
-										org.osgi*,
-										org.notima.generic.ifacebusinessobjects,
-										org.notima.generic.businessobjects,
-										org.notima.generic.businessobjects.util
+						<Import-Package>javax.xml.bind;version="[2.2,3)",
+										org.notima.bg*,
+										!com.ibm*,
+										!com.sun.jdmk*,
+										!javax.jmdns*,
+										!javax.jms,
+										!javax.mail*,
+										!org.joda.convert,
+										!com.sun.activation.registries,
+										!com.helger.commons.exception.mock,
+										!com.phloc.commons.cleanup,
+										!com.sun.jna*,
+										!com.sun.xml.bind.marshaller,
+										!net.i2p.crypto.eddsa*,
+										!org.apache.mina*,
+										!org.apache.sshd.server.command,
+										!org.apache.tomcat.jni,
+										!org.bouncycastle*,
+										!org.glassfish.hk2.osgiresourcelocator,
+										!org.junit*,
+										!org.mozilla.universalchardet,
+										!javax.annotation,										
+										*
 										</Import-Package>
-						<Embed-Dependency>!businessobjects|bankgiro-api|log4j|slf4j-api|slf4j-log4j12|jaxb-core|jaxb-api|jaxb-runtime,scope=compile|runtime;artifactId=!ph-jaxb-pom</Embed-Dependency>
+						<Embed-Dependency>!ph-jaxb-pom|businessobjects|bankgiro-api,scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
