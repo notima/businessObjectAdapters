@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.tools.command;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import javax.xml.bind.JAXB;
@@ -14,6 +15,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 
 @Command(scope = "notima", name = "show-canonical-invoice", description = "Show a specific invoice")
 @Service
@@ -39,7 +41,11 @@ public class ShowInvoice implements Action {
     
     @Option(name = "-of", aliases = { "--outfile" }, description = "Write the invoice to file", required = false, multiValued = false)
     private String outFile;
+    
+    @Option(name = "--destAdapter", description = "Destination adapter", required = false, multiValued = false)
+    private String destAdapter;
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Object execute() throws Exception {
 		
@@ -50,16 +56,40 @@ public class ShowInvoice implements Action {
 			return null;
 		}
 		
+		Object invoiceNative = null;
+		BusinessObjectConverter cv = null;
+		
+		if (destAdapter!=null) {
+			invoiceNative = cof.convertToNativeInvoice(destAdapter, invoice, null);
+			cv = cof.lookupConverter(destAdapter);
+		}
+		
 		if (outFile!=null) {
-			if (!outFile.endsWith(".xml")) {
-				outFile += ".xml";
+			
+			if (invoiceNative==null) {
+				
+				if (!outFile.endsWith(".xml")) {
+					outFile += ".xml";
+				}
+				JAXB.marshal(invoice, new File(outFile));
+				sess.getConsole().println("Invoice written to " + outFile);
+				
+			} else {
+				
+				PrintWriter out = new PrintWriter(outFile);
+				out.println(cv.nativeInvoiceToString(invoiceNative));
+				out.close();
+				
 			}
-			JAXB.marshal(invoice, new File(outFile));
-			sess.getConsole().println("Invoice written to " + outFile);
 		} else {
-			StringWriter sw = new StringWriter();
-			JAXB.marshal(invoice,  sw);
-			sess.getConsole().println(sw.toString());
+			
+			if (invoiceNative==null) {
+				StringWriter sw = new StringWriter();
+				JAXB.marshal(invoice,  sw);
+				sess.getConsole().println(sw.toString());
+			} else {
+				sess.getConsole().println(cv.nativeInvoiceToString(invoiceNative));
+			}
 		}
 		
 		return null;
