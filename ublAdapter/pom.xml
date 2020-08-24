@@ -37,13 +37,6 @@
 			<artifactId>ph-ubl21-codelists</artifactId>
 		</dependency>
 
-		<!-- 
-		<dependency>
-			<groupId>com.helger</groupId>
-			<artifactId>ph-commons</artifactId>
-			<version>9.3.9</version>
-		</dependency>
-		 -->
 		<dependency>
 			<groupId>com.phloc</groupId>
 			<artifactId>phloc-datetime</artifactId>
