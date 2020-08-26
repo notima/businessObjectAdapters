@@ -460,6 +460,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Set document number
 		invoice.setDocumentKey(dst.getDocumentNumber());
 		invoice.setInvoiceKey(dst.getDocumentNumber());
+		invoice.setNativeInvoice(dst);
 		
 		return invoice;
 	}
