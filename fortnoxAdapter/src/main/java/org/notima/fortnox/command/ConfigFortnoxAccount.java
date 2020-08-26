@@ -10,6 +10,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.entities3.Account;
 import org.notima.fortnox.command.completer.ConfigFortnoxAccountCompleter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
@@ -19,9 +20,11 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 
 	public static final String CONF_ENABLED = "enabled";
+	public static final String CONF_NAME = "name";
 	
 	public static String[] configs = new String[] {
-			CONF_ENABLED
+			CONF_ENABLED,
+			CONF_NAME
 	};
 	
 	
@@ -68,26 +71,46 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 		} catch (Exception e) {
 		}
 		
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		try {
 		
-		int yearId = fc.getFinancialYear(null).getId();
-
-		Account acct = fc.getAccount(yearId, Integer.parseInt(accountNo));
-		
-		if (CONF_ENABLED.equalsIgnoreCase(key)) {
-			if (toggle!=null) {
-				if ((acct.getActive() && toggle==false) || 
-						(!acct.getActive() && toggle==true)) {
-				
-					acct.setActive(toggle);
-					fc.updateAccount(yearId, acct);
-					sess.getConsole().println("Enabled set to " + toggle);
-				} else {
-					sess.getConsole().println("No change.");
+			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+			
+			int yearId = fc.getFinancialYear(null).getId();
+	
+			Account acct = fc.getAccount(yearId, Integer.parseInt(accountNo));
+			
+			if (CONF_ENABLED.equalsIgnoreCase(key)) {
+				if (toggle!=null) {
+					if ((acct.getActive() && toggle==false) || 
+							(!acct.getActive() && toggle==true)) {
+					
+						acct.setActive(toggle);
+						fc.updateAccount(yearId, acct);
+						sess.getConsole().println("Enabled set to " + toggle);
+					} else {
+						sess.getConsole().println("No change.");
+					}
+					
 				}
+			}
+			
+			if (CONF_NAME.equalsIgnoreCase(key)) {
+				
+				if (acct==null) {
+					// The account should be created
+					acct = new Account();
+					acct.setNumber(Integer.parseInt(accountNo));
+					acct.setActive(true);
+					sess.getConsole().println("Creating account " + accountNo);
+				} 
+				acct.setDescription(value);
+				
+				fc.updateAccount(yearId, acct);
 				
 			}
-		}	
+		} catch (FortnoxException fe) {
+			sess.getConsole().println(fe.toString());
+		}
 		
 		return null;
 	}
