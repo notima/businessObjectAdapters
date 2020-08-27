@@ -46,7 +46,12 @@ public class ConfigFortnoxModeOfPayment extends FortnoxCommand implements Action
 		try {
 		
 			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
-			ModeOfPayment mp = (ModeOfPayment)fc.getModeOfPayment(mode);
+			ModeOfPayment mp = null;
+			ModeOfPaymentSubset ms = fc.getModeOfPayment(mode);
+			if (ms!=null) {
+				mp = new ModeOfPayment(ms);
+			}
+			
 			if (mp==null) {
 				
 				String reply = sess.readLine("Mode " + mode + " doesn't exist. Do you want to create it? (y/n) ", null);
