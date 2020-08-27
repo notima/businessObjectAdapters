@@ -1,6 +1,5 @@
 package org.notima.generic.ubl.factory;
 
-import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -32,6 +31,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Fin
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.InvoiceLineType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.ItemType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.MonetaryTotalType;
+import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyIdentificationType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyLegalEntityType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyNameType;
 import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.PartyTaxSchemeType;
@@ -46,6 +46,7 @@ import oasis.names.specification.ubl.schema.xsd.commonaggregatecomponents_21.Tax
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.CreditedQuantityType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.DescriptionType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.EndpointIDType;
+import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.IDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.InvoicedQuantityType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.PaymentIDType;
 import oasis.names.specification.ubl.schema.xsd.commonbasiccomponents_21.PaymentMeansCodeType;
@@ -65,6 +66,7 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 
 	public static final String BIS30_CUSTOMIZATION_ID="urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0";
 	public static final String BIS30_PROFILE_ID="urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
+	public static final String GLN_ID = "0088";
 	
 	/**
 	 * Converts a business objects location to an UBL AddressType.
@@ -94,6 +96,41 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 	public static InvoiceType addPaymentMeansBankgiro(InvoiceType dst, String bgAccount, String ref, String accountName) {
 		
 		dst = addPaymentMeans(dst, "30", ref, bgAccount, "SE:BANKGIRO", accountName);
+		
+		return dst;
+	}
+
+	/**
+	 * Sets GLN number on customer on specific invoice.
+	 * 
+	 * @param dst		The destination invoice
+	 * @param gln		The GLN-number to be set.
+	 * @return	The invoice
+	 */
+	public static InvoiceType setGLNNumber(InvoiceType dst, String gln) {
+		
+		CustomerPartyType cpt = dst.getAccountingCustomerParty();
+		PartyType pt = cpt.getParty();
+		List<PartyIdentificationType> ptypes = pt.getPartyIdentification();
+		PartyIdentificationType glnType = null;
+		IDType idt;
+		for (PartyIdentificationType pit : ptypes) {
+			idt = pit.getID();
+			if (GLN_ID.equals(idt.getSchemeID())) {
+				glnType = pit;
+				break;
+			}
+		}
+		
+		if (glnType==null) {
+			glnType = new PartyIdentificationType();
+			idt = new IDType();
+			idt.setSchemeID(GLN_ID);
+			idt.setValue(gln);
+			glnType.setID(idt);
+		} else {
+			glnType.setID(gln);
+		}
 		
 		return dst;
 	}
