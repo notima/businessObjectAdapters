@@ -19,7 +19,6 @@ import org.notima.api.fortnox.entities3.CustomerSubset;
 import org.notima.api.fortnox.entities3.Customers;
 import org.notima.api.fortnox.entities3.DefaultDeliveryTypes;
 import org.notima.api.fortnox.entities3.EmailInformation;
-import org.notima.api.fortnox.entities3.FinancialYearSubset;
 import org.notima.api.fortnox.entities3.FortnoxFile;
 import org.notima.api.fortnox.entities3.InvoiceRow;
 import org.notima.api.fortnox.entities3.InvoiceRows;
@@ -784,6 +783,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			row.setUnit(il.getUOM());
 			rowList.add(row);
 		}
+
+		// Always set the prices excluding VAT
+		dst.setVATIncluded(Boolean.valueOf(false));
 		
 		return dst;
 		
