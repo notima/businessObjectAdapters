@@ -2,6 +2,7 @@ package org.notima.fortnox.command;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +13,10 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
+import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.businessobjects.adapter.tools.FactorySelector;
 import org.notima.fortnox.command.table.InvoiceHeaderTable;
@@ -22,7 +25,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 @Command(scope = "fortnox", name = "list-fortnox-invoices", description = "Lists invoices in Fortnox")
 @Service
 @SuppressWarnings("rawtypes")
-public class ListInvoices implements Action {
+public class ListInvoices extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;
@@ -33,6 +36,15 @@ public class ListInvoices implements Action {
 	@Option(name = "-e", aliases = {
 	"--enrich" }, description = "Read the complete invoice, not just the subset", required = false, multiValued = false)
 	private boolean enrich;
+
+	@Option(name = "--all", description = "Show all invoices", required = false, multiValued = false)
+	private boolean all;
+	
+	@Option(name = "--fromdate", description = "Select invoices from this date. (format yyyy-mm-dd)", required = false, multiValued = false)
+	private String fromDateStr;
+	
+	@Option(name = "--untildate", description = "Select invoices until this date. (format yyyy-mm-dd)", required = false, multiValued = false)
+	private String untilDateStr;
 	
 	@Option(name = "--unbooked", description = "Show unbooked invoices", required = false, multiValued = false)
 	private boolean unbooked;
@@ -54,17 +66,34 @@ public class ListInvoices implements Action {
 			sess.getConsole().println("No tenant found with orgNo [" + orgNo + "]");
 			return null;
 		}
+
+		Date fromDate = null, untilDate = null;
+		
+		if (fromDateStr!=null) {
+			fromDate = FortnoxClient3.s_dfmt.parse(fromDateStr);
+		}
+		if (untilDateStr!=null) {
+			untilDate = FortnoxClient3.s_dfmt.parse(untilDateStr);
+		}
 		
 		@SuppressWarnings("unchecked")
 		Map<Object, Object> invoicesMap = null;
 		
-		if (unbooked) {
-			invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPOSTED);
-		} else {
-			invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPAID);
-		}
-
 		List<Object> invoices = new ArrayList<Object>();
+		
+		if (!all) {
+			if (unbooked) {
+				invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPOSTED);
+			} else {
+				invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPAID);
+			}
+		} else {
+			
+			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+			Invoices allInvoices = fc.getAllCustomerInvoicesByDateRange(fromDate, untilDate);
+			invoices.addAll(allInvoices.getInvoiceSubset());
+			
+		}
 		
 		if (invoicesMap!=null) {
 			
@@ -106,7 +135,6 @@ public class ListInvoices implements Action {
 		
 		return null;
 	}
-	
 	
 	
 }

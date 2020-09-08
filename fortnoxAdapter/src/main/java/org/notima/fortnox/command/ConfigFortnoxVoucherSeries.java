@@ -36,7 +36,7 @@ public class ConfigFortnoxVoucherSeries extends FortnoxCommand implements Action
 	@Option(name = "--description", description = "Description of the voucher series", required = false, multiValued = false)
 	private String description;
 	
-	@Option(name = "--manual", description = "If the voucher series should be allowed to be created manually.", required = false, multiValued = false)
+	@Option(name = "--manual", description = "If the voucher series should be allowed to be created manually (defaults to true).", required = false, multiValued = false)
 	private Boolean manual;
 	
 	
