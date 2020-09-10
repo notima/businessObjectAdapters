@@ -128,6 +128,7 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 			idt.setSchemeID(GLN_ID);
 			idt.setValue(gln);
 			glnType.setID(idt);
+			ptypes.add(glnType);
 		} else {
 			glnType.setID(gln);
 		}
