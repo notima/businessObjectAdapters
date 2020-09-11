@@ -30,6 +30,7 @@
 		<module>adapterTools</module>
 		<module>jasperReportAdapter</module>
 		<module>adempiereAdapter</module>
+		<module>excelAdapter</module>
 	</modules>
 
 	<dependencies>
