@@ -4,6 +4,15 @@
 	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}">
 	
 		<bundle>mvn:com.google.code.gson/gson/2.8.1</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.12</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.5.10</bundle>
+        <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
+        <bundle>mvn:commons-configuration/commons-configuration/1.10</bundle>
+    	<bundle>wrap:mvn:commons-collections/commons-collections</bundle>
+    	<bundle>mvn:commons-codec/commons-codec</bundle>
+    	<bundle>mvn:commons-beanutils/commons-beanutils/1.9.4</bundle>
+    	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
+		
 <!--         <bundle>mvn:com.sun.xml.bind/jaxb-core/2.3.0.1</bundle>
         <bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
         <bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle> -->
@@ -31,8 +40,6 @@
     <feature name="notima-fortnox4j" description="Notima Fortnox4J Adapter" version="${project.version}">
         <feature prerequisite="true" dependency="false">wrap</feature>
         <feature>notima-businessobjects</feature>
-        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.12</bundle>
-        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.5.10</bundle>
         <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
         <bundle>mvn:org.notima.api/fortnox4j/1.8.10-SNAPSHOT</bundle>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
@@ -62,7 +69,6 @@
     </feature>
     
     <feature name="notima-adempiere" description="Notima ADempiere Adapter" version="${project.version}">
-
 
     	<feature>notima-businessobjects</feature>
         <feature>transaction</feature>
@@ -101,10 +107,6 @@
     	<feature prerequisite="true">wrap</feature>
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.codehaus.groovy/groovy/2.5.8</bundle>
-    	<bundle>wrap:mvn:commons-collections/commons-collections</bundle>
-    	<bundle>mvn:commons-codec/commons-codec</bundle>
-    	<bundle>mvn:commons-beanutils/commons-beanutils/1.9.4</bundle>
-    	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
     	<bundle>wrap:mvn:com.lowagie/itext/2.1.7</bundle>
 		<bundle>mvn:net.sf.jasperreports/jasperreports/6.4.3</bundle>    	
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/jasperReportAdapter/${project.version}</bundle>
