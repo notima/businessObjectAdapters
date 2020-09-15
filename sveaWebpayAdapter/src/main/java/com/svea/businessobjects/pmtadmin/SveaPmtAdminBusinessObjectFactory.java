@@ -59,6 +59,7 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	@Override
 	public Order<org.notima.api.webpay.pmtapi.entity.Order> lookupOrder(String key) throws Exception {
 		org.notima.api.webpay.pmtapi.entity.Order o = lookupNativeOrder(key);
+		if (o==null) return null;
 		Order<org.notima.api.webpay.pmtapi.entity.Order> result = SveaPmtAdminConverter.convert(o);
 		result.setNativeOrder(o);
 		return result;
