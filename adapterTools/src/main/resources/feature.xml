@@ -46,6 +46,7 @@
 
         <config name="FortnoxProperties">
             fortnoxClientsFile = private/fortnoxClients.xml
+            defaultClientSecret=DONT_STORE_HERE
         </config>
 
     </feature>
