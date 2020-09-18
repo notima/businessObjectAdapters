@@ -10,6 +10,11 @@ import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.OrderLine;
 import org.notima.generic.businessobjects.Person;
 
+import com.svea.webpay.common.conv.InvalidTaxIdFormatException;
+import com.svea.webpay.common.conv.TaxIdFormatter;
+import com.svea.webpay.common.conv.TaxIdStructure;
+import com.svea.webpay.common.conv.UnknownTaxIdFormatException;
+
 import org.notima.api.webpay.pmtapi.PmtApiUtil;
 import org.notima.api.webpay.pmtapi.entity.Delivery;
 import org.notima.api.webpay.pmtapi.entity.OrderRow;
@@ -101,6 +106,15 @@ public class SveaPmtAdminConverter {
 		}
 		dst.setLines(ol);
 		dst.calculateGrandTotal();
+
+		// Check to see if OrgNo should be harmonized
+		if (bp.isCompany() && "SE".equalsIgnoreCase(src.getBillingAddress().getCountryCode())) {
+				try {
+					bp.setTaxId(TaxIdFormatter.printTaxId(null, src.getNationalId(), TaxIdStructure.FMT_SE11));
+				} catch (UnknownTaxIdFormatException e) {
+				} catch (InvalidTaxIdFormatException e) {
+				}
+		}
 		
 		return dst;
 	}
