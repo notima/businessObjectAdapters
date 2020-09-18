@@ -18,7 +18,11 @@ import org.notima.generic.businessobjects.Person;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 
 import com.svea.businessobjects.SveaUtility;
+import com.svea.webpay.common.conv.InvalidTaxIdFormatException;
 import com.svea.webpay.common.conv.JsonUtil;
+import com.svea.webpay.common.conv.TaxIdFormatter;
+import com.svea.webpay.common.conv.TaxIdStructure;
+import com.svea.webpay.common.conv.UnknownTaxIdFormatException;
 import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportGroup;
@@ -340,9 +344,13 @@ public class SveaAdminConverter {
 
 		dst.setIdentityNo(src.getNationalIdNumber());
 		dst.setTaxId(src.getNationalIdNumber());
-		// Truncate "16" prefix if present.
+		// Truncate "16" prefix / harmonize if present.
 		if (dst.isCompany() && dst.getTaxId()!=null && dst.getTaxId().startsWith("16")) {
-			dst.setTaxId(dst.getTaxId().substring(2));
+			try {
+				dst.setTaxId(TaxIdFormatter.printTaxId(null, src.getNationalIdNumber(), TaxIdStructure.FMT_SE11));
+			} catch (Exception e) {
+				dst.setTaxId(dst.getTaxId().substring(2));
+			}
 		}
 		dst.setName(src.getFullName());
 
