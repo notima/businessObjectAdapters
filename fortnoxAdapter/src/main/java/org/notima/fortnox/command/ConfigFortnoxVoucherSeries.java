@@ -11,6 +11,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.entities3.FinancialYearSubset;
 import org.notima.api.fortnox.entities3.VoucherSeries;
 import org.notima.api.fortnox.entities3.VoucherSeriesSubset;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
@@ -50,9 +51,18 @@ public class ConfigFortnoxVoucherSeries extends FortnoxCommand implements Action
 		
 			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
 
+			if (yearId==null) {
+				FinancialYearSubset fys = fc.getFinancialYear(null);
+				if (fys==null) {
+					sess.getConsole().println("No financial year defined.");
+					return null;
+				}
+				yearId = fys.getId();
+			}
+			
 			boolean create = false;
 			VoucherSeries vs = null;
-			VoucherSeriesSubset vss = fc.getVoucherSeries(code);
+			VoucherSeriesSubset vss = fc.getVoucherSeries(code, yearId);
 			if (vss!=null) {
 				vs = new VoucherSeries(vss);
 			}
@@ -80,14 +90,8 @@ public class ConfigFortnoxVoucherSeries extends FortnoxCommand implements Action
 			if (manual!=null) {
 				vs.setManual(manual);
 			}
-			// TODO: Not yet configurable. Field is read only
-			/*
-			if (yearId!=null) {
-				vs.setYear(yearId);
-			}
-			*/
 			
-			fc.setVoucherSeries(vs);
+			fc.setVoucherSeries(vs, yearId);
 			sess.getConsole().println("Voucher series " + code + " " + (create ? "created" : "updated") + ".");
 			
 		} catch (FortnoxException fe) {
