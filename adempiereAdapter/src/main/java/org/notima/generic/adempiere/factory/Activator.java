@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.osgi.framework.ServiceReference;
@@ -19,8 +20,12 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(BusinessObjectFactory.class),
+		},
+		requires = {
+				@RequireService(value = DataSource.class, filter="(osgi.jndi.service.name=adempiere)"),
 		}
 )
+
 public class Activator extends BaseActivator {
 	
 	private Logger log = LoggerFactory.getLogger(Activator.class);	
@@ -68,12 +73,12 @@ public class Activator extends BaseActivator {
 		Dictionary<String, String> props = new Hashtable<String,String>();
 		props.put("SystemName", "Adempiere");
 		
-		// Lookup data source
-		
+		AdempiereJdbcFactory adapter = null;
+			
 		try {
 			Collection<ServiceReference<DataSource>> dsRef = bundleContext.getServiceReferences(DataSource.class, 
 					"(osgi.jndi.service.name=adempiere)");
-			AdempiereJdbcFactory adapter = null;
+			
 			if (dsRef!=null && dsRef.size()>0) {
 	
 				DataSource ds = bundleContext.getService(dsRef.iterator().next());
