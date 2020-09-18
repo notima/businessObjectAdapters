@@ -32,6 +32,9 @@ public class ConfigFortnoxVoucherSeries extends FortnoxCommand implements Action
 
 	@Argument(index = 1, name = "code", description ="The voucher series to configure. If it doesn't exist, it's created", required = true, multiValued = false)
 	private String code = "";
+
+	@Option(name = "--yearId", description = "Config voucher for specific yearId", required = false, multiValued = false)
+	private Integer yearId;
 	
 	@Option(name = "--description", description = "Description of the voucher series", required = false, multiValued = false)
 	private String description;
@@ -77,6 +80,12 @@ public class ConfigFortnoxVoucherSeries extends FortnoxCommand implements Action
 			if (manual!=null) {
 				vs.setManual(manual);
 			}
+			// TODO: Not yet configurable. Field is read only
+			/*
+			if (yearId!=null) {
+				vs.setYear(yearId);
+			}
+			*/
 			
 			fc.setVoucherSeries(vs);
 			sess.getConsole().println("Voucher series " + code + " " + (create ? "created" : "updated") + ".");

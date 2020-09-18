@@ -37,6 +37,9 @@ public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 	@Option(name = "--only-with-balances", description = "Include only accounts with balances (implicits --balances)", required = false, multiValued = false)
 	private boolean onlyWithBalances;
 	
+	@Option(name = "--yearId", description = "Show COA for specific yearId", required = false, multiValued = false)
+	private Integer yearId;
+	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
 
@@ -45,9 +48,16 @@ public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 		
 		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
 		
-		int yearId = fc.getFinancialYear(null).getId();
+		if (yearId==null) {
+			yearId = fc.getFinancialYear(null).getId();
+		}
 		
 		Accounts accts = fc.getAccounts(yearId);
+		if (accts==null) {
+			sess.getConsole().println("No chart of accounts found for yearId " + yearId);
+			return null;
+		}
+		
 		Account acct;
 		
 		List<Object> acctList = new ArrayList<Object>();
