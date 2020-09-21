@@ -19,6 +19,7 @@ public class AccountTable extends ShellTable {
 		column("VAT code");
 		column("SRU");
 		column("Active");
+		column("YearId");
 		column("Beg Bal").alignRight();
 		column("End Bal").alignRight();
 		
@@ -60,6 +61,7 @@ public class AccountTable extends ShellTable {
 				is.getSRU(),
 				is.getVATCode(),
 				is.getActive(),
+				is.getYear(),
 				"-",
 				"-")
 				;
@@ -74,11 +76,11 @@ public class AccountTable extends ShellTable {
 				aa.getSRU(),
 				aa.getVATCode(),
 				aa.getActive(),
+				aa.getYear(),
 				nfmt.format(aa.getBalanceCarriedForward()),
 				nfmt.format(aa.getBalanceBroughtForward())
 				)
 				;
-		
 		
 	}
 	
