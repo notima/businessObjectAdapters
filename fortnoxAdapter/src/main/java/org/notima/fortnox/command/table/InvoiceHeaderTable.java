@@ -16,9 +16,10 @@ public class InvoiceHeaderTable extends ShellTable {
 		
 		column("Date");
 		column("Invoice No");
+		column("Cust #");
 		column("Customer name");
-		column("Order No");
-		column("Your Order No");
+		column("Order #");
+		column("Your Order #");
 		column("ExtRef1");
 		column("ExtRef2");
 		column("Grand total").alignRight();
@@ -60,6 +61,7 @@ public class InvoiceHeaderTable extends ShellTable {
 		addRow().addContent(
 				is.getInvoiceDate(),
 				is.getDocumentNumber() + (is.isCancelled() ? " **" : ""),
+				is.getCustomerNumber(),
 				is.getCustomerName(),
 				"N/A",
 				"N/A",
@@ -77,6 +79,7 @@ public class InvoiceHeaderTable extends ShellTable {
 		addRow().addContent(
 				invoice.getInvoiceDate(),
 				invoice.getDocumentNumber() + (invoice.isCancelled() ? " **" : ""),
+				invoice.getCustomerNumber(),
 				invoice.getCustomerName(),
 				invoice.getOrderReference(),
 				invoice.getYourOrderNumber(),
