@@ -77,8 +77,8 @@ public class AccountTable extends ShellTable {
 				aa.getVATCode(),
 				aa.getActive(),
 				aa.getYear(),
-				nfmt.format(aa.getBalanceCarriedForward()),
-				nfmt.format(aa.getBalanceBroughtForward())
+				nfmt.format(aa.getBalanceBroughtForward()),
+				nfmt.format(aa.getBalanceCarriedForward())
 				)
 				;
 		
