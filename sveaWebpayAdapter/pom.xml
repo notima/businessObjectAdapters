@@ -55,6 +55,7 @@
 							com.svea.webpay.common.auth,
 							com.svea.webpay.common.conv,
 							com.svea.webpay.common.reconciliation,
+							com.svea.webpay.common.reconciliation2,
 							com.svea.webpay.common.reconciliation.conv,
 							com.svea.webpayadmin,
 							com.svea.webpayadmin.report,
@@ -110,7 +111,7 @@
 		<dependency>
 			<groupId>org.notima.api.webpay</groupId>
 			<artifactId>pmt-admin-api</artifactId>
-			<version>1.0.3</version>
+			<version>${pmt-admin-api.version}</version>
 		</dependency>
 
 		<dependency>

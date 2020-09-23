@@ -18,6 +18,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<businessobjects.version>0.1.18-SNAPSHOT</businessobjects.version>
 		<karaf.version>4.2.7</karaf.version>
+		<pmt-admin-api.version>2.0.1-SNAPSHOT</pmt-admin-api.version>
 	</properties>
 
 	<modules>
