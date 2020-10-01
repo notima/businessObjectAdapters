@@ -60,7 +60,7 @@
     <feature name="notima-sveawebpay" description="Notima SveaWebPay Adapter" version="${project.version}">
     	<feature>notima-csv</feature>
     	<bundle>mvn:org.notima.api.webpay/pmt-admin-api/${pmt-admin-api.version}</bundle>
-    	<bundle>mvn:com.svea/webpayadminservice-client</bundle>
+    	<bundle>mvn:com.svea/webpayadminservice-client/${webpay-common.version}</bundle>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/sveaWebpayAdapter/${project.version}</bundle>
     </feature>
     
