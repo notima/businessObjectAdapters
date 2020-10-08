@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
@@ -24,6 +25,9 @@ public class ShowVoucher extends FortnoxCommand implements Action {
 	@Reference 
 	Session sess;
 	
+	@Option(name = "--yearId", description = "Voucher for specific yearId", required = false, multiValued = false)
+	private Integer yearId;
+	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
 
@@ -38,9 +42,9 @@ public class ShowVoucher extends FortnoxCommand implements Action {
 		
 		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
 		
-		int yearId = fc.getFinancialYear(null).getId();
+		int yId = (yearId!=null && yearId.intValue()!=0 ? yearId.intValue() : fc.getFinancialYear(null).getId());
 
-		Voucher voucher = fc.getVoucher(yearId, series, voucherNo);
+		Voucher voucher = fc.getVoucher(yId, series, voucherNo);
 		VoucherTable vt = new VoucherTable(voucher);
 		
 		vt.print(sess.getConsole());
