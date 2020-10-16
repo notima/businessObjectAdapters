@@ -10,4 +10,12 @@ public interface FormatterFactory {
 	 */
 	public OrderListFormatter getFormatter(String format);
 	
+	/**
+	 * Returns an invoice formatter for given format.
+	 * 
+	 * @param format		The format.
+	 * @return	An invoice reminder formatter (if any).
+	 */
+	public InvoiceReminderFormatter getInvoiceReminderFormatter(String format);
+	
 }

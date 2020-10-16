@@ -17,6 +17,7 @@ public class FormatterFactoryImpl implements FormatterFactory {
 	ConfigurationAdmin configAdmin;
 	
 	private Map<String, OrderListFormatter> services = new TreeMap<String, OrderListFormatter>();
+	private Map<String, InvoiceReminderFormatter> invoiceReminderServices = new TreeMap<String, InvoiceReminderFormatter>();
 
 	private BundleContext ctx;
 	
@@ -50,6 +51,23 @@ public class FormatterFactoryImpl implements FormatterFactory {
 				}
 			}
 		}
+
+		Collection<ServiceReference<InvoiceReminderFormatter>> irefs = ctx.getServiceReferences(InvoiceReminderFormatter.class, null);		
+		
+		invoiceReminderServices.clear();
+		
+		if (irefs!=null) {
+			InvoiceReminderFormatter srv;
+			for (ServiceReference<InvoiceReminderFormatter> sr : irefs) {
+				srv = ctx.getService(sr);
+				String[] formats = srv.getFormats();
+				if (formats!=null) {
+					for (String s : formats) {
+						invoiceReminderServices.put(s, srv);
+					}
+				}
+			}
+		}
 		
 	}
 	
@@ -66,4 +84,25 @@ public class FormatterFactoryImpl implements FormatterFactory {
 		return null;
 	}
 
+	
+	/**
+	 * Returns an invoice formatter for given format.
+	 * 
+	 * @param format		The format.
+	 * @return	An invoice reminder formatter (if any).
+	 */
+	public InvoiceReminderFormatter getInvoiceReminderFormatter(String format) {
+		
+		try {
+			resetServices();
+			return invoiceReminderServices.get(format);
+		} catch (Exception ee) {
+			ee.printStackTrace();
+		}
+		
+		return null;
+		
+		
+	}
+	
 }
