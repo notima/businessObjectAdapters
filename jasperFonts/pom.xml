@@ -5,34 +5,10 @@
     <artifactId>businessObjectAdapters</artifactId>
     <version>1.8.10-SNAPSHOT</version>
   </parent>
-  <artifactId>jasperReportAdapter</artifactId>
+  <artifactId>jasperFonts</artifactId>
   <packaging>bundle</packaging>
-  <name>Notima Jasper Report Adapter</name>
-  
-  <dependencies>
-
-	<dependency>
-		<groupId>
-			org.notima.generic.businessobjects.adapter
-		</groupId>
-		<artifactId>adapterTools</artifactId>
-		<version>${version}</version>
-		<type>bundle</type>
-	</dependency>
-		
-  	<dependency>
-  		<groupId>net.sf.jasperreports</groupId>
-  		<artifactId>jasperreports</artifactId>
-  		<version>6.4.3</version>
-  	</dependency>
-
-  	<dependency>
-  		<groupId>org.codehaus.groovy</groupId>
-  		<artifactId>groovy</artifactId>
-  		<version>2.5.8</version>
-  	</dependency>
-		
-  </dependencies>
+  <name>Jasper Fonts</name>
+  <description>Fonts for Jasper Report Adapter	</description>
   
 	<build>
 
@@ -40,25 +16,12 @@
 			<resource>
 				<directory>src/main/resources</directory>
 				<includes>
-					<include>**/*.jasper</include>
-					<include>**/*.jpg</include>
-					<include>**/*.png</include>
+					<include>**/*.properties</include>
 				</includes>
 			</resource>
 		</resources>
 
 		<plugins>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.1</version>
-				<configuration>
-					<includes>
-						<include>**/AllTests.java</include>
-					</includes>
-				</configuration>
-			</plugin>
 			
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -67,17 +30,8 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>org.notima.businessobjects.adapter.jasperreports.Activator</Bundle-Activator>
-						<Export-Package>org.notima.businessobjects.adapter.jasperreports.*
-										</Export-Package>
-						<Private-Package>
-        					org.apache.karaf.util.tracker,
-        					org.apache.karaf.util.tracker.annotation
-        				</Private-Package>
-        				<Import-Package>
-        					javax.xml.bind;version="[2.2,3)",*
-        				</Import-Package>
-        				<Karaf-Commands>org.notima.businessobjects.adapter.jasperreports.cmd*</Karaf-Commands>
+						<Export-Package>org.notima.fonts</Export-Package>
+        				<Fragment-Host>net.sf.jasperreports.engine</Fragment-Host>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -85,14 +39,12 @@
 		</plugins>
 	</build>
 
-	<description>Adapter to convert Business Objects Data to Jasper Reports</description>
-
 	<organization>
 		<name>Notima System Integration AB</name>
 		<url>https://github.com/notima</url>
 	</organization>
 	<scm>
-		<url>https://github.com/notima/businessObjectAdapters/jasperReportAdapter</url>
+		<url>https://github.com/notima/businessObjectAdapters/jasperFonts</url>
 		<connection>scm:git:git://github.com/notima/businessObjectAdapters.git</connection>
 		<developerConnection>Daniel Tamm</developerConnection>
 	</scm>
@@ -119,5 +71,6 @@
 			<organizationUrl>https://github.com/notima</organizationUrl>
 		</developer>
 	</developers>
+  
   
 </project>

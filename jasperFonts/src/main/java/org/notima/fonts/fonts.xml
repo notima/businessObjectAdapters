@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fontFamilies>
+    
+    <fontFamily name="Helvetica">
+        <normal>org/notima/fonts/Helvetica.ttf</normal>
+        <bold>org/notima/fonts/HelveticaBold.ttf</bold>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="Times-Roman">
+        <normal>org/notima/fonts/TimesRoman.ttf</normal>
+        <bold>org/notima/fonts/TimesBold.ttf</bold>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="Futura">
+        <normal>org/notima/fonts/Futura.ttf</normal>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="Helvetica-Black">
+        <normal>org/notima/fonts/HelveticaBlack.ttf</normal>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+    
+    <fontFamily name="OCRB">
+        <normal>org/notima/fonts/OCRB.ttf</normal>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+	
+    <fontFamily name="Arial">
+        <normal>org/notima/fonts/arial.ttf</normal>
+        <bold>org/notima/fonts/arialbd.ttf</bold>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+    
+    <fontFamily name="Calibri">
+        <normal>org/notima/fonts/calibri.ttf</normal>
+        <bold>org/notima/fonts/calibrib.ttf</bold>
+        <italic>org/notima/fonts/calibrii.ttf</italic>
+        <boldItalic>org/notima/fonts/calibriz.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+    
+    <fontFamily name="Asap">
+        <normal>org/notima/fonts/Asap-Regular.ttf</normal>
+        <bold>org/notima/fonts/Asap-Bold.ttf</bold>
+        <italic>org/notima/fonts/Asap-Italic.ttf</italic>
+        <boldItalic>org/notima/fonts/Asap-BoldItalic.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+    
+	
+
+</fontFamilies>

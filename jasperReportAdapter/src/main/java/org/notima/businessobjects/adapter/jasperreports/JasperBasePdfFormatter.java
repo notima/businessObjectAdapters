@@ -36,6 +36,7 @@ public abstract class JasperBasePdfFormatter {
 	 * Adds additional parameters from a properties object
 	 * 
 	 * @param parameters	The parameters that are to be added to.
+	 * @param props			The properties that are to be added.
 	 */
 	public void addAdditionalJasperParameters(HashMap<String, Object> parameters, Properties props) {
 		
@@ -124,13 +125,12 @@ public abstract class JasperBasePdfFormatter {
 	/**
 	 * Creates a file from the PDF and saves it
 	 * 
-	 * @param print
-	 * @param dr
-	 * @param exportPath
-	 * @param exportFolder
-	 * @param exportFileName
-	 * @throws FileNotFoundException
-	 * @throws JRException
+	 * @param print						The print
+	 * @param exportPath				The export path to use
+	 * @param exportFolder				Export folder appended after the path
+	 * @param exportFileName			The export file name
+	 * @throws FileNotFoundException	If the export path can't be found.
+	 * @throws JRException				If there's a jasper report exception			
 	 */
 	protected File createPdfFile(JasperPrint print, String exportPath, String exportFolder, String exportFileName) throws FileNotFoundException, JRException{
 		String filePath;

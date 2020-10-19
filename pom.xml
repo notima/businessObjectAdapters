@@ -33,6 +33,7 @@
 		<module>jasperReportAdapter</module>
 		<module>adempiereAdapter</module>
 		<module>excelAdapter</module>
+		<module>jasperFonts</module>
 	</modules>
 
 	<dependencies>
