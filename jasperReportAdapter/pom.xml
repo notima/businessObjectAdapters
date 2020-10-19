@@ -41,6 +41,7 @@
 				<directory>src/main/resources</directory>
 				<includes>
 					<include>**/*.jasper</include>
+					<include>**/*.jpg</include>
 				</includes>
 			</resource>
 		</resources>
