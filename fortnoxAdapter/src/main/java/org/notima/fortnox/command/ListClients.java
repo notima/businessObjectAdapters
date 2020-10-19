@@ -6,7 +6,8 @@ import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.notima.generic.businessobjects.BusinessPartner;
+import org.apache.karaf.shell.api.console.Session;
+import org.notima.fortnox.command.table.ClientTable;
 import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
@@ -14,6 +15,9 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 @Service
 public class ListClients implements Action {
 
+	@Reference
+	private Session sess;
+	
 	@SuppressWarnings("rawtypes")
 	@Reference
 	private List<BusinessObjectFactory> bofs;
@@ -23,19 +27,17 @@ public class ListClients implements Action {
 	public Object execute() throws Exception {
 	
 		if (bofs==null) {
-			System.out.println("No Fortnox factories registered");
+			sess.getConsole().println("No Fortnox factories registered");
 		} else {
 			for (BusinessObjectFactory bf : bofs) {
 				if ("Fortnox".equals(bf.getSystemName())) {
 					BusinessPartnerList<?> bpl = 
 							bf.listTenants();
-					for (BusinessPartner<?> bp : bpl.getBusinessPartner() ) {
-						System.out.println(bp.getName());
-					}
 					
+					ClientTable tbl = new ClientTable(bpl);
+					tbl.print(sess.getConsole());
 				}
 			}
-			System.out.println(bofs.size() + " factories registered");
 		}
 		
 		return null;

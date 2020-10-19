@@ -150,13 +150,42 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		this.clientManager = clientManager;
 	}
 
+	
+	/**
+	 * Removes a tenant from a given business object factory.
+	 * 
+	 * @param orgNo				The orgNo
+	 * @param countryCode		The country code
+	 * @return	True if the tenant was removed. False if the tenant didn't exist.
+	 * @throws Exception if something goes wrong.
+	 */
+	@Override
+	public boolean removeTenant(String orgNo, String countryCode) throws Exception {
+
+		if (clientManager==null) return false;
+		
+		FortnoxClientInfo fi = clientManager.getClientInfoByOrgNo(orgNo);
+		if (fi==null) return false;
+		
+		if (clientManager.removeClient(fi)) {
+			return clientManager.saveClientInfo();
+		} else {
+			return false;
+		}
+		
+	}
 
 	/**
 	 * Adds a new tenant to the adapter.
 	 * 
-	 * @param orgNo
-	 * @param countryCode
-	 * @param props
+	 * @param orgNo				The org number of the tenant to be added.
+	 * @param countryCode		The country code of the tenant to be added.
+	 * @param props				Vaild properties are
+	 * 							- accessToken
+	 * 							- apiCode
+	 * 							- clientSecret. If omitted, the manager's default clientSecret is used.
+	 * 							- clientId
+	 * 
 	 * @return		The tenant represented as a business partner.
 	 */
 	@Override
@@ -179,6 +208,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 		if (clientManager!=null) {
 			fi = clientManager.getClientInfoByOrgNo(orgNo);
+			if (clientSecret==null || clientSecret.trim().length()==0) {
+				clientSecret = clientManager.getDefaultClientSecret();
+			}
 		}
 
 		BusinessPartner<Customer> bp = null;
@@ -189,14 +221,35 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			// Create new tenant
 			fi = new FortnoxClientInfo();
 			fi.setOrgNo(orgNo);
-			fi.setOrgName(name);
-			fi.setAccessToken(accessToken);
-			fi.setApiCode(apiCode);
-			fi.setClientSecret(clientSecret);
-			fi.setClientId(clientId);
-		} else {
-
 		}
+		
+		if (name!=null)
+			fi.setOrgName(name);
+		if (accessToken!=null)
+			fi.setAccessToken(accessToken);
+		if (apiCode!=null)
+			fi.setApiCode(apiCode);
+		if (clientSecret!=null)
+			fi.setClientSecret(clientSecret);
+		if (clientId!=null)
+			fi.setClientId(clientId);
+		
+
+		if (clientManager!=null) {
+			try {
+				clientManager.validateConnection(fi);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
+		Customer tenant = new Customer();
+		tenant.setOrganisationNumber(fi.getOrgNo());
+		tenant.setName(fi.getOrgName());
+		tenant.setCountryCode(countryCode);
+		
+		bp = convert(tenant);
 		
 		return bp;
 	}

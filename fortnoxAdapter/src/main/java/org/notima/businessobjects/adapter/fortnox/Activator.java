@@ -37,6 +37,7 @@ public class Activator extends BaseActivator {
 	public void doStart() {
 	
 		String fortnoxClientsFile = null;
+		String defaultClientSecret = null;
 		ConfigurationAdmin configurationAdmin = null;
 		
 		ServiceReference<ConfigurationAdmin> reference = bundleContext.getServiceReference(ConfigurationAdmin.class);
@@ -51,6 +52,7 @@ public class Activator extends BaseActivator {
                     Dictionary<String, Object> properties = configuration.getProperties();
                     if (properties!=null) {
 	                    fortnoxClientsFile = (String)properties.get("fortnoxClientsFile");
+	                    defaultClientSecret = (String)properties.get("defaultClientSecret");
                     }
                 }
                 
@@ -79,6 +81,7 @@ public class Activator extends BaseActivator {
 			
 			try {
 				mgr = new FortnoxClientManager(fortnoxClientsFile);
+				mgr.setDefaultClientSecret(defaultClientSecret);
 			} catch (FileNotFoundException fne) {
 				
 				// Create the file
