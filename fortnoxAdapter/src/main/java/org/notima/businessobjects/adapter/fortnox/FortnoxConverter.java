@@ -61,6 +61,8 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		
 		dst.setDescription(src.getDescription());
 		dst.setTransactionDate(FortnoxClient3.s_dfmt.format(LocalDateUtils.asDate(src.getAcctDate())));
+		dst.setCostCenter(src.getCostCenter());
+		dst.setProject(src.getProjectCode());
 		
 		if (voucherSeries!=null) {
 			dst.setVoucherSeries(voucherSeries);
@@ -118,6 +120,9 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			if (avl.getDescription()!=null && avl.getDescription().trim().length()>0) {
 				r.setDescription(avl.getDescription());
 			}
+			r.setCostCenter(avl.getCostCenter());
+			r.setProject(avl.getProjectCode());
+			
 			dst.addVoucherRow(r);
 			
 		}
