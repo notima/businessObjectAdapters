@@ -67,6 +67,7 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 	public static final String BIS30_CUSTOMIZATION_ID="urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0";
 	public static final String BIS30_PROFILE_ID="urn:fdc:peppol.eu:2017:poacc:billing:01:1.0";
 	public static final String GLN_ID = "0088";
+	public static final String ORG_ID = "0007";
 	
 	/**
 	 * Converts a business objects location to an UBL AddressType.
@@ -104,10 +105,23 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 	 * Sets GLN number on customer on specific invoice.
 	 * 
 	 * @param dst		The destination invoice
-	 * @param gln		The GLN-number to be set.
+	 * @param gln		The GLN-number to be set. 
+	 * 					If the GLN-number starts with a prefix (ie  0088, that's pruned).
+	 * 					If the GLN represents an org number, the org number is set.
 	 * @return	The invoice
 	 */
 	public static InvoiceType setGLNNumber(InvoiceType dst, String gln) {
+		
+		if (gln == null) return dst;
+		
+		String ID_TYPE = GLN_ID;
+		
+		if (gln.startsWith(GLN_ID + ":")) gln = gln.substring(5);
+		
+		if (gln.startsWith(ORG_ID + ":")) {
+			gln = gln.substring(5);
+			ID_TYPE = ORG_ID;
+		}
 		
 		CustomerPartyType cpt = dst.getAccountingCustomerParty();
 		PartyType pt = cpt.getParty();
@@ -116,7 +130,7 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		IDType idt;
 		for (PartyIdentificationType pit : ptypes) {
 			idt = pit.getID();
-			if (GLN_ID.equals(idt.getSchemeID())) {
+			if (ID_TYPE.equals(idt.getSchemeID())) {
 				glnType = pit;
 				break;
 			}
@@ -125,7 +139,7 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		if (glnType==null) {
 			glnType = new PartyIdentificationType();
 			idt = new IDType();
-			idt.setSchemeID(GLN_ID);
+			idt.setSchemeID(ID_TYPE);
 			idt.setValue(gln);
 			glnType.setID(idt);
 			ptypes.add(glnType);
