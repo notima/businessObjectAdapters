@@ -72,6 +72,9 @@ public class AccountingReportConverter {
 			dst.setDescription("Svea Webpay " +  
 					src.getPaymentTypeReference() + " " + Translator.getTranslation(src.getPaymentType(), lang));
 			
+			dst.setCostCenter(src.getCostCenter());
+			dst.setProjectCode(src.getProjectCode());
+			
 			dst.setAcctDate(src.getAcctDate());
 			result.add(dst);
 
