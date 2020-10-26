@@ -503,8 +503,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		
 		org.notima.api.fortnox.entities3.Invoice dst = convert(invoice);
-		
-		
+		// Set as not completed as false by default.
+		dst.setNotCompleted(Boolean.FALSE);
+	
 		dst = client.setInvoice(dst);
 		if (dst==null) {
 			throw new Exception("Invoice not saved: " + invoice.getDocumentKey());
