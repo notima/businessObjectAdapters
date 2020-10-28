@@ -503,8 +503,6 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		
 		org.notima.api.fortnox.entities3.Invoice dst = convert(invoice);
-		// Set as not completed as false by default.
-		dst.setNotCompleted(Boolean.FALSE);
 	
 		dst = client.setInvoice(dst);
 		if (dst==null) {
@@ -840,6 +838,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 		// Always set the prices excluding VAT
 		dst.setVATIncluded(Boolean.valueOf(false));
+		// Set as not completed as false by default.
+		dst.setNotCompleted(Boolean.FALSE);
 		
 		return dst;
 		
