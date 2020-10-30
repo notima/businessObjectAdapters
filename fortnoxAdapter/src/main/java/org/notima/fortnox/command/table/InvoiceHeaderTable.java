@@ -25,6 +25,7 @@ public class InvoiceHeaderTable extends ShellTable {
 		column("Grand total").alignRight();
 		column("Open amt").alignRight();
 		column("Pmt term");
+		column("Not completed");
 		
 	}
 	
@@ -69,7 +70,8 @@ public class InvoiceHeaderTable extends ShellTable {
 				is.getExternalInvoiceReference2(),
 				nfmt.format(is.getTotal()),
 				nfmt.format(is.getBalance()),
-				is.getTermsOfPayment())
+				is.getTermsOfPayment(),
+				"N/A")
 				;
 		
 	}
@@ -87,7 +89,8 @@ public class InvoiceHeaderTable extends ShellTable {
 				invoice.getExternalInvoiceReference2(),
 				nfmt.format(invoice.getTotal()),
 				nfmt.format(invoice.getBalance()),
-				invoice.getTermsOfPayment())
+				invoice.getTermsOfPayment(),
+				invoice.isNotCompleted())
 				;
 		
 	}
