@@ -18,4 +18,13 @@ public interface FormatterFactory {
 	 */
 	public InvoiceReminderFormatter getInvoiceReminderFormatter(String format);
 	
+
+	/**
+	 * Returns a formatter for given class and format.
+	 * 
+	 * @param format
+	 * @return	A formatter for given class. Null if none is found.
+	 */
+	public BasicReportFormatter<?> getReportFormatter(Class<?> clazz, String format);
+	
 }

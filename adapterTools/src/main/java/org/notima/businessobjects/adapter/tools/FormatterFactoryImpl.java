@@ -18,6 +18,8 @@ public class FormatterFactoryImpl implements FormatterFactory {
 	
 	private Map<String, OrderListFormatter> services = new TreeMap<String, OrderListFormatter>();
 	private Map<String, InvoiceReminderFormatter> invoiceReminderServices = new TreeMap<String, InvoiceReminderFormatter>();
+	// The class name is the key
+	private Map<String, BasicReportFormatter<?>> basicReportFormatters = new TreeMap<String, BasicReportFormatter<?>>();
 
 	private BundleContext ctx;
 	
@@ -84,6 +86,58 @@ public class FormatterFactoryImpl implements FormatterFactory {
 		return null;
 	}
 
+	
+	/**
+	 * Returns a formatter for given class and format.
+	 * 
+	 * @param format
+	 * @return	A formatter for given class. Null if none is found.
+	 */
+	@SuppressWarnings("rawtypes")
+	@Override
+	public BasicReportFormatter<?> getReportFormatter(Class<?> clazz, String format) {
+
+		basicReportFormatters.clear();
+		
+		try {
+			Collection<ServiceReference<BasicReportFormatter>> irefs = ctx.getServiceReferences(BasicReportFormatter.class, null);
+			
+			if (irefs!=null) {
+				BasicReportFormatter<?> srv;
+				for (ServiceReference<BasicReportFormatter> sr : irefs) {
+					srv = ctx.getService(sr);
+					String className = srv.getClazz().getClass().getName();
+					basicReportFormatters.put(className, srv);
+				}
+			}
+			
+		} catch (InvalidSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// Try to find report formatter
+		BasicReportFormatter<?> result = basicReportFormatters.get(clazz.getName());
+		
+		boolean supportsFormat = false;
+		
+		if (result!=null) {
+			// Check format
+			String[] formats = result.getFormats();
+			for (String f : formats) {
+				if (f.equalsIgnoreCase(format)) {
+					supportsFormat = true;
+					break;
+				}
+			}
+		}
+		
+		if (supportsFormat) return result;
+		
+		return null;
+		
+	}
+	
 	
 	/**
 	 * Returns an invoice formatter for given format.
