@@ -104,7 +104,7 @@ public abstract class JasperBasePdfFormatter {
 		
     	// set parameters
 		HashMap<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("SUBREPORT_DIR", jasperFile.substring(0, jasperFile.lastIndexOf("/") + 1));
+		parameters.put("SUBREPORT_DIR", jasperFile.substring(0, jasperFile.lastIndexOf(File.separator) + 1));
 		parameters.put(JASPER_REPORT_NAME, jasperReportName);
 		if (jasperLang!=null) {
 			parameters.put("CURRENT_LANG", jasperLang);
