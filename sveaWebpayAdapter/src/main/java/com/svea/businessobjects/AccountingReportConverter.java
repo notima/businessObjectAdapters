@@ -68,7 +68,7 @@ public class AccountingReportConverter {
 		List<AccountingVoucher> srcList = ar.getVouchers();
 		for (AccountingVoucher src : srcList) {
 			dst = new org.notima.generic.businessobjects.AccountingVoucher();
-			// dst.setPrecision(DEFAULT_PRECISION);
+			dst.setPrecision(DEFAULT_PRECISION);
 			dst.setDescription("Svea Webpay " +  
 					src.getPaymentTypeReference() + " " + Translator.getTranslation(src.getPaymentType(), lang));
 			
@@ -160,7 +160,8 @@ public class AccountingReportConverter {
 			if (dst.getBalance().abs().doubleValue() > 4) {
 				dst.balanceWithLine(AccountingType.UNKNOWN_BALANCE_TRX);
 			} else {
-				dst.balanceWithLine(AccountingType.ROUNDING);
+				// Purge voucher (round to precision, remove zero lines and round the rest)
+				dst.purge();
 			}
 			
 		}
