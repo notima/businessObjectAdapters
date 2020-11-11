@@ -34,6 +34,9 @@ public class PayInvoice extends FortnoxCommand implements Action {
 	@Option(name = "--paydate", description = "Use this date as paydate, default is today. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String payDateStr;
 
+	@Option(name = "-iap", aliases = { "--invoicedate-as-paydate" }, description="Use invoice date as pay date", required = false, multiValued = false)
+	private boolean iap = false;
+	
 	@Option(name = "--amount", description = "Pay using this amount. Default is open amount", required = false, multiValued = false)
 	private Double amount;
 	
@@ -57,23 +60,29 @@ public class PayInvoice extends FortnoxCommand implements Action {
 	public Object execute() throws Exception {
 		
 		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
-
-		Date payDate = null;
-		if (payDateStr==null) {
-			payDate = Calendar.getInstance().getTime();
-		} else {
-			try {
-				payDate = FortnoxClient3.s_dfmt.parse(payDateStr);
-			} catch (Exception e) {
-				sess.getConsole().println("Invalid date: " + payDateStr);
-			}
-		}
 		
 		Invoice invoice = fc.getInvoice(invoiceNo);
 
 		if (invoice==null) {
 			sess.getConsole().println("Invoice " + invoiceNo + " not found.");
 			return null;
+		}
+		
+		if (iap) {
+			// Invoice date as pay date
+			payDateStr = invoice.getInvoiceDate();
+		}
+
+		Date payDate = null;
+		if (payDateStr==null) {
+			payDate = Calendar.getInstance().getTime();
+			payDateStr = FortnoxClient3.s_dfmt.format(payDate);
+		} else {
+			try {
+				payDate = FortnoxClient3.s_dfmt.parse(payDateStr);
+			} catch (Exception e) {
+				sess.getConsole().println("Invalid date: " + payDateStr);
+			}
 		}
 		
 		if (!invoice.isBooked()) {
@@ -118,7 +127,7 @@ public class PayInvoice extends FortnoxCommand implements Action {
 		}
 
 		// Confirm payment
-		String reply = noConfirm ? "y" : sess.readLine("Do you want to pay invoice " + invoiceNo + " with amt " + openAmt + " using account " + mp.getAccountNumber() + ": (y/n) ", null);
+		String reply = noConfirm ? "y" : sess.readLine("Do you want to pay invoice " + invoiceNo + " on " + payDateStr + " with amt " + openAmt + " using account " + mp.getAccountNumber() + ": (y/n) ", null);
 
 		if (reply.equalsIgnoreCase("y")) {
 			
@@ -140,18 +149,22 @@ public class PayInvoice extends FortnoxCommand implements Action {
 			return null;
 		}
 		
-		InvoicePayment pmt = fc.payCustomerInvoice(
-				Integer.parseInt(invoiceNo), 
-				modeOfPayment, 
-				payDate, 
-				openAmt, 
-				null, !noBookkeepPayment);
+		InvoicePayment pmt = null;
 		
-		InvoiceHeaderTable iht = new InvoiceHeaderTable(invoice);
-		InvoiceLineTable ilt = new InvoiceLineTable(invoice, null);
+		try {
+			pmt = fc.payCustomerInvoice(
+					Integer.parseInt(invoiceNo), 
+					mp, 
+					payDate, 
+					openAmt, 
+					null, !noBookkeepPayment);
+			
+			sess.getConsole().println("Payment # " + pmt.getNumber() + " created.");
+			
+		} catch (FortnoxException fe) {
+			sess.getConsole().println(fe.toString());
+		}
 		
-		iht.print(sess.getConsole());
-		ilt.print(sess.getConsole());
 		
 		return null;
 	}
