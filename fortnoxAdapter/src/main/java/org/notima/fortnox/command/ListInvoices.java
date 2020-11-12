@@ -55,6 +55,7 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object execute() throws Exception {
 
@@ -76,7 +77,6 @@ public class ListInvoices extends FortnoxCommand implements Action {
 			untilDate = FortnoxClient3.s_dfmt.parse(untilDateStr);
 		}
 		
-		@SuppressWarnings("unchecked")
 		Map<Object, Object> invoicesMap = null;
 		
 		List<Object> invoices = new ArrayList<Object>();

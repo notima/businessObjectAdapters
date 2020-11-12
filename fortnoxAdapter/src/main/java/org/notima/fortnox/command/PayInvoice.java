@@ -16,8 +16,6 @@ import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoicePayment;
 import org.notima.api.fortnox.entities3.ModeOfPayment;
-import org.notima.fortnox.command.table.InvoiceHeaderTable;
-import org.notima.fortnox.command.table.InvoiceLineTable;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "pay-fortnox-invoice", description = "Pays a specific invoice")
