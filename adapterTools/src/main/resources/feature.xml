@@ -114,4 +114,10 @@
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/jasperReportAdapter/${project.version}</bundle>
     </feature>
     
+    <feature name="notima-excel" description="Notima Excel Adapter" version="${project.version}">
+    	<feature>notima-businessobjects</feature>
+    	<bundle>mvn:org.notima.generic.businessobjects.adapter/excelAdapter/${project.version}</bundle>
+    </feature>
+    
+    
 </features>
