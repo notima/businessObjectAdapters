@@ -245,20 +245,23 @@ public class ExcelToInvoices {
 		// Connect bp, location and invoice line
 		// Check for multiple lines (separated by | )
 		String[] lines = null;
-		if (il.getDescription()!=null) {
+		boolean emptyInvoiceLine = false;
+		if (il.getDescription()!=null && il.getDescription().trim().length()>0) {
 			lines = il.getDescription().split("\\|");
 		}
 		if ((il.getDescription()==null || il.getDescription().trim().length()==0) &&
-				il.getLineNet()==0) {
-			
+				il.getPriceActual()==0) {
+			emptyInvoiceLine = true;
 		}
-		invoice.addInvoiceLine(il);
-		if (lines!=null && lines.length>1) {
-			il.setDescription(lines[0]);
-			for (int i=1; i<lines.length; i++) {
-				il = new InvoiceLine();
-				il.setDescription(lines[i]);
-				invoice.addInvoiceLine(il);
+		if (!emptyInvoiceLine) {
+			invoice.addInvoiceLine(il);
+			if (lines!=null && lines.length>1) {
+				il.setDescription(lines[0]);
+				for (int i=1; i<lines.length; i++) {
+					il = new InvoiceLine();
+					il.setDescription(lines[i]);
+					invoice.addInvoiceLine(il);
+				}
 			}
 		}
 		bp.setAddressOfficial(loc);
