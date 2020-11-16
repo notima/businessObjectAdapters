@@ -1,8 +1,10 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -23,6 +25,9 @@ public class ListTenants implements Action {
 	@Reference
 	private List<BusinessObjectFactory> bofs;
 	
+    @Argument(index = 0, name = "adapter", description = "The adapter to use", required = false, multiValued = false)
+    private String systemName;
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object execute() throws Exception {
@@ -30,22 +35,37 @@ public class ListTenants implements Action {
 		if (bofs==null) {
 			System.out.println("No adapters registered");
 		} else {
+
+			List<BusinessObjectFactory> adaptersToList = new ArrayList<BusinessObjectFactory>();
+
+			for (BusinessObjectFactory bf : bofs) {
+				
+				if (systemName==null || systemName.equals(bf.getSystemName())) {
+					adaptersToList.add(bf);
+				}
+				
+			}
+			
 			
 			TenantTable tt = null;
 			
-			for (BusinessObjectFactory bf : bofs) {
+			for (BusinessObjectFactory bf : adaptersToList) {
 				
 				sess.getConsole().println(bf.getSystemName());
 				
 				BusinessPartnerList<Object> bpl = 
 						bf.listTenants();
-				List<BusinessPartner<Object>> tenants = bpl.getBusinessPartner();
-				tt = new TenantTable(tenants);
+				if (bpl!=null) {
+					List<BusinessPartner<Object>> tenants = bpl.getBusinessPartner();
+					tt = new TenantTable(tenants);
+				} else {
+					tt = new TenantTable(null);
+				}
 
 				tt.print(sess.getConsole());
 				
 			}
-			System.out.println(bofs.size() + " factories registered");
+				
 		}
 		
 		return null;
