@@ -26,7 +26,7 @@
         <feature>notima-common</feature>
 		<bundle>mvn:org.notima.bg/bankgiro-api/1.3.7</bundle>
 		<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
-		<bundle>mvn:org.notima.generic/businessobjects/0.1.18-SNAPSHOT</bundle>
+		<bundle>mvn:org.notima.generic/businessobjects/${businessobjects.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
 	</feature>
 
