@@ -18,7 +18,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
  * @author Daniel Tamm
  *
  */
-@Command(scope = "fortnox", name = "remove-client", description = "Remove a client to Fortnox integration")
+@Command(scope = "fortnox", name = "remove-fortnox-client", description = "Remove a client to Fortnox integration")
 @Service
 public class RemoveClient implements Action {
 

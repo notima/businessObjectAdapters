@@ -50,6 +50,10 @@ public class ConfigFortnoxVoucherSeries extends FortnoxCommand implements Action
 		try {
 		
 			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+			if (fc == null) {
+				sess.getConsole().println("Can't get client for " + orgNo);
+				return null;
+			}
 
 			if (yearId==null) {
 				FinancialYearSubset fys = fc.getFinancialYear(null);

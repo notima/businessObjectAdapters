@@ -46,6 +46,11 @@ public class ConfigFortnoxModeOfPayment extends FortnoxCommand implements Action
 		try {
 		
 			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+			if (fc == null) {
+				sess.getConsole().println("Can't get client for " + orgNo);
+				return null;
+			}
+			
 			ModeOfPayment mp = null;
 			ModeOfPaymentSubset ms = fc.getModeOfPayment(mode);
 			if (ms!=null) {

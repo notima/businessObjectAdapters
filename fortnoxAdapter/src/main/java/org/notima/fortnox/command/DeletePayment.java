@@ -39,18 +39,12 @@ public class DeletePayment extends FortnoxCommand implements Action {
 	
 	@Override
 	public Object execute() throws Exception {
-
-		FactorySelector selector = new FactorySelector(bofs);
-		
-		BusinessObjectFactory bf = selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
-
-		if (bf==null) {
-			sess.getConsole().println("No tenant found with orgNo [" + orgNo + "]");
-			return null;
-		}
-		
 			
 		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		if (fc == null) {
+			sess.getConsole().println("Can't get client for " + orgNo);
+			return null;
+		}
 		
 		InvoicePayment pmt;
 		

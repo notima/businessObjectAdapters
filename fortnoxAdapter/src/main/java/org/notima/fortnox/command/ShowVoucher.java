@@ -41,6 +41,10 @@ public class ShowVoucher extends FortnoxCommand implements Action {
 	public Object execute() throws Exception {
 		
 		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		if (fc == null) {
+			sess.getConsole().println("Can't get client for " + orgNo);
+			return null;
+		}
 		
 		int yId = (yearId!=null && yearId.intValue()!=0 ? yearId.intValue() : fc.getFinancialYear(null).getId());
 

@@ -33,6 +33,10 @@ public class ShowPreDefinedAccounts extends FortnoxCommand implements Action {
 	public Object execute() throws Exception {
 		
 		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		if (fc == null) {
+			sess.getConsole().println("Can't get client for " + orgNo);
+			return null;
+		}
 
 		Map<String, PreDefinedAccountSubset> paccts = fc.getPredefinedAccountMap();
 		
