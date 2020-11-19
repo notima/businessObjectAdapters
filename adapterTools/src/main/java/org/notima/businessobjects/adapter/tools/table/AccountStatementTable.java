@@ -29,7 +29,7 @@ public class AccountStatementTable extends ShellTable {
 		}
 		
 		// Add starting line
-		double runningBalance = alines.getStartBalance();
+		double runningBalance = NumberUtils.roundToPrecision(alines.getStartBalance(), 2);
 		
 		addRow().addContent("",
 				"",
