@@ -38,6 +38,16 @@ public class VoucherTable extends ShellTable {
 			return;
 		}
 
+		// Add a first row
+		addRow().addContent(
+				(vv.getVoucherSeries() + vv.getVoucherNumber()),
+				"",
+				vv.getDescription(),
+				vv.getCostCenter()!=null && vv.getCostCenter().trim().length()>0 ? ("Cst " + vv.getCostCenter()) : "",
+				vv.getProject()!=null && vv.getProject().trim().length()>0 ? ("Pr " + vv.getProject()) : "",
+				""
+				);
+		
 		for (VoucherRow vr : vv.getVoucherRows().getVoucherRow()) {
 			addRow().addContent(
 					vv.getTransactionDate(),
