@@ -21,7 +21,7 @@ import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
 @Command(scope = "notima", name = "show-gl-details", description = "Shows GL-details")
 @Service
 public class ShowGLDetails implements Action {
-
+	
 	public static DateFormat	s_dfmt = new SimpleDateFormat("yyyy-MM-dd");	
 	
 	@Reference
