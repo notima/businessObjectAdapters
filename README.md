@@ -9,6 +9,10 @@ https://github.com/notima/businessobjects
 
 https://github.com/notima/fortnox4j
 
+https://github.com/notima/svea-pmt-admin-api
+
+https://github.com/notima/siefilelib
+
 https://github.com/sveawebpay/webpay-common
 
 https://github.com/sveawebpay/webpayadminreports
