@@ -45,7 +45,7 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 	@Argument(index = 1, name = "accountNo", description ="The account number to configure.", required = true, multiValued = false)
 	private String accountNo = "";
 	
-    @Argument(index = 2, name = "configuration parameter", description = "What to configure", required = true, multiValued = false)
+    @Argument(index = 2, name = "configuration parameter", description = "What to configure (name, enabled)", required = true, multiValued = false)
     @Completion(ConfigFortnoxAccountCompleter.class)
     String key;
 
