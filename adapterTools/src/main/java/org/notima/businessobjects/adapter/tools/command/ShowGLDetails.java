@@ -36,6 +36,9 @@ public class ShowGLDetails implements Action {
 	@Option(name = "--untildate", description = "Select invoices until this date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String untilDateStr;
 	
+	@Option(name = "--orderbyamount", description = "Order transactions by amount (after date)", required = false, multiValued = false)
+	private boolean orderByAmount;
+	
     @Argument(index = 0, name = "orgNo", description = "The org number to show details for", required = true, multiValued = false)
     private String orgNo;
     
@@ -80,7 +83,7 @@ public class ShowGLDetails implements Action {
 		
 		AccountStatementLines lines = arp.getAccountStatementLines(bp, accountNo, 
 				LocalDateUtils.asLocalDate(fromDate), 
-				LocalDateUtils.asLocalDate(untilDate));
+				LocalDateUtils.asLocalDate(untilDate), orderByAmount);
 		
 		AccountStatementTable ast = new AccountStatementTable(lines);
 		ast.print(sess.getConsole());
