@@ -8,7 +8,7 @@
 
 	<parent>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.8.10-SNAPSHOT</version>
+		<version>1.8.10</version>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	</parent>
 
@@ -117,7 +117,7 @@
 		<dependency>
 			<groupId>com.svea</groupId>
 			<artifactId>webpayadmin-reports</artifactId>
-			<version>0.0.3-SNAPSHOT</version>
+			<version>0.0.3</version>
 		</dependency>
 
 	</dependencies>

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.8.10-SNAPSHOT</version>
+		<version>1.8.10</version>
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>org.notima.api</groupId>
 			<artifactId>fortnox4j</artifactId>
-			<version>1.8.10-SNAPSHOT</version>
+			<version>1.8.10</version>
 		</dependency>
 		<dependency>
 			<groupId>

@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.notima.generic.businessobjects.adapter</groupId>
     <artifactId>businessObjectAdapters</artifactId>
-    <version>1.8.10-SNAPSHOT</version>
+    <version>1.8.10</version>
   </parent>
   <artifactId>sieAdapter</artifactId>
   <packaging>bundle</packaging>
@@ -19,7 +19,7 @@
   	<dependency>
   		<groupId>org.notima</groupId>
   		<artifactId>siefilelib</artifactId>
-  		<version>1.0.4-SNAPSHOT</version>
+  		<version>${siefilelib.version}</version>
   	</dependency>
   </dependencies>
   
