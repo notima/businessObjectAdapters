@@ -40,6 +40,20 @@
 		<module>jasperFonts</module>
 	</modules>
 
+	<dependencyManagement>
+	
+		<dependencies>
+		
+	  		<dependency>
+	  			<groupId>com.svea</groupId>
+	  			<artifactId>webpay-common</artifactId>
+	  			<version>${webpay-common.version}</version>
+	  		</dependency>
+		
+		</dependencies>
+	
+	</dependencyManagement>
+
 	<dependencies>
 
 		<dependency>
