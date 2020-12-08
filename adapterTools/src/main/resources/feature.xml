@@ -41,7 +41,7 @@
         <feature prerequisite="true" dependency="false">wrap</feature>
         <feature>notima-businessobjects</feature>
         <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
-        <bundle>mvn:org.notima.api/fortnox4j/1.8.10-SNAPSHOT</bundle>
+        <bundle>mvn:org.notima.api/fortnox4j/${fortnox4j.version}</bundle>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
 
         <config name="FortnoxProperties">
