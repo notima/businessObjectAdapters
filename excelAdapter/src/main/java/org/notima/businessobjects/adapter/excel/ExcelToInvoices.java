@@ -456,7 +456,7 @@ public class ExcelToInvoices {
 		
 		List<Invoice<?>> invoices = billing.parseExcelList(fileName);
 
-		if (additional.size()>1) {
+		if (additional!=null && additional.size()>1) {
 			// See if additional billing lines should be added
 			Map<String,Invoice> invoiceMap = new TreeMap<String,Invoice>();
 			
