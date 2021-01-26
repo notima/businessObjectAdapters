@@ -117,6 +117,9 @@ public class AccountingReportConverter {
 							for (FeeDetail fd : pl.getFeeSpecification()) {
 								
 								avl = new AccountingVoucherLine(BigDecimal.valueOf(fd.getFee()), null);
+								if (fd.getDescription()!=null && fd.getDescription().trim().length()>0) {
+									avl.setDescription(fd.getDescription());
+								}
 								avl.setTaxKey(pl.getTaxKey());
 								mapWebpayFeeTypesToAccountingType(fd.getFeeType(), avl);
 								dst.addVoucherLine(avl);
