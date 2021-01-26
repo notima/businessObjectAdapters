@@ -52,7 +52,7 @@ public class VoucherTable extends ShellTable {
 			addRow().addContent(
 					vv.getTransactionDate(),
 					vr.getAccount(),
-					vr.getDescription(),
+					vr.getDescription() + (vr.getTransactionInformation()!=null && vr.getTransactionInformation().trim().length()>0 ? (" : " + vr.getTransactionInformation()) : ""),
 					nfmt.format(vr.getDebit()),
 					nfmt.format(vr.getCredit()),
 					vr.getRemoved()!=null && vr.getRemoved().booleanValue() ? "*" : ""
