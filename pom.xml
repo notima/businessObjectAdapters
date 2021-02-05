@@ -16,7 +16,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<businessobjects.version>0.1.18</businessobjects.version>
+		<businessobjects.version>0.1.19-SNAPSHOT</businessobjects.version>
 		<karaf.version>4.2.7</karaf.version>
 		<pmt-admin-api.version>2.0.2</pmt-admin-api.version>
 		<webpay-common.version>0.0.4-SNAPSHOT</webpay-common.version>
