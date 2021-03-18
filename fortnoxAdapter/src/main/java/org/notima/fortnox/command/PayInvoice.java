@@ -161,7 +161,11 @@ public class PayInvoice extends FortnoxCommand implements Action {
 					openAmt, 
 					null, !noBookkeepPayment);
 			
-			sess.getConsole().println("Payment # " + pmt.getNumber() + " created.");
+			if (pmt!=null) {
+				sess.getConsole().println("Payment # " + pmt.getNumber() + " created.");
+			} else {
+				sess.getConsole().println("No payment was created.");
+			}
 			
 		} catch (FortnoxException fe) {
 			sess.getConsole().println(fe.toString());
