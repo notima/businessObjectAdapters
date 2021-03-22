@@ -40,6 +40,43 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	}
 
 	/**
+	 * Determines the target account number for the given Fortnox adapter, type and taxKey
+	 * 
+	 * @param fa				FortnoxAdapter (ie client)
+	 * @param accountingType	The accounting type to be mapped
+	 * @param taxKey			The tax key to be mapped (can be null)
+	 * @return					The suggested account for the given client.
+	 */
+	public String getTargetAccountNo(FortnoxAdapter fa, String accountingType, String taxKey) throws Exception {
+
+		String acctNo = null;
+		
+		switch (accountingType) {
+			case AccountingType.REVENUE:
+				acctNo = fa.getRevenueAcctNo(taxKey, null);
+				break;
+			case AccountingType.LIABILITY_VAT:
+				acctNo = fa.getOutVatAccount(taxKey);
+				break;
+			case AccountingType.CLAIM_VAT:
+				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_INVAT);
+				break;
+			case AccountingType.ROUNDING:
+				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_ROUNDING);
+				break;
+			case AccountingType.OTHER_EXPENSES_SALES:
+				// TODO: Below must be configurable
+				acctNo = "6590";
+				break;
+			case AccountingType.LIQUID_ASSET_CASH:
+				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_CASHBYCARD);
+		}
+
+		return acctNo;
+		
+	}
+	
+	/**
 	 * Takes an accounting voucher and converts it into a Fortnox Voucher.
 	 * If account numbers are not set in the source, default accounts from Fortnox are
 	 * tried using the accountType and taxKey of the source lines.
@@ -83,32 +120,14 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 					&& avl.getAcctType()!=null && avl.getAcctType().trim().length()>0) {
 				
 				taxKey = convertTaxKey(avl.getTaxKey());
+
+				// Set account number using getTargetAccountNo
+				avl.setAcctNo(getTargetAccountNo(fa, avl.getAcctType(), taxKey));
 				
-				switch (avl.getAcctType()) {
-					case AccountingType.REVENUE:
-						avl.setAcctNo(fa.getRevenueAcctNo(taxKey, null));
-						break;
-					case AccountingType.LIABILITY_VAT:
-						avl.setAcctNo(fa.getOutVatAccount(taxKey));
-						break;
-					case AccountingType.CLAIM_VAT:
-						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_INVAT));
-						break;
-					case AccountingType.ROUNDING:
-						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_ROUNDING));
-						break;
-					case AccountingType.OTHER_EXPENSES_SALES:
-						// TODO: Below must be configurable
-						avl.setAcctNo("6590");
-						break;
-					case AccountingType.LIQUID_ASSET_CASH:
-						avl.setAcctNo(fa.getPredefinedAccount(FortnoxClient3.ACCT_CASHBYCARD));
-				}
-				
-			} else {
-				if (avl.getAcctNo()==null || avl.getAcctNo().trim().length()==0) {
-					throw new Exception("Unable to map accountType. AccountType: " + avl.getAcctType());
-				}
+			}
+			
+			if (avl.getAcctNo()==null || avl.getAcctNo().trim().length()==0) {
+				throw new Exception("Unable to map accountType. AccountType: " + avl.getAcctType());
 			}
 			
 			if (avl.getAcctNo()!=null && avl.getAcctNo().trim().length()>0) {
@@ -149,20 +168,20 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		}
 		
 		if (vatRate>16) {
-			return "MP1";
+			return FortnoxClient3.VAT_MP1;
 		}
 		if (vatRate>10) {
-			return "MP2";
+			return FortnoxClient3.VAT_MP2;
 		}
 		if (vatRate>5) {
-			return "MP3";
+			return FortnoxClient3.VAT_MP3;
 		}
 		
 		if (vatRate==0) {
-			return "MP0";
+			return FortnoxClient3.VAT_MP0;
 		}
 		
-		return "MP0";
+		return FortnoxClient3.VAT_MP0;
 		
 	}
 	
