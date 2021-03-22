@@ -58,8 +58,8 @@ public class AccountTable extends ShellTable {
 		addRow().addContent(
 				is.getNumber(),
 				is.getDescription(),
-				is.getSRU(),
 				is.getVATCode(),
+				is.getSRU(),
 				is.getActive(),
 				is.getYear(),
 				"-",
@@ -73,8 +73,8 @@ public class AccountTable extends ShellTable {
 		addRow().addContent(
 				aa.getNumber(),
 				aa.getDescription(),
-				aa.getSRU(),
 				aa.getVATCode(),
+				aa.getSRU(),
 				aa.getActive(),
 				aa.getYear(),
 				nfmt.format(aa.getBalanceBroughtForward()),
