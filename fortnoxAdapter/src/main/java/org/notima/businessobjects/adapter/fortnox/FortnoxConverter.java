@@ -124,10 +124,12 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 				// Set account number using getTargetAccountNo
 				avl.setAcctNo(getTargetAccountNo(fa, avl.getAcctType(), taxKey));
 				
-			}
-			
-			if (avl.getAcctNo()==null || avl.getAcctNo().trim().length()==0) {
-				throw new Exception("Unable to map accountType. AccountType: " + avl.getAcctType());
+			} else {
+				
+				if (avl.getAcctNo()==null || avl.getAcctNo().trim().length()==0) {
+					throw new Exception("Unable to map accountType. AccountType: " + avl.getAcctType());
+				}
+				
 			}
 			
 			if (avl.getAcctNo()!=null && avl.getAcctNo().trim().length()>0) {
