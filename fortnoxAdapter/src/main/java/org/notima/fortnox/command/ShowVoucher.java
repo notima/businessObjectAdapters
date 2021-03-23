@@ -14,7 +14,7 @@ import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.fortnox.command.table.VoucherTable;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
-@Command(scope = "fortnox", name = "show-fortnox-voucher", description = "List chart of accounts for given client.")
+@Command(scope = "fortnox", name = "show-fortnox-voucher", description = "Show fortnox Voucher")
 @Service
 public class ShowVoucher extends FortnoxCommand implements Action {
 
