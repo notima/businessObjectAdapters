@@ -22,10 +22,12 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 
 	public static final String CONF_ENABLED = "enabled";
 	public static final String CONF_NAME = "name";
+	public static final String CONF_VATCODE = "vatCode";
 	
 	public static String[] configs = new String[] {
 			CONF_ENABLED,
-			CONF_NAME
+			CONF_NAME,
+			CONF_VATCODE
 	};
 	
 	
@@ -125,6 +127,20 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 				fc.updateAccount(yearId, acct);
 				
 			}
+			
+			if (CONF_VATCODE.equalsIgnoreCase(key)) {
+
+				if (acct==null) {
+					sess.getConsole().println("Account " + accountNo + " not found for yearId: " + yearId);
+					return null;
+				}
+				
+				acct.setVATCode(value);
+				
+				fc.updateAccount(yearId, acct);
+				
+			}
+			
 		} catch (FortnoxException fe) {
 			sess.getConsole().println(fe.toString());
 		}
