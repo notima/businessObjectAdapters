@@ -38,6 +38,7 @@
 		<module>adempiereAdapter</module>
 		<module>excelAdapter</module>
 		<module>jasperFonts</module>
+		<module>pgpAdapter</module>
 	</modules>
 
 	<dependencyManagement>

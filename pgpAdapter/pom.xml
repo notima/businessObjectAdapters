@@ -1,0 +1,67 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	
+	<parent>
+		<groupId>org.notima.generic.businessobjects.adapter</groupId>
+		<artifactId>businessObjectAdapters</artifactId>
+		<version>1.8.11-SNAPSHOT</version>
+	</parent>
+	
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>pgpAdapter</artifactId>
+	<packaging>bundle</packaging>
+	<name>PGP for Business Objects</name>
+
+	<dependencies>
+		
+		<dependency>
+			<groupId>me.sniggle</groupId>
+			<artifactId>simple-pgp-java</artifactId>
+			<version>0.1.0</version>
+			<scope>import</scope>
+		</dependency>
+		
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>4.2.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Export-Package>
+							org.notima.generic.pgp.factory,
+							me.sniggle.pgp.crypt.*,
+						</Export-Package>
+						<Import-Package>
+						</Import-Package>
+						<Embed-Dependency>simple-pgp-java,scope=compile|runtime</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
