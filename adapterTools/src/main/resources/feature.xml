@@ -37,6 +37,12 @@
 	
 	</feature>
 
+	<feature name="notima-pgp" description="Notima UBL Adapter" version="${project.version}">
+
+        <bundle>mvn:org.notima.generic.businessobjects.adapter/pgpAdapter/${project.version}</bundle>
+	
+	</feature>
+
     <feature name="notima-fortnox4j" description="Notima Fortnox4J Adapter" version="${project.version}">
         <feature prerequisite="true" dependency="false">wrap</feature>
         <feature>notima-businessobjects</feature>
