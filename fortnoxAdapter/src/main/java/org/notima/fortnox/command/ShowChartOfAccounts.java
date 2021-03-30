@@ -15,6 +15,8 @@ import org.notima.api.fortnox.entities3.Account;
 import org.notima.api.fortnox.entities3.AccountSubset;
 import org.notima.api.fortnox.entities3.Accounts;
 import org.notima.fortnox.command.table.AccountTable;
+import org.notima.generic.businessobjects.AccountClass;
+import org.notima.generic.businessobjects.BasicAccountingReportProvider;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "show-fortnox-coa", description = "List chart of accounts for given client.")
@@ -40,9 +42,15 @@ public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 	@Option(name = "--yearId", description = "Show COA for specific yearId", required = false, multiValued = false)
 	private Integer yearId;
 	
+	@Option(name = "--include-pl-accounts", description = "Include P/L accounts (not just balance sheet accounts)", required = false, multiValued = false)
+	private boolean includePlAccounts;
+	
+	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
 
+	private BasicAccountingReportProvider barp = new BasicAccountingReportProvider();
+	
 	@Override
 	public Object execute() throws Exception {
 		
@@ -63,26 +71,34 @@ public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 		}
 		
 		Account acct;
+		String acctNo;
 		
 		List<Object> acctList = new ArrayList<Object>();
-		if (showInactive) {
-			acctList.addAll(accts.getAccountSubset());
-		} else {
-			for (AccountSubset as : accts.getAccountSubset()) {
-				if (as.getActive()) {
-					if (showBalances || onlyWithBalances) {
-						// TODO: Lookup of individual account
-						acct = fc.getAccount(yearId, as.getNumber());
-						if (onlyWithBalances) {
-							if (acct.getBalanceBroughtForward()!=0 || acct.getBalanceCarriedForward()!=0) {
-								acctList.add(acct);
-							}
-						} else {
+		for (AccountSubset as : accts.getAccountSubset()) {
+			acctNo = as.getNumber().toString();
+			
+			if (!includePlAccounts) {
+				// Skip revenue accounts
+				if (!AccountClass.isBalanceClass(barp.getAccountClass(acctNo))) {
+					continue;
+				}
+			}
+			
+			if (as.getActive() || showInactive) {
+				
+				if (showBalances || onlyWithBalances) {
+					// TODO: Lookup of individual account
+					acct = fc.getAccount(yearId, as.getNumber());
+					
+					if (onlyWithBalances) {
+						if (acct.getBalanceBroughtForward()!=0 || acct.getBalanceCarriedForward()!=0) {
 							acctList.add(acct);
 						}
 					} else {
-						acctList.add(as);
+						acctList.add(acct);
 					}
+				} else {
+					acctList.add(as);
 				}
 			}
 		}

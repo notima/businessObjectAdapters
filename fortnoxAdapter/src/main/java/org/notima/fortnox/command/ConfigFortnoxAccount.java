@@ -23,11 +23,13 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 	public static final String CONF_ENABLED = "enabled";
 	public static final String CONF_NAME = "name";
 	public static final String CONF_VATCODE = "vatCode";
+	public static final String CONF_OPENINGBALANCE = "openingBalance";
 	
 	public static String[] configs = new String[] {
 			CONF_ENABLED,
 			CONF_NAME,
-			CONF_VATCODE
+			CONF_VATCODE,
+			CONF_OPENINGBALANCE
 	};
 	
 	
@@ -47,7 +49,7 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 	@Argument(index = 1, name = "accountNo", description ="The account number to configure.", required = true, multiValued = false)
 	private String accountNo = "";
 	
-    @Argument(index = 2, name = "configuration parameter", description = "What to configure (name, enabled, vatCode)", required = true, multiValued = false)
+    @Argument(index = 2, name = "configuration parameter", description = "What to configure (name, enabled, vatCode, openingBalance)", required = true, multiValued = false)
     @Completion(ConfigFortnoxAccountCompleter.class)
     String key;
 
@@ -90,14 +92,29 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 			}
 	
 			Account acct = fc.getAccount(yearId, Integer.parseInt(accountNo));
-			
+
+			if (CONF_NAME.equalsIgnoreCase(key)) {
+				
+				if (acct==null) {
+					// The account should be created
+					acct = new Account();
+					acct.setNumber(Integer.parseInt(accountNo));
+					acct.setActive(true);
+					sess.getConsole().println("Creating account " + accountNo);
+				} 
+				acct.setDescription(value);
+				
+				fc.updateAccount(yearId, acct);
+				
+			}
+
+			if (acct==null) {
+				sess.getConsole().println("Account " + accountNo + " not found for yearId: " + yearId);
+				return null;
+			}
 			
 			if (CONF_ENABLED.equalsIgnoreCase(key)) {
 
-				if (acct==null) {
-					sess.getConsole().println("Account " + accountNo + " not found for yearId: " + yearId);
-					return null;
-				}
 				
 				if (toggle!=null) {
 					if ((acct.getActive() && toggle==false) || 
@@ -113,31 +130,28 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 				}
 			}
 			
-			if (CONF_NAME.equalsIgnoreCase(key)) {
+			
+			if (CONF_VATCODE.equalsIgnoreCase(key)) {
 				
-				if (acct==null) {
-					// The account should be created
-					acct = new Account();
-					acct.setNumber(Integer.parseInt(accountNo));
-					acct.setActive(true);
-					sess.getConsole().println("Creating account " + accountNo);
-				} 
-				acct.setDescription(value);
+				acct.setVATCode(value);
 				
 				fc.updateAccount(yearId, acct);
 				
 			}
 			
-			if (CONF_VATCODE.equalsIgnoreCase(key)) {
+			if (CONF_OPENINGBALANCE.equalsIgnoreCase(key)) {
 
-				if (acct==null) {
-					sess.getConsole().println("Account " + accountNo + " not found for yearId: " + yearId);
-					return null;
+				Double bbf = null;
+				
+				try {
+					
+					bbf = Double.parseDouble(value);
+					acct.setBalanceBroughtForward(bbf);
+					fc.updateAccount(yearId, acct);
+					
+				} catch (NumberFormatException pe) {
+					sess.getConsole().println(value + " is not a number.");
 				}
-				
-				acct.setVATCode(value);
-				
-				fc.updateAccount(yearId, acct);
 				
 			}
 			
