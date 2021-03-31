@@ -6,12 +6,9 @@ import java.text.NumberFormat;
 
 import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.ShellTable;
-import org.notima.generic.businessobjects.AccountStatementLine;
-import org.notima.generic.businessobjects.AccountStatementLines;
 import org.notima.generic.businessobjects.ProfitLossColumn;
 import org.notima.generic.businessobjects.ProfitLossLine;
 import org.notima.generic.businessobjects.ProfitLossReport;
-import org.notima.generic.businessobjects.util.NumberUtils;
 
 public class ProfitLossTable extends ShellTable {
 	
@@ -45,7 +42,7 @@ public class ProfitLossTable extends ShellTable {
 				addRow().addContent(
 						pll.getAccountNo(), 
 						pll.getDescription(),
-						nfmt.format(pll.getColumns().get(0).getAmount())
+						nfmt.format(pll.getColumns().get(0).getAmount().negate())
 						);
 				
 			}
@@ -53,7 +50,7 @@ public class ProfitLossTable extends ShellTable {
 		}
 		
 		if (result.signum()!=0) {
-			addRow().addContent("", "CALCULATED RESULT", nfmt.format(result));
+			addRow().addContent("", "CALCULATED RESULT", nfmt.format(result.negate()));
 		}
 		
 	}
