@@ -37,8 +37,9 @@
 	
 	</feature>
 
-	<feature name="notima-pgp" description="Notima UBL Adapter" version="${project.version}">
+	<feature name="notima-pgp" description="Notima PGP Adapter" version="${project.version}">
 
+        <feature>camel-mail</feature>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/pgpAdapter/${project.version}</bundle>
 	
 	</feature>

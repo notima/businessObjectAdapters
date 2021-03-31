@@ -27,6 +27,12 @@
 	</dependencyManagement>
 
 	<dependencies>
+        
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
+		</dependency>  
 		
 		<dependency>
 			<groupId>me.sniggle</groupId>
@@ -45,10 +51,11 @@
 				<configuration>
 					<instructions>
 						<Export-Package>
-							org.notima.generic.pgp.factory,
+							org.notima.generic.pgp.*,
 							me.sniggle.pgp.crypt.*,
 						</Export-Package>
 						<Import-Package>
+							javax.net.*,
 							org.slf4j*
 						</Import-Package>
 						<Embed-Dependency>*;scope=compile|runtime;
