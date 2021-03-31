@@ -1,0 +1,72 @@
+package org.notima.businessobjects.adapter.tools.command;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
+import org.notima.businessobjects.adapter.tools.table.TenantTable;
+import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.BusinessPartnerList;
+import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+
+@Command(scope = "notima", name = "remove-tenant", description = "Removes tenant for given adapter")
+@Service
+public class RemoveTenant implements Action {
+
+	@Reference
+	private Session sess;
+	
+	@SuppressWarnings("rawtypes")
+	@Reference
+	private List<BusinessObjectFactory> bofs;
+	
+    @Argument(index = 0, name = "adapter", description = "The adapter to use", required = true, multiValued = false)
+    private String systemName;
+    
+    @Argument(index = 1, name = "orgNo", description = "The tenant to remove", required = true, multiValued = false)
+    private String orgNo;
+
+    @Argument(index = 2, name = "countryCode", description = "The country code", required = true, multiValued = false)
+    private String countryCode;
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Object execute() throws Exception {
+	
+		if (bofs==null) {
+			System.out.println("No adapters registered");
+		} else {
+
+			List<BusinessObjectFactory> adaptersToList = new ArrayList<BusinessObjectFactory>();
+
+			for (BusinessObjectFactory bf : bofs) {
+				
+				if (systemName==null || systemName.equals(bf.getSystemName())) {
+					adaptersToList.add(bf);
+				}
+				
+			}
+			
+			TenantTable tt = null;
+			
+			for (BusinessObjectFactory bf : adaptersToList) {
+				
+				sess.getConsole().println(bf.getSystemName());
+
+				bf.removeTenant(orgNo, countryCode);
+
+				tt.print(sess.getConsole());
+				
+			}
+				
+		}
+		
+		return null;
+	}
+
+}
