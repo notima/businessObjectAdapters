@@ -207,7 +207,7 @@ public class PGPEmail {
      */
     private FileInputStream getRecipientPublicKeyInputStream() throws KeyNotFoundException {
         File keyFile = getRecipientPublicKey();
-        KeyNotFoundException exception = new KeyNotFoundException("The email can not be encrypted because no public key could be found for this recipient.");
+        KeyNotFoundException exception = new KeyNotFoundException("The email can not be encrypted because no public key could be found for the user id: " + recipient);
         try {
             if(keyFile == null)
                 throw exception;
