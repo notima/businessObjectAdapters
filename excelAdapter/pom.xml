@@ -28,6 +28,14 @@
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<version>${apache.poi.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>
+				org.notima.generic.businessobjects.adapter
+			</groupId>
+			<artifactId>adapterTools</artifactId>
+			<version>${version}</version>
+			<type>bundle</type>
+		</dependency>
 	</dependencies>
 
 
@@ -55,6 +63,8 @@
 										org.notima.generic.businessobjects.exception,
 										org.notima.generic.businessobjects.util,
 										org.notima.generic.ifacebusinessobjects,
+										org.notima.businessobjects.adapter.tools,
+										org.notima.businessobjects.adapter.tools.table,
 										org.slf4j,
 										org.notima.bg,
 										org.notima.bg.bgmax,

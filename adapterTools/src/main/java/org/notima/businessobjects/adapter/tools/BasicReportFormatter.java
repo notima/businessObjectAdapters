@@ -1,32 +1,52 @@
 package org.notima.businessobjects.adapter.tools;
 
+import java.io.File;
 import java.util.Properties;
 
-public interface BasicReportFormatter<T> {
+public abstract class BasicReportFormatter {
+
+	public final static String OUTPUT_FILENAME = "OutputFilename";	
+	public final static String OUTPUT_DIR = "OutputDir";
+	
+	protected String outputDir;
+	protected String outputFileName;
 
 	/**
-	 * Formats a report from a data object
+	 * Sets default file properties (if any).
 	 * 
-	 * @param data	 			The data to be formatted as a report.
-	 * @param props				Properties sent to the formatter. These properties depends on the specific formatter.
-	 * @return					A reference to the created report. Normally a file path.
-	 * @throws					Exception if something goes wrong.
+	 * @param props		Properties
 	 */
-	public String formatReport(T data, String format, Properties props) throws Exception;
+	public void setFromProperties(Properties props) {
+		
+		if (props==null) return;
+		
+		outputDir = props.getProperty(OUTPUT_DIR, System.getenv("user.home"));
+		outputFileName = props.getProperty(OUTPUT_FILENAME, "outfile");
+		
+	}
 
-	/**
-	 * Returns the class that this formatter formats. 
-	 * @return		The class.
-	 * 
-	 */
-	public T getClazz();
+	public String getOutputDir() {
+		return outputDir;
+	}
+
+	public void setOutputDir(String outputDir) {
+		this.outputDir = outputDir;
+	}
+
+	public String getOutputFileName() {
+		return outputFileName;
+	}
+
+	public void setOutputFileName(String outputFileName) {
+		this.outputFileName = outputFileName;
+	}
 	
-	/**
-	 * What formats the formatter provides.
-	 * 
-	 * @return		Return an array of strings representing the format this formatter provides.
-	 */
-	public String[] getFormats();
-	
+	public String getPath() {
+		if (outputDir!=null) {
+			return outputDir + File.separator + outputFileName;
+		} else {
+			return outputFileName;
+		}
+	}
 	
 }

@@ -22,9 +22,9 @@ public interface FormatterFactory {
 	/**
 	 * Returns a formatter for given class and format.
 	 * 
-	 * @param format
+	 * @param format		The target format.
 	 * @return	A formatter for given class. Null if none is found.
 	 */
-	public BasicReportFormatter<?> getReportFormatter(Class<?> clazz, String format);
+	public ReportFormatter<?> getReportFormatter(Class<?> clazz, String format);
 	
 }

@@ -19,7 +19,7 @@ public class FormatterFactoryImpl implements FormatterFactory {
 	private Map<String, OrderListFormatter> services = new TreeMap<String, OrderListFormatter>();
 	private Map<String, InvoiceReminderFormatter> invoiceReminderServices = new TreeMap<String, InvoiceReminderFormatter>();
 	// The class name is the key
-	private Map<String, BasicReportFormatter<?>> basicReportFormatters = new TreeMap<String, BasicReportFormatter<?>>();
+	private Map<String, ReportFormatter<?>> basicReportFormatters = new TreeMap<String, ReportFormatter<?>>();
 
 	private BundleContext ctx;
 	
@@ -95,16 +95,16 @@ public class FormatterFactoryImpl implements FormatterFactory {
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override
-	public BasicReportFormatter<?> getReportFormatter(Class<?> clazz, String format) {
+	public ReportFormatter<?> getReportFormatter(Class<?> clazz, String format) {
 
 		basicReportFormatters.clear();
 		
 		try {
-			Collection<ServiceReference<BasicReportFormatter>> irefs = ctx.getServiceReferences(BasicReportFormatter.class, null);
+			Collection<ServiceReference<ReportFormatter>> irefs = ctx.getServiceReferences(ReportFormatter.class, null);
 			
 			if (irefs!=null) {
-				BasicReportFormatter<?> srv;
-				for (ServiceReference<BasicReportFormatter> sr : irefs) {
+				ReportFormatter<?> srv;
+				for (ServiceReference<ReportFormatter> sr : irefs) {
 					srv = ctx.getService(sr);
 					String className = srv.getClazz().getClass().getName();
 					basicReportFormatters.put(className, srv);
@@ -117,7 +117,7 @@ public class FormatterFactoryImpl implements FormatterFactory {
 		}
 		
 		// Try to find report formatter
-		BasicReportFormatter<?> result = basicReportFormatters.get(clazz.getName());
+		ReportFormatter<?> result = basicReportFormatters.get(clazz.getName());
 		
 		boolean supportsFormat = false;
 		

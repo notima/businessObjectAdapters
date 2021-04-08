@@ -22,9 +22,11 @@ public class Activator extends BaseActivator {
 
 		FormatterFactory formatterFactory = new FormatterFactoryImpl();
 		log.info("Created FormatterFactory");
+		((FormatterFactoryImpl)formatterFactory).setBundleContext(bundleContext);
 		register(FormatterFactory.class, formatterFactory);
 		
 		CanonicalObjectFactory cof = new CanonicalObjectFactoryImpl();
+		((CanonicalObjectFactoryImpl)cof).setBundleContext(bundleContext);
 		log.info("Created Canonical Object Factory");
 		register(CanonicalObjectFactory.class, cof);
 		

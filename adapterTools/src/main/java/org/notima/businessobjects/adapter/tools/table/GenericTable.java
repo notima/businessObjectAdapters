@@ -1,0 +1,174 @@
+package org.notima.businessobjects.adapter.tools.table;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.karaf.shell.support.table.Col;
+import org.apache.karaf.shell.support.table.Row;
+import org.apache.karaf.shell.support.table.ShellTable;
+
+public class GenericTable {
+
+    public static final int COLOR_BLACK = 0;
+    public static final int COLOR_RED = 1;
+    public static final int COLOR_GREEN = 2;
+    public static final int COLOR_YELLOW = 3;
+    public static final int COLOR_BLUE = 4;
+    public static final int COLOR_MAGENTA = 5;
+    public static final int COLOR_CYAN = 6;
+    public static final int COLOR_WHITE = 7;
+
+
+    public String[] ansiColors = {
+        "\u001B[30m",
+        "\u001B[31m",
+        "\u001B[32m",
+        "\u001B[33m",
+        "\u001B[34m",
+        "\u001B[35m",
+        "\u001B[36m",
+        "\u001B[37m"
+    };
+
+    public String[] cssColors = {
+            "black",
+            "red",
+            "green",
+            "darkgoldenrod",
+            "blue",
+            "magenta",
+            "cyan",
+            "white"
+        };
+    
+    private final String ANSI_RESET = "\u001B[0m";
+
+    private List<GenericColumn> columns = new ArrayList<GenericColumn>();
+    private List<List<GenericCell>> rows = new ArrayList<List<GenericCell>>();
+
+    private String emptyTableText;
+
+    public void addColumn(String header){
+        addColumn(new GenericColumn(header));
+    }
+
+    public void addColumn(String header, String alignment){
+        addColumn(new GenericColumn(header, alignment));
+    }
+
+    public void addColumn(GenericColumn column){
+        columns.add(column);
+    }
+
+    public void addRow(List<GenericCell> row){
+        rows.add(row);
+    }
+    
+    public List<GenericColumn> getColumns() {
+		return columns;
+	}
+
+    public boolean hasHeaders() {
+    	if (columns!=null && columns.size()>0) {
+    		for (GenericColumn c : columns) {
+    			if (c.getHeader()!=null && c.getHeader().trim().length()>0) {
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
+    
+    public boolean isEmpty() {
+    	return (rows==null || rows.size()==0);
+    }
+    
+	public void setColumns(List<GenericColumn> columns) {
+		this.columns = columns;
+	}
+
+	public List<List<GenericCell>> getRows() {
+		return rows;
+	}
+
+	public void setRows(List<List<GenericCell>> rows) {
+		this.rows = rows;
+	}
+
+	public String getEmptyTableText() {
+        return emptyTableText;
+    }
+
+    public void setEmptyTableText(String emptyTableText) {
+        this.emptyTableText = emptyTableText;
+    }
+    
+    /**
+     * Create a shell table from the provided table data.
+     * @return
+     */
+    public ShellTable getShellTable(){
+        ShellTable shellTable = new ShellTable();
+        for(GenericColumn column : columns){
+            Col col = shellTable.column(column.getHeader());
+            if(column.getAlignment().equalsIgnoreCase(GenericColumn.ALIGNMENT_CENTER)){
+                col.alignCenter();
+            }
+            else if(column.getAlignment().equalsIgnoreCase(GenericColumn.ALIGNMENT_RIGHT)){
+                col.alignRight();
+            }
+        }
+        
+        for(List<GenericCell> row : rows){
+            Row r = shellTable.addRow();
+            for(GenericCell cell : row){
+                if(cell.getColor() >= 0){
+                    String coloredData = String.format("%s%s%s", ansiColors[cell.getColor()], cell.toString(), ANSI_RESET);
+                    r.addContent(coloredData);
+                }else{
+                    r.addContent(cell);
+                }
+            }
+        }
+
+        shellTable.emptyTableText(emptyTableText);
+
+        return shellTable;
+    }
+    
+    /**
+     * Create a HTML table from the provided data
+     * @return
+     */
+    public HtmlTable getHtmlTable(){
+        HtmlTable htmlTable = new HtmlTable();
+
+        for(GenericColumn column : columns){
+            if(column.getAlignment().equalsIgnoreCase(GenericColumn.ALIGNMENT_RIGHT)){
+                htmlTable.column(column.getHeader(), GenericColumn.ALIGNMENT_RIGHT);
+            }else{
+                htmlTable.column(column.getHeader());
+            }
+        }
+		
+		if (rows.size()==0) {
+			return htmlTable;
+		}
+		
+		for (List<GenericCell> row : rows) {
+            List<Object> htmlRow = new ArrayList<Object>();
+            for(GenericCell cell : row){
+                String cellData = cell.toString();
+                if(cell.getColor() >= 0){
+                    cellData = String.format("<span style='color:%s;'>%s</span>", cssColors[cell.getColor()], cell.toString());
+                }
+                htmlRow.add(cellData);
+            }
+            htmlTable.addRow(htmlRow);
+		}
+		
+		return htmlTable;
+    }
+    
+    
+}
