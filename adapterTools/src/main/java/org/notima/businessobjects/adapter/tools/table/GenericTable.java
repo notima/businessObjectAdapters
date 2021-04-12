@@ -60,8 +60,29 @@ public class GenericTable {
         columns.add(column);
     }
 
+    /**
+     * Use when all columns are a generic cell.
+     * @param row
+     */
     public void addRow(List<GenericCell> row){
         rows.add(row);
+    }
+    
+    /**
+     * Use when you're not sure all cells are generic cells. Those that aren't are converted
+     * to generic cells.
+     * @param row
+     */
+    public void addRowOfObjects(List<Object> row) {
+    	if (row==null) return;
+    	List<GenericCell> r = new ArrayList<GenericCell>();
+    	for (Object o : row) {
+    		if (o instanceof GenericCell) {
+    			r.add((GenericCell)o);
+    		} else {
+    			r.add(new GenericCell(o));
+    		}
+    	}
     }
     
     public List<GenericColumn> getColumns() {
