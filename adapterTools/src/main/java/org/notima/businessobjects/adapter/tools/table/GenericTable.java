@@ -83,6 +83,7 @@ public class GenericTable {
     			r.add(new GenericCell(o));
     		}
     	}
+    	rows.add(r);
     }
     
     public List<GenericColumn> getColumns() {
