@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 		provides = {
 				@ProvideService(FormatterFactory.class),
 				@ProvideService(CanonicalObjectFactory.class),
+				@ProvideService(MessageSenderFactory.class),
 		}
 )
 public class Activator extends BaseActivator {
@@ -29,6 +30,11 @@ public class Activator extends BaseActivator {
 		((CanonicalObjectFactoryImpl)cof).setBundleContext(bundleContext);
 		log.info("Created Canonical Object Factory");
 		register(CanonicalObjectFactory.class, cof);
+
+		MessageSenderFactory messageSenderFactory = new MessageSenderFactoryImpl();
+		log.info("Created MessageSenderFactory");
+		((MessageSenderFactoryImpl)messageSenderFactory).setBundleContext(bundleContext);
+		register(MessageSenderFactory.class, messageSenderFactory);
 		
 	}
 	
