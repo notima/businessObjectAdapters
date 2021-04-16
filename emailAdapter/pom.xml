@@ -8,9 +8,9 @@
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>pgpAdapter</artifactId>
+	<artifactId>emailAdapter</artifactId>
 	<packaging>bundle</packaging>
-	<name>PGP for Business Objects</name>
+	<name>Email Sender</name>
 	
 	<dependencyManagement>
 	

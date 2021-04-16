@@ -19,7 +19,7 @@ import me.sniggle.pgp.crypt.PGPKeyPairGenerator;
 //import me.sniggle.pgp.crypt.PGPKeyPairGenerator;
 
 @Service
-@Command(scope = "notima", name = "generate-keypair", description = "Generates GPG keypair for email encryption. Default values from WebpayEmailProperties.cfg will be used if flags are omitted.")
+@Command(scope = "notima", name = "generate-keypair", description = "Generates GPG keypair for email encryption. Default values from EmailProperties.cfg will be used if flags are omitted.")
 public class GenerateKeyPair implements Action {
 
     private static final String EMAIL_CONFIG_FILE = "EmailProperties";

@@ -43,10 +43,12 @@ public class PGPEmailMessageSender implements MessageSender {
 
     /**
      * Send the email to the recipient
-     * @throws MessageSenderException
-     * @throws MessagingException
-     * @throws AddressException         
-     * @throws KeyNotFoundException
+     * @param message
+     * The message to be sent
+     * @param keyManager
+     * the keyManager to retrieve public recipient keys from if no keys are provided in the message
+     * @param attachSenderPublicKey
+     * If set to true, The public sender key will be sent as an attachment.
      */
     public void send(Message message, KeyManager keyManager, boolean attachSenderPublicKey) throws MessageSenderException {
         MimeMultipart emailContent = new MimeMultipart();

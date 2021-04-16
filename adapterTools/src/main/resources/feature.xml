@@ -37,10 +37,11 @@
 	
 	</feature>
 
-	<feature name="notima-pgp" description="Notima PGP Adapter" version="${project.version}">
+	<feature name="notima-email" description="Notima Email Adapter" version="${project.version}">
 
         <feature>camel-mail</feature>
-        <bundle>mvn:org.notima.generic.businessobjects.adapter/pgpAdapter/${project.version}</bundle>
+        <feature>notima-businessobjects</feature>
+        <bundle>mvn:org.notima.generic.businessobjects.adapter/emailAdapter/${project.version}</bundle>
 	
         <config name="EmailProperties">
             emailHost=
