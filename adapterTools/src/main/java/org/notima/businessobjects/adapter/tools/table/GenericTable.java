@@ -91,16 +91,11 @@ public class GenericTable {
      */
     public void addRowOfObjects(List<Object> row) {
     	if (row==null) return;
+    	GenericRow gr = new GenericRow();
     	List<GenericCell> r = new ArrayList<GenericCell>();
     	for (Object o : row) {
-    		if (o instanceof GenericCell) {
-    			r.add((GenericCell)o);
-    		} else {
-    			r.add(new GenericCell(o));
-    		}
+    		gr.addContent(o);
     	}
-    	GenericRow gr = new GenericRow();
-    	gr.addGenericContent(r);
     	rows.add(gr);
     }
     
