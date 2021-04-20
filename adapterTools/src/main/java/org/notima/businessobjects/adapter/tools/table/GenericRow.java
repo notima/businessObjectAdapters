@@ -9,11 +9,11 @@ public class GenericRow {
 
     private List<Object> data;
     
-    GenericRow() {
+    public GenericRow() {
         data = new ArrayList<>();
     }
     
-    GenericRow(List<GenericColumn> cols) {
+    public GenericRow(List<GenericColumn> cols) {
         this();
         for (GenericColumn col : cols) {
             data.add(col.getHeader());
