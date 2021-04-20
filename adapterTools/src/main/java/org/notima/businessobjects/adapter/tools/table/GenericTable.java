@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
+import org.notima.businessobjects.adapter.tools.table.GenericColumn;
+
 
 public class GenericTable {
 
@@ -44,7 +46,7 @@ public class GenericTable {
     private final String ANSI_RESET = "\u001B[0m";
 
     private List<GenericColumn> columns = new ArrayList<GenericColumn>();
-    private List<List<GenericCell>> rows = new ArrayList<List<GenericCell>>();
+    private List<GenericRow> rows = new ArrayList<GenericRow>();
 
     private String emptyTableText;
 
@@ -60,12 +62,26 @@ public class GenericTable {
         columns.add(column);
     }
 
+    public GenericColumn column(String header) {
+    	GenericColumn res = new GenericColumn(header);
+    	addColumn(res);
+    	return res;
+    }
+    
+    public GenericRow addRow() {
+    	GenericRow row = new GenericRow();
+    	rows.add(row);
+    	return row;
+    }
+    
     /**
      * Use when all columns are a generic cell.
      * @param row
      */
     public void addRow(List<GenericCell> row){
-        rows.add(row);
+    	GenericRow gr = new GenericRow();
+    	gr.addGenericContent(row);
+        rows.add(gr);
     }
     
     /**
@@ -83,7 +99,9 @@ public class GenericTable {
     			r.add(new GenericCell(o));
     		}
     	}
-    	rows.add(r);
+    	GenericRow gr = new GenericRow();
+    	gr.addGenericContent(r);
+    	rows.add(gr);
     }
     
     public List<GenericColumn> getColumns() {
@@ -109,11 +127,11 @@ public class GenericTable {
 		this.columns = columns;
 	}
 
-	public List<List<GenericCell>> getRows() {
+	public List<GenericRow> getRows() {
 		return rows;
 	}
 
-	public void setRows(List<List<GenericCell>> rows) {
+	public void setRows(List<GenericRow> rows) {
 		this.rows = rows;
 	}
 
@@ -141,15 +159,23 @@ public class GenericTable {
             }
         }
         
-        for(List<GenericCell> row : rows){
+        for(GenericRow row : rows){
             Row r = shellTable.addRow();
-            for(GenericCell cell : row){
-                if(cell.getColor() >= 0){
-                    String coloredData = String.format("%s%s%s", ansiColors[cell.getColor()], cell.toString(), ANSI_RESET);
-                    r.addContent(coloredData);
-                }else{
-                    r.addContent(cell);
-                }
+            GenericCell gc;
+            List<Object> rowContent = row.getContent();
+            for(Object cell : rowContent){
+            	if (cell instanceof GenericCell) {
+            		gc = (GenericCell)cell;
+	                if(gc.getColor() >= 0){
+	                    String coloredData = String.format("%s%s%s", ansiColors[gc.getColor()], gc.toString(), ANSI_RESET);
+	                    r.addContent(coloredData);
+	                }else{
+	                    r.addContent(gc);
+	                }
+            	} else {
+            		r.addContent(cell);
+            	}
+            	
             }
         }
 
@@ -176,13 +202,18 @@ public class GenericTable {
 		if (rows.size()==0) {
 			return htmlTable;
 		}
-		
-		for (List<GenericCell> row : rows) {
+
+		GenericCell gc;
+		for (GenericRow row : rows) {
             List<Object> htmlRow = new ArrayList<Object>();
-            for(GenericCell cell : row){
+
+            for(Object cell : row.getContent()){
                 String cellData = cell.toString();
-                if(cell.getColor() >= 0){
-                    cellData = String.format("<span style='color:%s;'>%s</span>", cssColors[cell.getColor()], cell.toString());
+                if (cell instanceof GenericCell) {
+                	gc = (GenericCell)cell;
+	                if(gc.getColor() >= 0){
+	                    cellData = String.format("<span style='color:%s;'>%s</span>", cssColors[gc.getColor()], cell.toString());
+	                }
                 }
                 htmlRow.add(cellData);
             }

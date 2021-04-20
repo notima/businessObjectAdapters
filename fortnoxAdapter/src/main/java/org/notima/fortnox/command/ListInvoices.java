@@ -127,7 +127,7 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		if (invoices.size()>0) {
 
 			InvoiceHeaderTable iht = new InvoiceHeaderTable(invoices);
-			iht.print(sess.getConsole());
+			iht.getShellTable().print(sess.getConsole());
 			
 			sess.getConsole().println("\n" + invoices.size() + " invoice(s).");
 			

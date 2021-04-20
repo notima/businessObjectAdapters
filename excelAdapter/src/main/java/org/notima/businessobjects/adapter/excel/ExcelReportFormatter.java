@@ -13,6 +13,7 @@ import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
 import org.notima.businessobjects.adapter.tools.ReportFormatter;
 import org.notima.businessobjects.adapter.tools.table.GenericCell;
 import org.notima.businessobjects.adapter.tools.table.GenericColumn;
+import org.notima.businessobjects.adapter.tools.table.GenericRow;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
 public class ExcelReportFormatter extends BasicReportFormatter implements ReportFormatter<GenericTable> {
@@ -56,14 +57,20 @@ public class ExcelReportFormatter extends BasicReportFormatter implements Report
 		// Add lines
 		if (!data.isEmpty()) {
 
-			for (List<GenericCell> rr : data.getRows()) {
+			GenericCell gc = null;
+			for (GenericRow rr : data.getRows()) {
 				colId = 0;
 				row = sheet.createRow(rowId++);
-				for (GenericCell gc : rr) {
-					
+				for (Object oc : rr.getContent()) {
 					cell = row.createCell(colId++);
-					if (gc.getData()!=null) {
-						cell.setCellValue(gc.getData().toString());
+					if (oc instanceof GenericCell) {
+						gc = (GenericCell)oc;
+						if (gc.getData()!=null) {
+							cell.setCellValue(gc.getData().toString());
+						}
+					} else {
+						if (oc!=null)
+							cell.setCellValue(oc.toString());
 					}
 					
 				}

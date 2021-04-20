@@ -7,7 +7,7 @@ public class GenericCell {
     public GenericCell(Object data){
         this.data = data;
     }
-
+    
     public GenericCell(Object data, int color){
         this.data = data;
         this.color = color;

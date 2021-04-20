@@ -50,7 +50,7 @@ public class ShowInvoice extends FortnoxCommand implements Action {
 		InvoiceHeaderTable iht = new InvoiceHeaderTable(invoice);
 		InvoiceLineTable ilt = new InvoiceLineTable(invoice, null);
 		
-		iht.print(sess.getConsole());
+		iht.getShellTable().print(sess.getConsole());
 		ilt.print(sess.getConsole());
 		
 		return null;

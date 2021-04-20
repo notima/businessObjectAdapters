@@ -10,6 +10,7 @@ public class GenericColumn {
 
     public GenericColumn() {}
     
+    
     public GenericColumn(String header){
         this(header, ALIGNMENT_LEFT);
     }
@@ -27,6 +28,11 @@ public class GenericColumn {
         return alignment;
     }
 
+    public GenericColumn alignRight() {
+    	setAlignment(ALIGNMENT_RIGHT);
+    	return this;
+    }
+    
     public void setAlignment(String alignment) {
         this.alignment = alignment;
     }

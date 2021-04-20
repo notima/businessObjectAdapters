@@ -4,11 +4,11 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 
-import org.apache.karaf.shell.support.table.ShellTable;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
+import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
-public class InvoiceHeaderTable extends ShellTable {
+public class InvoiceHeaderTable extends GenericTable {
 
 	private NumberFormat nfmt = new DecimalFormat("#,##0.00");	
 	
@@ -26,6 +26,7 @@ public class InvoiceHeaderTable extends ShellTable {
 		column("Open amt").alignRight();
 		column("Pmt term");
 		column("Not completed");
+		column("Warehouse Ready");
 		
 	}
 	
@@ -71,6 +72,7 @@ public class InvoiceHeaderTable extends ShellTable {
 				nfmt.format(is.getTotal()),
 				nfmt.format(is.getBalance()),
 				is.getTermsOfPayment(),
+				"N/A", 
 				"N/A")
 				;
 		
@@ -90,7 +92,9 @@ public class InvoiceHeaderTable extends ShellTable {
 				nfmt.format(invoice.getTotal()),
 				nfmt.format(invoice.getBalance()),
 				invoice.getTermsOfPayment(),
-				invoice.isNotCompleted())
+				invoice.isNotCompleted(),
+				invoice.getWarehouseReady()
+				)
 				;
 		
 	}
