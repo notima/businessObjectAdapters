@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
-import org.notima.businessobjects.adapter.tools.table.GenericColumn;
 
 
 public class GenericTable {
@@ -203,7 +202,7 @@ public class GenericTable {
             List<Object> htmlRow = new ArrayList<Object>();
 
             for(Object cell : row.getContent()){
-                String cellData = cell.toString();
+                String cellData = cell == null ? "" : cell.toString();
                 if (cell instanceof GenericCell) {
                 	gc = (GenericCell)cell;
 	                if(gc.getColor() >= 0){
