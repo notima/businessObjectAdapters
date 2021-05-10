@@ -24,6 +24,10 @@ Set the default client secret
 
 Restart the Fortnox adapter when the secret has been set
 
+	bundle:restart [bundle_id]
+	
+You can find out the bundle id with the ``list`` command.
+
 ### Adding clients
 
 Add new clients using the command
