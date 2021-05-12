@@ -45,7 +45,7 @@ public class BalanceSheetTable extends GenericTable {
 		}
 		
 		if (result.signum()!=0) {
-			addRow().addContent("", "CALCULATED RESULT", nfmt.format(result.negate()));
+			addRow().addContent("", "CALCULATED RESULT", nfmt.format(result));
 		}
 		
 	}
