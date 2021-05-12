@@ -53,7 +53,7 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
         }
 
         if(propertyToModify.equalsIgnoreCase(INVOICE_PROPERTY_WAREHOUSE_READY)){
-            fortnoxClient.warehouseReadyInvoice(invoiceNo);
+            invoice = fortnoxClient.warehouseReadyInvoice(invoiceNo);
         }else{
             session.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
             return null;
