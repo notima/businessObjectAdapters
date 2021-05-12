@@ -12,16 +12,16 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
-import org.notima.businessobjects.adapter.tools.table.ProfitLossTable;
+import org.notima.businessobjects.adapter.tools.table.BalanceSheetTable;
 import org.notima.generic.businessobjects.AccountingPeriod;
+import org.notima.generic.businessobjects.BalanceSheetReport;
 import org.notima.generic.businessobjects.BusinessPartner;
-import org.notima.generic.businessobjects.ProfitLossReport;
 import org.notima.generic.businessobjects.util.LocalDateUtils;
 import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
 
-@Command(scope = "notima", name = "show-pl-report", description = "Shows Profit/Loss Report")
+@Command(scope = "notima", name = "show-balance-report", description = "Shows Balance Sheet Report")
 @Service
-public class ShowPLReport implements Action {
+public class ShowBalanceReport implements Action {
 	
 	public static DateFormat	s_dfmt = new SimpleDateFormat("yyyy-MM-dd");	
 	
@@ -79,9 +79,9 @@ public class ShowPLReport implements Action {
 		ap.setPeriodStart(LocalDateUtils.asLocalDate(fromDate));
 		ap.setPeriodEnd(LocalDateUtils.asLocalDate(untilDate));
 		
-		ProfitLossReport report = arp.getProfitLossReport(bp, ap, null, null);
-		ProfitLossTable plt = new ProfitLossTable(report);
-		plt.print(sess.getConsole());
+		BalanceSheetReport report = arp.getBalanceSheet(bp, ap, null, null);
+		BalanceSheetTable plt = new BalanceSheetTable(report);
+		plt.getShellTable().print(sess.getConsole());
 		
 		return null;
 	}
