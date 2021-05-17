@@ -71,7 +71,9 @@
 					<instructions>
 						<Bundle-Activator>org.notima.businessobjects.adapter.fortnox.Activator</Bundle-Activator>
 						<Export-Package>org.notima.businessobjects.adapter.fortnox.*,
-										org.notima.fortnox.command*
+										org.notima.fortnox.command*,
+										org.notima.fortnox.command.completer,
+										org.notima.fortnox.command.table
 										</Export-Package>
 		        		<Private-Package>
         					org.apache.karaf.util.tracker,

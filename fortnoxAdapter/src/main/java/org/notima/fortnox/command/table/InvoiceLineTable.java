@@ -21,6 +21,7 @@ public class InvoiceLineTable extends ShellTable {
 		column("PPU").alignRight();
 		column("Line tax").alignRight();
 		column("Line total").alignRight();
+		column("Acct").alignRight();
 		
 		if (lines==null) {
 			lines = invoice.getInvoiceRows().getInvoiceRow();
@@ -39,7 +40,8 @@ public class InvoiceLineTable extends ShellTable {
 					l.getUnit(),
 					nfmt.format(l.getPrice()),
 					nfmt.format(l.getVAT()),
-					nfmt.format(l.getTotal())
+					nfmt.format(l.getTotal()),
+					l.getAccountNumber()
 			);
 		}
 		
