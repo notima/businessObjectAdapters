@@ -808,6 +808,10 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			row.setArticleNumber(il.getProductKey());
 			row.setDescription(il.getName()!=null ? il.getName() : il.getDescription());
 			row.setDeliveredQuantity((double)il.getQtyEntered());
+			if (!row.hasDescription()) {
+				// Empty description if missing
+				row.setDescription(".");
+			}
 			
 			// Try to set default account number if not set
 			if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
