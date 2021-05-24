@@ -10,9 +10,14 @@ import org.apache.karaf.shell.api.console.Session;
 
 public abstract class AbstractAction implements Action {
 
-	@Reference
-	protected Session sess;
+    @Reference
+    protected Session sess;
 
+    /**
+     * assigns each field with the @Argument annotation to a shell variable.
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     */
     protected void updateMacros() throws IllegalArgumentException, IllegalAccessException{
         for(Field field  : this.getClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(Argument.class)) {
@@ -21,11 +26,19 @@ public abstract class AbstractAction implements Action {
         }
     }
 
-	@Override
-	public Object execute() throws Exception {	
+    /**
+     * Called by the Karaf shell when the command is executed.
+     */
+    @Override
+    public Object execute() throws Exception {	
         updateMacros();
         return onExecute();
     }
 
+    /**
+     * Custom behaviour of the subclass.
+     * @return
+     * @throws Exception
+     */
     protected abstract Object onExecute() throws Exception;
 }
