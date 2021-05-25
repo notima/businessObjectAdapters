@@ -8,6 +8,15 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 import org.apache.karaf.shell.api.console.Session;
 
+/**
+ * Abstract implementation of Karaf shell api action.
+ * This superclass intercepts command line arguments
+ * passed to inherited commands and stores them for
+ * later reference as shell variables as long as their
+ * values are accessible to this class. private 
+ * argument variables will not be saved since their
+ * values are not accessible.
+ */
 public abstract class AbstractAction implements Action {
 
     @Reference
@@ -15,12 +24,13 @@ public abstract class AbstractAction implements Action {
 
     /**
      * assigns each field with the @Argument annotation to a shell variable.
+     * As long as they are accessible (protected or public)
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      */
     protected void updateMacros() throws IllegalArgumentException, IllegalAccessException{
         for(Field field  : this.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Argument.class)) {
+            if (field.isAnnotationPresent(Argument.class) && field.isAccessible()) {
                 sess.put(((Argument)field.getAnnotation(Argument.class)).name(), field.get(this));
             }
         }
