@@ -71,7 +71,9 @@
 						<Bundle-Activator>org.notima.businessobjects.adapter.tools.Activator</Bundle-Activator>					
 						<Export-Package>org.notima.businessobjects.adapter.tools.*,
 										org.notima.businessobjects.adapter.tools.table*,
-										org.notima.businessobjects.adapter.tools.command*
+										org.notima.businessobjects.adapter.tools.command*,
+										org.notima.businessobjects.adapter.tools.command.annotation*,
+										org.notima.businessobjects.adapter.tools.command.annotation.processor*
 						</Export-Package>
 		        		<Private-Package>
         					org.apache.karaf.util.tracker,
