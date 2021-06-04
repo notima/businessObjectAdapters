@@ -5,7 +5,8 @@
 	
 		<bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.12</bundle>
-        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.5.10</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.5.13</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpmime-osgi/4.5.13</bundle>
         <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
         <bundle>mvn:commons-configuration/commons-configuration/1.10</bundle>
     	<bundle>wrap:mvn:commons-collections/commons-collections</bundle>

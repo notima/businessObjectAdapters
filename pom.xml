@@ -45,6 +45,12 @@
 	
 		<dependencies>
 		
+			<dependency>
+				<groupId>org.notima.generic</groupId>
+				<artifactId>businessobjects</artifactId>
+				<version>${businessobjects.version}</version>
+			</dependency>
+		
 	  		<dependency>
 	  			<groupId>com.svea</groupId>
 	  			<artifactId>webpay-common</artifactId>
@@ -97,7 +103,6 @@
 		<dependency>
 			<groupId>org.notima.generic</groupId>
 			<artifactId>businessobjects</artifactId>
-			<version>${businessobjects.version}</version>
 		</dependency>
 
 		<dependency>
