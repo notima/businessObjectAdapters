@@ -316,7 +316,7 @@ public class ExcelToInvoices {
 	}
 	
 	/**
-	 * RealEstateNR; ProductKey; InvoiceText; Qty; Price/Each 
+	 * RealEstateNR; ProductKey; InvoiceText; Qty; Price/Each; UOM; RevenueAccount
 	 * 
 	 * 
 	 * @param invoiceMap		The invoice map to work on
@@ -456,7 +456,7 @@ public class ExcelToInvoices {
 		
 		List<Invoice<?>> invoices = billing.parseExcelList(fileName);
 
-		if (additional!=null && additional.size()>1) {
+		if (additional!=null && additional.size()>0) {
 			// See if additional billing lines should be added
 			Map<String,Invoice> invoiceMap = new TreeMap<String,Invoice>();
 			
