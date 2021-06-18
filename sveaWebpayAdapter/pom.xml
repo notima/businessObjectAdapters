@@ -16,6 +16,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<webpayadminreports.version>0.0.4-SNAPSHOT</webpayadminreports.version>
 	</properties>
 
 	<build>
@@ -117,7 +118,7 @@
 		<dependency>
 			<groupId>com.svea</groupId>
 			<artifactId>webpayadmin-reports</artifactId>
-			<version>0.0.3</version>
+			<version>${webpayadminreports.version}</version>
 		</dependency>
 
 	</dependencies>
