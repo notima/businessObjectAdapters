@@ -44,7 +44,7 @@ import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
-import org.notima.generic.businessobjects.util.LocalDateUtils;
+import org.notima.util.LocalDateUtils;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

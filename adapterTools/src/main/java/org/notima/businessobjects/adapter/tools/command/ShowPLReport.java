@@ -16,7 +16,7 @@ import org.notima.businessobjects.adapter.tools.table.ProfitLossTable;
 import org.notima.generic.businessobjects.AccountingPeriod;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.ProfitLossReport;
-import org.notima.generic.businessobjects.util.LocalDateUtils;
+import org.notima.util.LocalDateUtils;
 import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
 
 @Command(scope = "notima", name = "show-pl-report", description = "Shows Profit/Loss Report")

@@ -14,9 +14,9 @@ import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.Location;
-import org.notima.generic.businessobjects.util.InvalidTaxIdFormatException;
-import org.notima.generic.businessobjects.util.TaxIdStructure;
-import org.notima.generic.businessobjects.util.UnknownTaxIdFormatException;
+import org.notima.util.InvalidTaxIdFormatException;
+import org.notima.util.TaxIdStructure;
+import org.notima.util.UnknownTaxIdFormatException;
 
 import com.helger.ubl21.UBL21Reader;
 import com.helger.ubl21.UBL21Writer;

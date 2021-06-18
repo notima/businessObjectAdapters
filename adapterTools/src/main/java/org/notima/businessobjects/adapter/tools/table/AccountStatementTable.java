@@ -7,7 +7,7 @@ import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.notima.generic.businessobjects.AccountStatementLine;
 import org.notima.generic.businessobjects.AccountStatementLines;
-import org.notima.generic.businessobjects.util.NumberUtils;
+import org.notima.util.NumberUtils;
 
 public class AccountStatementTable extends ShellTable {
 

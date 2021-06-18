@@ -15,7 +15,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.table.AccountStatementTable;
 import org.notima.generic.businessobjects.AccountStatementLines;
 import org.notima.generic.businessobjects.BusinessPartner;
-import org.notima.generic.businessobjects.util.LocalDateUtils;
+import org.notima.util.LocalDateUtils;
 import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
 
 @Command(scope = "notima", name = "show-gl-details", description = "Shows GL-details")

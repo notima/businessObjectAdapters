@@ -20,7 +20,7 @@ import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
-import org.notima.generic.businessobjects.util.LocalDateUtils;
+import org.notima.util.LocalDateUtils;
 
 /**
  * Converts Fortnox entities to/from Business Objects entities.

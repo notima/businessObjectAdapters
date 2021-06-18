@@ -2,7 +2,7 @@ package org.notima.businessobjects.adapter.sie;
 
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
-import org.notima.generic.businessobjects.util.LocalDateUtils;
+import org.notima.util.LocalDateUtils;
 import org.notima.sie.TransRec;
 import org.notima.sie.VerRec;
 
