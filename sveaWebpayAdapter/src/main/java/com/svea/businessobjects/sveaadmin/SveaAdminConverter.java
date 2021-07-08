@@ -477,7 +477,7 @@ public class SveaAdminConverter {
 		
 		Payment dst = new Payment();
 		
-		dst.setPaymentDate(JsonUtil.dfmt.parse(group.getReconciliationDate()));
+		dst.setPaymentDate(JsonUtil.getDateFormat().parse(group.getReconciliationDate()));
 		dst.setCurrency(group.getCurrency());
 		
 		dst.setAccountNo(group.getDstAcct());
