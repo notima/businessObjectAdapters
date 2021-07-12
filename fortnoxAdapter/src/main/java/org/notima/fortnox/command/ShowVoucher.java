@@ -51,7 +51,7 @@ public class ShowVoucher extends FortnoxCommand implements Action {
 		Voucher voucher = fc.getVoucher(yId, series, voucherNo);
 		VoucherTable vt = new VoucherTable(voucher);
 		
-		vt.print(sess.getConsole());
+		vt.getShellTable().print(sess.getConsole());
 		
 		return null;
 	}

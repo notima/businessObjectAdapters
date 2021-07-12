@@ -3,22 +3,27 @@ package org.notima.fortnox.command.table;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import org.apache.karaf.shell.support.table.ShellTable;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherRow;
+import org.notima.businessobjects.adapter.tools.table.GenericColumn;
+import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
-public class VoucherTable extends ShellTable {
+public class VoucherTable extends GenericTable {
 
 	private NumberFormat nfmt = new DecimalFormat("#,##0.00");	
 	
 	public void initColumns() {
 		
-		column("Date");
-		column("Acct No");
-		column("Description");
-		column("Debet").alignRight();
-		column("Credit").alignRight();
-		column("Is deleted");
+		addColumn("Date");
+		addColumn("Acct No");
+		addColumn("Description");
+		GenericColumn col = new GenericColumn("Debet");
+		col.alignRight();
+		addColumn(col);
+		col = new GenericColumn("Credit");
+		col.alignRight();
+		addColumn(col);
+		addColumn("Is deleted");
 		
 	}
 	
@@ -58,6 +63,18 @@ public class VoucherTable extends ShellTable {
 					vr.getRemoved()!=null && vr.getRemoved().booleanValue() ? "*" : ""
 					)
 					;
+		}
+		
+		// Add comment if existing
+		if (vv.getComments()!=null && vv.getComments().trim().length()>0) {
+			addRow().addContent(
+					"",
+					"",
+					vv.getComments(),
+					"",
+					"",
+					""
+					);
 		}
 		
 	}
