@@ -92,6 +92,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	private FortnoxClient3 client;
 	
+	private FortnoxClientInfo	currentTenant = null;
+	
 	private FortnoxClientManager clientManager;
 	
 	private String exportRevenueAccount = null;
@@ -1296,13 +1298,13 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			try {
 				cs = client.getCompanySetting();
 				if (cs.getOrganizationNumber().equalsIgnoreCase(orgNo)) {
+					currentTenant = null;	// Set to make sure current tenant is read using credentials
 					return;
 				} else {
 					
 					
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -1315,6 +1317,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				throw new NoSuchTenantException("No such tenant " + orgNo);
 			} else {
 				client.setAccessToken(fi.getAccessToken(), fi.getClientSecret());
+				currentTenant = fi;
 			}
 			
 		} else {
@@ -1327,6 +1330,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public BusinessPartner<Customer> getCurrentTenant() {
 		
 		if (client.hasCredentials()) {
+			// Read from credentials
 			CompanySetting cs;
 			try {
 				cs = client.getCompanySetting();
@@ -1340,6 +1344,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				e.printStackTrace();
 			}
 
+		} else {
+			BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
+			bp.setTaxId(currentTenant.getOrgNo());
+			bp.setName(currentTenant.getOrgName());
+			return bp;
 		}
 		
 		return null;
