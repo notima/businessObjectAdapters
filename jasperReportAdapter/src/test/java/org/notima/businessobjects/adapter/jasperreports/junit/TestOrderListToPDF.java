@@ -17,7 +17,7 @@ import org.notima.businessobjects.adapter.jasperreports.ds.OrderListXmlDataSourc
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.OrderList;
 
-import com.ibm.icu.util.Calendar;
+import java.util.Calendar;
 
 public class TestOrderListToPDF {
 

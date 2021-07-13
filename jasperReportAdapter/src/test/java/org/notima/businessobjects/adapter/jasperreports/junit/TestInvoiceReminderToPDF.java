@@ -3,6 +3,7 @@ package org.notima.businessobjects.adapter.jasperreports.junit;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -15,8 +16,6 @@ import org.notima.businessobjects.adapter.jasperreports.JasperInvoiceReminderFor
 import org.notima.businessobjects.adapter.jasperreports.ds.DunningEntryXmlDataSource;
 import org.notima.generic.businessobjects.DunningEntry;
 import org.notima.generic.businessobjects.DunningRun;
-
-import com.ibm.icu.util.Calendar;
 
 public class TestInvoiceReminderToPDF {
 
