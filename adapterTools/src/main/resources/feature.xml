@@ -135,6 +135,7 @@
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.codehaus.groovy/groovy/2.5.14</bundle>
     	<bundle>wrap:mvn:com.lowagie/itext/2.1.7</bundle>
+    	<bundle>mvn:org.apache.commons/commons-collections4/4.2</bundle>
 		<bundle>mvn:net.sf.jasperreports/jasperreports/6.9.0</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/jasperFonts/${project.version}</bundle>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/jasperReportAdapter/${project.version}</bundle>
