@@ -30,6 +30,9 @@ public class CancelVoucher extends FortnoxCommand implements Action {
 	
 	@Option(name = "--reverse-date", description = "Date for reversal (if not same as voucher)", required = false, multiValued = false)
 	private String reverseDateStr;
+
+	@Option(name ="--reverse-series", description = "If a different series should be used for the reversal voucher", required = false, multiValued = false)
+	private String reverseSeries;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
@@ -82,6 +85,7 @@ public class CancelVoucher extends FortnoxCommand implements Action {
 		if (voucher!=null) {
 
 			Voucher v = new Voucher();
+			v.setVoucherSeries(reverseSeries!=null ? reverseSeries : series);
 			v.reverse(voucher, revTxt);
 			if (reverseDate!=null) {
 				v.setTransactionDate(reverseDateStr);
