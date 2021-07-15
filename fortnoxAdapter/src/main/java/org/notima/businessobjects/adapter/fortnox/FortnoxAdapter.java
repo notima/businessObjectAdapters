@@ -1345,6 +1345,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 
 		} else {
+			if (currentTenant==null) return null;
+			
 			BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
 			bp.setTaxId(currentTenant.getOrgNo());
 			bp.setName(currentTenant.getOrgName());
