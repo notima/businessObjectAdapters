@@ -11,10 +11,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
-import org.notima.api.fortnox.entities3.InvoicePayment;
 import org.notima.api.fortnox.entities3.Voucher;
-import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
-import org.notima.businessobjects.adapter.tools.FactorySelector;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "delete-fortnox-voucher", description = "Delete voucher in Fortnox")
