@@ -112,6 +112,12 @@ public class PayInvoice extends FortnoxCommand implements Action {
 
 		// Check open amount
 		Double openAmt = invoice.getBalance();
+		Double payAmt;
+		if (amount!=null && amount!=0.0) {
+			payAmt = amount;
+		} else {
+			payAmt = openAmt;
+		}
 		
 		// Get mode of payment
 		ModeOfPayment mp = null;
@@ -129,7 +135,7 @@ public class PayInvoice extends FortnoxCommand implements Action {
 		}
 
 		// Confirm payment
-		String reply = noConfirm ? "y" : sess.readLine("Do you want to pay invoice " + invoiceNo + " on " + payDateStr + " with amt " + openAmt + " using account " + mp.getAccountNumber() + ": (y/n) ", null);
+		String reply = noConfirm ? "y" : sess.readLine("Do you want to pay invoice " + invoiceNo + " on " + payDateStr + " with amt " + payAmt + " using account " + mp.getAccountNumber() + ": (y/n) ", null);
 
 		if (reply.equalsIgnoreCase("y")) {
 			
@@ -158,7 +164,7 @@ public class PayInvoice extends FortnoxCommand implements Action {
 					Integer.parseInt(invoiceNo), 
 					mp, 
 					payDate, 
-					openAmt, 
+					payAmt, 
 					null, !noBookkeepPayment);
 			
 			if (pmt!=null) {
