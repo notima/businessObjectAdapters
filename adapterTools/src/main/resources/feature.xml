@@ -14,6 +14,13 @@
     	<bundle>mvn:commons-beanutils/commons-beanutils/1.9.4</bundle>
     	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
 		
+		<bundle>mvn:com.sun.activation/javax.activation/1.2.0</bundle>
+		<bundle>mvn:javax.xml.soap/javax.xml.soap-api/1.4.0</bundle>
+		<bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
+		<bundle>mvn:javax.xml.ws/jaxws-api/2.3.1</bundle>
+		<bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
+		<bundle>mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
+		
 <!--         <bundle>mvn:com.sun.xml.bind/jaxb-core/2.3.0.1</bundle>
         <bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
         <bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle> -->
