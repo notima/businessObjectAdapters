@@ -56,7 +56,6 @@ public class AccountingReportConverter {
 	 * 
 	 * @param ar		An accounting report.
 	 * @param lang		Language to use for texts in voucher. Can be null.
-	 * @param maxRoundingPer100Trx
 	 * 
 	 * @return	A list of accounting vouchers.
 	 */
