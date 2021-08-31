@@ -24,8 +24,10 @@ public class AccountingReportConverter {
 
 	// Default accounting precision.
 	public static final int DEFAULT_PRECISION = 2;
+
+	private double maxRounding = 4.0;
 	
-	public static AccountingVoucherLine mapWebpayFeeTypesToAccountingType(String feeType, AccountingVoucherLine avl) {
+	public AccountingVoucherLine mapWebpayFeeTypesToAccountingType(String feeType, AccountingVoucherLine avl) {
 		
 		switch(feeType) {
 		
@@ -47,17 +49,18 @@ public class AccountingReportConverter {
 		return avl;
 		
 	}
-	
+
 	/**
 	 * Converts an accounting report to a list of accounting vouchers that can be used to map accounting to 
 	 * an ERP-system.
 	 * 
 	 * @param ar		An accounting report.
 	 * @param lang		Language to use for texts in voucher. Can be null.
+	 * @param maxRoundingPer100Trx
 	 * 
 	 * @return	A list of accounting vouchers.
 	 */
-	public static List<org.notima.generic.businessobjects.AccountingVoucher> toBoVouchers(AccountingReport ar, String lang) {
+	public List<org.notima.generic.businessobjects.AccountingVoucher> toBoVouchers(AccountingReport ar, String lang) {
 		
 		List<org.notima.generic.businessobjects.AccountingVoucher> result = new ArrayList<org.notima.generic.businessobjects.AccountingVoucher>();
 		if (ar==null || ar.getVouchers()==null) return result;
@@ -159,8 +162,7 @@ public class AccountingReportConverter {
 				}
 			}
 			
-			// TODO: Have a better rounding algorithm.
-			if (dst.getBalance().abs().doubleValue() > 4) {
+			if (dst.getBalance().abs().doubleValue() > maxRounding) {
 				dst.balanceWithLine(AccountingType.UNKNOWN_BALANCE_TRX);
 			} else {
 				// Purge voucher (round to precision, remove zero lines and round the rest)
@@ -171,6 +173,15 @@ public class AccountingReportConverter {
 		
 		return result;
 		
+	}
+	
+	public double getMaxRounding() {
+		return maxRounding;
+	}
+
+	public AccountingReportConverter setMaxRounding(double maxRounding) {
+		this.maxRounding = maxRounding;
+		return this;
 	}
 	
 }
