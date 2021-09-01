@@ -19,7 +19,7 @@
 		<notima-util.version>0.0.2-SNAPSHOT</notima-util.version>
 		<businessobjects.version>0.1.20-SNAPSHOT</businessobjects.version>
 		<karaf.version>4.2.9</karaf.version>
-		<pmt-admin-api.version>2.0.2</pmt-admin-api.version>
+		<pmt-admin-api.version>2.1.0-SNAPSHOT</pmt-admin-api.version>
 		<webpay-common.version>0.0.4-SNAPSHOT</webpay-common.version>
 		<apache.poi.version>3.17</apache.poi.version>
 		<fortnox4j.version>1.8.11-SNAPSHOT</fortnox4j.version>

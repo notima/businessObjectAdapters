@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.notima.api.webpay.pmtapi.PmtApiClientRF;
+import org.notima.api.webpay.pmtapi.CheckoutOrder;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
@@ -27,7 +28,7 @@ import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactory<
 		PmtApiClientRF, 
 		org.notima.api.webpay.pmtapi.entity.Invoice, 
-		org.notima.api.webpay.pmtapi.entity.Order,
+		org.notima.api.webpay.pmtapi.CheckoutOrder,
 		Object,
 		Object
 		> {
@@ -57,10 +58,10 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public Order<org.notima.api.webpay.pmtapi.entity.Order> lookupOrder(String key) throws Exception {
-		org.notima.api.webpay.pmtapi.entity.Order o = lookupNativeOrder(key);
+	public Order<org.notima.api.webpay.pmtapi.CheckoutOrder> lookupOrder(String key) throws Exception {
+		org.notima.api.webpay.pmtapi.CheckoutOrder o = lookupNativeOrder(key);
 		if (o==null) return null;
-		Order<org.notima.api.webpay.pmtapi.entity.Order> result = SveaPmtAdminConverter.convert(o);
+		Order<org.notima.api.webpay.pmtapi.CheckoutOrder> result = SveaPmtAdminConverter.convert(o);
 		result.setNativeOrder(o);
 		return result;
 	}
@@ -71,10 +72,10 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public org.notima.api.webpay.pmtapi.entity.Order lookupNativeOrder(String key)
+	public org.notima.api.webpay.pmtapi.CheckoutOrder lookupNativeOrder(String key)
 			throws Exception {
 		
-		return client.getOrder(Long.parseLong(key));
+		return client.getCheckoutOrder(Long.parseLong(key));
 		
 	}
 
@@ -114,8 +115,8 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public org.notima.api.webpay.pmtapi.entity.Order persistNativeOrder(
-			org.notima.api.webpay.pmtapi.entity.Order order) throws Exception {
+	public org.notima.api.webpay.pmtapi.CheckoutOrder persistNativeOrder(
+			org.notima.api.webpay.pmtapi.CheckoutOrder order) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

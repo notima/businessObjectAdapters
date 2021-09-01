@@ -22,47 +22,49 @@ import org.notima.api.webpay.pmtapi.entity.OrderRow;
 public class SveaPmtAdminConverter {
 
 	@SuppressWarnings("rawtypes")
-	public static Order<org.notima.api.webpay.pmtapi.entity.Order> convert(org.notima.api.webpay.pmtapi.entity.Order src) throws ParseException {
+	public static Order<org.notima.api.webpay.pmtapi.CheckoutOrder> convert(org.notima.api.webpay.pmtapi.CheckoutOrder src) throws ParseException {
 		if (src==null) return null;
-		Order<org.notima.api.webpay.pmtapi.entity.Order> dst = new Order<org.notima.api.webpay.pmtapi.entity.Order>();
+		Order<org.notima.api.webpay.pmtapi.CheckoutOrder> dst = new Order<org.notima.api.webpay.pmtapi.CheckoutOrder>();
+		
+		org.notima.api.webpay.pmtapi.entity.Order s = src.getOrder();
 		
 		BusinessPartner<?> bp = new BusinessPartner();
 		dst.setBpartner(bp);
-		bp.setTaxId(src.getNationalId());
-		bp.setCompany(src.isCompany());
+		bp.setTaxId(s.getNationalId());
+		bp.setCompany(s.isCompany());
 		
-		dst.setDocumentKey(Long.toString(src.getId()));
-		dst.setOrderKey(src.getMerchantOrderId());
-		dst.setCurrency(src.getCurrency());
-		dst.setDateOrdered(PmtApiUtil.dateTimeFmt.parse(src.getCreatationDate()));
+		dst.setDocumentKey(Long.toString(s.getId()));
+		dst.setOrderKey(s.getMerchantOrderId());
+		dst.setCurrency(s.getCurrency());
+		dst.setDateOrdered(PmtApiUtil.dateTimeFmt.parse(s.getCreatationDate()));
 		
 		Person person = new Person();
-		if (src.isCompany())
-			person.setName(src.getCustomerReference());
+		if (s.isCompany())
+			person.setName(s.getCustomerReference());
 		else 
-			person.setName(src.getBillingAddress().getFullName());
+			person.setName(s.getBillingAddress().getFullName());
 		
-		person.setPhone(src.getPhoneNumber());
-		person.setEmail(src.getEmailAddress());
+		person.setPhone(s.getPhoneNumber());
+		person.setEmail(s.getEmailAddress());
 		if (person.getName()==null || person.getName().trim().length()==0) {
-			if (src.getBillingAddress()!=null)
-					person.setName(src.getBillingAddress().getFullName());
+			if (s.getBillingAddress()!=null)
+					person.setName(s.getBillingAddress().getFullName());
 		}
 		
 		dst.setBillPerson(person);
 		
-		dst.setBillLocation(convert(src.getBillingAddress()));
-		dst.getBillLocation().setEmail(src.getEmailAddress());
-		dst.getBillLocation().setPhone(src.getPhoneNumber());
+		dst.setBillLocation(convert(s.getBillingAddress()));
+		dst.getBillLocation().setEmail(s.getEmailAddress());
+		dst.getBillLocation().setPhone(s.getPhoneNumber());
 		
-		dst.setShipLocation(convert(src.getShippingAddress()));
+		dst.setShipLocation(convert(s.getShippingAddress()));
 		if (dst.getShipLocation()!=null) {
-			dst.getShipLocation().setEmail(src.getEmailAddress());
+			dst.getShipLocation().setEmail(s.getEmailAddress());
 		}
 		
 		// With card orders, billing address can be empty. Set billing adress to shipping adress in that case.
-		if (src.getBillingAddress()==null || 
-			(src.getBillingAddress().getFullName()==null && src.getBillingAddress().getStreetAddress()==null)) {
+		if (s.getBillingAddress()==null || 
+			(s.getBillingAddress().getFullName()==null && s.getBillingAddress().getStreetAddress()==null)) {
 			dst.setBillLocation(dst.getShipLocation());
 		}
 		
@@ -70,7 +72,7 @@ public class SveaPmtAdminConverter {
 		bp.setAddressOfficial(dst.getBillLocation());
 		
 		// Get name from either billing address or shipping address (if billing address is empty)
-		bp.setName(src.getBillingAddress().getFullName()!=null ? src.getBillingAddress().getFullName() : src.getShippingAddress().getFullName());
+		bp.setName(s.getBillingAddress().getFullName()!=null ? s.getBillingAddress().getFullName() : s.getShippingAddress().getFullName());
 		if (bp.isCompany()) {
 			// Add contact
 			List<Person> contacts = new ArrayList<Person>();
@@ -79,13 +81,13 @@ public class SveaPmtAdminConverter {
 		}
 		
 		// Set payment rule from payment type
-		dst.setPaymentRule(src.getPaymentType());
+		dst.setPaymentRule(s.getPaymentType());
 		
 		List<OrderLine> ol = new ArrayList<OrderLine>();
 		OrderLine ll;
 
-		if (src.getDeliveries()!=null) {
-			for (Delivery d : src.getDeliveries()) {
+		if (s.getDeliveries()!=null) {
+			for (Delivery d : s.getDeliveries()) {
 				// TODO: Perhaps make a more sophisticated delivery date check
 				dst.setDateDelivered(PmtApiUtil.dateTimeFmt.parse(d.getCreationDate()));
 				if (d.getOrderRows()!=null) {
@@ -98,8 +100,8 @@ public class SveaPmtAdminConverter {
 			}
 		}
 		
-		if (src.getOrderRows()!=null) {
-			for (OrderRow r : src.getOrderRows()) {
+		if (s.getOrderRows()!=null) {
+			for (OrderRow r : s.getOrderRows()) {
 				ll = convert(r);
 				ol.add(ll);
 			}
@@ -108,9 +110,9 @@ public class SveaPmtAdminConverter {
 		dst.calculateGrandTotal();
 
 		// Check to see if OrgNo should be harmonized
-		if (bp.isCompany() && "SE".equalsIgnoreCase(src.getBillingAddress().getCountryCode())) {
+		if (bp.isCompany() && "SE".equalsIgnoreCase(s.getBillingAddress().getCountryCode())) {
 				try {
-					bp.setTaxId(TaxIdFormatter.printTaxId(null, src.getNationalId(), TaxIdStructure.FMT_SE11));
+					bp.setTaxId(TaxIdFormatter.printTaxId(null, s.getNationalId(), TaxIdStructure.FMT_SE11));
 				} catch (UnknownTaxIdFormatException e) {
 				} catch (InvalidTaxIdFormatException e) {
 				}
