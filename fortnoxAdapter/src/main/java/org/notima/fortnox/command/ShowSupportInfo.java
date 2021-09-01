@@ -36,7 +36,9 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 		}
 
 		CompanySetting cs = fc.getCompanySetting();
-		sess.getConsole().println("[ " + orgNo + " ] - " + cs.getName());
+		sess.getConsole().println("[ " + cs.getOrganizationNumber() + " ] - " + cs.getName());
+		sess.getConsole().println("Contact: " + cs.getContactFirstName() + " " + cs.getContactLastName());
+		sess.getConsole().println("Email: " + cs.getEmail());
 		sess.getConsole().println("Subscription-ID: " + cs.getDatabaseNumber());
 		sess.getConsole().println("Access-token: " + fc.getAccessTokenCurrent());
 		
