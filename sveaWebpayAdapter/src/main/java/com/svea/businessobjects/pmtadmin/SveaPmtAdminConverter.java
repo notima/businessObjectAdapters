@@ -4,6 +4,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.notima.api.webpay.pmtapi.PmtApiUtil;
+import org.notima.api.webpay.pmtapi.entity.Credit;
+import org.notima.api.webpay.pmtapi.entity.Delivery;
+import org.notima.api.webpay.pmtapi.entity.OrderRow;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
@@ -14,10 +18,6 @@ import com.svea.webpay.common.conv.InvalidTaxIdFormatException;
 import com.svea.webpay.common.conv.TaxIdFormatter;
 import com.svea.webpay.common.conv.TaxIdStructure;
 import com.svea.webpay.common.conv.UnknownTaxIdFormatException;
-
-import org.notima.api.webpay.pmtapi.PmtApiUtil;
-import org.notima.api.webpay.pmtapi.entity.Delivery;
-import org.notima.api.webpay.pmtapi.entity.OrderRow;
 
 public class SveaPmtAdminConverter {
 
@@ -95,6 +95,19 @@ public class SveaPmtAdminConverter {
 						ll = convert(r);
 						ll.setQtyDelivered(ll.getQtyEntered());
 						ol.add(ll);
+					}
+				}
+				
+				if (d.getCredits()!=null) {
+					for (Credit cr : d.getCredits()) {
+						if (cr.getOrderRows()!=null) {
+							for (OrderRow creditedOrderRow : cr.getOrderRows()) {
+								ll = convert(creditedOrderRow);
+								// Set to zero delivered.
+								ll.setQtyDelivered(0);
+								ol.add(ll);
+							}
+						}
 					}
 				}
 			}
