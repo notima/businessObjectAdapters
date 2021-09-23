@@ -98,7 +98,11 @@ public class SveaPmtAdminConverter {
 					}
 				}
 				
-				if (d.getCredits()!=null) {
+				// TODO: It seemed as if a temporary problem at the API (sept 2021) caused 
+				// credited rows to not show up in the original order rows.
+				// Commenting out below since it's now working, 2021-09-23
+				
+				/** if (d.getCredits()!=null) {
 					for (Credit cr : d.getCredits()) {
 						if (cr.getOrderRows()!=null) {
 							for (OrderRow creditedOrderRow : cr.getOrderRows()) {
@@ -109,7 +113,7 @@ public class SveaPmtAdminConverter {
 							}
 						}
 					}
-				}
+				} */
 			}
 		}
 		
