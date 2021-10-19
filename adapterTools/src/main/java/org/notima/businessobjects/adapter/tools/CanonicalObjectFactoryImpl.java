@@ -9,6 +9,8 @@ import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
+import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -26,6 +28,10 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	@SuppressWarnings("rawtypes")
 	private Map<String, BusinessObjectConverter> converters = new TreeMap<String, BusinessObjectConverter>();
 
+	private Map<String, PaymentFactory> paymentFactories = new TreeMap<String, PaymentFactory>();
+	
+	private Map<String, PaymentBatchProcessor> paymentBatchProcessors = new TreeMap<String, PaymentBatchProcessor>();
+	
 	private BundleContext ctx;
 
 	public void setBundleContext(BundleContext c) {
@@ -82,6 +88,53 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 	}
 	
+	/**
+	 * Resets the services by re-reading the service references for PaymentFactories
+	 * 
+	 * @throws InvalidSyntaxException
+	 */
+	public void resetPaymentFactories() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		
+		Collection<ServiceReference<PaymentFactory>> references = ctx.getServiceReferences(PaymentFactory.class, null);		
+
+		paymentFactories.clear();
+		
+		if (references!=null) {
+			PaymentFactory srv;
+			for (ServiceReference<PaymentFactory> sr : references) {
+				srv = ctx.getService(sr);
+				paymentFactories.put(srv.getSystemName(), srv);
+			}
+		}
+
+	}
+
+	/**
+	 * Resets the services by re-reading the service references for PaymentBatchProcessors
+	 * 
+	 * @throws InvalidSyntaxException
+	 */
+	public void resetPaymentBatchProcessors() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		
+		Collection<ServiceReference<PaymentBatchProcessor>> references = ctx.getServiceReferences(PaymentBatchProcessor.class, null);		
+
+		paymentBatchProcessors.clear();
+		
+		if (references!=null) {
+			PaymentBatchProcessor srv;
+			for (ServiceReference<PaymentBatchProcessor> sr : references) {
+				srv = ctx.getService(sr);
+				paymentBatchProcessors.put(srv.getSystemName(), srv);
+			}
+		}
+
+	}
 	
 	/**
 	 * Looks up an adapter with given name.
@@ -145,6 +198,56 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		return cv;
 		
 	}
+
+	public PaymentFactory lookupPaymentFactory(String systemName) {
+		
+		try {
+			resetPaymentFactories();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+		
+		PaymentFactory pp = null;
+		
+		if (systemName==null) {
+			return null;
+		} else {
+			pp = paymentFactories.get(systemName);
+		}
+		if (pp==null)
+			log.warn("Payment Factory {} not found.", systemName);
+		
+		return pp;
+		
+	}
+	
+	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName) {
+		
+		try {
+			resetPaymentBatchProcessors();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+		
+		PaymentBatchProcessor pp = null;
+		
+		if (systemName==null) {
+			return null;
+		} else {
+			pp = paymentBatchProcessors.get(systemName);
+		}
+		if (pp==null)
+			log.warn("Payment Batch Processor {} not found.", systemName);
+		
+		return pp;
+		
+		
+	}
+	
 	
 	
 	@Override
