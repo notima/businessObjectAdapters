@@ -13,7 +13,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
-import org.notima.generic.businessobjects.Invoice;
 
 @Command(scope = "notima", name = "convert-invoice", description = "Converts an invoice to an adapter format")
 @Service
