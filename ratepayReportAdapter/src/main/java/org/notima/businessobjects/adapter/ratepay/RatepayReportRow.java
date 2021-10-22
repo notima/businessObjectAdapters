@@ -140,7 +140,7 @@ public class RatepayReportRow {
      *          5 - Service charge
      *          6 - VAT
      *          7 - Interest cost
-     *          <null> - Other (monthly fee or similar)
+     *          null - Other (monthly fee or similar)
      *          8 - Retransfer / Chargeback/Reassignment
      */
     public int getFeeType() {
