@@ -77,6 +77,7 @@
 										com.svea.webpayadminservice.client,
 										org.notima.api.webpay.pmtapi,
 										org.notima.api.webpay.pmtapi.entity,
+										org.notima.api.webpay.pmtapi.exception,
 										org.notima.factoring,
 										org.notima.generic.businessobjects,
 										org.notima.generic.businessobjects.exception,

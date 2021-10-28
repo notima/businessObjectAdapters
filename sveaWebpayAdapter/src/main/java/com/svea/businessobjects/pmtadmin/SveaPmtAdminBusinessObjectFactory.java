@@ -3,8 +3,10 @@ package com.svea.businessobjects.pmtadmin;
 import java.util.List;
 import java.util.Map;
 
+import org.notima.api.webpay.pmtapi.PmtApiClientCollection;
 import org.notima.api.webpay.pmtapi.PmtApiClientRF;
-import org.notima.api.webpay.pmtapi.CheckoutOrder;
+import org.notima.api.webpay.pmtapi.PmtApiCredential;
+import org.notima.api.webpay.pmtapi.exception.NoSuchOrderException;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
@@ -26,17 +28,17 @@ import org.notima.generic.ifacebusinessobjects.FactoringReservation;
  *
  */
 public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactory<
-		PmtApiClientRF, 
+		PmtApiClientCollection, 
 		org.notima.api.webpay.pmtapi.entity.Invoice, 
 		org.notima.api.webpay.pmtapi.CheckoutOrder,
 		Object,
 		Object
 		> {
 
-	private PmtApiClientRF client;
+	private PmtApiClientCollection clients;
 	
 	public SveaPmtAdminBusinessObjectFactory() {
-		client = new PmtApiClientRF();
+		clients = new PmtApiClientCollection();
 	}
 
 	/**
@@ -46,20 +48,24 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	 * @param merchantId
 	 * @param secretWord
 	 */
-	public void init(String serverName, String merchantId, String secretWord) {
-		client.init(serverName, merchantId, secretWord);
-	}
-	
-	/**
-	 * Initializes the business object factory using a configfile
-	 */
-	public void loadConfig(String configFile) throws Exception {
-		client.loadConfig(configFile);
+	public void addCredential(String serverName, String merchantId, String secretWord) {
+		
+		PmtApiCredential credential = new PmtApiCredential();
+		credential.setServer(serverName);
+		credential.setMerchantId(merchantId);
+		credential.setSecret(secretWord);
+		clients.addPmtApiClient(credential);
+
 	}
 
 	@Override
 	public Order<org.notima.api.webpay.pmtapi.CheckoutOrder> lookupOrder(String key) throws Exception {
-		org.notima.api.webpay.pmtapi.CheckoutOrder o = lookupNativeOrder(key);
+		org.notima.api.webpay.pmtapi.CheckoutOrder o = null;
+		try {
+			o = lookupNativeOrder(key);
+		} catch (NoSuchOrderException nsoe) {
+			
+		}
 		if (o==null) return null;
 		Order<org.notima.api.webpay.pmtapi.CheckoutOrder> result = SveaPmtAdminConverter.convert(o);
 		result.setNativeOrder(o);
@@ -67,15 +73,15 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public PmtApiClientRF getClient() {
-		return client;
+	public PmtApiClientCollection getClient() {
+		return clients;
 	}
 
 	@Override
 	public org.notima.api.webpay.pmtapi.CheckoutOrder lookupNativeOrder(String key)
 			throws Exception {
 		
-		return client.getCheckoutOrder(Long.parseLong(key));
+		return clients.getCheckoutOrder(Long.parseLong(key));
 		
 	}
 
