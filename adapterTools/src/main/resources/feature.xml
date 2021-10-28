@@ -81,7 +81,7 @@
     
     <feature name="notima-csv" description="Notima CSV Adapter" version="">
     	<feature>notima-businessobjects</feature>
-    	<bundle>mvn:org.apache.commons/commons-csv/1.6</bundle>
+    	<bundle>mvn:org.apache.commons/commons-csv/${commons-csv.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/csvAdapter/${project.version}</bundle>    	
     </feature>
     
@@ -95,6 +95,7 @@
     
     <feature name="notima-infometric" description="Notima Infometric Adapter" version="${project.version}">
     	<feature>notima-businessobjects</feature>
+    	<bundle>mvn:org.apache.commons/commons-csv/${commons-csv.version}</bundle>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/infometricAdapter/${project.version}</bundle>
     </feature>
     
