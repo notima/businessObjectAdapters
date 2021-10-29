@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.8.11-SNAPSHOT</version>
+		<version>1.8.12-SNAPSHOT</version>
 	</parent>
 	<artifactId>ratepayAdapter</artifactId>
 	<packaging>bundle</packaging>
@@ -16,7 +16,7 @@
 				org.notima.generic.businessobjects.adapter
 			</groupId>
 			<artifactId>adapterTools</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 			<type>bundle</type>
 		</dependency>
 			

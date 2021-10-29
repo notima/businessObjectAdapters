@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.notima.generic.businessobjects.adapter</groupId>
     <artifactId>businessObjectAdapters</artifactId>
-    <version>1.8.11-SNAPSHOT</version>
+    <version>1.8.12-SNAPSHOT</version>
   </parent>
   <artifactId>infometricAdapter</artifactId>
   <packaging>bundle</packaging>
@@ -50,7 +50,7 @@
   	<dependency>
   		<groupId>org.apache.commons</groupId>
   		<artifactId>commons-csv</artifactId>
-  		<version>1.6</version>
+  		<version>${commons-csv.version}</version>
   	</dependency>
   </dependencies>
   

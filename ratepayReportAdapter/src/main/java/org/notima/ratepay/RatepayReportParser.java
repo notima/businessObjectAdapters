@@ -62,10 +62,7 @@ public class RatepayReportParser {
         RatepayReportRow row = new RatepayReportRow();
         String[] values = line.split(";");
         for(int i = 0 ; i < values.length; i++) {
-            System.out.println(indexMap.get(i));
-            System.out.println(values[i]);
             if(indexMap.get(i).equals(K_SHOP_ID)){
-                System.out.println("SHOPID!");
                 row.setShopId(values[i]);
             }
             if(indexMap.get(i).equals(K_PAYMENTDATE))
