@@ -17,6 +17,8 @@ https://github.com/sveawebpay/webpay-common
 
 https://github.com/sveawebpay/webpayadminreports
 
+https://github.com/notima/swish4j
+
 If the project is a release version, you'll only have to checkout and compile the sveawebpay projects.
 
 ## Installation in Karaf
