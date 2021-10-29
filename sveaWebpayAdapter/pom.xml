@@ -129,7 +129,7 @@
 
 		<dependency>
 			<groupId>org.notima</groupId>
-			<artifactId>swish</artifactId>
+			<artifactId>swish4j</artifactId>
 			<version>0.0.1</version>
 		</dependency>
 
