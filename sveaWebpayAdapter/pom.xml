@@ -121,6 +121,18 @@
 			<version>${webpayadminreports.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.svea</groupId>
+			<artifactId>webpayadmin-reports</artifactId>
+			<version>${webpayadminreports.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.notima</groupId>
+			<artifactId>swish</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+
 	</dependencies>
 
 </project>
