@@ -37,7 +37,7 @@ public class SwishReportConverter {
         PaymentReportDetail detail = new PaymentReportDetail();
         detail.setCustomerId(row.getAmount() > 0 ? row.getSenderNumber() : row.getRecipientNumber());
         detail.setPayerName(row.getAmount() > 0 ? row.getSenderName() : row.getRecipientName());
-        detail.setOrderId(row.getOrderReference());
+        detail.setClientOrderNo(row.getOrderReference());
         detail.setOrderDate(JsonUtil.getDateFormat().format(row.getTransactionDate()));
         detail.setPaidAmt(row.getAmount());
         detail.setReceivedAmt(row.getAmount());
