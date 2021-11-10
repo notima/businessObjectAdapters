@@ -41,6 +41,7 @@ public class SwishReportConverter {
         detail.setOrderDate(JsonUtil.getDateFormat().format(row.getTransactionDate()));
         detail.setPaidAmt(row.getAmount());
         detail.setReceivedAmt(row.getAmount());
+        detail.setCheckoutOrderId(row.getCheckoutOrderId());
         return detail;
     }
 }
