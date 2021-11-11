@@ -66,11 +66,12 @@
 							com.svea.businessobjects,
 							com.svea.businessobjects.pmtadmin,
 							com.svea.businessobjects.sveaadmin,
-							com.svea.businessobjects.paymentgw
+							com.svea.businessobjects.paymentgw,
+							com.svea.businessobjects.sveaswish
 						</Export-Package>
 		        		<Private-Package>
-        					org.apache.karaf.util.tracker,
-        					org.apache.karaf.util.tracker.annotation
+							org.apache.karaf.util.tracker,
+							org.apache.karaf.util.tracker.annotation
         				</Private-Package>
 						<Import-Package>
 										com.svea.webpayadminservice.client,
@@ -82,6 +83,8 @@
 										org.notima.generic.businessobjects.exception,
 										org.notima.generic.businessobjects.util,
 										org.notima.generic.ifacebusinessobjects,
+										org.notima.swish,
+										org.notima.swish.reports,
 										org.slf4j,
 										org.notima.bg,
 										org.notima.bg.bgmax,
@@ -98,7 +101,7 @@
 										javax.naming,
 										org.osgi.*
 										</Import-Package>
-						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
+						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|swish4j|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
