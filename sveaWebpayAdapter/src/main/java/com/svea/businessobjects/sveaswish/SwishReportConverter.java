@@ -66,11 +66,11 @@ public class SwishReportConverter {
         List<PaymentReportDetail> details = new ArrayList<PaymentReportDetail>();
         LocalDate from = LocalDateUtils.asLocalDate(fromDate);
         LocalDate until = LocalDateUtils.asLocalDate(toDate);
-        LocalDate transactionDate;
+        LocalDate bookkeepingDate;
         for(SettlementReportRow row : rows) {
-            transactionDate = LocalDateUtils.asLocalDate(row.getTransactionDate());
-            if(includeAfter(transactionDate, from) && 
-            	includeBefore(transactionDate, until)) {
+            bookkeepingDate = LocalDateUtils.asLocalDate(row.getBookKeepingDate());
+            if(includeAfter(bookkeepingDate, from) && 
+            	includeBefore(bookkeepingDate, until)) {
                 details.add(convertToPaymentReportDetail(row));
             }
         }
