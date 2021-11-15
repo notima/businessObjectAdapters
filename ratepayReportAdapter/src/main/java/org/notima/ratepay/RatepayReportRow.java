@@ -1,4 +1,4 @@
-package org.notima.businessobjects.adapter.ratepay;
+package org.notima.ratepay;
 
 import java.util.Date;
 

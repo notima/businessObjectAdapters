@@ -10,6 +10,8 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.junit.Test;
+import org.notima.ratepay.RatepayReportParser;
+import org.notima.ratepay.RatepayReportRow;
 
 public class TestRatepayReportParser {
     

@@ -12,6 +12,7 @@ import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(BusinessObjectFactory.class),
+				@ProvideService(PaymentBatchProcessor.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -101,6 +103,12 @@ public class Activator extends BaseActivator {
 			
 			log.info("Created FortnoxProvisioner from file " + mgr.getClientsFile());
 			register(BusinessObjectFactory.class, fapt, props);
+			
+			FortnoxPaymentBatchProcessor fpbp = new FortnoxPaymentBatchProcessor();
+			fpbp.setFortnoxAdapter(fapt);
+			
+			register(PaymentBatchProcessor.class, fpbp, props);
+			log.info("Registered FortnoxPaymentBatchProcessor.");
 
 		}
 		

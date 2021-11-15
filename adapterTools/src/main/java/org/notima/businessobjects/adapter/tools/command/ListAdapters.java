@@ -8,6 +8,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
+import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 
 @Command(scope = "notima", name = "list-adapters", description = "Lists registered adapters")
 @Service
@@ -19,6 +21,12 @@ public class ListAdapters implements Action {
 	@SuppressWarnings("rawtypes")
 	@Reference
 	private List<BusinessObjectFactory> bofs;
+	
+	@Reference
+	private List<PaymentFactory> pfs;
+	
+	@Reference
+	private List<PaymentBatchProcessor> pbps;
 	
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -34,6 +42,29 @@ public class ListAdapters implements Action {
 			}
 			System.out.println(bofs.size() + " adapters registered");
 		}
+		
+		if (pfs==null) {
+			System.out.println("No payment factories registered");
+		} else {
+			for (PaymentFactory pf : pfs) {
+
+				sess.getConsole().println(pf.getSystemName());
+				
+			}
+			System.out.println(pfs.size() + " payment factories registered");
+		}
+
+		if (pbps==null) {
+			System.out.println("No payment batch processors registered");
+		} else {
+			for (PaymentBatchProcessor pbp : pbps) {
+
+				sess.getConsole().println(pbp.getSystemName());
+				
+			}
+			System.out.println(pbps.size() + " payment batch processors registered");
+		}
+
 		
 		return null;
 	}

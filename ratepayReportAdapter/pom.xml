@@ -5,9 +5,9 @@
 		<artifactId>businessObjectAdapters</artifactId>
 		<version>1.8.12-SNAPSHOT</version>
 	</parent>
-	<artifactId>ratepayReportAdapter</artifactId>
+	<artifactId>ratepayAdapter</artifactId>
 	<packaging>bundle</packaging>
-	<name>Notima Ratepay Report Adapter</name>
+	<name>Notima Ratepay Adapter</name>
   
 	<dependencies>
 
@@ -33,8 +33,9 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>org.notima.businessobjects.adapter.ratepayreports.Activator</Bundle-Activator>
-						<Export-Package>org.notima.businessobjects.adapter.ratepayreports.*
+						<Bundle-Activator>org.notima.businessobjects.adapter.ratepay.Activator</Bundle-Activator>
+						<Export-Package>org.notima.businessobjects.adapter.ratepay.*,
+										org.notima.ratepay
 										</Export-Package>
 						<Private-Package>
         					org.apache.karaf.util.tracker,
@@ -43,7 +44,6 @@
         				<Import-Package>
         					javax.xml.bind;version="[2.2,3)",*
         				</Import-Package>
-        				<Karaf-Commands>org.notima.businessobjects.adapter.ratepayreports.cmd*</Karaf-Commands>
 					</instructions>
 				</configuration>
 			</plugin>
