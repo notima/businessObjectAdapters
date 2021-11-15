@@ -2,24 +2,19 @@ package org.notima.businessobjects.adapter.ratepay;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
 import org.junit.Test;
-import org.notima.ratepay.RatepayReportParser;
 import org.notima.ratepay.RatepayReportRow;
 
 public class TestRatepayReportParser {
     
     @Test
     public void testParseFile() throws FileNotFoundException, IOException, ParseException{
-        File file = new File("src/test/resources/test_settlement_report.csv");
-        RatepayReportParser parser = new RatepayReportParser();
-        List<RatepayReportRow> report = parser.parseFile(new FileInputStream(file));
+    	List<RatepayReportRow> report = TestRatepayUtil.getTestReport();
         for(RatepayReportRow row : report) {
             System.out.printf(
                 "%s\t%s\t%s\t%.2f\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%d\t%d\t\n", 
