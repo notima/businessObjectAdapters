@@ -5,18 +5,25 @@ import java.util.List;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.TransactionReference;
+import org.notima.ratepay.RatepayReport;
 import org.notima.ratepay.RatepayReportRow;
 import org.notima.util.LocalDateUtils;
 
-public class RatepayToCanonicalPayment {
+/**
+ * Converts a Ratepay file to a payment batch.
+ * 
+ * @author Daniel Tamm
+ *
+ */
+public class RatepayToPaymentBatch {
 
 	private List<RatepayReportRow> rows;
 	private PaymentBatch batch;
 	
-	public static RatepayToCanonicalPayment buildFromList(List<RatepayReportRow> rows) {
+	public static RatepayToPaymentBatch buildFromReport(RatepayReport report) {
 		
-		RatepayToCanonicalPayment ratepay = new RatepayToCanonicalPayment();
-		ratepay.rows = rows;
+		RatepayToPaymentBatch ratepay = new RatepayToPaymentBatch();
+		ratepay.rows = report.getReportRows();
 		ratepay.build();
 		return ratepay;
 		

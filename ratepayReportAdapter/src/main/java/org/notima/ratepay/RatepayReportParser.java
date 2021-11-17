@@ -1,6 +1,8 @@
 package org.notima.ratepay;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -14,6 +16,9 @@ import org.jline.utils.InputStreamReader;
 
 public class RatepayReportParser {
 
+	private String 			filename;
+	private RatepayReport	report;
+	
     private static final String K_SHOP_ID = "SHOP_ID";
     private static final String K_PAYMENTDATE = "PAYMENTDATE";
     private static final String K_SHOPNAME = "SHOPNAME";
@@ -34,7 +39,28 @@ public class RatepayReportParser {
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public List<RatepayReportRow> parseFile (InputStream inStream) throws IOException, ParseException {
+    public static RatepayReport createFromFile(String filename) throws IOException, ParseException {
+    	RatepayReportParser parser = new RatepayReportParser(filename);
+    	return parser.parseRatepayFile();
+    }
+    
+    /**
+     * Private constructor to hide the inner workings of this class.
+     * 
+     * @param filename
+     */
+    private RatepayReportParser(String filename) {
+    	this.filename = filename;
+    	report = new RatepayReport();
+    }
+    
+    private RatepayReport parseRatepayFile() throws IOException, ParseException {
+    	InputStream in = new FileInputStream(new File(filename));
+    	report.setReportRows(parseFile(in));
+    	return report;
+    }
+    
+    private List<RatepayReportRow> parseFile (InputStream inStream) throws IOException, ParseException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
         List<RatepayReportRow> report = new ArrayList<RatepayReportRow>();
         Map<Integer, String> indexMap = getHeaderIndicies(reader.readLine().replaceAll("\"", ""));
