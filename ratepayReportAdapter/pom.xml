@@ -30,6 +30,16 @@
   
 	<build>
 
+		<resources>
+			<resource>
+				<directory>src/test/resources/reports</directory>
+				<excludes>
+					<exclude>*</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
+
 		<plugins>
 			
 			<plugin>
