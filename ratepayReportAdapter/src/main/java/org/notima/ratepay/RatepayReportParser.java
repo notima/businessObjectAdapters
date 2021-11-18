@@ -6,10 +6,10 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.jline.utils.InputStreamReader;
 
 public class RatepayReportParser {
@@ -37,67 +37,58 @@ public class RatepayReportParser {
     public List<RatepayReportRow> parseFile (InputStream inStream) throws IOException, ParseException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
         List<RatepayReportRow> report = new ArrayList<RatepayReportRow>();
-        Map<Integer, String> indexMap = getHeaderIndicies(reader.readLine().replaceAll("\"", ""));
-        String line = reader.readLine();
-        while(line != null) {
-            RatepayReportRow row = parseLine(line.replaceAll("\"", ""), indexMap);
+        Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD
+            .withFirstRecordAsHeader()
+            .withDelimiter(';')
+            .withQuote('"')
+            .parse(reader);
+        for (CSVRecord record : records) {
+            RatepayReportRow row = parseRecord(record);
             report.add(row);
-            line = reader.readLine();
         }
         reader.close();
         inStream.close();
         return report;
     }
 
-    private Map<Integer, String> getHeaderIndicies(String headerLine) {
-        Map<Integer, String> indexMap = new HashMap<Integer, String>();
-        String[] headers = headerLine.split(";");
-        for(int i = 0; i < headers.length; i++) {
-            indexMap.put(i, headers[i]);
-        }
-        return indexMap;
-    }
-
-    private RatepayReportRow parseLine(String line, Map<Integer, String> indexMap) throws ParseException {
+    private RatepayReportRow parseRecord(CSVRecord record) throws ParseException {
         RatepayReportRow row = new RatepayReportRow();
-        String[] values = line.split(";");
-        for(int i = 0 ; i < values.length; i++) {
-            if(indexMap.get(i).equals(K_SHOP_ID)){
-                row.setShopId(values[i]);
-            }
-            if(indexMap.get(i).equals(K_PAYMENTDATE))
-                row.setPaymentDate(dateFormat.parse(values[i]));
-            if(indexMap.get(i).equals(K_SHOPNAME))
-                row.setShopName(values[i]);
-            if(indexMap.get(i).equals(K_AMOUNT))
-                row.setAmount(Double.parseDouble(values[i]));
-            if(indexMap.get(i).equals(K_DESCRIPTOR))
-                row.setDescriptor(values[i]);
-            if(indexMap.get(i).equals(K_SHOPINVOICE_ID))
-                row.setShopInvoiceId(values[i]);
-            if(indexMap.get(i).equals(K_SHOPSORDER_ID))
-                row.setShopsOrderId(values[i]);
-            if(indexMap.get(i).equals(K_INVOICENUMBER))
-                row.setInvoiceNumber(values[i]);
-            if(indexMap.get(i).equals(K_DESCRIPTION))
-                row.setDescriptor(values[i]);
-            if(indexMap.get(i).equals(K_FEETYPE))
-                row.setFeeType(Integer.parseInt(values[i]));
-            if(indexMap.get(i).equals(K_ORDERDATE))
-                row.setOrderDate(dateFormat.parse(values[i]));
-            if(indexMap.get(i).equals(K_SENTDATE))
-                row.setSentDate(dateFormat.parse(values[i]));
-            if(indexMap.get(i).equals(K_TRANSACTION_ID))
-                row.setTransactionId(values[i]);
-            if(indexMap.get(i).equals(K_CUSTOMERGROUP))
-                row.setCustomerGroup(Integer.parseInt(values[i]));
-            if(indexMap.get(i).equals(K_KNOWNCUSTOMER))
-                row.setKnownCustomer(Integer.parseInt(values[i]) == 1);
-            if(indexMap.get(i).equals(K_PRODUCT))
-                row.setProduct(Integer.parseInt(values[i]));
-            if(indexMap.get(i).equals(K_REFERENCE_ID_ACCOUNTING))
-                row.setReferenceIdAccounting(Integer.parseInt(values[i]));
-        }
+
+        if(record.isMapped(K_SHOP_ID))
+            row.setShopId(record.get(K_SHOP_ID));
+        if(record.isMapped(K_PAYMENTDATE))
+            row.setPaymentDate(dateFormat.parse(record.get(K_PAYMENTDATE)));
+        if(record.isMapped(K_SHOPNAME))
+            row.setShopName(record.get(K_SHOPNAME));
+        if(record.isMapped(K_SHOPNAME))
+            row.setAmount(Double.parseDouble(record.get(K_AMOUNT)));
+        if(record.isMapped(K_DESCRIPTOR))
+            row.setDescriptor(record.get(K_DESCRIPTOR));
+        if(record.isMapped(K_SHOPINVOICE_ID))
+            row.setShopInvoiceId(record.get(K_SHOPINVOICE_ID));
+        if(record.isMapped(K_SHOPSORDER_ID))
+            row.setShopsOrderId(record.get(K_SHOPSORDER_ID));
+        if(record.isMapped(K_INVOICENUMBER))
+            row.setInvoiceNumber(record.get(K_INVOICENUMBER));
+        if(record.isMapped(K_DESCRIPTION))
+            row.setDescription(record.get(K_DESCRIPTION));
+        if(record.isMapped(K_FEETYPE))
+            row.setFeeType(Integer.parseInt(record.get(K_FEETYPE)));
+        if(record.isMapped(K_ORDERDATE))
+            row.setOrderDate(dateFormat.parse(record.get(K_ORDERDATE)));
+        if(record.isMapped(K_SENTDATE))
+            row.setSentDate(dateFormat.parse(record.get(K_SENTDATE)));
+        if(record.isMapped(K_TRANSACTION_ID))
+            row.setTransactionId(record.get(K_TRANSACTION_ID));
+        if(record.isMapped(K_CUSTOMERGROUP))
+            row.setCustomerGroup(Integer.parseInt(record.get(K_CUSTOMERGROUP)));
+        if(record.isMapped(K_KNOWNCUSTOMER))
+            row.setKnownCustomer(Integer.parseInt(record.get(K_KNOWNCUSTOMER)) == 1);
+        if(record.isMapped(K_PRODUCT))
+            row.setProduct(Integer.parseInt(record.get(K_PRODUCT)));
+        if(record.isMapped(K_REFERENCE_ID_ACCOUNTING) && !record.get(K_REFERENCE_ID_ACCOUNTING).isEmpty()) 
+           row.setReferenceIdAccounting(Integer.parseInt(record.get(K_REFERENCE_ID_ACCOUNTING)));
+
         return row;
     }
 }
