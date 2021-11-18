@@ -80,7 +80,7 @@
     </feature>
     
     <feature name="notima-ratepay" description="Notima Ratepay Adapter" version="">
-        <feature>notima-businessobjects</feature>
+        <feature>notima-csv</feature>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/ratepayAdapter/${project.version}</bundle>
     </feature>
     
