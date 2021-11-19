@@ -1,3 +1,5 @@
 *.csv
 *.xlsx
 *.xlsx#
+/ratepay.properties
+/generated_batch.json

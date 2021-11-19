@@ -25,7 +25,13 @@
 			<artifactId>commons-csv</artifactId>
 			<version>${commons-csv.version}</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
   
 	<build>
@@ -36,6 +42,9 @@
 				<excludes>
 					<exclude>*</exclude>
 				</excludes>
+				<includes>
+					<include>ratepay-example.properties</include>
+				</includes>
 			</resource>
 		</resources>
 

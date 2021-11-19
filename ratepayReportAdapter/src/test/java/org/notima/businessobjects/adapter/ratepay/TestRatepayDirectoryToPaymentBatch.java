@@ -3,7 +3,6 @@ package org.notima.businessobjects.adapter.ratepay;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.net.URL;
 import java.util.List;
 
 import org.junit.Before;
@@ -11,7 +10,7 @@ import org.junit.Test;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 
-public class TestRatepayPaymentBatchFactory {
+public class TestRatepayDirectoryToPaymentBatch {
 
 	@Before
 	public void setUp() throws Exception {
@@ -20,7 +19,6 @@ public class TestRatepayPaymentBatchFactory {
 	@Test
 	public void testRatepayPaymentBatchFactory() {
 		
-		URL url = null;
 		String cwd = System.getProperty("user.dir");
 		File reportsDirectory = new File(cwd + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "reports");
 		if (!reportsDirectory.exists()) {
@@ -30,7 +28,8 @@ public class TestRatepayPaymentBatchFactory {
 			PaymentBatchFactory batchFactory = new RatepayDirectoryToPaymentBatch();
 			batchFactory.setSource(reportsDirectory.getAbsolutePath());
 			List<PaymentBatch> batches = batchFactory.readPaymentBatches();
-			System.out.println(batches.size() + " created.");
+			System.out.println(batches.size() + " batches created.");
+			TestRatepayUtil.createGson().toJson(batches, System.out);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());

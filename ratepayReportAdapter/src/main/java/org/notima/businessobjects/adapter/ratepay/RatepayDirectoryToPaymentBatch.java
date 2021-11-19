@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import org.notima.generic.businessobjects.Payment.PaymentType;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
+import org.jline.utils.Log;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.ratepay.RatepayReport;
@@ -120,6 +121,9 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 		directoryFile = f;
 	}
 	
+	/**
+	 * Checks if the directory is readable and retreives directory information.
+	 */
 	private void checkForTaxIdentifierAndCurrency() {
 
 		File f = new File(directory + File.separator + RATEPAY_PROPERTY_FILE);
@@ -139,13 +143,22 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 			String countryCode = props.getProperty("countryCode");
 			defaultCurrency = props.getProperty("defaultCurrency");
 			taxIdentifier = new TaxSubjectIdentifier(taxId, countryCode);
-			
+			logRetrievedProperties();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 	}
 
+	private void logRetrievedProperties() {
+		// TODO: Improve logging
+		if (RatepayAdapter.log.isDebugEnabled()) {
+			if (defaultCurrency!=null) {
+				Log.debug("Currency defined in ratepay.properties: %s",  defaultCurrency);
+			}
+		}
+	}
+	
 	@Override
 	public String getSystemName() {
 		return RatepayAdapter.SYSTEMNAME;
