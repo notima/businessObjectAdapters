@@ -14,7 +14,7 @@ import org.notima.ratepay.RatepayReportRow;
 public class TestRatepayReportParser {
     
     @Test
-    public void testParseFile() throws FileNotFoundException, IOException, ParseException{
+    public void testParseFile() throws FileNotFoundException, IOException, Exception{
     	RatepayReport report = TestRatepayUtil.getTestReport();
     	
     	List<RatepayReportRow> rows = report.getReportRows();

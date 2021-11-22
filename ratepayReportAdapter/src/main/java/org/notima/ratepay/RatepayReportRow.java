@@ -1,6 +1,8 @@
 package org.notima.ratepay;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class RatepayReportRow {
 
@@ -31,6 +33,8 @@ public class RatepayReportRow {
     private int product;
     private int referenceIdAccounting;
     private String chargeBackReason;
+    
+    private List<RatepayFee>	fees;
 
     /**
      * @return Identifier of shop
@@ -87,6 +91,14 @@ public class RatepayReportRow {
         this.descriptor = descriptor;
     }
 
+    public RatepayReportRow addFee(RatepayFee fee) {
+    	if (fees==null) {
+    		fees = new ArrayList<RatepayFee>();
+    	}
+    	fees.add(fee);
+    	return this;
+    }
+    
     /**
      * @return Identifier of shop-Invoice
      */
@@ -119,8 +131,16 @@ public class RatepayReportRow {
     public void setInvoiceNumber(String invoiceNumber) {
         this.invoiceNumber = invoiceNumber;
     }
+    
+    public List<RatepayFee> getFees() {
+		return fees;
+	}
 
-    /**
+	public void setFees(List<RatepayFee> fees) {
+		this.fees = fees;
+	}
+
+	/**
      * @return Description of type of amount
      */
     public String getDescription() {
@@ -131,6 +151,26 @@ public class RatepayReportRow {
         this.description = description;
     }
 
+    /**
+     * Merges information from another row to this row.
+     * Merging is mostly done to cater for different types of amounts.
+     * 
+     * @param that
+     * @return
+     */
+    public RatepayReportRow mergeRow(RatepayReportRow that) throws Exception {
+    	if (this.descriptor!=null && !this.descriptor.equals(that.getDescriptor())) {
+    		throw new Exception("Can't merge rows with different descriptors. Dst: " + this.descriptor + " Src: " + that.descriptor);
+    	}
+    	if (that.feeType==1) {
+    		this.setAmount(that.getAmount());
+    	} else {
+    		this.addFee(new RatepayFee(new Integer(that.feeType), new Double(that.amount), that.description));
+    	}
+    	
+    	return this;
+    }
+    
     /**
      * ID of type of amount
      * @return  1 - Original amount, return, cancellation, credit memo, additional debit
@@ -152,7 +192,7 @@ public class RatepayReportRow {
     }
 
     /**
-     * @return Date when request was sent to Ratepay-gateway
+     * @return Date when request was sent to Ratepay-ga)teway
      */
     public Date getOrderDate() {
         return orderDate;

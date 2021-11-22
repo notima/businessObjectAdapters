@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentWriteOff;
 import org.notima.generic.businessobjects.TransactionReference;
+import org.notima.ratepay.RatepayFee;
 import org.notima.ratepay.RatepayReport;
 import org.notima.ratepay.RatepayReportRow;
 import org.notima.util.LocalDateUtils;
@@ -63,18 +65,36 @@ public class RatepayToPaymentBatch {
 		dst.setNativePayment(src);
 		dst.setPaymentDate(src.getPaymentDate());
 		dst.setAmount(src.getAmount());
-		dst.setOrderNo(src.getShopsOrderId());
+		dst.setOrderNo(src.getDescriptor());
 		dst.setComment(src.getDescription());
+		dst.setClientOrderNo(src.getShopsOrderId());
 
 		TransactionReference trxRef = new TransactionReference();
 		dst.setTransactionReference(trxRef);
 		
 		trxRef.setShipDate(LocalDateUtils.asLocalDate(src.getSentDate()));
+		trxRef.setOrderDate(LocalDateUtils.asLocalDate(src.getOrderDate()));
 		trxRef.setTransactionId(src.getTransactionId());
+		if (src.getFees()!=null && src.getFees().size()>0) {
+			for (RatepayFee fee : src.getFees()) {
+				addFeeToPayment(dst, fee);
+			}
+		}
 		
 		return dst;
 		
 	}
+	
+	private void addFeeToPayment(Payment<RatepayReportRow> payment, RatepayFee fee) {
+
+		PaymentWriteOff pwo = new PaymentWriteOff();
+		pwo.setAccountNo(fee.getFeeType().toString());
+		pwo.setAmount(fee.getAmount());
+		pwo.setComment(fee.getComment());
+		payment.addPaymentWriteOff(pwo);
+		
+	}
+	
 	
 	
 }

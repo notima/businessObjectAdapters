@@ -9,6 +9,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -18,6 +20,8 @@ public class RatepayReportParser {
 
 	private String 			filename;
 	private RatepayReport	report;
+	// There must only be one report row per descriptor. Fees are described by using multiple rows with the same descriptor.
+	private Map<String, RatepayReportRow> descriptorMap;
 	
     private static final String K_SHOP_ID = "SHOP_ID";
     private static final String K_PAYMENTDATE = "PAYMENTDATE";
@@ -39,7 +43,7 @@ public class RatepayReportParser {
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    public static RatepayReport createFromFile(String filename) throws IOException, ParseException {
+    public static RatepayReport createFromFile(String filename) throws IOException, Exception {
     	RatepayReportParser parser = new RatepayReportParser(filename);
     	return parser.parseRatepayFile();
     }
@@ -52,15 +56,16 @@ public class RatepayReportParser {
     private RatepayReportParser(String filename) {
     	this.filename = filename;
     	report = new RatepayReport();
+    	descriptorMap = new TreeMap<String,RatepayReportRow>();
     }
     
-    private RatepayReport parseRatepayFile() throws IOException, ParseException {
+    private RatepayReport parseRatepayFile() throws IOException, Exception {
     	InputStream in = new FileInputStream(new File(filename));
     	report.setReportRows(parseFile(in));
     	return report;
     }
     
-    private List<RatepayReportRow> parseFile (InputStream inStream) throws IOException, ParseException {
+    private List<RatepayReportRow> parseFile (InputStream inStream) throws IOException, Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
         List<RatepayReportRow> report = new ArrayList<RatepayReportRow>();
         Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD
@@ -70,7 +75,13 @@ public class RatepayReportParser {
             .parse(reader);
         for (CSVRecord record : records) {
             RatepayReportRow row = parseRecord(record);
-            report.add(row);
+        	RatepayReportRow existingRow = descriptorMap.get(row.getDescriptor());        	
+        	if (existingRow==null) {
+        		report.add(row);
+        		descriptorMap.put(row.getDescriptor(), row);
+        	} else {
+        		existingRow.mergeRow(row);
+        	}
         }
         reader.close();
         inStream.close();

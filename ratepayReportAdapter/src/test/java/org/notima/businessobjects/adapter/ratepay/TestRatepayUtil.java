@@ -12,13 +12,16 @@ import com.google.gson.GsonBuilder;
 
 public class TestRatepayUtil {
 
+	
+	
 	public static Gson createGson() {
-		Gson gson = new GsonBuilder().setPrettyPrinting().
-				create();
+		
+		Gson gson = org.notima.util.json.JsonUtil.buildGson();
+		
 		return gson;
 	}
 	
-	public static RatepayReport getTestReport() throws FileNotFoundException, IOException, ParseException {
+	public static RatepayReport getTestReport() throws FileNotFoundException, IOException, Exception {
 		
         String filename = "src/test/resources/test_settlement_report.csv";
         RatepayReport report = RatepayReportParser.createFromFile(filename);

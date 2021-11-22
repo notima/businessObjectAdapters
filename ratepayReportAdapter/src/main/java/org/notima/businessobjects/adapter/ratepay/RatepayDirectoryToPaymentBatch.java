@@ -5,17 +5,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.Properties;
 
-import org.notima.generic.businessobjects.Payment.PaymentType;
-import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.jline.utils.Log;
+import org.notima.generic.businessobjects.BankAccountDetail;
+import org.notima.generic.businessobjects.Payment.PaymentType;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.ratepay.RatepayReport;
 import org.notima.ratepay.RatepayReportParser;
 
@@ -74,13 +73,16 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 		return result;
 	}
 	
-	private PaymentBatch createPaymentBatchFromFile(String file) throws IOException, ParseException {
+	private PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
 		
 		RatepayReport ratepayReport = RatepayReportParser.createFromFile(directory + File.separator + file);
 		RatepayToPaymentBatch converter = RatepayToPaymentBatch.buildFromReport(ratepayReport);
 		PaymentBatch result = converter.getPaymentBatch();
 		result.setBatchOwner(taxIdentifier);
 		result.setPaymenType(PaymentType.RECEIVABLE);
+		BankAccountDetail bad = new BankAccountDetail();
+		bad.setCurrency(defaultCurrency);
+		result.setBankAccount(bad);
 		result.setSource(file);
 		return result;
 		
