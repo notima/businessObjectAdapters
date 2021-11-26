@@ -76,6 +76,7 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	private PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
 		
 		RatepayReport ratepayReport = RatepayReportParser.createFromFile(directory + File.separator + file);
+		ratepayReport.setCurrency(defaultCurrency);
 		RatepayToPaymentBatch converter = RatepayToPaymentBatch.buildFromReport(ratepayReport);
 		PaymentBatch result = converter.getPaymentBatch();
 		result.setBatchOwner(taxIdentifier);
