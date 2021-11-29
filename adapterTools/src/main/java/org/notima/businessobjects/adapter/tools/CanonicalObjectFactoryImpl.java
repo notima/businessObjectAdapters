@@ -136,6 +136,28 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 	}
 	
+	public Collection<PaymentBatchProcessor> listPaymentBatchProcessors() {
+		try {
+			resetPaymentBatchProcessors();
+			return paymentBatchProcessors.values();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public Collection<PaymentFactory> listPaymentFactories() {
+		try {
+			resetPaymentFactories();
+			return paymentFactories.values();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	/**
 	 * Looks up an adapter with given name.
 	 * 

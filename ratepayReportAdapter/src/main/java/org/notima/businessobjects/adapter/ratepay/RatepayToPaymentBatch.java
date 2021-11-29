@@ -71,6 +71,8 @@ public class RatepayToPaymentBatch {
 		dst.setAmount(new Double(-src.getAmount()));
 		dst.setOrderNo(src.getDescriptor());
 		dst.setComment(src.getDescription());
+		dst.setDestinationSystemReference(src.getTransactionId());
+		dst.setDestinationSystemReferenceField("ExternalInvoiceReference2");
 		dst.setClientOrderNo(src.getShopsOrderId());
 		if (report.getCurrency()!=null) {
 			dst.setCurrency(report.getCurrency());

@@ -1,8 +1,10 @@
 package org.notima.businessobjects.adapter.tools.table;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,8 @@ import org.notima.generic.businessobjects.PayoutLine;
 
 public class PaymentBatchTable extends GenericTable {
 	
-    private static NumberFormat nfmt = new DecimalFormat("#,##0.00");	
+    private static NumberFormat nfmt = new DecimalFormat("#,##0.00");
+    private static DateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd");
     
     private void initColumns(boolean detailed) {
     	addColumn("#", GenericColumn.ALIGNMENT_RIGHT);
@@ -82,26 +85,30 @@ public class PaymentBatchTable extends GenericTable {
 		double totalFees = 0, totalVat = 0, totalRec = 0;
 		int totalCount = 0;
 
-		for(PayoutLine payout : report.retrievePayoutLines()){
-
-			if (!payout.isIncludedInOtherPayout()) {
-				totalPaidAmount += payout.getPaidByCustomer();
-				totalRec += payout.getPaidOut();
+		List<PayoutLine> payoutLines = report.retrievePayoutLines();
+		
+		if (payoutLines!=null) {
+			for(PayoutLine payout : payoutLines){
+	
+				if (!payout.isIncludedInOtherPayout()) {
+					totalPaidAmount += payout.getPaidByCustomer();
+					totalRec += payout.getPaidOut();
+				}
+				totalFees += payout.getFeeAmount();
+				totalVat += payout.getTaxAmount();
+				totalCount += payout.getTrxCount();
+	
+				row = new GenericRow();
+	
+				row.addContent(
+					payout.getTrxCount(),
+					(payout.isIncludedInOtherPayout() ? "(":"") + nfmt.format(payout.getPaidByCustomer()) + (payout.isIncludedInOtherPayout() ? ")":""),
+					nfmt.format(payout.getFeeAmount()),
+					nfmt.format(payout.getTaxAmount()),
+					nfmt.format(payout.getPaidOut()));
+				
+				rows.add(row);
 			}
-			totalFees += payout.getFeeAmount();
-			totalVat += payout.getTaxAmount();
-			totalCount += payout.getTrxCount();
-
-			row = new GenericRow();
-
-			row.addContent(
-				payout.getTrxCount(),
-				(payout.isIncludedInOtherPayout() ? "(":"") + nfmt.format(payout.getPaidByCustomer()) + (payout.isIncludedInOtherPayout() ? ")":""),
-				nfmt.format(payout.getFeeAmount()),
-				nfmt.format(payout.getTaxAmount()),
-				nfmt.format(payout.getPaidOut()));
-			
-			rows.add(row);
 		}
 
 		row = new GenericRow();
@@ -136,7 +143,7 @@ public class PaymentBatchTable extends GenericTable {
 			row = new GenericRow();
 			row.addContent(
 				count++,
-				d.getPaymentDate(),
+				dfmt.format(d.getPaymentDate()),
 				d.getInvoiceNo(),
 				d.getOrderNo(),
 				d.getComment(),

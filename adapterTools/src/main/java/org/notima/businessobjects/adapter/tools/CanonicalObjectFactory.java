@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools;
 
+import java.util.Collection;
 import java.util.Properties;
 
 import org.notima.generic.businessobjects.Invoice;
@@ -25,7 +26,11 @@ public interface CanonicalObjectFactory {
 	
 	public PaymentFactory lookupPaymentFactory(String systemName);
 	
+	public Collection<PaymentFactory> listPaymentFactories();
+	
 	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName);
+	
+	public Collection<PaymentBatchProcessor> listPaymentBatchProcessors();
 	
 	public Invoice<?> lookupCustomerInvoice(String adapterName, String orgNo, String countryCode, String invoiceNo) throws NoSuchTenantException;
 	
