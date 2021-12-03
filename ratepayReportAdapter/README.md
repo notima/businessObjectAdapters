@@ -1,10 +1,16 @@
 # Ratepay Adapter
 
+This adapter adds the capability to parse files from Ratepay.
+
 ## Installation in Karaf
 
 	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/LATEST/xml/features
 	
 	feature:install notima-ratepay
+	
+## Example usage
+
+	show-payment-batch -d Ratepay /path/file
 	
 ## Testing
 

@@ -73,7 +73,7 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 		return result;
 	}
 	
-	private PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
+	public PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
 		
 		RatepayReport ratepayReport = RatepayReportParser.createFromFile(directory + File.separator + file);
 		ratepayReport.setCurrency(defaultCurrency);
