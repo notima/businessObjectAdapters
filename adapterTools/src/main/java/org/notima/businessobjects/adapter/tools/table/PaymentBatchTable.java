@@ -11,6 +11,8 @@ import java.util.List;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PayoutLine;
+import org.notima.generic.businessobjects.exception.CurrencyMismatchException;
+import org.notima.generic.businessobjects.exception.DateMismatchException;
 
 public class PaymentBatchTable extends GenericTable {
 	
@@ -23,7 +25,7 @@ public class PaymentBatchTable extends GenericTable {
 			addColumn("Date");
 			addColumn("Invoice Id");
 			addColumn("Order Id");
-			addColumn("Checkout Id"); 
+			addColumn("Dest reference"); 
 			addColumn("Payer Name");
 			addColumn("Client Order");
 			addColumn("Paid amt", GenericColumn.ALIGNMENT_RIGHT);
@@ -33,6 +35,7 @@ public class PaymentBatchTable extends GenericTable {
 			addColumn("Fees", GenericColumn.ALIGNMENT_RIGHT);
 			addColumn("VAT", GenericColumn.ALIGNMENT_RIGHT);
 			addColumn("Paid out", GenericColumn.ALIGNMENT_RIGHT);
+			addColumn("Curr");
 		}
     }
     
@@ -42,8 +45,10 @@ public class PaymentBatchTable extends GenericTable {
      * @param pr			The payment report
      * @param detailed		If report should be detailed.
      * @throws ParseException
+     * @throws CurrencyMismatchException 
+     * @throws DateMismatchException 
      */
-    public PaymentBatchTable(PaymentBatch pr, boolean detailed) throws ParseException {
+    public PaymentBatchTable(PaymentBatch pr, boolean detailed) throws ParseException, DateMismatchException, CurrencyMismatchException {
 
     	initColumns(detailed);
 		List<GenericRow> rows = detailed ? getDetailedTableRows(pr) : getTableRows(pr);
@@ -70,8 +75,10 @@ public class PaymentBatchTable extends GenericTable {
      * @param report
      * @return	A list of table rows
      * @throws ParseException
+     * @throws CurrencyMismatchException 
+     * @throws DateMismatchException 
      */
-    public static List<GenericRow> getTableRows(PaymentBatch report) throws ParseException {
+    public static List<GenericRow> getTableRows(PaymentBatch report) throws ParseException, DateMismatchException, CurrencyMismatchException {
     	
     	List<GenericRow> rows = new ArrayList<GenericRow>();
 
@@ -105,7 +112,9 @@ public class PaymentBatchTable extends GenericTable {
 					(payout.isIncludedInOtherPayout() ? "(":"") + nfmt.format(payout.getPaidByCustomer()) + (payout.isIncludedInOtherPayout() ? ")":""),
 					nfmt.format(payout.getFeeAmount()),
 					nfmt.format(payout.getTaxAmount()),
-					nfmt.format(payout.getPaidOut()));
+					nfmt.format(payout.getPaidOut()),
+					payout.getCurrency()
+					);
 				
 				rows.add(row);
 			}
@@ -115,13 +124,12 @@ public class PaymentBatchTable extends GenericTable {
 		row.addContent("","TOTALS", "====", "==========", "=========", "========", "==========");
 		rows.add(row);
 		row = new GenericRow();
-		row.addContent("",
-				"", 
+		row.addContent(
 				totalCount, 
 				nfmt.format(totalPaidAmount), 
 				nfmt.format(totalFees), 
 				nfmt.format(totalVat), 
-				nfmt.format(totalRec));
+				nfmt.format(totalRec), "", "");
 		rows.add(row);
     	
     	return rows; 
@@ -146,7 +154,7 @@ public class PaymentBatchTable extends GenericTable {
 				dfmt.format(d.getPaymentDate()),
 				d.getInvoiceNo(),
 				d.getOrderNo(),
-				d.getComment(),
+				d.getDestinationSystemReference(),
 				d.getPayerName(),
 				d.getClientOrderNo(),
 				nfmt.format(d.getAmount()));
