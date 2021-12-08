@@ -10,6 +10,7 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.api.fortnox.ClientManagerKeyProvider;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
@@ -40,14 +41,17 @@ public class AddClient implements Action {
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client to configure", required = false, multiValued = false)
 	String orgNo;
 
-    @Argument(index = 1, name = "apiCode", description = "API code provided by client", required = false, multiValued = false)
-    String apiCode;
+    @Argument(index = 1, name = "authorizationCode", description = "API code provided by client used to retrieve an access token", required = false, multiValued = false)
+    String authorizationCode;
    
     @Option(name = "--orgName", description = "The name of the organisation", required = false, multiValued = false)
     private String orgName;
     
     @Option(name = "--accessToken", description = "If there's an existing access token, omit apiCode and supply the access token", required = false, multiValued = false)
 	private String accessToken;
+
+	@Option(name = "--refreshToken", description = "The refresh token belonging to the access token.", required = false, multiValued = false)
+    private String refreshToken;
 
     @Option(name = "--clientSecret", description = "The client secret for our Fortnox integration. If omitted, the default client secret is used (if set).", required = false, multiValued = false)
     private String clientSecret;
@@ -80,9 +84,9 @@ public class AddClient implements Action {
 		
 		CompanySetting cs = null;
 		if (orgNo==null) {
-			if (accessToken!=null && clientSecret!=null) {
+			if (accessToken!=null && clientSecret!=null && refreshToken != null) {
 				FortnoxClient3 fc3 = fa.getClient();
-				fc3.setAccessToken(accessToken, clientSecret);
+				fc3.setKeyProvider(new ClientManagerKeyProvider(orgNo, mgr));
 				try { 
 					cs = fc3.getCompanySetting();
 					if (cs!=null) {
@@ -105,10 +109,12 @@ public class AddClient implements Action {
 		}
 		
 		Properties props = new Properties();
-		if (apiCode!=null)
-			props.setProperty("apiCode", apiCode);
+		if (authorizationCode!=null)
+			props.setProperty("apiCode", authorizationCode);
 		if (accessToken!=null)
 			props.setProperty("accessToken", accessToken);
+		if (refreshToken!=null)
+			props.setProperty("refreshToken", refreshToken);
 		if (clientSecret!=null) {
 			props.setProperty("clientSecret", clientSecret);
 		}

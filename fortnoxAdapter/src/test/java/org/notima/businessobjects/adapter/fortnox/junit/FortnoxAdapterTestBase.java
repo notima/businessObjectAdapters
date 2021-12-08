@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientList;
+import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.slf4j.Logger;
@@ -32,19 +33,11 @@ public class FortnoxAdapterTestBase {
 		
 		FortnoxClientInfo info = clientList.getFirstClient();
 		
-		String clientSecret = info.getClientSecret();
-		String accessToken = info.getAccessToken();
+		String orgNo = info.getOrgNo();
 		
-		if (clientSecret==null || clientSecret.trim().length()==0) {
-			throw new Exception("Client secret must be supplied.");
-		}
-
-		if (accessToken==null || accessToken.trim().length()==0) {
-			throw new Exception("Access token must be supplied.");
-		}
+		FortnoxClientManager mgr = new FortnoxClientManager(configUrl.getFile());
 		
-		
-		factory = new FortnoxAdapter(accessToken, clientSecret);
+		factory = new FortnoxAdapter(orgNo, mgr);
 		
 	}
 	
