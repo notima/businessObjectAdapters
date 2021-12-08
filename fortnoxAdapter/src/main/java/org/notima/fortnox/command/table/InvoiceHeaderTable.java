@@ -2,15 +2,35 @@ package org.notima.fortnox.command.table;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.notima.api.fortnox.entities3.Invoice;
+import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
 public class InvoiceHeaderTable extends GenericTable {
 
 	private NumberFormat nfmt = new DecimalFormat("#,##0.00");	
+	
+	class InvoiceComparator implements Comparator<InvoiceInterface> {
+		
+		@Override
+		public int compare(InvoiceInterface o1, InvoiceInterface o2) {
+			
+			// First compare dates
+			if (o1.getInvoiceDate().equals(o2.getInvoiceDate())) {
+				// Compare document numbers
+				return o1.getDocumentNumber().compareTo(o2.getDocumentNumber());
+			} else {
+				return o1.getInvoiceDate().compareTo(o2.getInvoiceDate());
+			}
+			
+		}
+		
+	}
 	
 	public void initColumns() {
 		
@@ -30,8 +50,10 @@ public class InvoiceHeaderTable extends GenericTable {
 		
 	}
 	
-	public InvoiceHeaderTable(List<Object> invoices) {
+	public InvoiceHeaderTable(List<InvoiceInterface> invoices) {
 		initColumns();
+
+		Collections.sort(invoices, new InvoiceComparator());
 		
 		Invoice ii;
 		InvoiceSubset is;

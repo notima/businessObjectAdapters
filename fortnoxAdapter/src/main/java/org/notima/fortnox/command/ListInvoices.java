@@ -15,6 +15,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.Invoice;
+import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
@@ -77,9 +78,9 @@ public class ListInvoices extends FortnoxCommand implements Action {
 			untilDate = FortnoxClient3.s_dfmt.parse(untilDateStr);
 		}
 		
-		Map<Object, Object> invoicesMap = null;
+		Map<Object, InvoiceInterface> invoicesMap = null;
 		
-		List<Object> invoices = new ArrayList<Object>();
+		List<InvoiceInterface> invoices = new ArrayList<InvoiceInterface>();
 		
 		if (!all) {
 			if (unbooked) {
@@ -97,11 +98,11 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		
 		if (invoicesMap!=null) {
 			
-			Collection<Object> invoiceObjects = invoicesMap.values();
+			Collection<InvoiceInterface> invoiceObjects = invoicesMap.values();
 			
 			Invoice inv = null;
 			InvoiceSubset invs = null;
-			for (Object oo : invoiceObjects) {
+			for (InvoiceInterface oo : invoiceObjects) {
 				if (oo instanceof Invoice) {
 					inv = (Invoice)oo;
 					if (!inv.isCancelled() || showCancelled) {
