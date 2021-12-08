@@ -40,7 +40,8 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 		sess.getConsole().println("Contact: " + cs.getContactFirstName() + " " + cs.getContactLastName());
 		sess.getConsole().println("Email: " + cs.getEmail());
 		sess.getConsole().println("Subscription-ID: " + cs.getDatabaseNumber());
-		sess.getConsole().println("Access-token: " + fc.getAccessTokenCurrent());
+		//TODO: Show something else instead?
+		//sess.getConsole().println("Access-token: " + fc.getAccessTokenCurrent());
 		
 		return null;
 	}
