@@ -23,8 +23,9 @@ public class RatepayAdapter implements PaymentFactory {
 		File sourceDir = null;
 		if (sourceFile.exists() && sourceFile.getParentFile().isDirectory()) {
 			sourceDir = sourceFile.getParentFile();
+			String filenameonly = sourceFile.getName();
 			RatepayDirectoryToPaymentBatch directoryReader = new RatepayDirectoryToPaymentBatch(sourceDir.getCanonicalPath());
-			PaymentBatch result = directoryReader.createPaymentBatchFromFile(sourceFile.getName());
+			PaymentBatch result = directoryReader.createPaymentBatchFromFile(filenameonly);
 			return result;
 		} else {
 			// TODO: Probably obsolete code
