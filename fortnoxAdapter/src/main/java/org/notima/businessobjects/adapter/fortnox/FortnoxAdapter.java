@@ -48,6 +48,10 @@ import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.util.LocalDateUtils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,8 +136,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		});
 	}
 
-	public FortnoxAdapter(String orgNo, FortnoxClientManager clientManager) {
-		client = new FortnoxClient3(new ClientManagerKeyProvider(orgNo, clientManager));
+	public FortnoxAdapter(String orgNo) {
+		client = new FortnoxClient3(new ClientManagerKeyProvider(orgNo, getClientManager()));
 	}
 	
 	/**
@@ -150,6 +154,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @return
 	 */
 	public FortnoxClientManager getClientManager() {
+		if(clientManager == null) 
+			clientManager = getServiceReference(FortnoxClientManager.class);
 		return clientManager;
 	}
 
@@ -1457,6 +1463,18 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return vfc.getFileId();
 		
 	}
+
+	private <S> S getServiceReference(Class<S> clazz) {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		if (bundle != null) {
+			BundleContext ctx = bundle.getBundleContext();
+			ServiceReference<S> reference = ctx
+					.getServiceReference(clazz);
+			if (reference != null)
+				return ctx.getService(reference);
+		}
+		return null;
+    }
 	
 
 }

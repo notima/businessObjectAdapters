@@ -97,6 +97,8 @@ public class Activator extends BaseActivator {
 				}
 				
 			}
+
+			register(FortnoxClientManager.class, mgr);
 			
 			FortnoxAdapter fapt = new FortnoxAdapter();
 			fapt.setClientManager(mgr);
