@@ -14,21 +14,21 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
-import org.notima.api.fortnox.FortnoxKeyProvider;
-import org.notima.api.fortnox.clients.FortnoxApiKey;
+import org.notima.api.fortnox.FortnoxCredentialsProvider;
+import org.notima.api.fortnox.clients.FortnoxCredentials;
 
-public class FileKeyProvider extends FortnoxKeyProvider {
-    private static final Type KEYS_TYPE = new TypeToken<List<FortnoxApiKey>>() {}.getType();
+public class FileCredentialsProvider extends FortnoxCredentialsProvider {
+    private static final Type KEYS_TYPE = new TypeToken<List<FortnoxCredentials>>() {}.getType();
 
     Gson gson = new GsonBuilder().create();
 
-    public FileKeyProvider(String orgNo) {
+    public FileCredentialsProvider(String orgNo) {
         super(orgNo);
     }
 
     @Override
-    public FortnoxApiKey getKey() throws Exception {
-        for(FortnoxApiKey key : getKeyList()) {
+    public FortnoxCredentials getCredentials() throws Exception {
+        for(FortnoxCredentials key : getKeyList()) {
             if (key.getOrgNo().equals(orgNo)){
                 return key;
             }
@@ -37,9 +37,9 @@ public class FileKeyProvider extends FortnoxKeyProvider {
     }
 
     @Override
-    public void setKey(FortnoxApiKey key) throws Exception {
+    public void setCredentials(FortnoxCredentials key) throws Exception {
         key.setOrgNo(orgNo);
-        List<FortnoxApiKey> keys = getKeyList();
+        List<FortnoxCredentials> keys = getKeyList();
         boolean updated = false;
         for(int i = 0; i < keys.size(); i++) {
             if(keys.get(0).getOrgNo().equals(orgNo)) {
@@ -55,13 +55,13 @@ public class FileKeyProvider extends FortnoxKeyProvider {
         fileWriter.close();
     }
 
-    private List<FortnoxApiKey> getKeyList() throws IOException {
+    private List<FortnoxCredentials> getKeyList() throws IOException {
         if(!new File("private/credentials.json").exists()) {
             Files.createFile(new File("private/credentials.json").toPath());
         }
         JsonReader reader = new JsonReader(new FileReader("private/credentials.json"));
-        List<FortnoxApiKey> keyList = gson.fromJson(reader, KEYS_TYPE);
-        return keyList != null ? keyList : new ArrayList<FortnoxApiKey>();
+        List<FortnoxCredentials> keyList = gson.fromJson(reader, KEYS_TYPE);
+        return keyList != null ? keyList : new ArrayList<FortnoxCredentials>();
     }
     
 }
