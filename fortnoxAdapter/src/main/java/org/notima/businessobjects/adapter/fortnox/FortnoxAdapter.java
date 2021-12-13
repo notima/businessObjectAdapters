@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.fortnox;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import org.notima.api.fortnox.ClientManagerKeyProvider;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.FortnoxKeyProvider;
@@ -117,27 +117,28 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	/**
 	 * Creates a new Fortnox Adapter using default configuration determined by fortnox4J 
+	 * @throws IOException
 	 * 
 	 */
-	@Deprecated
-	public FortnoxAdapter() {
+	public FortnoxAdapter() throws IOException {
 		client = new FortnoxClient3(new FortnoxKeyProvider("") {
+			private final String ERR_MSG = "A Fortnox adapter tried to call the fortnox api without a valid key provider. Make sure to set the tenant of the Fortnox adapter";
 
 			@Override
 			public FortnoxApiKey getKey() throws Exception {
-				throw new Exception("No keyprovider");
+				throw new Exception(ERR_MSG);
 			}
 
 			@Override
 			public void setKey(FortnoxApiKey key) throws Exception {
-				throw new Exception("No keyprovider");
+				throw new Exception(ERR_MSG);
 			}
 			
 		});
 	}
 
-	public FortnoxAdapter(String orgNo) {
-		client = new FortnoxClient3(new ClientManagerKeyProvider(orgNo, getClientManager()));
+	public FortnoxAdapter(String orgNo) throws IOException {
+		client = new FortnoxClient3(new FileKeyProvider(orgNo));
 	}
 	
 	/**
@@ -208,14 +209,12 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		// Get properties
 		String accessToken = null;
-		String apiCode = null;
 		String clientSecret = null;
 		String clientId = null;
 		String refreshToken = null;
 
 		if (props!=null) {
 			accessToken = props.getProperty("accessToken");
-			apiCode = props.getProperty("apiCode");
 			clientSecret = props.getProperty("clientSecret");
 			clientId = props.getProperty("clientId");
 			refreshToken = props.getProperty("refreshToken");
@@ -240,10 +239,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (name!=null)
 			fi.setOrgName(name);
-		if (accessToken!=null)
-			fi.setAccessToken(accessToken);
-		if (apiCode!=null)
-			fi.setApiCode(apiCode);
+		if (accessToken!=null) {
+			if(fi.getApiKey() == null)
+				fi.setApiKey(new FortnoxApiKey());
+			fi.getApiKey().setAccessToken(accessToken);
+		}
 		if (clientSecret!=null)
 			fi.setClientSecret(clientSecret);
 		if (clientId!=null)
@@ -1324,7 +1324,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			if (fi==null) {
 				throw new NoSuchTenantException("No such tenant " + orgNo);
 			} else {
-				client.setKeyProvider(new ClientManagerKeyProvider(orgNo, clientManager));
+				client.setKeyProvider(new FileKeyProvider(orgNo));
 				currentTenant = fi;
 			}
 			

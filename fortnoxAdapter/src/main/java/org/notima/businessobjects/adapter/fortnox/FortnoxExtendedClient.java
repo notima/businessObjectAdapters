@@ -117,19 +117,19 @@ public class FortnoxExtendedClient {
 	 * @return	The current FortnoxAdapter (if none is initialized, it's initialized)
 	 * @throws Exception
 	 */
-	public FortnoxAdapter getFortnoxAdapter(String orgNo, FortnoxClientManager clientManager) throws Exception {
+	public FortnoxAdapter getFortnoxAdapter(String orgNo) throws Exception {
 		if (lastClientOrgNo==null || !lastClientOrgNo.equals(orgNo)) {
 			// Reset object factory
 			bof = null;
 		}
 		
 		if (bof==null) {
-			bof = new FortnoxAdapter(orgNo, clientManager);
+			bof = new FortnoxAdapter(orgNo);
 			lastClientOrgNo = orgNo;
 		}
 		
 		this.clientOrgNo = orgNo;
-		this.clientManager = clientManager;
+		this.clientManager = bof.getClientManager();
 		
 		return bof;
 	}
@@ -147,7 +147,7 @@ public class FortnoxExtendedClient {
 		
 		if (pt==null) return result;
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		Map<Object,Object> unposted = bof.lookupList(FortnoxAdapter.LIST_UNPOSTED);
 		
@@ -175,7 +175,7 @@ public class FortnoxExtendedClient {
 	public org.notima.api.fortnox.entities3.Invoice getFortnoxInvoice (
 			String invoiceNo) throws Exception {
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		org.notima.api.fortnox.entities3.Invoice finvoice = (org.notima.api.fortnox.entities3.Invoice)bof.lookupNativeInvoice((String)invoiceNo);
 
@@ -192,7 +192,7 @@ public class FortnoxExtendedClient {
 	public CompanySetting getCompanySetting(
 			) throws Exception {
 
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		CompanySetting cs = bof.getClient().getCompanySetting();
 		return cs;
@@ -229,7 +229,7 @@ public class FortnoxExtendedClient {
 		
 		if (createIfNotFound==null) createIfNotFound = Boolean.TRUE;
 
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		Supplier supplier = bof.getClient().getSupplierByTaxId(orgNo, true);
 		
@@ -256,7 +256,7 @@ public class FortnoxExtendedClient {
 			String filter
 			) throws Exception {
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		List<org.notima.api.fortnox.entities3.Invoice> result = null;
 		
@@ -311,7 +311,7 @@ public class FortnoxExtendedClient {
 				String action			
 			) throws Exception {
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		String result = bof.getClient().invoiceGetAction(invoiceNo, action);
 		
@@ -334,7 +334,7 @@ public class FortnoxExtendedClient {
 
 			log.info("Refreshing invoiceMap. This might take some time...");
 			
-			bof = getFortnoxAdapter(clientOrgNo, clientManager);
+			bof = getFortnoxAdapter(clientOrgNo);
 			
 			CompanySetting cs = bof.getClient().getCompanySetting();
 			clientName = cs.getName();
@@ -448,7 +448,7 @@ public class FortnoxExtendedClient {
 		
 		if (orderMap==null || !clientOrgNo.equals(mapOrgNo)) {
 
-			bof = getFortnoxAdapter(clientOrgNo, clientManager);
+			bof = getFortnoxAdapter(clientOrgNo);
 			
 			CompanySetting cs = bof.getClient().getCompanySetting();
 			clientName = cs.getName();
@@ -542,7 +542,7 @@ public class FortnoxExtendedClient {
 			Date reconciliationDate,
 			String invoiceRefRegEx) throws Exception {
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);		
+		bof = getFortnoxAdapter(clientOrgNo);		
 		
 		Invoice invoice = null;
 		String invoiceNo = null;
@@ -628,7 +628,7 @@ public class FortnoxExtendedClient {
 		
 		// TODO: Use FortnoxClient3.payCustomerInvoice to avoid duplicating code
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		InvoicePayment pmt = null;
 		
 		if (invoice!=null) {
@@ -738,7 +738,7 @@ public class FortnoxExtendedClient {
 	public String persistInvoice(
 			Invoice invoice) throws Exception {
 
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		Invoice result = (Invoice)bof.persistNativeInvoice(invoice);
 		return result.getDocumentNumber();
@@ -767,7 +767,7 @@ public class FortnoxExtendedClient {
 			throw new Exception("Can't persist invoice from order. The order is either null or missing order lines");
 		}
 
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);		
+		bof = getFortnoxAdapter(clientOrgNo);		
 
 		if (defaultRevenueAccount!=null)
 			bof.setDefaultRevenueAccount(defaultRevenueAccount);
@@ -794,7 +794,7 @@ public class FortnoxExtendedClient {
 			org.notima.generic.businessobjects.BusinessPartner bp 
 			) throws Exception {
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		Customer result = null;
 		if (bp.getbPartnerId()!=0) {
@@ -884,7 +884,7 @@ public class FortnoxExtendedClient {
 				(double)totalAmount,
 				description);
 
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		FortnoxClient3 client = (FortnoxClient3)bof.getClient();
 		voucher = client.setVoucher(voucher);
@@ -937,7 +937,7 @@ public class FortnoxExtendedClient {
 				(double)vatAmount, 
 				description);
 
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		
 		FortnoxClient3 client = (FortnoxClient3)bof.getClient();
 		voucher = client.setVoucher(voucher);
@@ -977,7 +977,7 @@ public class FortnoxExtendedClient {
 	public Map<String, String> getSettingsFromSupplier(
 			String supplierOrgNo) throws Exception {
 		
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		FortnoxClient3 client = (FortnoxClient3)bof.getClient();
 		Fortnox4JSettings settings = new Fortnox4JSettings(client);
 		
@@ -999,7 +999,7 @@ public class FortnoxExtendedClient {
 			String settingKey, 
 			String settingValue) throws Exception {
 
-		bof = getFortnoxAdapter(clientOrgNo, clientManager);
+		bof = getFortnoxAdapter(clientOrgNo);
 		FortnoxClient3 client = (FortnoxClient3)bof.getClient();
 		Fortnox4JSettings settings = new Fortnox4JSettings(client);
 		

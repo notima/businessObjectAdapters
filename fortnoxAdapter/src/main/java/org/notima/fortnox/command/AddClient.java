@@ -10,12 +10,12 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
-import org.notima.api.fortnox.ClientManagerKeyProvider;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
+import org.notima.businessobjects.adapter.fortnox.FileKeyProvider;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
@@ -86,7 +86,7 @@ public class AddClient implements Action {
 		if (orgNo==null) {
 			if (accessToken!=null && clientSecret!=null && refreshToken != null) {
 				FortnoxClient3 fc3 = fa.getClient();
-				fc3.setKeyProvider(new ClientManagerKeyProvider(orgNo, mgr));
+				fc3.setKeyProvider(new FileKeyProvider(orgNo));
 				try { 
 					cs = fc3.getCompanySetting();
 					if (cs!=null) {

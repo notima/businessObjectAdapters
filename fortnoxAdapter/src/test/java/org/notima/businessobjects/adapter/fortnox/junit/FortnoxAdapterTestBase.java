@@ -37,7 +37,7 @@ public class FortnoxAdapterTestBase {
 		
 		FortnoxClientManager mgr = new FortnoxClientManager(configUrl.getFile());
 		
-		factory = new FortnoxAdapter(orgNo, mgr);
+		factory = new FortnoxAdapter(orgNo);
 		
 	}
 	
