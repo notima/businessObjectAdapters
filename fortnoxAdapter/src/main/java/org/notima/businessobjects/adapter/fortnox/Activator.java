@@ -41,6 +41,7 @@ public class Activator extends BaseActivator {
 	public void doStart() throws IOException {
 	
 		String fortnoxClientsFile = null;
+		String fortnoxCredentialsFile = null;
 		String defaultClientSecret = null;
 		String defaultClientId = null;
 		ConfigurationAdmin configurationAdmin = null;
@@ -57,6 +58,7 @@ public class Activator extends BaseActivator {
                     Dictionary<String, Object> properties = configuration.getProperties();
                     if (properties!=null) {
 	                    fortnoxClientsFile = (String)properties.get("fortnoxClientsFile");
+						fortnoxCredentialsFile = (String)properties.get("fortnoxCredentialsFile");
 	                    defaultClientSecret = (String)properties.get("defaultClientSecret");
 	                    defaultClientId = (String)properties.get("defaultClientId");
                     }
@@ -84,6 +86,7 @@ public class Activator extends BaseActivator {
 		if (fortnoxClientsFile!=null) {
 			
 			System.setProperty(FortnoxClient3.DFortnox4JFile, fortnoxClientsFile);
+			System.setProperty(FileCredentialsProvider.CREDENTIALS_FILE_PROPERTY, fortnoxCredentialsFile);
 			FortnoxClientManager mgr = null;
 			
 			try {

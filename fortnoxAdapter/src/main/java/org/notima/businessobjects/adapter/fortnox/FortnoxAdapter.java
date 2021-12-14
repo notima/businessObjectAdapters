@@ -239,19 +239,19 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (name!=null)
 			fi.setOrgName(name);
-		if (accessToken!=null) {
-			if(fi.getCredentials() == null)
-				fi.setCredentials(new FortnoxCredentials());
-			fi.getCredentials().setAccessToken(accessToken);
-		}
 		if (clientSecret!=null)
 			fi.setClientSecret(clientSecret);
 		if (clientId!=null)
 			fi.setClientId(clientId);
-		if (refreshToken!=null) {
-			if(fi.getCredentials() == null)
-				fi.setCredentials(new FortnoxCredentials());
-			fi.getCredentials().setRefreshToken(refreshToken);
+		if (accessToken!=null) {
+			FortnoxCredentials credentials = new FortnoxCredentials();
+			credentials.setAccessToken(accessToken);
+			credentials.setRefreshToken(refreshToken);
+			try {
+				new FileCredentialsProvider(orgNo).setCredentials(credentials);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 		Customer tenant = new Customer();
@@ -1324,7 +1324,12 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			if (fi==null) {
 				throw new NoSuchTenantException("No such tenant " + orgNo);
 			} else {
-				client.setKeyProvider(new FileCredentialsProvider(orgNo));
+				try {
+					client.setKeyProvider(new FileCredentialsProvider(orgNo));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				currentTenant = fi;
 			}
 			
