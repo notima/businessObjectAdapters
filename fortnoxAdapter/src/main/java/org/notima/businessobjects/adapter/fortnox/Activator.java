@@ -92,7 +92,7 @@ public class Activator extends BaseActivator {
 			try {
 				mgr = new FortnoxClientManager(fortnoxClientsFile);
 				mgr.setDefaultClientSecret(defaultClientSecret);
-				mgr.setDefaultClientSecret(defaultClientId);
+				mgr.setDefaultClientId(defaultClientId);
 			} catch (FileNotFoundException fne) {
 				
 				// Create the file
