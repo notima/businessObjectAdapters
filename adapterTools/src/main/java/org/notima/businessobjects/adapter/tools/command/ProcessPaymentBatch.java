@@ -1,7 +1,5 @@
 package org.notima.businessobjects.adapter.tools.command;
 
-import java.io.File;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -10,7 +8,9 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
+import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 
@@ -26,15 +26,19 @@ public class ProcessPaymentBatch implements Action {
 
     @Option(name = "--match-only", description = "Run only a match session.", required = false, multiValued = false)
     private boolean matchOnly;
+    
+    @Option(name = "--draft-payments", description = "Only creates drafts of the payments, if supported by the destination adapter", required = false, multiValued = false)
+    private boolean	draftPayments;
 	
 	@Argument(index = 0, name = "paymentBatchProcessor", description ="The payment processor to send to", required = true, multiValued = false)
 	private String paymentBatchProcessorStr = "";
 
-	@Argument(index = 1, name = "paymentSource", description ="The payment source (normally a file)", required = true, multiValued = false)
+	@Argument(index = 1, name = "paymentFactory", description ="The payment destination adapter name", required = true, multiValued = false)
+	private String paymentFactoryStr = "";
+	
+	@Argument(index = 2, name = "paymentSource", description ="The payment source (normally a file)", required = true, multiValued = false)
 	private String paymentSource = "";
 
-	@Argument(index = 2, name = "paymentFactory", description ="The payment destination adapter name", required = true, multiValued = false)
-	private String paymentFactoryStr = "";
 
 	@Override
 	public Object execute() throws Exception {
@@ -42,11 +46,18 @@ public class ProcessPaymentBatch implements Action {
 		PaymentFactory paymentFactory = cof.lookupPaymentFactory(paymentFactoryStr);
 		PaymentBatchProcessor paymentProcessor = cof.lookupPaymentBatchProcessor(paymentBatchProcessorStr);
 		
+		PaymentBatchProcessOptions processOptions = new PaymentBatchProcessOptions();
+		processOptions.setDraftPaymentsIfPossible(draftPayments);
+		
 		PaymentBatch pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
 		if (matchOnly) {
 			paymentProcessor.lookupInvoiceReferences(pb);
+
+			PaymentBatchTable paymentBatchTable = new PaymentBatchTable(pb, true);
+			paymentBatchTable.getShellTable().print(sess.getConsole());
+			
 		} else {
-			paymentProcessor.processPaymentBatch(pb, null);
+			paymentProcessor.processPaymentBatch(pb, processOptions);
 		}
 		
 		return null;

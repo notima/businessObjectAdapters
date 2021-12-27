@@ -1,14 +1,20 @@
 package org.notima.businessobjects.adapter.fortnox;
 
-import java.util.Properties;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.entities3.Invoice;
-import org.notima.businessobjects.adapter.fortnox.FortnoxExtendedClient.ReferenceField;
 import org.notima.generic.businessobjects.BasicPaymentBatchProcessor;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
 import org.notima.generic.businessobjects.PaymentBatchProcessResult;
+import org.notima.generic.businessobjects.PaymentBatchProcessResult.ResultCode;
+import org.notima.generic.businessobjects.PaymentProcessResult;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processes a payment batch
@@ -18,8 +24,11 @@ import org.notima.generic.businessobjects.PaymentBatchProcessResult;
  */
 public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 
+	private Logger log = LoggerFactory.getLogger(FortnoxPaymentBatchProcessor.class);	
+	
 	private FortnoxAdapter fortnoxAdapter;
-	private FortnoxExtendedClient	cl;
+	
+	private Map<TaxSubjectIdentifier, FortnoxPaymentBatchRunner> fortnoxRunnerMap = new TreeMap<TaxSubjectIdentifier, FortnoxPaymentBatchRunner>();
 	
 	public FortnoxAdapter getFortnoxAdapter() {
 		return fortnoxAdapter;
@@ -29,17 +38,17 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 		this.fortnoxAdapter = fortnoxAdapter;
 	}
 
+	
+	
+	
 	@Override
 	public PaymentBatch lookupInvoiceReferences(PaymentBatch report) throws Exception {
 
-		if (report.hasPayments()) return report;
-		
-		// Make sure we have the correct Fortnox instance
-		fortnoxAdapter.setTenant(report.getBatchOwner().getTaxId(), report.getBatchOwner().getCountryCode());
+		if (!report.hasPayments()) return report;
+
+		FortnoxPaymentBatchRunner cl = createFortnoxPaymentBatchRunner(report);
 		
 		boolean fortnoxClientFailed = false;
-		
-		cl = new FortnoxExtendedClient(fortnoxAdapter);
 		
 		String existingReference = null;
 		
@@ -56,18 +65,7 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 				// Try to lookup Fortnox invoice id
 				try {
 					if (!fortnoxClientFailed) {
-						inv = cl.getInvoiceToPay(
-								payment.getDestinationSystemReference(), 
-								ReferenceField.valueOf(payment.getDestinationSystemReferenceField()), 
-								payment.getPaymentDate(),
-								null);
-						if (inv!=null) {
-							matchCount++;
-							if (inv.getOCR()!=null && inv.getOCR().trim().length()>0)
-								payment.setMatchedInvoiceNo(inv.getOCR());
-							else 
-								payment.setMatchedInvoiceNo(inv.getDocumentNumber());
-						}
+						inv = cl.getInvoiceToPayAndUpdatePayment(payment);
 					}
 				} catch (FortnoxException fe) {
 					fortnoxClientFailed = true;
@@ -85,21 +83,64 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 			
 		}
 		
-		return null;
+		return report;
 	}
 
 	@Override
-	public PaymentBatchProcessResult processPaymentBatch(PaymentBatch report, Properties props) throws Exception {
-
-		setOptionsFromProperties(props);
+	public synchronized PaymentBatchProcessResult processPaymentBatch(PaymentBatch report, PaymentBatchProcessOptions options) throws Exception {
 		
-		return null;
+		PaymentBatchProcessResult result = new PaymentBatchProcessResult();
+		
+		if (report==null) {
+			return result;
+		}
+		
+		if (report.isEmpty()) {
+			// Successful
+			result.setResultCode(ResultCode.OK);
+			return result;
+		}
+
+		// Get Fortnox client for this report
+		FortnoxPaymentBatchRunner cl = createFortnoxPaymentBatchRunner(report);	
+		cl.setOptions(options);
+		cl.setPaymentBatch(report);
+
+		Invoice inv;
+		PaymentProcessResult paymentResult;
+		
+		// Iterate through the payments
+		for (Payment<?> payment : report.getPayments()) {
+			inv = cl.getInvoiceToPayAndUpdatePayment(payment);
+			if (inv!=null) {
+				paymentResult = cl.payInvoice(inv, payment);
+			} else {
+				paymentResult = new PaymentProcessResult(PaymentProcessResult.ResultCode.NOT_PROCESSED);
+			}
+			result.addPaymentProcessResult(paymentResult);
+		}
+		
+		return result;
 	}
 
 	@Override
 	public String getSystemName() {
 		return FortnoxAdapter.SYSTEMNAME;
 	}
+	
+	
+	private FortnoxPaymentBatchRunner createFortnoxPaymentBatchRunner(PaymentBatch report) throws Exception {
 
+		FortnoxPaymentBatchRunner runner = fortnoxRunnerMap.get(report.getBatchOwner());
+		if (runner==null) {
+			// Make sure we have the correct Fortnox instance
+			fortnoxAdapter.setTenant(report.getBatchOwner().getTaxId(), report.getBatchOwner().getCountryCode());
+			FortnoxExtendedClient client = new FortnoxExtendedClient(fortnoxAdapter);
+			runner = new FortnoxPaymentBatchRunner(client);
+			fortnoxRunnerMap.put(report.getBatchOwner(), runner);
+		}
+		return runner;
+		
+	}
 
 }

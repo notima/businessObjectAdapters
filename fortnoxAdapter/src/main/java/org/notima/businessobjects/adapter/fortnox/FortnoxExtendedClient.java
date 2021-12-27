@@ -98,6 +98,10 @@ public class FortnoxExtendedClient {
 		accessToken = finfo.getAccessToken();
 	}
 
+	public FortnoxClient3 getCurrentFortnoxClient() {
+		return bof.getClient();
+	}
+	
 	/**
 	 * Return true if the given parameter is equal to the last access token used.
 	 * 
@@ -702,6 +706,9 @@ public class FortnoxExtendedClient {
 			log.info("Payment for invoice " + pmt.getInvoiceNumber() + " is empty. Not processing.");
 			return pmt;
 		}
+		
+		// Blank the currency field since it's read-only
+		pmt.setCurrency(null);
 		
 		pmt = bof.getClient().setCustomerPayment(pmt);
 
