@@ -33,6 +33,10 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	private String					directory;
 	private File					directoryFile;
 	private String					defaultCurrency;
+	private String					generalLedgerBankAccount;
+	private String					generalLedgerInTransitAccount;
+	private String					generalLedgerReconciliationAccount;
+	private String					generalLedgerFeeAccount;
 	
 	public RatepayDirectoryToPaymentBatch(String directoryToRead) throws Exception {
 		setSource(directoryToRead);
@@ -83,6 +87,10 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 		result.setPaymenType(PaymentType.RECEIVABLE);
 		BankAccountDetail bad = new BankAccountDetail();
 		bad.setCurrency(defaultCurrency);
+		bad.setGeneralLedgerBankAccount(generalLedgerBankAccount);
+		bad.setGeneralLedgerInTransitAccount(generalLedgerInTransitAccount);
+		bad.setGeneralLedgerReconciliationAccount(generalLedgerReconciliationAccount);
+		bad.setGeneralLedgerFeeAccount(generalLedgerFeeAccount);
 		result.setBankAccount(bad);
 		result.setSource(file);
 		return result;
@@ -146,6 +154,10 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 			String countryCode = props.getProperty("countryCode");
 			defaultCurrency = props.getProperty("defaultCurrency");
 			taxIdentifier = new TaxSubjectIdentifier(taxId, countryCode);
+			generalLedgerBankAccount = props.getProperty("generalLedgerBankAccount");
+			generalLedgerInTransitAccount = props.getProperty("generalLedgerInTransitAccount");
+			generalLedgerReconciliationAccount = props.getProperty("generalLedgerReconciliationAccount");
+			generalLedgerFeeAccount = props.getProperty("generalLedgerFeeAccount");
 			logRetrievedProperties();
 		} catch (IOException e) {
 			e.printStackTrace();
