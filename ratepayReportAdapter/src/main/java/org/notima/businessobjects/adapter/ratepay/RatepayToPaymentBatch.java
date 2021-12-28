@@ -100,7 +100,7 @@ public class RatepayToPaymentBatch {
 		
 		PaymentWriteOff pwo = new PaymentWriteOff();
 		pwo.setAccountNo(fee.getFeeType().toString());
-		pwo.setAmount(-fee.getAmount());
+		pwo.setAmount(fee.getAmount());
 		pwo.setComment(fee.getComment());
 		payment.addPaymentWriteOff(pwo);
 		

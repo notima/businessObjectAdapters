@@ -84,7 +84,7 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 		RatepayToPaymentBatch converter = RatepayToPaymentBatch.buildFromReport(ratepayReport);
 		PaymentBatch result = converter.getPaymentBatch();
 		result.setBatchOwner(taxIdentifier);
-		result.setPaymenType(PaymentType.RECEIVABLE);
+		result.setPaymentType(PaymentType.RECEIVABLE);
 		BankAccountDetail bad = new BankAccountDetail();
 		bad.setCurrency(defaultCurrency);
 		bad.setGeneralLedgerBankAccount(generalLedgerBankAccount);
