@@ -14,6 +14,7 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.entities3.CompanySetting;
+import org.notima.api.fortnox.entities3.Currency;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoicePayment;
@@ -77,6 +78,8 @@ public class FortnoxExtendedClient {
 	private String	clientName;
 	// Tax id associated with the access token
 	private String	taxId;
+	// Currency mapping
+	private Map<String, Currency> currencies;
 	
 	// Default supplier name if a new supplier is created automatically (@see getSupplierByOrgNo)
 	public static String DEFAULT_NEW_SUPPLIER_NAME = "Supplier created by Fortnox4J"; 
@@ -96,10 +99,24 @@ public class FortnoxExtendedClient {
 		FortnoxClientInfo finfo = bof.getClientManager().getClientInfoByOrgNo(orgNo);
 		clientSecret = finfo.getClientSecret();
 		accessToken = finfo.getAccessToken();
+		currencies = new TreeMap<String,Currency>();
 	}
 
 	public FortnoxClient3 getCurrentFortnoxClient() {
 		return bof.getClient();
+	}
+	
+	
+	private Currency getCurrency(String code) throws Exception {
+		code = code.toUpperCase();
+		Currency currency = currencies.get(code);
+		if (currency==null) {
+			currency = getCurrentFortnoxClient().getCurrency(code);
+			if (currency!=null) {
+				currencies.put(code, currency);
+			}
+		}
+		return currency;
 	}
 	
 	/**
@@ -705,8 +722,14 @@ public class FortnoxExtendedClient {
 		}
 		
 		// Blank the currency field since it's read-only
-		if ("EUR".equalsIgnoreCase(pmt.getCurrency())) {
-			pmt.setCurrencyRate(10.3151);
+		if (!pmt.isDefaultAccountingCurrency()) {
+			// Get currency rate if not set
+			if (!pmt.hasCurrencyRate()) {
+				Currency currency = getCurrency(pmt.getCurrency());
+				if (currency!=null) {
+					pmt.setCurrencyRate(currency.getBuyRate());
+				}
+			}
 			pmt.currencyConvertBeforeCreation();
 		}
 		// Clear currency field
