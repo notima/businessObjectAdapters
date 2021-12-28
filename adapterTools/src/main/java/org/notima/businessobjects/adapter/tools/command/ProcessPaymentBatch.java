@@ -29,6 +29,9 @@ public class ProcessPaymentBatch implements Action {
     
     @Option(name = "--draft-payments", description = "Only creates drafts of the payments, if supported by the destination adapter", required = false, multiValued = false)
     private boolean	draftPayments;
+    
+    @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
+    private boolean feesPerPayment;
 	
 	@Argument(index = 0, name = "paymentBatchProcessor", description ="The payment processor to send to", required = true, multiValued = false)
 	private String paymentBatchProcessorStr = "";
@@ -48,6 +51,7 @@ public class ProcessPaymentBatch implements Action {
 		
 		PaymentBatchProcessOptions processOptions = new PaymentBatchProcessOptions();
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
+		processOptions.setFeesPerPayment(feesPerPayment);
 		
 		PaymentBatch pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
 		if (matchOnly) {

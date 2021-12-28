@@ -29,6 +29,7 @@ public class PaymentBatchTable extends GenericTable {
 			addColumn("Payer Name");
 			addColumn("Client Order");
 			addColumn("Paid amt", GenericColumn.ALIGNMENT_RIGHT);
+			addColumn("Orig amt", GenericColumn.ALIGNMENT_RIGHT);
 			addColumn("Matched invoice");
 		}
 		else{
@@ -142,12 +143,14 @@ public class PaymentBatchTable extends GenericTable {
     	
     	int count = 0;
     	double totalPaidAmount = 0d;
+    	double totalOriginalAmount = 0d;
     	
     	GenericRow row = null;
 			
 		for (Payment<?> d : report.getPayments()) {
 
 			totalPaidAmount += d.getAmount();
+			totalOriginalAmount += d.getOriginalAmount();
 
 			row = new GenericRow();
 			row.addContent(
@@ -159,21 +162,22 @@ public class PaymentBatchTable extends GenericTable {
 				d.getPayerName(),
 				d.getClientOrderNo(),
 				nfmt.format(d.getAmount()),
+				nfmt.format(d.getOriginalAmount()),
 				d.getMatchedInvoiceNo());
 
 			rows.add(row);
 		}
 			
 		row = new GenericRow();
-		row.addContent("=====","==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========");
+		row.addContent("=====","==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========");
 		rows.add(row);
 
 		row = new GenericRow();
-		row.addContent("", "", "", "", "", "", "TOTAL", nfmt.format(totalPaidAmount), "");
+		row.addContent("", "", "", "", "", "", "TOTAL", nfmt.format(totalPaidAmount), nfmt.format(totalOriginalAmount), "");
 		rows.add(row);
 
 		row = new GenericRow();
-		row.addContent("", "", "", "", "", "", "", "", "");
+		row.addContent("", "", "", "", "", "", "", "", "", "");
 		rows.add(row);
     	
     	return rows; 

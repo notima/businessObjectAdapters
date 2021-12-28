@@ -278,6 +278,80 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		return FortnoxUtil.createSingleTransactionVoucher(voucherSeries, acctDate, creditAcct, debitAcct, amount, description);
 		
 	}
+
+	/**
+	 * Converts a generic business object payment to a Fortnox Payment.
+	 * 
+	 * @param src	The Payment to be converted
+	 * @param includeWriteOffs 	If write offs are to be included
+	 * @return	A Fortnox equivalent of a payment.
+	 * @throws	Exception if the payment is incomplete.
+	 */
+	private static InvoicePayment toFortnoxPaymentWithWriteOffFlag(Payment<?> src, boolean includeWriteOffs) throws Exception {
+		
+		if (src==null) return null;
+		
+		if (src.getInvoiceNo()==null)
+			throw new Exception("Invoice number missing.");
+		
+		InvoicePayment dst = new InvoicePayment();
+		
+		if (includeWriteOffs) {
+			dst.setAmount(src.getAmount());
+		} else {
+			dst.setAmount(src.getOriginalAmount());
+		}
+		dst.setPaymentDate(FortnoxClient3.s_dfmt.format(src.getPaymentDate()));
+		
+		dst.setInvoiceNumber(Integer.parseInt(src.getInvoiceNo()));
+		
+		String otherCurrency = null;
+		
+		if (src.getCurrency()!=null && !"SEK".equalsIgnoreCase(src.getCurrency())) {
+			
+			otherCurrency = src.getCurrency();
+			dst.setAmountCurrency(includeWriteOffs ? src.getAmount() : src.getOriginalAmount());
+			dst.setCurrency(src.getCurrency());
+			
+			if (src.getAcctAmount()!=null && src.getAcctAmount()!=0) {
+				dst.setAmount(src.getAcctAmount());
+				if (dst.getAmount()!=0)
+					dst.setCurrencyRate(src.getAcctAmount()/dst.getAmount());
+			}
+			
+		}
+		
+		// Check write offs
+		if (includeWriteOffs && src.getPaymentWriteOffs()!=null) {
+			
+			WriteOffs wofs = new WriteOffs();
+			List<WriteOff> wlist = new ArrayList<WriteOff>();
+			wofs.setWriteOff(wlist);
+			dst.setWriteOffs(wofs);
+			
+			for (PaymentWriteOff po : src.getPaymentWriteOffs().getPaymentWriteOff()) {
+				
+				wlist.add(toFortnoxWriteOff(po, otherCurrency));
+				
+			}
+			
+		}
+		
+		return dst;
+	}
+	
+	/**
+	 * Converts a generic business object payment to a Fortnox Payment without write offs (original amount is used)
+	 * 
+	 * @param src	The Payment to be converted
+	 * @return	A Fortnox equivalent of a payment.
+	 * @throws	Exception if the payment is incomplete.
+	 */
+	public static InvoicePayment toFortnoxPaymentWithoutWriteOffs(Payment<?> src) throws Exception {
+		
+		return toFortnoxPaymentWithWriteOffFlag(src, false);		
+		
+	}
 	
 	/**
 	 * Converts a generic business object payment to a Fortnox Payment.
@@ -288,48 +362,8 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 */
 	public static InvoicePayment toFortnoxPayment(Payment<?> src) throws Exception {
 		
-		if (src==null) return null;
+		return toFortnoxPaymentWithWriteOffFlag(src, true);
 		
-		if (src.getInvoiceNo()==null)
-			throw new Exception("Invoice number missing.");
-		
-		InvoicePayment dst = new InvoicePayment();
-		
-		dst.setAmount(src.getAmount());
-		dst.setPaymentDate(FortnoxClient3.s_dfmt.format(src.getPaymentDate()));
-		
-		dst.setInvoiceNumber(Integer.parseInt(src.getInvoiceNo()));
-		
-		if (src.getCurrency()!=null && !"SEK".equalsIgnoreCase(src.getCurrency())) {
-			
-			dst.setAmountCurrency(src.getAmount());
-			dst.setCurrency(src.getCurrency());
-			
-			if (src.getAcctAmount()!=null && src.getAcctAmount()!=0) {
-				dst.setAmount(src.getAcctAmount());
-				if (src.getAmount()!=0)
-					dst.setCurrencyRate(src.getAcctAmount()/src.getAmount());
-			}
-			
-		}
-		
-		// Check write offs
-		if (src.getPaymentWriteOffs()!=null) {
-			
-			WriteOffs wofs = new WriteOffs();
-			List<WriteOff> wlist = new ArrayList<WriteOff>();
-			wofs.setWriteOff(wlist);
-			dst.setWriteOffs(wofs);
-			
-			for (PaymentWriteOff po : src.getPaymentWriteOffs().getPaymentWriteOff()) {
-				
-				wlist.add(toFortnoxWriteOff(po));
-				
-			}
-			
-		}
-		
-		return dst;
 	}
 	
 	/**
@@ -338,11 +372,14 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 * @param src		A Business Objects writeoff.
 	 * @return	A Fortnox writeoff.
 	 */
-	public static WriteOff toFortnoxWriteOff(PaymentWriteOff src) {
+	public static WriteOff toFortnoxWriteOff(PaymentWriteOff src, String currency) {
 		
 		WriteOff dst = new WriteOff();
 		
 		dst.setAmount(src.getAmount());
+		if (currency!=null) {
+			dst.setCurrency(currency);
+		}
 		dst.setAccountNumber(src.getAccountNo());
 		dst.setTransactionInformation(src.getComment());
 		

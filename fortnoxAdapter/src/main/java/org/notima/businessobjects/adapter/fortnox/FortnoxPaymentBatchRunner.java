@@ -28,6 +28,7 @@ public class FortnoxPaymentBatchRunner {
 	private TaxSubjectIdentifier	taxSubject;
 	private PaymentBatch			paymentBatch;
 	private String					modeOfPayment;
+	private String					modeOfPaymentAccount;
 	private String					feeGlAccount;
 	
 	private Map<String, AccountSubset> acctMap;
@@ -40,6 +41,10 @@ public class FortnoxPaymentBatchRunner {
 		taxSubject = new TaxSubjectIdentifier(cs.getOrganizationNumber(), cs.getCountryCode());
 	}
 	
+	public TaxSubjectIdentifier getTaxSubject() {
+		return taxSubject;
+	}
+
 	public PaymentProcessResult payInvoice(Invoice inv, Payment<?> payment) throws Exception {
 
 		if (inv==null || payment==null) {
@@ -47,11 +52,14 @@ public class FortnoxPaymentBatchRunner {
 		}
 		
 		boolean bookkeepPayment = !processOptions.isDraftPaymentsIfPossible();
-
-		// Remap to default fee account if the account supplied for write offs doesn't exist
-		mapFeeAccount(payment);
 		
-		InvoicePayment invoicePayment = cl.payCustomerInvoice(modeOfPayment, inv, bookkeepPayment, payment);
+		prepareWriteOffs(payment);
+		
+		InvoicePayment invoicePayment = cl.payCustomerInvoice(
+				modeOfPayment, 
+				inv, 
+				bookkeepPayment, 
+				processOptions.isFeesPerPayment(), payment);
 		
 		if (invoicePayment!=null && invoicePayment.getNumber()>0) {
 			return new PaymentProcessResult(ResultCode.OK);
@@ -61,14 +69,24 @@ public class FortnoxPaymentBatchRunner {
 		
 	}
 	
-	private void mapFeeAccount(Payment<?> payment) throws Exception {
+	private void prepareWriteOffs(Payment<?> payment) throws Exception {
 		
-		if (payment.getPaymentWriteOffs()!=null && payment.getPaymentWriteOffs().getPaymentWriteOff().size()>0) {
+		if (payment.hasPaymentWriteOffs()) {
+			if (!processOptions.isFeesPerPayment()) {
+				return;
+			}
+			
 			for (PaymentWriteOff pwo : payment.getPaymentWriteOffs().getPaymentWriteOff()) {
-				if (!isAccountActive(pwo.getAccountNo())) {
+				if (feeGlAccount!=null && !isAccountActive(pwo.getAccountNo())) {
 					pwo.setAccountNo(feeGlAccount);
 				}
 			}
+			PaymentWriteOff feeWriteOff = new PaymentWriteOff();
+			feeWriteOff.setAccountNo(modeOfPaymentAccount);
+			feeWriteOff.setAmount(payment.getOriginalAmount()-payment.getAmount());
+			payment.addPaymentWriteOff(feeWriteOff);
+			payment.setAmount(payment.getOriginalAmount());
+			
 		}
 		
 	}
@@ -148,6 +166,8 @@ public class FortnoxPaymentBatchRunner {
 			throw new UnableToDetermineFeeAccountException(feeAccount + " doesn't exist or is not active.");
 		}
 		
+		feeGlAccount = feeAccount;
+		
 	}
 	
 	private boolean isAccountActive(String accountNo) throws Exception {
@@ -188,6 +208,7 @@ public class FortnoxPaymentBatchRunner {
 		for (ModeOfPaymentSubset subset : subsets) {
 			if (paymentAccount.equals(subset.getAccountNumber())) {
 				result = subset.getCode();
+				modeOfPaymentAccount = subset.getAccountNumber();
 				break;
 			}
 		}

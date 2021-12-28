@@ -633,7 +633,8 @@ public class FortnoxExtendedClient {
 	public InvoicePayment payCustomerInvoice(
 			String modeOfPayment,
 			Invoice invoice,
-			Boolean bookkeepPayment,
+			boolean bookkeepPayment,
+			boolean includeWriteOffs,
 			Payment payment) throws Exception {
 		
 		// TODO: Use FortnoxClient3.payCustomerInvoice to avoid duplicating code
@@ -648,10 +649,6 @@ public class FortnoxExtendedClient {
 			return pmt;
 		}
 		
-		if (bookkeepPayment==null) {
-			bookkeepPayment=Boolean.TRUE;
-		}
-		
 		// Check invoice date. Set payment date to invoice date if payment
 		// has a date earlier than the invoice.
 		// If this behavior is unwanted, correct the accounting before calling payCustomerInvoice.
@@ -660,10 +657,10 @@ public class FortnoxExtendedClient {
 			payment.setPaymentDate(invoiceDate);
 		}
 		
-		pmt = FortnoxConverter.toFortnoxPayment(payment);
+		pmt = includeWriteOffs ? FortnoxConverter.toFortnoxPayment(payment) : FortnoxConverter.toFortnoxPaymentWithoutWriteOffs(payment);
 		
 		// Round off if necessary (not EUR)
-		if (pmt.getCurrency()==null || !pmt.getCurrency().equals("EUR")) {
+		if (pmt.isDefaultAccountingCurrency()) {
 		
 			double sumWriteOffs = 0d;
 			if (pmt.getWriteOffs()!=null && pmt.getWriteOffs().getWriteOff()!=null) {
@@ -708,12 +705,17 @@ public class FortnoxExtendedClient {
 		}
 		
 		// Blank the currency field since it's read-only
+		if ("EUR".equalsIgnoreCase(pmt.getCurrency())) {
+			pmt.setCurrencyRate(10.3151);
+			pmt.currencyConvertBeforeCreation();
+		}
+		// Clear currency field
 		pmt.setCurrency(null);
 		
 		pmt = bof.getClient().setCustomerPayment(pmt);
 
 		// Book the payment directly if account and mode of payment is set.
-		if (bookkeepPayment.booleanValue() && pmt!=null && pmt.getModeOfPayment()!=null && pmt.getModeOfPaymentAccount()!=null && pmt.getModeOfPaymentAccount()>0) {
+		if (bookkeepPayment && pmt!=null && pmt.getModeOfPayment()!=null && pmt.getModeOfPaymentAccount()!=null && pmt.getModeOfPaymentAccount()>0) {
 			bof.getClient().performAction(true, "invoicepayment", Integer.toString(pmt.getNumber()), FortnoxClient3.ACTION_INVOICE_BOOKKEEP);
 		}
 		
