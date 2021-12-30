@@ -9,6 +9,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.JAXB;
+
 import org.notima.api.fortnox.Fortnox4JSettings;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
@@ -130,6 +132,10 @@ public class FortnoxExtendedClient {
 			return false;
 		
 		return accessToken.equals(lastAccessToken);
+	}
+	
+	public FortnoxAdapter getCurrentFortnoxAdapter() {
+		return bof;
 	}
 	
 	/**
@@ -745,6 +751,39 @@ public class FortnoxExtendedClient {
 		return pmt;
 	}
 
+
+	/**
+	 * Account the voucher with currency conversion if necessary.
+	 * 
+	 * @param voucher
+	 * @param srcCurrency
+	 * @param rate
+	 * @return
+	 * @throws Exception
+	 */
+	public Voucher accountFortnoxVoucher(Voucher voucher, String srcCurrency, double rate) throws Exception {
+		
+		if (srcCurrency!=null && !srcCurrency.equalsIgnoreCase(FortnoxClient3.DEFAULT_ACCOUNTING_CURRENCY)) {
+			
+			Currency currency;
+			if (rate==0) {
+				currency = getCurrency(srcCurrency);
+			} else {
+				currency = new Currency(srcCurrency);
+				currency.setBuyRate(rate);
+			}
+			
+			voucher.currencyConvert(currency);
+			
+		}
+		
+		JAXB.marshal(voucher, System.out);
+
+		voucher = bof.getClient().setVoucher(voucher);
+		
+		return voucher;
+	}
+	
 	/**
 	 * Creates an invoice from order number.
 	 * 

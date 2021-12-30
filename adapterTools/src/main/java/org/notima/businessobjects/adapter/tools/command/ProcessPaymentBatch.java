@@ -42,6 +42,9 @@ public class ProcessPaymentBatch implements Action {
     @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
     private boolean feesPerPayment;
 	
+    @Option(name = "-p", aliases = { "--account-payout-only" }, description = "Only account payout", required = false, multiValued = false)
+    private boolean accountPayoutOnly;
+    
     @Option(name="-of", description="Output match result to file name", required = false, multiValued = false)
     private String	outFile;
     
@@ -67,6 +70,7 @@ public class ProcessPaymentBatch implements Action {
 		PaymentBatchProcessOptions processOptions = new PaymentBatchProcessOptions();
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
 		processOptions.setFeesPerPayment(feesPerPayment);
+		processOptions.setAccountPayoutOnly(accountPayoutOnly);
 		
 		PaymentBatch pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
 		if (matchOnly) {

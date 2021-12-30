@@ -381,7 +381,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			dst.setCurrency(currency);
 		}
 		dst.setAccountNumber(src.getAccountNo());
-		dst.setTransactionInformation(src.getComment());
+		dst.appendTransactionInformation(src.getComment());
 		
 		return dst;
 		

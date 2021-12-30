@@ -37,9 +37,6 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 	public void setFortnoxAdapter(FortnoxAdapter fortnoxAdapter) {
 		this.fortnoxAdapter = fortnoxAdapter;
 	}
-
-	
-	
 	
 	@Override
 	public PaymentBatch lookupInvoiceReferences(PaymentBatch report) throws Exception {
@@ -89,40 +86,30 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 	@Override
 	public synchronized PaymentBatchProcessResult processPaymentBatch(PaymentBatch report, PaymentBatchProcessOptions options) throws Exception {
 		
-		PaymentBatchProcessResult result = new PaymentBatchProcessResult();
+		 PaymentBatchProcessResult processResult = new PaymentBatchProcessResult();
 		
 		if (report==null) {
-			return result;
+			return processResult;
 		}
 		
 		if (report.isEmpty()) {
 			// Successful
-			result.setResultCode(ResultCode.OK);
-			return result;
+			processResult.setResultCode(ResultCode.OK);
+			return processResult;
 		}
 
 		// Get Fortnox client for this report
-		FortnoxPaymentBatchRunner cl = createFortnoxPaymentBatchRunner(report);	
-		cl.setOptions(options);
-		cl.setPaymentBatch(report);
+		FortnoxPaymentBatchRunner batchRunner = createFortnoxPaymentBatchRunner(report);	
+		batchRunner.setOptions(options);
+		batchRunner.setPaymentBatch(report);
 
-		Invoice inv;
-		PaymentProcessResult paymentResult;
+		batchRunner.processPayments();
+		batchRunner.processFees();
+		batchRunner.processPayout();
 		
-		// Iterate through the payments
-		for (Payment<?> payment : report.getPayments()) {
-			inv = cl.getInvoiceToPayAndUpdatePayment(payment);
-			if (inv!=null) {
-				paymentResult = cl.payInvoice(inv, payment);
-			} else {
-				paymentResult = new PaymentProcessResult(PaymentProcessResult.ResultCode.NOT_PROCESSED);
-			}
-			result.addPaymentProcessResult(paymentResult);
-		}
-		
-		return result;
+		return batchRunner.getPaymentBatchProcessResult();
 	}
-
+	
 	@Override
 	public String getSystemName() {
 		return FortnoxAdapter.SYSTEMNAME;
