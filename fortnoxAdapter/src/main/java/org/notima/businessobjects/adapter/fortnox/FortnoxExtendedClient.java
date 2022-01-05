@@ -120,10 +120,10 @@ public class FortnoxExtendedClient {
 	}
 	
 	/**
-	 * Return true if the given parameter is equal to the last access token used.
+	 * Return true if the given parameter is equal to the last orgNo used.
 	 * 
-	 * @param accessToken
-	 * @return	True if accesstoken hasn't changed.
+	 * @param orgNo
+	 * @return	True if orgNo hasn't changed.
 	 */
 	public boolean isLastOrgNo(String orgNo) {
 		if (orgNo==null || lastClientOrgNo==null)
@@ -139,8 +139,7 @@ public class FortnoxExtendedClient {
 	/**
 	 * Keeps a cached business object factory
 	 * 
-	 * @param accessToken
-	 * @param clientSecret
+	 * @param orgNo
 	 * @return	The current FortnoxAdapter (if none is initialized, it's initialized)
 	 * @throws Exception
 	 */
