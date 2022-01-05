@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.fortnox;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -9,11 +10,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import org.notima.api.fortnox.ClientManagerKeyProvider;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
-import org.notima.api.fortnox.FortnoxKeyProvider;
-import org.notima.api.fortnox.clients.FortnoxApiKey;
+import org.notima.api.fortnox.FortnoxCredentialsProvider;
+import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
@@ -48,6 +48,10 @@ import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.util.LocalDateUtils;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,27 +117,28 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	/**
 	 * Creates a new Fortnox Adapter using default configuration determined by fortnox4J 
+	 * @throws IOException
 	 * 
 	 */
-	@Deprecated
-	public FortnoxAdapter() {
-		client = new FortnoxClient3(new FortnoxKeyProvider("") {
+	public FortnoxAdapter() throws IOException {
+		client = new FortnoxClient3(new FortnoxCredentialsProvider("") {
+			private final String ERR_MSG = "A Fortnox adapter tried to call the fortnox api without a valid key provider. Make sure to set the tenant of the Fortnox adapter";
 
 			@Override
-			public FortnoxApiKey getKey() throws Exception {
-				throw new Exception("No keyprovider");
+			public FortnoxCredentials getCredentials() throws Exception {
+				throw new Exception(ERR_MSG);
 			}
 
 			@Override
-			public void setKey(FortnoxApiKey key) throws Exception {
-				throw new Exception("No keyprovider");
+			public void setCredentials(FortnoxCredentials key) throws Exception {
+				throw new Exception(ERR_MSG);
 			}
 			
 		});
 	}
 
-	public FortnoxAdapter(String orgNo, FortnoxClientManager clientManager) {
-		client = new FortnoxClient3(new ClientManagerKeyProvider(orgNo, clientManager));
+	public FortnoxAdapter(String orgNo) throws IOException {
+		client = new FortnoxClient3(new FileCredentialsProvider(orgNo));
 	}
 	
 	/**
@@ -150,6 +155,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @return
 	 */
 	public FortnoxClientManager getClientManager() {
+		if(clientManager == null) 
+			clientManager = getServiceReference(FortnoxClientManager.class);
 		return clientManager;
 	}
 
@@ -202,14 +209,12 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		// Get properties
 		String accessToken = null;
-		String apiCode = null;
 		String clientSecret = null;
 		String clientId = null;
 		String refreshToken = null;
 
 		if (props!=null) {
 			accessToken = props.getProperty("accessToken");
-			apiCode = props.getProperty("apiCode");
 			clientSecret = props.getProperty("clientSecret");
 			clientId = props.getProperty("clientId");
 			refreshToken = props.getProperty("refreshToken");
@@ -234,18 +239,19 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (name!=null)
 			fi.setOrgName(name);
-		if (accessToken!=null)
-			fi.setAccessToken(accessToken);
-		if (apiCode!=null)
-			fi.setApiCode(apiCode);
 		if (clientSecret!=null)
 			fi.setClientSecret(clientSecret);
 		if (clientId!=null)
 			fi.setClientId(clientId);
-		if (refreshToken!=null) {
-			if(fi.getApiKey() == null)
-				fi.setApiKey(new FortnoxApiKey());
-			fi.getApiKey().setRefreshToken(refreshToken);
+		if (accessToken!=null) {
+			FortnoxCredentials credentials = new FortnoxCredentials();
+			credentials.setAccessToken(accessToken);
+			credentials.setRefreshToken(refreshToken);
+			try {
+				new FileCredentialsProvider(orgNo).setCredentials(credentials);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 		Customer tenant = new Customer();
@@ -1318,7 +1324,12 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			if (fi==null) {
 				throw new NoSuchTenantException("No such tenant " + orgNo);
 			} else {
-				client.setKeyProvider(new ClientManagerKeyProvider(orgNo, clientManager));
+				try {
+					client.setKeyProvider(new FileCredentialsProvider(orgNo));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				currentTenant = fi;
 			}
 			
@@ -1457,6 +1468,18 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return vfc.getFileId();
 		
 	}
+
+	private <S> S getServiceReference(Class<S> clazz) {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		if (bundle != null) {
+			BundleContext ctx = bundle.getBundleContext();
+			ServiceReference<S> reference = ctx
+					.getServiceReference(clazz);
+			if (reference != null)
+				return ctx.getService(reference);
+		}
+		return null;
+    }
 	
 
 }

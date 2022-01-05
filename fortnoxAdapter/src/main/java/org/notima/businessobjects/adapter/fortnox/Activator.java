@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.fortnox;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -8,6 +9,7 @@ import java.util.Hashtable;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
@@ -36,10 +38,12 @@ public class Activator extends BaseActivator {
 	}
 
 	@Override
-	public void doStart() {
+	public void doStart() throws IOException {
 	
 		String fortnoxClientsFile = null;
+		String fortnoxCredentialsFile = null;
 		String defaultClientSecret = null;
+		String defaultClientId = null;
 		ConfigurationAdmin configurationAdmin = null;
 		
 		ServiceReference<ConfigurationAdmin> reference = bundleContext.getServiceReference(ConfigurationAdmin.class);
@@ -54,7 +58,9 @@ public class Activator extends BaseActivator {
                     Dictionary<String, Object> properties = configuration.getProperties();
                     if (properties!=null) {
 	                    fortnoxClientsFile = (String)properties.get("fortnoxClientsFile");
+						fortnoxCredentialsFile = (String)properties.get("fortnoxCredentialsFile");
 	                    defaultClientSecret = (String)properties.get("defaultClientSecret");
+	                    defaultClientId = (String)properties.get("defaultClientId");
                     }
                 }
                 
@@ -79,11 +85,14 @@ public class Activator extends BaseActivator {
 		
 		if (fortnoxClientsFile!=null) {
 			
+			System.setProperty(FortnoxClient3.DFortnox4JFile, fortnoxClientsFile);
+			System.setProperty(FileCredentialsProvider.CREDENTIALS_FILE_PROPERTY, fortnoxCredentialsFile);
 			FortnoxClientManager mgr = null;
 			
 			try {
 				mgr = new FortnoxClientManager(fortnoxClientsFile);
 				mgr.setDefaultClientSecret(defaultClientSecret);
+				mgr.setDefaultClientId(defaultClientId);
 			} catch (FileNotFoundException fne) {
 				
 				// Create the file
@@ -97,6 +106,8 @@ public class Activator extends BaseActivator {
 				}
 				
 			}
+
+			register(FortnoxClientManager.class, mgr);
 			
 			FortnoxAdapter fapt = new FortnoxAdapter();
 			fapt.setClientManager(mgr);
