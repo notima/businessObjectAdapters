@@ -9,12 +9,15 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.xml.bind.JAXB;
+
 import org.notima.api.fortnox.Fortnox4JSettings;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
+import org.notima.api.fortnox.entities3.Currency;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoicePayment;
@@ -78,6 +81,8 @@ public class FortnoxExtendedClient {
 	private String	clientName;
 	// Tax id associated with the access token
 	private String	taxId;
+	// Currency mapping
+	private Map<String, Currency> currencies;
 	
 	// Default supplier name if a new supplier is created automatically (@see getSupplierByOrgNo)
 	public static String DEFAULT_NEW_SUPPLIER_NAME = "Supplier created by Fortnox4J"; 
@@ -94,8 +99,26 @@ public class FortnoxExtendedClient {
 		bof = fortnoxAdapter;
 		clientOrgNo = bof.getCurrentTenant().getTaxId();
 		FortnoxClientInfo finfo = bof.getClientManager().getClientInfoByOrgNo(clientOrgNo);
+		currencies = new TreeMap<String,Currency>();
 	}
 
+	public FortnoxClient3 getCurrentFortnoxClient() {
+		return bof.getClient();
+	}
+	
+	
+	private Currency getCurrency(String code) throws Exception {
+		code = code.toUpperCase();
+		Currency currency = currencies.get(code);
+		if (currency==null) {
+			currency = getCurrentFortnoxClient().getCurrency(code);
+			if (currency!=null) {
+				currencies.put(code, currency);
+			}
+		}
+		return currency;
+	}
+	
 	/**
 	 * Return true if the given parameter is equal to the last access token used.
 	 * 
@@ -107,6 +130,10 @@ public class FortnoxExtendedClient {
 			return false;
 		
 		return orgNo.equals(lastClientOrgNo);
+	}
+	
+	public FortnoxAdapter getCurrentFortnoxAdapter() {
+		return bof;
 	}
 	
 	/**
@@ -623,7 +650,8 @@ public class FortnoxExtendedClient {
 	public InvoicePayment payCustomerInvoice(
 			String modeOfPayment,
 			Invoice invoice,
-			Boolean bookkeepPayment,
+			boolean bookkeepPayment,
+			boolean includeWriteOffs,
 			Payment payment) throws Exception {
 		
 		// TODO: Use FortnoxClient3.payCustomerInvoice to avoid duplicating code
@@ -638,10 +666,6 @@ public class FortnoxExtendedClient {
 			return pmt;
 		}
 		
-		if (bookkeepPayment==null) {
-			bookkeepPayment=Boolean.TRUE;
-		}
-		
 		// Check invoice date. Set payment date to invoice date if payment
 		// has a date earlier than the invoice.
 		// If this behavior is unwanted, correct the accounting before calling payCustomerInvoice.
@@ -650,10 +674,10 @@ public class FortnoxExtendedClient {
 			payment.setPaymentDate(invoiceDate);
 		}
 		
-		pmt = FortnoxConverter.toFortnoxPayment(payment);
+		pmt = includeWriteOffs ? FortnoxConverter.toFortnoxPayment(payment) : FortnoxConverter.toFortnoxPaymentWithoutWriteOffs(payment);
 		
 		// Round off if necessary (not EUR)
-		if (pmt.getCurrency()==null || !pmt.getCurrency().equals("EUR")) {
+		if (pmt.isDefaultAccountingCurrency()) {
 		
 			double sumWriteOffs = 0d;
 			if (pmt.getWriteOffs()!=null && pmt.getWriteOffs().getWriteOff()!=null) {
@@ -697,16 +721,63 @@ public class FortnoxExtendedClient {
 			return pmt;
 		}
 		
+		// Blank the currency field since it's read-only
+		if (!pmt.isDefaultAccountingCurrency()) {
+			// Get currency rate if not set
+			if (!pmt.hasCurrencyRate()) {
+				Currency currency = getCurrency(pmt.getCurrency());
+				if (currency!=null) {
+					pmt.setCurrencyRate(currency.getBuyRate());
+				}
+			}
+			pmt.currencyConvertBeforeCreation();
+		}
+		// Clear currency field
+		pmt.setCurrency(null);
+		
 		pmt = bof.getClient().setCustomerPayment(pmt);
 
 		// Book the payment directly if account and mode of payment is set.
-		if (bookkeepPayment.booleanValue() && pmt!=null && pmt.getModeOfPayment()!=null && pmt.getModeOfPaymentAccount()!=null && pmt.getModeOfPaymentAccount()>0) {
+		if (bookkeepPayment && pmt!=null && pmt.getModeOfPayment()!=null && pmt.getModeOfPaymentAccount()!=null && pmt.getModeOfPaymentAccount()>0) {
 			bof.getClient().performAction(true, "invoicepayment", Integer.toString(pmt.getNumber()), FortnoxClient3.ACTION_INVOICE_BOOKKEEP);
 		}
 		
 		return pmt;
 	}
 
+
+	/**
+	 * Account the voucher with currency conversion if necessary.
+	 * 
+	 * @param voucher
+	 * @param srcCurrency
+	 * @param rate
+	 * @return
+	 * @throws Exception
+	 */
+	public Voucher accountFortnoxVoucher(Voucher voucher, String srcCurrency, double rate) throws Exception {
+		
+		if (srcCurrency!=null && !srcCurrency.equalsIgnoreCase(FortnoxClient3.DEFAULT_ACCOUNTING_CURRENCY)) {
+			
+			Currency currency;
+			if (rate==0) {
+				currency = getCurrency(srcCurrency);
+			} else {
+				currency = new Currency(srcCurrency);
+				currency.setBuyRate(rate);
+			}
+			
+			voucher.currencyConvert(currency);
+			
+		}
+		
+		JAXB.marshal(voucher, System.out);
+
+		voucher = bof.getClient().setVoucher(voucher);
+		
+		return voucher;
+	}
+	
 	/**
 	 * Creates an invoice from order number.
 	 * 

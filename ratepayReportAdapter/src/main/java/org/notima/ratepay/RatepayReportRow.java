@@ -9,6 +9,10 @@ public class RatepayReportRow {
     public static final int B2B = 1;
     public static final int B2C = 2;
 
+    public static final int	FEETYPE_PAYMENT = 1;
+    public static final int FEETYPE_PROVISION = 2;
+    public static final int FEETYPE_TRX_FEE = 3;
+    
     public static final int PRODUCT_INVOICE = 1;
     public static final int PRODUCT_INSTALLMENT = 2;
     public static final int PRODUCT_DIRECT_DEBIT = 3;
@@ -162,8 +166,8 @@ public class RatepayReportRow {
     	if (this.descriptor!=null && !this.descriptor.equals(that.getDescriptor())) {
     		throw new Exception("Can't merge rows with different descriptors. Dst: " + this.descriptor + " Src: " + that.descriptor);
     	}
-    	if (that.feeType==1) {
-    		this.setAmount(that.getAmount());
+    	if (that.feeType==FEETYPE_PAYMENT) {
+    		this.setAmount(this.getAmount() + that.getAmount());
     	} else {
     		this.addFee(new RatepayFee(new Integer(that.feeType), new Double(that.amount), that.description));
     	}
