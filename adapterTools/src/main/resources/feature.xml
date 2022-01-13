@@ -76,7 +76,7 @@
         <config name="FortnoxProperties">
             fortnoxClientsFile = private/fortnoxClients.xml
             fortnoxCredentialsFile = private/credentials.json
-            defaultClientID=DONT_STORE_HERE
+            defaultClientId=DONT_STORE_HERE
             defaultClientSecret=DONT_STORE_HERE
         </config>
 
