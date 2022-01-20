@@ -22,7 +22,7 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     private static final Type KEYS_TYPE = new TypeToken<List<FortnoxCredentials>>() {}.getType();
     public static final String CREDENTIALS_FILE_PROPERTY = "FortnoxCredentialsFile";
 
-    private Gson gson = new GsonBuilder().create();
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private File file;
 
     public FileCredentialsProvider(String orgNo) throws IOException {
