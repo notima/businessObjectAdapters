@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>businessObjectAdapters</artifactId>
-	<version>1.8.12-SNAPSHOT</version>
+	<version>1.8.13-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<distributionManagement>
