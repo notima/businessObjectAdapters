@@ -5,10 +5,12 @@ import java.util.Properties;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
@@ -58,6 +60,7 @@ public class ProcessPaymentBatch implements Action {
 	private String paymentFactoryStr = "";
 	
 	@Argument(index = 2, name = "paymentSource", description ="The payment source (normally a file)", required = true, multiValued = false)
+	@Completion(FileCompleter.class)
 	private String paymentSource = "";
 
 
