@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="notima-business-objects">
 
-	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}">
+	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}" install="manual">
 	
 		<bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.12</bundle>
@@ -9,8 +9,8 @@
         <bundle>wrap:mvn:org.apache.httpcomponents/httpmime/4.5.13</bundle>
         <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
         <bundle>mvn:commons-configuration/commons-configuration/1.10</bundle>
-    	<bundle>wrap:mvn:commons-collections/commons-collections</bundle>
-    	<bundle>mvn:commons-codec/commons-codec</bundle>
+    	<bundle>wrap:mvn:commons-collections/commons-collections/LATEST</bundle>
+    	<bundle>mvn:commons-codec/commons-codec/LATEST</bundle>
     	<bundle>mvn:commons-beanutils/commons-beanutils/1.9.4</bundle>
     	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
 		
@@ -30,7 +30,7 @@
 	
 	</feature>
 
-	<feature name="notima-businessobjects" description="Notima Business Objects" version="${project.version}">
+	<feature name="notima-businessobjects" description="Notima Business Objects" version="${project.version}" install="manual">
 		<!-- 
         <feature prerequisite="true" dependency="false">wrap</feature>
          -->
@@ -41,14 +41,14 @@
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
 	</feature>
 
-	<feature name="notima-ubl" description="Notima UBL Adapter" version="${project.version}">
+	<feature name="notima-ubl" description="Notima UBL Adapter" version="${project.version}" install="manual">
 
         <feature>notima-businessobjects</feature>	
         <bundle>mvn:org.notima.generic.businessobjects.adapter/ublAdapter/${project.version}</bundle>
 	
 	</feature>
 
-	<feature name="notima-email" description="Notima Email Adapter" version="${project.version}">
+	<feature name="notima-email" description="Notima Email Adapter" version="${project.version}" install="manual">
 
         <feature>camel-mail</feature>
         <feature>notima-businessobjects</feature>
@@ -65,10 +65,11 @@
         </config>
 	</feature>
 
-    <feature name="notima-fortnox4j" description="Notima Fortnox4J Adapter" version="${project.version}">
+    <feature name="notima-fortnox4j" description="Notima Fortnox4J Adapter" version="${project.version}" install="manual">
         <feature prerequisite="true" dependency="false">wrap</feature>
         <feature>notima-businessobjects</feature>
         <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
+        <bundle>mvn:com.diffplug.osgi/com.diffplug.osgi.extension.com.sun.net.httpserver/0.0.0</bundle>
         <bundle>mvn:org.notima.api/fortnox4j/${fortnox4j.version}</bundle>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
 
@@ -81,18 +82,18 @@
 
     </feature>
     
-    <feature name="notima-ratepay" description="Notima Ratepay Adapter" version="">
+    <feature name="notima-ratepay" description="Notima Ratepay Adapter" version="" install="manual">
         <feature>notima-csv</feature>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/ratepayAdapter/${project.version}</bundle>
     </feature>
     
-    <feature name="notima-csv" description="Notima CSV Adapter" version="">
+    <feature name="notima-csv" description="Notima CSV Adapter" version="" install="manual">
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.apache.commons/commons-csv/${commons-csv.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/csvAdapter/${project.version}</bundle>    	
     </feature>
     
-    <feature name="notima-sveawebpay" description="Notima SveaWebPay Adapter" version="${project.version}">
+    <feature name="notima-sveawebpay" description="Notima SveaWebPay Adapter" version="${project.version}" install="manual">
     	<feature>notima-csv</feature>
     	<bundle>mvn:org.notima.bg/bankgiro-api/1.3.7</bundle>
     	<bundle>mvn:org.notima.api.webpay/pmt-admin-api/${pmt-admin-api.version}</bundle>
@@ -101,20 +102,20 @@
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/sveaWebpayAdapter/${project.version}</bundle>
     </feature>
     
-    <feature name="notima-infometric" description="Notima Infometric Adapter" version="${project.version}">
+    <feature name="notima-infometric" description="Notima Infometric Adapter" version="${project.version}" install="manual">
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.apache.commons/commons-csv/${commons-csv.version}</bundle>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/infometricAdapter/${project.version}</bundle>
     </feature>
     
-	<feature name="notima-sie" description="Notima SIE Adapter" version="${project.version}" >
+	<feature name="notima-sie" description="Notima SIE Adapter" version="${project.version}" install="manual">
 		<feature>notima-businessobjects</feature>
 		<bundle>mvn:org.notima/siefilelib/${siefilelib.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/sieAdapter/${project.version}</bundle>
 	</feature>
     
     
-    <feature name="notima-adempiere" description="Notima ADempiere Adapter" version="${project.version}">
+    <feature name="notima-adempiere" description="Notima ADempiere Adapter" version="${project.version}" install="manual">
 
     	<feature>notima-businessobjects</feature>
         <feature>transaction</feature>
@@ -149,7 +150,7 @@
     	
     </feature>
 
-    <feature name="notima-jasperreport" description="Notima JasperReports Adapter" version="${project.version}">
+    <feature name="notima-jasperreport" description="Notima JasperReports Adapter" version="${project.version}" install="manual">
     	<feature prerequisite="true">wrap</feature>
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.codehaus.groovy/groovy/2.5.14</bundle>
@@ -160,7 +161,7 @@
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/jasperReportAdapter/${project.version}</bundle>
     </feature>
     
-    <feature name="notima-excel" description="Notima Excel Adapter" version="${project.version}">
+    <feature name="notima-excel" description="Notima Excel Adapter" version="${project.version}" install="manual">
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/excelAdapter/${project.version}</bundle>
     </feature>

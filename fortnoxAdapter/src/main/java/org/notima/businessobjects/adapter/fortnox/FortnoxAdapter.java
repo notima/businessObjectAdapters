@@ -133,6 +133,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			public void setCredentials(FortnoxCredentials key) throws Exception {
 				throw new Exception(ERR_MSG);
 			}
+
+			@Override
+			public void removeCredentials() throws Exception {}
 			
 		});
 	}

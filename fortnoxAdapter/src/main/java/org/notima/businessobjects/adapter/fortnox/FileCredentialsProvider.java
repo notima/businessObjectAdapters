@@ -72,6 +72,20 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
         fileWriter.close();
     }
 
+    @Override
+    public void removeCredentials() throws IOException {
+        List<FortnoxCredentials> credentialsList = getKeyList();
+        for(int i = 0; i < credentialsList.size(); i++) {
+            if (credentialsList.get(i).getOrgNo().equals(orgNo)){
+                credentialsList.remove(i);
+                break;
+            }
+        }
+        FileWriter fileWriter = new FileWriter(file.getPath());
+        gson.toJson(credentialsList, fileWriter);
+        fileWriter.close();
+    }
+
     private List<FortnoxCredentials> getKeyList() throws FileNotFoundException {
         JsonReader reader = new JsonReader(new FileReader(file.getPath()));
         List<FortnoxCredentials> keyList = gson.fromJson(reader, KEYS_TYPE);
