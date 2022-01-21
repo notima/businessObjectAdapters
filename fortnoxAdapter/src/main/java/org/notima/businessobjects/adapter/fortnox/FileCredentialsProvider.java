@@ -22,7 +22,7 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     private static final Type KEYS_TYPE = new TypeToken<List<FortnoxCredentials>>() {}.getType();
     public static final String CREDENTIALS_FILE_PROPERTY = "FortnoxCredentialsFile";
 
-    private Gson gson = new GsonBuilder().create();
+    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private File file;
 
     public FileCredentialsProvider(String orgNo) throws IOException {
@@ -33,14 +33,24 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
         }
     }
 
+    /**
+     * Return the credentials with the highest lastRefresh.
+     */
     @Override
     public FortnoxCredentials getCredentials() throws Exception {
+    	
+    	FortnoxCredentials result = null;
+    	long lastRefresh = 0L;
+    	
         for(FortnoxCredentials credentials : getKeyList()) {
             if (credentials.getOrgNo().equals(orgNo)){
-                return credentials;
+            	if (credentials.getLastRefresh()>lastRefresh) {
+            		result = credentials;
+            		lastRefresh = credentials.getLastRefresh();
+            	}
             }
         }
-        return null;
+        return result;
     }
 
     @Override
