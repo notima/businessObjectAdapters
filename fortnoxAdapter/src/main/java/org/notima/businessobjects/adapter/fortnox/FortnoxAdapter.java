@@ -12,6 +12,7 @@ import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
@@ -139,9 +140,17 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			
 		});
 	}
-
+	
 	public FortnoxAdapter(String orgNo) throws IOException {
-		client = new FortnoxClient3(new FileCredentialsProvider(orgNo));
+		FortnoxClientInfo fci = null;
+		if (getClientManager()!=null) {
+			fci = getClientManager().getClientInfoByOrgNo(orgNo);
+		}
+		if (fci.getAccessToken()!=null) {
+			client = new FortnoxClient3(getClientManager().getDefaultClientId(), fci.getClientSecret(), new LegacyTokenCredentialsProvider(fci.getAccessToken()));
+		} else {
+			client = new FortnoxClient3(new FileCredentialsProvider(orgNo));
+		}
 	}
 	
 	/**
@@ -1328,8 +1337,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				throw new NoSuchTenantException("No such tenant " + orgNo);
 			} else {
 				try {
-					client.setKeyProvider(new FileCredentialsProvider(orgNo));
-				} catch (IOException e) {
+					FortnoxCredentialsProvider fcp = null;
+					if (fi.getAccessToken()!=null) {
+						fcp = new LegacyTokenCredentialsProvider(fi.getAccessToken());
+					} else {
+						fcp = new FileCredentialsProvider(orgNo);
+					}
+					client.setKeyProvider(fcp);
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
