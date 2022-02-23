@@ -93,6 +93,9 @@ public class AccountingReportConverter {
 					if (rl.getTaxBase()!=0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(-rl.getTaxBase()), "?".equals(rl.getTaxKey()) ? AccountingType.REVENUE_UNCLEAR : AccountingType.REVENUE);
 						avl.setTaxKey(rl.getTaxKey());
+						if (rl.getRevenueAcctNo()!=null && rl.getRevenueAcctNo().trim().length()>0) {
+							avl.setAcctNo(rl.getRevenueAcctNo());
+						}
 						dst.addVoucherLine(avl);
 					}
 					
