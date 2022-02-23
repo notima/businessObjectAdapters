@@ -139,7 +139,8 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			r.setCredit(avl.getCreditAmount().doubleValue());
 			r.setDebit(avl.getDebitAmount().doubleValue());
 			if (avl.getDescription()!=null && avl.getDescription().trim().length()>0) {
-				r.setDescription(avl.getDescription());
+				r.appendTransactionInformation(avl.getDescription());
+				// TODO: Check if description is needed
 			}
 			r.setCostCenter(avl.getCostCenter());
 			r.setProject(avl.getProjectCode());
