@@ -3,8 +3,6 @@ package org.notima.businessobjects.adapter.fortnox;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXB;
-
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.AccountSubset;
 import org.notima.api.fortnox.entities3.CompanySetting;
@@ -37,6 +35,8 @@ public class FortnoxPaymentBatchRunner {
 	private String					modeOfPayment;
 	private String					modeOfPaymentAccount;
 	private String					feeGlAccount;
+	private String					intransitAccount;
+	private String					voucherSeries;
 	
 	private PaymentBatchProcessResult	paymentBatchProcessResult;
 	private FortnoxConverter		fortnoxConverter;
@@ -52,6 +52,22 @@ public class FortnoxPaymentBatchRunner {
 		taxSubject = new TaxSubjectIdentifier(cs.getOrganizationNumber(), cs.getCountryCode());
 		paymentBatchProcessResult = new PaymentBatchProcessResult();
 		fortnoxConverter = new FortnoxConverter();
+	}
+	
+	public void setPaymentBatch(PaymentBatch paymentBatch) throws Exception {
+		this.paymentBatch = paymentBatch;
+		// TODO - Compare tax subject
+		determineModeOfPayment();
+
+		determineAccountingSettings();
+		
+		// Check if account map needs to be updated
+		if (acctMap==null) {
+			refreshAccountMap();
+		}
+		
+		determineFeeAccount();
+		
 	}
 	
 	public TaxSubjectIdentifier getTaxSubject() {
@@ -98,10 +114,9 @@ public class FortnoxPaymentBatchRunner {
 		AccountingVoucher av = AccountingVoucher.buildVoucherFromPayoutLine(payout);
 		av.remapAccountType(AccountingType.LIQUID_ASSET_AR, modeOfPaymentAccount);
 		av.remapAccountType(AccountingType.OTHER_EXPENSES_SALES, feeGlAccount);
-		// TODO - Fix in transit account
-		av.remapAccountType(AccountingType.LIQUID_ASSET_CASH, "1920");
+		av.remapAccountType(AccountingType.LIQUID_ASSET_CASH, intransitAccount);
 		
-		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), "R", av);
+		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
 		
 		extendedClient.accountFortnoxVoucher(fortnoxVoucher, payout.getCurrency(), payout.getCurrencyRateToAccountingCurrency());
 
@@ -240,19 +255,16 @@ public class FortnoxPaymentBatchRunner {
 		return paymentBatch;
 	}
 
-
-	public void setPaymentBatch(PaymentBatch paymentBatch) throws Exception {
-		this.paymentBatch = paymentBatch;
-		// TODO - Compare tax subject
-		determineModeOfPayment();
-		
-		// Check if account map needs to be updated
-		if (acctMap==null) {
-			refreshAccountMap();
+	
+	private void determineAccountingSettings() {
+		if (paymentBatch!=null) {
+			if (paymentBatch.getBankAccount()!=null) {
+				intransitAccount = paymentBatch.getBankAccount().getGeneralLedgerInTransitAccount();
+			} else {
+				intransitAccount = null;
+			}
+			voucherSeries = paymentBatch.getVoucherSeries();
 		}
-		
-		determineFeeAccount();
-		
 	}
 	
 	private void refreshAccountMap() throws Exception {
