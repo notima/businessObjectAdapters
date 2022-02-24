@@ -146,8 +146,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		if (getClientManager()!=null) {
 			fci = getClientManager().getClientInfoByOrgNo(orgNo);
 		}
-		if (fci.getAccessToken()!=null) {
-			client = new FortnoxClient3(getClientManager().getDefaultClientId(), fci.getClientSecret(), new LegacyTokenCredentialsProvider(fci.getAccessToken()));
+		if (fci.getLegacyAccessToken()!=null) {
+			client = new FortnoxClient3(getClientManager().getDefaultClientId(), fci.getClientSecret(), new LegacyTokenCredentialsProvider(fci.getLegacyAccessToken()));
 		} else {
 			client = new FortnoxClient3(new FileCredentialsProvider(orgNo));
 		}
@@ -1338,8 +1338,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			} else {
 				try {
 					FortnoxCredentialsProvider fcp = null;
-					if (fi.getAccessToken()!=null) {
-						fcp = new LegacyTokenCredentialsProvider(fi.getAccessToken());
+					if (fi.getLegacyAccessToken()!=null) {
+						fcp = new LegacyTokenCredentialsProvider(fi.getLegacyAccessToken());
 					} else {
 						fcp = new FileCredentialsProvider(orgNo);
 					}
