@@ -1,11 +1,13 @@
 package com.svea.businessobjects.pmtadmin;
 
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXB;
+
 import org.notima.api.webpay.pmtapi.PmtApiUtil;
-import org.notima.api.webpay.pmtapi.entity.Credit;
 import org.notima.api.webpay.pmtapi.entity.Delivery;
 import org.notima.api.webpay.pmtapi.entity.OrderRow;
 import org.notima.generic.businessobjects.BusinessPartner;
@@ -21,6 +23,29 @@ import com.svea.webpay.common.conv.UnknownTaxIdFormatException;
 
 public class SveaPmtAdminConverter {
 
+	/**
+	 * Prints a native order as a string.
+	 * 
+	 * @param order
+	 * @return	The string representation of the native order.
+	 */
+	public static String nativeOrderToString(Order<?> order) {
+		
+		if (order.getNativeOrder()==null) return null;
+		
+		StringWriter sw = new StringWriter();
+		
+		if (order.getNativeOrder() instanceof org.notima.api.webpay.pmtapi.entity.Order) {
+			
+			org.notima.api.webpay.pmtapi.entity.Order nativeOrder = (org.notima.api.webpay.pmtapi.entity.Order) order.getNativeOrder();
+			JAXB.marshal(nativeOrder, sw);			
+			
+		}
+		
+		return sw.toString();
+		
+	}
+	
 	@SuppressWarnings("rawtypes")
 	public static Order<org.notima.api.webpay.pmtapi.CheckoutOrder> convert(org.notima.api.webpay.pmtapi.CheckoutOrder src) throws ParseException {
 		if (src==null) return null;
