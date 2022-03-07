@@ -41,6 +41,9 @@ public class ProcessPaymentBatch implements Action {
     @Option(name = "--draft-payments", description = "Only creates drafts of the payments, if supported by the destination adapter", required = false, multiValued = false)
     private boolean	draftPayments;
     
+    @Option(name = "-d", aliases = { "--dry-run" }, description = "Let's you know what would be done, but doesn't do it", required = false, multiValued = false)
+    private boolean dryRun;
+    
     @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
     private boolean feesPerPayment;
 	
@@ -74,6 +77,9 @@ public class ProcessPaymentBatch implements Action {
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
 		processOptions.setFeesPerPayment(feesPerPayment);
 		processOptions.setAccountPayoutOnly(accountPayoutOnly);
+		if (dryRun) {
+			processOptions.setDryRun(true);
+		}
 		
 		PaymentBatch pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
 		if (matchOnly) {

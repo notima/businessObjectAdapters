@@ -3,6 +3,7 @@ package org.notima.businessobjects.adapter.fortnox;
 import java.util.List;
 import java.util.Map;
 
+import org.jline.utils.Log;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.AccountSubset;
 import org.notima.api.fortnox.entities3.CompanySetting;
@@ -40,6 +41,8 @@ public class FortnoxPaymentBatchRunner {
 	
 	private PaymentBatchProcessResult	paymentBatchProcessResult;
 	private FortnoxConverter		fortnoxConverter;
+	
+	private boolean					dryRun = false;
 	
 	
 	private Map<String, AccountSubset> acctMap;
@@ -118,8 +121,11 @@ public class FortnoxPaymentBatchRunner {
 		
 		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
 		
-		extendedClient.accountFortnoxVoucher(fortnoxVoucher, payout.getCurrency(), payout.getCurrencyRateToAccountingCurrency());
-
+		if (!dryRun) {
+			extendedClient.accountFortnoxVoucher(fortnoxVoucher, payout.getCurrency(), payout.getCurrencyRateToAccountingCurrency());
+		} else {
+			Log.info("Would have accounted voucher: " + fortnoxVoucher.toString());
+		}
 		
 	}
 	
@@ -131,7 +137,7 @@ public class FortnoxPaymentBatchRunner {
 	 */
 	public void processPayments() throws Exception {
 		
-		if (processOptions.isAccountPayoutOnly() || processOptions.isAccountFeesOnly() || processOptions.isDryRun()) {
+		if (processOptions.isAccountPayoutOnly() || processOptions.isAccountFeesOnly()) {
 			return;
 		}
 		
@@ -172,7 +178,9 @@ public class FortnoxPaymentBatchRunner {
 				modeOfPayment, 
 				inv, 
 				bookkeepPayment, 
-				processOptions.isFeesPerPayment(), payment);
+				processOptions.isFeesPerPayment(), 
+				payment,
+				dryRun);
 		
 		if (invoicePayment!=null && invoicePayment.getNumber()>0) {
 			return new PaymentProcessResult(ResultCode.OK);
@@ -248,6 +256,7 @@ public class FortnoxPaymentBatchRunner {
 
 	public void setOptions(PaymentBatchProcessOptions options) {
 		processOptions = options;
+		dryRun = processOptions.isDryRun();
 	}
 
 
