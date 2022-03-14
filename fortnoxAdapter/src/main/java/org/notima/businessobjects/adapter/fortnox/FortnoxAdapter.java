@@ -48,6 +48,7 @@ import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.util.EmailUtils;
 import org.notima.util.LocalDateUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -640,7 +641,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			dstContact.setZipCode(loc.getPostal());
 			dstContact.setCountryCode(loc.getCountryCode());
 			
-			if (dstContact.getEmail()==null)
+			if (EmailUtils.isValidEmail(dstContact.getEmail()))
 				dstContact.setEmail(loc.getEmail());
 			if (dstContact.getPhone1()==null)
 				dstContact.setPhone1(loc.getPhone());
