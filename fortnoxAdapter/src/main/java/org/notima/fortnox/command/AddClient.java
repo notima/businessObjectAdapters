@@ -12,6 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
@@ -44,6 +45,9 @@ public class AddClient implements Action {
     @Argument(index = 1, name = "authorizationCode", description = "API code provided by client used to retrieve an access token", required = false, multiValued = false)
     String authorizationCode;
    
+    @Option(name = "--legacy", description = "Use legacy API-code calls", required = false, multiValued = false)
+    boolean legacy;
+    
     @Option(name = "--orgName", description = "The name of the organisation", required = false, multiValued = false)
     private String orgName;
     
@@ -83,10 +87,19 @@ public class AddClient implements Action {
 		}
 		
 		CompanySetting cs = null;
-		if (orgNo==null) {
-			if (accessToken!=null && clientSecret!=null && refreshToken != null) {
+		if (orgNo!=null) {
+			if ((accessToken!=null || (legacy && authorizationCode!=null))
+					&& clientSecret!=null && 
+					(refreshToken != null || legacy)) {
 				FortnoxClient3 fc3 = fa.getClient();
-				fc3.setKeyProvider(new FileCredentialsProvider(orgNo));
+				if (clientSecret!=null && !fc3.hasClientSecret()) {
+					fc3.setClientSecret(clientSecret);
+				}
+				if (legacy) {
+					fc3.setKeyProvider(new LegacyTokenCredentialsProvider(accessToken));
+				} else {
+					fc3.setKeyProvider(new FileCredentialsProvider(orgNo));
+				}
 				try { 
 					cs = fc3.getCompanySetting();
 					if (cs!=null) {
