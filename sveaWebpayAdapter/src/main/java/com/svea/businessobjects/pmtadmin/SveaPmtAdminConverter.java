@@ -8,6 +8,7 @@ import java.util.List;
 import javax.xml.bind.JAXB;
 
 import org.notima.api.webpay.pmtapi.PmtApiUtil;
+import org.notima.api.webpay.pmtapi.entity.Credit;
 import org.notima.api.webpay.pmtapi.entity.Delivery;
 import org.notima.api.webpay.pmtapi.entity.OrderRow;
 import org.notima.generic.businessobjects.BusinessPartner;
@@ -123,22 +124,24 @@ public class SveaPmtAdminConverter {
 					}
 				}
 				
-				// TODO: It seemed as if a temporary problem at the API (sept 2021) caused 
-				// credited rows to not show up in the original order rows.
-				// Commenting out below since it's now working, 2021-09-23
+				// Only consider credits if everything is credited
+				// If everything is credited we have no rows at all to calculate VAT.
+				// TODO: Make a more in depth algorithm on this
+				if (d.getDeliveryAmount().equals(d.getCreditedAmount())) {
 				
-				/** if (d.getCredits()!=null) {
-					for (Credit cr : d.getCredits()) {
-						if (cr.getOrderRows()!=null) {
-							for (OrderRow creditedOrderRow : cr.getOrderRows()) {
-								ll = convert(creditedOrderRow);
-								// Set to zero delivered.
-								ll.setQtyDelivered(0);
-								ol.add(ll);
+					if (d.getCredits()!=null) {
+						for (Credit cr : d.getCredits()) {
+							if (cr.getOrderRows()!=null) {
+								for (OrderRow creditedOrderRow : cr.getOrderRows()) {
+									ll = convert(creditedOrderRow);
+									// Set to zero delivered.
+									ll.setQtyDelivered(0);
+									ol.add(ll);
+								}
 							}
 						}
 					}
-				} */
+				}
 			}
 		}
 		
