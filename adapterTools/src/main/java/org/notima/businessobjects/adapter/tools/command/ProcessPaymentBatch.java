@@ -5,10 +5,12 @@ import java.util.Properties;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
@@ -39,6 +41,9 @@ public class ProcessPaymentBatch implements Action {
     @Option(name = "--draft-payments", description = "Only creates drafts of the payments, if supported by the destination adapter", required = false, multiValued = false)
     private boolean	draftPayments;
     
+    @Option(name = "-d", aliases = { "--dry-run" }, description = "Let's you know what would be done, but doesn't do it", required = false, multiValued = false)
+    private boolean dryRun;
+    
     @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
     private boolean feesPerPayment;
 	
@@ -58,6 +63,7 @@ public class ProcessPaymentBatch implements Action {
 	private String paymentFactoryStr = "";
 	
 	@Argument(index = 2, name = "paymentSource", description ="The payment source (normally a file)", required = true, multiValued = false)
+	@Completion(FileCompleter.class)
 	private String paymentSource = "";
 
 
@@ -71,6 +77,9 @@ public class ProcessPaymentBatch implements Action {
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
 		processOptions.setFeesPerPayment(feesPerPayment);
 		processOptions.setAccountPayoutOnly(accountPayoutOnly);
+		if (dryRun) {
+			processOptions.setDryRun(true);
+		}
 		
 		PaymentBatch pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
 		if (matchOnly) {

@@ -643,7 +643,9 @@ public class FortnoxExtendedClient {
 	 * @param modeOfPayment		Payment Method Code (ie what account is this payment made to, betalningsvillkor)
 	 * @param invoice			The Fortnox invoice to be paid.
 	 * @param bookkeepPayment	If false, the payments are not bookkept (only preliminary).
+	 * @param includeWriteOffs	
 	 * @param payment			The payment to be applied
+	 * @param dryRun			If true, nothing is committed to Fortnox.
 	 * @return
 	 * @throws Exception
 	 */
@@ -652,7 +654,8 @@ public class FortnoxExtendedClient {
 			Invoice invoice,
 			boolean bookkeepPayment,
 			boolean includeWriteOffs,
-			Payment payment) throws Exception {
+			Payment payment,
+			boolean dryRun) throws Exception {
 		
 		// TODO: Use FortnoxClient3.payCustomerInvoice to avoid duplicating code
 		
@@ -712,7 +715,12 @@ public class FortnoxExtendedClient {
 		}
 		
 		if (!invoice.isBooked()) {
-			bof.getClient().performAction(true, "invoice", Integer.toString(pmt.getInvoiceNumber()), FortnoxClient3.ACTION_INVOICE_BOOKKEEP);
+			if (!dryRun) {
+				log.debug("Bookkeeping invoice # " + pmt.getInvoiceNumber());
+				bof.getClient().performAction(true, "invoice", Integer.toString(pmt.getInvoiceNumber()), FortnoxClient3.ACTION_INVOICE_BOOKKEEP);
+			} else {
+				log.info("Would have booked invoice " + pmt.getInvoiceNumber());
+			}
 		}
 		
 		// Make sure the payment isn't empty
@@ -734,12 +742,19 @@ public class FortnoxExtendedClient {
 		}
 		// Clear currency field
 		pmt.setCurrency(null);
-		
-		pmt = bof.getClient().setCustomerPayment(pmt);
 
-		// Book the payment directly if account and mode of payment is set.
-		if (bookkeepPayment && pmt!=null && pmt.getModeOfPayment()!=null && pmt.getModeOfPaymentAccount()!=null && pmt.getModeOfPaymentAccount()>0) {
-			bof.getClient().performAction(true, "invoicepayment", Integer.toString(pmt.getNumber()), FortnoxClient3.ACTION_INVOICE_BOOKKEEP);
+		if (!dryRun) {
+			pmt = bof.getClient().setCustomerPayment(pmt);
+			log.debug("Paying invoice # " + pmt.getInvoiceNumber());
+	
+			// Book the payment directly if account and mode of payment is set.
+			if (bookkeepPayment && pmt!=null && pmt.getModeOfPayment()!=null && pmt.getModeOfPaymentAccount()!=null && pmt.getModeOfPaymentAccount()>0) {
+				bof.getClient().performAction(true, "invoicepayment", Integer.toString(pmt.getNumber()), FortnoxClient3.ACTION_INVOICE_BOOKKEEP);
+			}
+		} else {
+			log.info("Would have paid invoice # " + pmt.getInvoiceNumber() + " with " + pmt.getAmount());
+			// Set number to one to mark it as successful
+			pmt.setNumber(1);
 		}
 		
 		return pmt;
