@@ -37,6 +37,8 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	private String					generalLedgerInTransitAccount;
 	private String					generalLedgerReconciliationAccount;
 	private String					generalLedgerFeeAccount;
+	private String					generalLedgerUnknownTrxAccount;
+	private String					voucherSeries;
 	
 	public RatepayDirectoryToPaymentBatch(String directoryToRead) throws Exception {
 		setSource(directoryToRead);
@@ -91,8 +93,10 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 		bad.setGeneralLedgerInTransitAccount(generalLedgerInTransitAccount);
 		bad.setGeneralLedgerReconciliationAccount(generalLedgerReconciliationAccount);
 		bad.setGeneralLedgerFeeAccount(generalLedgerFeeAccount);
+		result.setVoucherSeries(voucherSeries);
 		result.setBankAccount(bad);
 		result.setSource(file);
+		result.setGeneralLedgerUnknownTrxAccount(generalLedgerUnknownTrxAccount);
 		return result;
 		
 	}
@@ -158,6 +162,8 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 			generalLedgerInTransitAccount = props.getProperty("generalLedgerInTransitAccount");
 			generalLedgerReconciliationAccount = props.getProperty("generalLedgerReconciliationAccount");
 			generalLedgerFeeAccount = props.getProperty("generalLedgerFeeAccount");
+			generalLedgerUnknownTrxAccount = props.getProperty("generalLedgerUnknownTrxAccount");
+			voucherSeries = props.getProperty("voucherSeries");
 			logRetrievedProperties();
 		} catch (IOException e) {
 			e.printStackTrace();

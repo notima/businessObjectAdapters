@@ -96,6 +96,9 @@ public class AddClient implements Action {
 					fc3.setClientSecret(clientSecret);
 				}
 				if (legacy) {
+					if(accessToken == null && authorizationCode != null) {
+						accessToken = fc3.getLegacyAccessToken(authorizationCode, clientSecret);
+					}
 					fc3.setKeyProvider(new LegacyTokenCredentialsProvider(accessToken));
 				} else {
 					fc3.setKeyProvider(new FileCredentialsProvider(orgNo));
