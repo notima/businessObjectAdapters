@@ -36,6 +36,10 @@ Add new clients using the command
 	
 If there's no defaultClientSecret, that must be supplied with the clientSecret option.
 
+If you have an API-code/authorization code (one time token to get an accessToken) you add and activate the client by below command
+
+	fortnox:add-client --legacy --clientSecret REAL_SECRET orgNo authorizationCode
+
 If you already have existing clients and your Fortnox connection has access to CompanySettings you can add your clients with this command
 
 	fortnox:add-client --accessToken REAL_ACCESS_TOKEN --clientSecret REAL_SECRET
@@ -49,6 +53,17 @@ or if you've set the defaultClientSecret
 List clients with
 
 	fortnox:list-fortnox-clients
+
+### Test the connection
+
+Use for instance these commands to test the connection
+
+	fortnox:show-fortnox-support-info orgNo
+	
+	fortnox:show-fortnox-financial-years orgNo
+	
+	fortnox:show-fortnox-coa --only-with-balances --include-pl-accounts orgNo
+	
 
 ### Removing clients
 
