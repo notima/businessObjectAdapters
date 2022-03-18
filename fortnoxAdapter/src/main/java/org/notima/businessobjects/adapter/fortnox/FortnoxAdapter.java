@@ -221,12 +221,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		FortnoxClientInfo fi = null;
 		
 		// Get properties
+		String authorizationCode = null;
 		String accessToken = null;
 		String clientSecret = null;
 		String clientId = null;
 		String refreshToken = null;
 
 		if (props!=null) {
+			authorizationCode = props.getProperty("apiCode");
 			accessToken = props.getProperty("accessToken");
 			clientSecret = props.getProperty("clientSecret");
 			clientId = props.getProperty("clientId");
@@ -258,13 +260,24 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			fi.setClientId(clientId);
 		if (accessToken!=null) {
 			FortnoxCredentials credentials = new FortnoxCredentials();
-			credentials.setAccessToken(accessToken);
-			credentials.setRefreshToken(refreshToken);
+			if(authorizationCode != null) {
+				credentials.setLegacyToken(accessToken);
+				credentials.setAuthorizationCode(authorizationCode);
+			} else {
+				credentials.setAccessToken(accessToken);
+				credentials.setRefreshToken(refreshToken);
+			}
 			try {
 				new FileCredentialsProvider(orgNo).setCredentials(credentials);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+
+		try{
+			clientManager.updateAndSaveClientInfo(fi);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		Customer tenant = new Customer();
