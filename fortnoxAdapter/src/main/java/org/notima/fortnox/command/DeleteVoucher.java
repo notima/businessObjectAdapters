@@ -1,5 +1,6 @@
 package org.notima.fortnox.command;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -40,8 +41,13 @@ public class DeleteVoucher extends FortnoxCommand implements Action {
 	@Argument(index = 1, name = "series", description ="The series", required = true, multiValued = false)
 	private String series = "";
 
-	@Argument(index = 2, name = "voucherNo", description ="The voucher no", required = true, multiValued = false)
+	@Argument(index = 2, name = "firstVoucherNo", description ="The voucher no", required = true, multiValued = false)
 	private int voucherNo;
+	
+	@Argument(index = 3, name = "lastVoucherNo", description = "The last voucher no in the series", required = false, multiValued = false)
+	private int	lastVoucherNo;
+	
+	private List<Integer> vouchersToRemove = new ArrayList<Integer>();
 	
 	
 	@Override
@@ -63,11 +69,16 @@ public class DeleteVoucher extends FortnoxCommand implements Action {
 			return null;
 		}
 		
-		String reply = noConfirm ? "y" : sess.readLine("Do you want to delete voucher " + series + " " + voucherNo + "? (y/n) ", null);
+		checkParameters();
+		
+		String reply = noConfirm ? "y" : sess.readLine(confirmQueryString() + "? (y/n) ", null);
 		if (reply.equalsIgnoreCase("y")) {
 			
 			try {
-				fc.deleteVoucher(yId, series, voucherNo);
+				for (Integer vv : vouchersToRemove) {
+					fc.deleteVoucher(yId, series, vv);
+					sess.getConsole().println("Voucher " + series + " " + vv + " removed.");
+				}
 			} catch (Exception e) {
 				String msg = null;
 				if (e instanceof FortnoxException) {
@@ -85,6 +96,34 @@ public class DeleteVoucher extends FortnoxCommand implements Action {
 		}
 		
 		return null;
+	}
+	
+	private String confirmQueryString() {
+		String result;
+		if (vouchersToRemove.size()==1) {
+			result = "Do you want to delete voucher " + series + " " + voucherNo;
+		} else {
+			result = "Do you want to remove vouchers " + series + " " + voucherNo + " to " + lastVoucherNo;
+		}
+		return result;
+	}
+	
+	private void checkParameters() {
+		
+		if (lastVoucherNo==0) {
+			vouchersToRemove.add(voucherNo);
+			return;
+		}
+		
+		if (voucherNo > lastVoucherNo) {
+			sess.getConsole().println("Lowest voucher number must be first.");
+			return;
+		}
+		
+		for (int voucherToRemove = lastVoucherNo; voucherToRemove >= voucherNo; voucherToRemove--) {
+			vouchersToRemove.add(voucherToRemove);
+		}
+		
 	}
 	
 	
