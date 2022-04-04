@@ -98,7 +98,7 @@ public class ListAccountingVouchers implements Action {
 
 		List<AccountingVoucher> vouchers = arp.getAccountingVoucherList(bp, ap, series);
 		
-		AccountingVoucherListTable ast = new AccountingVoucherListTable(vouchers);
+		AccountingVoucherListTable ast = new AccountingVoucherListTable(vouchers, true);
 		ast.getShellTable().print(sess.getConsole());
 		
 		if (format!=null) {
@@ -110,6 +110,9 @@ public class ListAccountingVouchers implements Action {
 			if (rf!=null) {
 				Properties props = new Properties();
 				props.setProperty(BasicReportFormatter.OUTPUT_FILENAME, outFile);
+
+				// Don't format the numbers when exporting.
+				ast = new AccountingVoucherListTable(vouchers, false);
 				
 				String of = rf.formatReport((GenericTable)ast, format, props);
 				sess.getConsole().println("Output file to: " + of);

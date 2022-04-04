@@ -13,6 +13,8 @@ public class AccountingVoucherListTable extends GenericTable {
 
 	private NumberFormat nfmt = new DecimalFormat("#,##0.00");	
 	
+	private boolean formatNumbers = false;
+	
 	public void initColumns() {
 		
 		addColumn("Date");
@@ -28,8 +30,9 @@ public class AccountingVoucherListTable extends GenericTable {
 		
 	}
 	
-	public AccountingVoucherListTable(List<AccountingVoucher> vouchers) {
+	public AccountingVoucherListTable(List<AccountingVoucher> vouchers, boolean formatNumbers) {
 		initColumns();
+		this.formatNumbers = formatNumbers;
 
 		if (vouchers==null || vouchers.size()==0) {
 			return;
@@ -62,9 +65,9 @@ public class AccountingVoucherListTable extends GenericTable {
 			addRow().addContent(
 					vv.getAcctDate(),
 					vr.getAcctNo(),
-					vr.getDescription(),
-					nfmt.format(vr.getDebitAmount()),
-					nfmt.format(vr.getCreditAmount()),
+					vr.getAcctName() + " " + vr.getDescription(),
+					formatNumbers ? nfmt.format(vr.getDebitAmount()) : vr.getDebitAmount(),
+					formatNumbers ? nfmt.format(vr.getCreditAmount()) : vr.getCreditAmount(),
 					vr.isDeleted()!=null && vr.isDeleted().booleanValue() ? "*" : ""
 					)
 					;
@@ -82,6 +85,19 @@ public class AccountingVoucherListTable extends GenericTable {
 					);
 		}
 		
+		addEmptyRow();
+		
 	}
+	
+	private void addEmptyRow() {
+		addRow().addContent(
+				"---------",
+				"",
+				"",
+				"",
+				"",
+				"");
+	}
+	
 	
 }
