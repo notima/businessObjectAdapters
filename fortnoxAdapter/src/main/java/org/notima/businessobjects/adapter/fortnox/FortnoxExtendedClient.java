@@ -989,6 +989,7 @@ public class FortnoxExtendedClient {
 	 * @param vatAccount
 	 * @param description
 	 * @param voucherSeries
+	 * @param costCenter
 	 * @return
 	 * @throws Exception	if something goes wrong.
 	 */
@@ -1000,7 +1001,8 @@ public class FortnoxExtendedClient {
 			String srcAccount,
 			String vatAccount,
 			String description,
-			String voucherSeries
+			String voucherSeries,
+			String costCenter
 			) throws Exception {
 
 		Date trxDate = null;
@@ -1020,7 +1022,8 @@ public class FortnoxExtendedClient {
 				vatAccount, 
 				(double)totalAmount, 
 				(double)vatAmount, 
-				description);
+				description,
+				costCenter);
 
 		bof = getFortnoxAdapter(clientOrgNo);
 		

@@ -200,6 +200,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 * @param totalAmount		The total amount of the transaction
 	 * @param vatAmount			The VAT amount.
 	 * @param description		The description for the voucher text.
+	 * @param costCenter		Cost Center if any
 	 * @return	A Fortnox Voucher
 	 */
 	public Voucher createSingleCostWithVatTransactionVoucher(
@@ -210,9 +211,12 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			String vatAcct,
 			double totalAmount,
 			double vatAmount,
-			String description) {
+			String description,
+			String costCenter) {
 
 		Voucher result = new Voucher();
+		if (costCenter!=null && costCenter.trim().length()>0)
+			result.setCostCenter(costCenter);
 		
 		if (acctDate==null) {
 			acctDate = Calendar.getInstance().getTime();
