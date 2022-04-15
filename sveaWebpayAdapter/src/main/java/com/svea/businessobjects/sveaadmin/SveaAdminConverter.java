@@ -330,8 +330,8 @@ public class SveaAdminConverter {
 		if (src==null) return null;
 		
 		org.notima.generic.businessobjects.Order<com.svea.webpayadminservice.client.Order> dst = new org.notima.generic.businessobjects.Order<com.svea.webpayadminservice.client.Order>(); 
-
-		dst.setDocumentKey(src.getClientOrderId());
+		dst.setDocumentKey(Long.toString(src.getSveaOrderId()));
+		dst.setOrderKey(src.getClientOrderId());
 		dst.setCurrency(src.getCurrency());
 		dst.setSalesOrder(true);
 		dst.setDocumentDate(src.getCreatedDate().toGregorianCalendar().getTime());
