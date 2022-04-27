@@ -908,6 +908,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				logger.warn("Can't parse delivery date " + src.getDeliveryDate() + " on invoice " + src.getDocumentNumber());
 			}
 		}
+		dst.setExternalReference1(src.getExternalInvoiceReference1());
 		dst.setGrandTotal(src.getTotal());
 		// Set open amount
 		dst.setOpenAmt(src.getBalance());
