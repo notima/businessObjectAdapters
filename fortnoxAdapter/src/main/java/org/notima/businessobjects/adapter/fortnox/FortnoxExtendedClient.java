@@ -317,7 +317,7 @@ public class FortnoxExtendedClient {
 		
 		if (finvoices!=null) {
 			for (org.notima.api.fortnox.entities3.Invoice ii : finvoices)
-			result.add(FortnoxAdapter.convert(ii));
+			result.add(FortnoxAdapter.convertToCanonicalInvoice(ii));
 		}
 		
 		return result;
@@ -861,7 +861,7 @@ public class FortnoxExtendedClient {
 		org.notima.generic.businessobjects.Invoice invoice = bbc.toInvoice(order);
 		
 		Customer fortnoxCustomer = persistCustomerFromCanonical(order.getBusinessPartner());
-		invoice.setBusinessPartner(FortnoxAdapter.convert(fortnoxCustomer));
+		invoice.setBusinessPartner(FortnoxAdapter.convertToBusinessPartner(fortnoxCustomer));
 		if (invoiceDate!=null) {
 			invoice.setInvoiceDate(invoiceDate);
 		}
@@ -925,7 +925,7 @@ public class FortnoxExtendedClient {
 		}
 		if (result==null) {
 			// Customer doesn't exist
-			result = bof.getClient().setCustomer(bof.convert(bp));
+			result = bof.getClient().setCustomer(bof.convertFromBusinessPartner(bp));
 		}
 
 		return result;

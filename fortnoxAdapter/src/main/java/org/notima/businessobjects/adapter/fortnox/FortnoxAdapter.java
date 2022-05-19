@@ -285,7 +285,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		tenant.setName(fi.getOrgName());
 		tenant.setCountryCode(countryCode);
 		
-		bp = convert(tenant);
+		bp = convertToBusinessPartner(tenant);
 		
 		return bp;
 	}
@@ -378,7 +378,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public BusinessPartner<Customer> lookupBusinessPartner(String key) throws Exception {
 		Customer c = client.getCustomerByCustNo(key);
 		if (c==null) return null;
-		return convert(c);
+		return convertToBusinessPartner(c);
 	}
 
 	@Override
@@ -444,7 +444,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public Invoice<org.notima.api.fortnox.entities3.Invoice> lookupInvoice(String key) throws Exception {
 		
 		org.notima.api.fortnox.entities3.Invoice src = client.getInvoice(key);
-		Invoice<org.notima.api.fortnox.entities3.Invoice> dst = convert(src);
+		Invoice<org.notima.api.fortnox.entities3.Invoice> dst = convertToCanonicalInvoice(src);
 		dst.setDocumentKey(key);
 		return dst;
 		
@@ -534,11 +534,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Check that the business partner exists
 		Customer cust = client.getCustomerByCustNo(invoice.getBusinessPartner().getIdentityNo());
 		if (cust==null) {
-			cust = convert(invoice.getBusinessPartner());
+			cust = convertFromBusinessPartner(invoice.getBusinessPartner());
 			client.setCustomer(cust);
 		}
 		
-		org.notima.api.fortnox.entities3.Invoice dst = convert(invoice);
+		org.notima.api.fortnox.entities3.Invoice dst = convertToFortnoxInvoice(invoice);
 	
 		dst = client.setInvoice(dst);
 		if (dst==null) {
@@ -571,7 +571,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (!bpartner.getIsVendor()) {
 		
-			Customer dstContact = convert(bpartner);
+			Customer dstContact = convertFromBusinessPartner(bpartner);
 	
 			// Check if business partner already exists
 			Customer checkContact = null;
@@ -617,7 +617,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param bpartner		The business partner to convert
 	 * @return				A Fortnox representation of business partner (customer)
 	 */
-	public static org.notima.api.fortnox.entities3.Customer convert(org.notima.generic.businessobjects.BusinessPartner<?> bpartner) {
+	public static org.notima.api.fortnox.entities3.Customer convertFromBusinessPartner(org.notima.generic.businessobjects.BusinessPartner<?> bpartner) {
 		
 		Customer dstContact = new Customer();
 		
@@ -757,7 +757,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param src
 	 * @return
 	 */
-	public org.notima.api.fortnox.entities3.Invoice convert(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> src) throws Exception {
+	public org.notima.api.fortnox.entities3.Invoice convertToFortnoxInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> src) throws Exception {
 		
 		org.notima.api.fortnox.entities3.Invoice dst = new org.notima.api.fortnox.entities3.Invoice();
 
@@ -820,8 +820,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		
 		dst.setCurrency(src.getCurrency());
-		if (src.getOrderKey()!=null || src.getPoDocumentNo()!=null) {
-			dst.setYourOrderNumber(src.getOrderKey());
+		if (src.getPoDocumentNo()!=null) {
+			dst.setYourOrderNumber(src.getPoDocumentNo());
+		}
+		if (src.getOrderKey()!=null) {
+			dst.setOrderReference(src.getOrderKey());
 			dst.setExternalInvoiceReference2(src.getOrderKey());
 		}
 		dst.setExternalInvoiceReference1(src.getExternalReference1());
@@ -893,7 +896,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param src		The invoice to be converted
 	 * @return
 	 */
-	public static org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> convert(org.notima.api.fortnox.entities3.Invoice src) throws Exception {
+	public static org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> convertToCanonicalInvoice(org.notima.api.fortnox.entities3.Invoice src) throws Exception {
 	
 		org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> dst = new org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice>();
 
@@ -1014,7 +1017,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	}
 	
-	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convert(org.notima.api.fortnox.entities3.Customer src) {
+	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convertToBusinessPartner(org.notima.api.fortnox.entities3.Customer src) {
 		
 		BusinessPartner<Customer> dst = new BusinessPartner<Customer>();
 		
