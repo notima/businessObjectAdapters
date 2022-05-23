@@ -824,7 +824,6 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			dst.setYourOrderNumber(src.getPoDocumentNo());
 		}
 		if (src.getOrderKey()!=null) {
-			dst.setOrderReference(src.getOrderKey());
 			dst.setExternalInvoiceReference2(src.getOrderKey());
 		}
 		dst.setExternalInvoiceReference1(src.getExternalReference1());
