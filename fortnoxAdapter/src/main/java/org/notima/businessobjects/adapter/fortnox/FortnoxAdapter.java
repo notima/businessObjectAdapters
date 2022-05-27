@@ -513,7 +513,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public Object persist(Object o) throws Exception {
 
 		if (o instanceof org.notima.generic.businessobjects.Invoice) {
-			return persist((org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice>)o);
+			return persistCanonicalInvoice((org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice>)o);
 		}
 		if (o instanceof org.notima.generic.businessobjects.BusinessPartner) {
 			return persistBusinessPartner((org.notima.generic.businessobjects.BusinessPartner)o);
@@ -529,7 +529,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @return
 	 * @throws Exception
 	 */
-	protected org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> persist(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) throws Exception {
+	protected org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> persistCanonicalInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) throws Exception {
 
 		// Check that the business partner exists
 		Customer cust = client.getCustomerByCustNo(invoice.getBusinessPartner().getIdentityNo());
@@ -554,7 +554,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	public org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> persistInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) throws Exception {
 		
-		return persist(invoice);
+		return persistCanonicalInvoice(invoice);
 	}
 
 	@Override

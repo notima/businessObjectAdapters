@@ -868,7 +868,7 @@ public class FortnoxExtendedClient {
 		
 		bof.getClient().setUseArticles(useArticles!=null && useArticles.booleanValue());
 		
-		org.notima.generic.businessobjects.Invoice result = (org.notima.generic.businessobjects.Invoice)bof.persist(invoice);
+		org.notima.generic.businessobjects.Invoice result = (org.notima.generic.businessobjects.Invoice)bof.persistCanonicalInvoice(invoice);
 		
 		return result;
 		
