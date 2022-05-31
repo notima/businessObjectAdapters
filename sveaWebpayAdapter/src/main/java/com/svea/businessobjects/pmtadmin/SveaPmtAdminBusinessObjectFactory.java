@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.notima.api.webpay.pmtapi.PmtApiClientCollection;
-import org.notima.api.webpay.pmtapi.PmtApiClientRF;
 import org.notima.api.webpay.pmtapi.PmtApiCredential;
 import org.notima.api.webpay.pmtapi.exception.NoSuchOrderException;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
