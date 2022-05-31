@@ -19,7 +19,7 @@ import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 
 public class FileCredentialsProvider extends FortnoxCredentialsProvider {
-    private static final Type KEYS_TYPE = new TypeToken<List<FortnoxCredentials>>() {}.getType();
+    public static final Type KEYS_TYPE = new TypeToken<List<FortnoxCredentials>>() {}.getType();
     public static final String CREDENTIALS_FILE_PROPERTY = "FortnoxCredentialsFile";
 
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();

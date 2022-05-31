@@ -147,11 +147,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		if (getClientManager()!=null) {
 			fci = getClientManager().getClientInfoByOrgNo(orgNo);
 		}
-		if (fci.getLegacyAccessToken()!=null) {
-			client = new FortnoxClient3(getClientManager().getDefaultClientId(), fci.getClientSecret(), new LegacyTokenCredentialsProvider(fci.getLegacyAccessToken()));
-		} else {
-			client = new FortnoxClient3(new FileCredentialsProvider(orgNo));
-		}
+		client = new FortnoxClient3(getClientManager().getDefaultClientId(), fci.getClientSecret(), new FileCredentialsProvider(orgNo));
 	}
 	
 	/**
