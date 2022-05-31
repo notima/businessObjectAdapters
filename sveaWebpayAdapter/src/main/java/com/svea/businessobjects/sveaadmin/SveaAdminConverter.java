@@ -19,11 +19,9 @@ import org.notima.generic.businessobjects.TaxSummary;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 
 import com.svea.businessobjects.SveaUtility;
-import com.svea.webpay.common.conv.InvalidTaxIdFormatException;
 import com.svea.webpay.common.conv.JsonUtil;
 import com.svea.webpay.common.conv.TaxIdFormatter;
 import com.svea.webpay.common.conv.TaxIdStructure;
-import com.svea.webpay.common.conv.UnknownTaxIdFormatException;
 import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportGroup;
@@ -58,7 +56,7 @@ public class SveaAdminConverter {
 	 * @param d		The payment detail.
 	 * @return		An order that corresponds to the amount of the payment detail.
 	 */
-	public static Order<?> checkDifference(Order<?> i, PaymentReportDetail d) {
+	public static Order<?> checkDifferenceAndAdjustIfNecessary(Order<?> i, PaymentReportDetail d) {
 		BasicBusinessObjectConverter<Object,Object> bboc = new BasicBusinessObjectConverter<Object,Object>();
 		
 		try {
@@ -589,6 +587,7 @@ public class SveaAdminConverter {
 	 * @return				A list of payments.
 	 * @throws ParseException	If report can't be parsed.
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Payment<PaymentReportDetail>> convert(PaymentReportGroup group, boolean retriesOnly, boolean includeFees) throws ParseException {
 		
 		List<Payment<PaymentReportDetail>> dstList = new ArrayList<Payment<PaymentReportDetail>>();
@@ -619,6 +618,7 @@ public class SveaAdminConverter {
 	 * @return				A payment
 	 * @throws ParseException	If something goes wrong
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Payment convert(PaymentReportDetail src, PaymentReportGroup group, boolean includeFees) throws ParseException {
 		
 		Payment dst = new Payment();
