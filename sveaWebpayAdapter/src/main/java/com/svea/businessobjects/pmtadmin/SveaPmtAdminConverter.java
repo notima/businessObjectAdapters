@@ -124,10 +124,10 @@ public class SveaPmtAdminConverter {
 					}
 				}
 				
-				// Only consider credits if everything is credited
+				// Only consider credits if everything is credited and there are no order rows.
 				// If everything is credited we have no rows at all to calculate VAT.
 				// TODO: Make a more in depth algorithm on this
-				if (d.getDeliveryAmount().equals(d.getCreditedAmount())) {
+				if (d.getDeliveryAmount().equals(d.getCreditedAmount()) && (d.getOrderRows()==null || d.getOrderRows().size()==0)) {
 				
 					if (d.getCredits()!=null) {
 						for (Credit cr : d.getCredits()) {
