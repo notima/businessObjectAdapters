@@ -101,7 +101,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	private FortnoxClient3 client;
 	
-	private FortnoxClientInfo	currentTenant = null;
+	private FortnoxClientInfo	currentFortnoxTenant = null;
 	
 	private FortnoxClientManager clientManager;
 	
@@ -1333,7 +1333,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			try {
 				cs = client.getCompanySetting();
 				if (cs.getOrganizationNumber().equalsIgnoreCase(orgNo)) {
-					currentTenant = null;	// Set to make sure current tenant is read using credentials
+					currentFortnoxTenant = null;	// Set to make sure current tenant is read using credentials
 					return;
 				} else {
 					
@@ -1363,7 +1363,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				currentTenant = fi;
+				currentFortnoxTenant = fi;
 			}
 			
 		} else {
@@ -1391,11 +1391,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 
 		} else {
-			if (currentTenant==null) return null;
+			if (currentFortnoxTenant==null) return null;
 			
 			BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
-			bp.setTaxId(currentTenant.getOrgNo());
-			bp.setName(currentTenant.getOrgName());
+			bp.setTaxId(currentFortnoxTenant.getOrgNo());
+			bp.setName(currentFortnoxTenant.getOrgName());
 			return bp;
 		}
 		
