@@ -40,14 +40,10 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     public FortnoxCredentials getCredentials() throws Exception {
     	
     	FortnoxCredentials result = null;
-    	long lastRefresh = 0L;
     	
         for(FortnoxCredentials credentials : getKeyList()) {
             if (credentials.getOrgNo().equals(orgNo)){
-            	if (credentials.getLastRefresh()>lastRefresh) {
-            		result = credentials;
-            		lastRefresh = credentials.getLastRefresh();
-            	}
+                result = credentials;
             }
         }
         return result;
