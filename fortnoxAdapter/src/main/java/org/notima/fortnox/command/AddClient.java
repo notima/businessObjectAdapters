@@ -92,9 +92,6 @@ public class AddClient implements Action {
 					&& clientSecret!=null && 
 					(refreshToken != null || legacy)) {
 				FortnoxClient3 fc3 = fa.getClient();
-				if (clientSecret!=null && !fc3.hasClientSecret()) {
-					fc3.setClientSecret(clientSecret);
-				}
 				if (legacy) {
 					if(accessToken == null && authorizationCode != null) {
 						accessToken = fc3.getLegacyAccessToken(authorizationCode, clientSecret);
