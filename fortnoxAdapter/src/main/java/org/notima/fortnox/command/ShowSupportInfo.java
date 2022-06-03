@@ -1,5 +1,7 @@
 package org.notima.fortnox.command;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -29,6 +31,8 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
+
+	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
 	@Override
 	public Object execute() throws Exception {
@@ -55,8 +59,7 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 			}
 			else if(credentials.getAccessToken() != null) {
 				sess.getConsole().println("Using OAuth2 Access Token");
-				sess.getConsole().println("Last token refresh: " + new Date(credentials.getLastRefresh()).toString());
-				sess.getConsole().println("Valid until: " + new Date(credentials.getExpiresIn()));
+				sess.getConsole().println("Last token refresh: " + dateFormat.format(new Date(credentials.getLastRefresh()).toString()));
 			}
 		} catch(FortnoxAuthenticationException e) {
 			sess.getConsole().println("Authentication failed!");
