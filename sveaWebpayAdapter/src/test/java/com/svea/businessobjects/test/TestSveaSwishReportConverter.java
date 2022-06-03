@@ -51,7 +51,7 @@ public class TestSveaSwishReportConverter {
 		report.setRows(rows);
 
 		SwishReportConverter converter = new SwishReportConverter();
-		PaymentReport pReport = converter.convert(report);
+		PaymentReport pReport = converter.convertFromSettlementReport(report);
 		System.out.println(new GsonBuilder().setPrettyPrinting().create().toJson(pReport));
 
 		assertEquals(pReport.getPaymentReportGroup().get(0).getPaymentReportDetail().get(1).getPayerName(), rows.get(1).getSenderName());
@@ -72,7 +72,7 @@ public class TestSveaSwishReportConverter {
 		Date fromDate = fmt.parse("2021-07-27");
 		Date toDate = fmt.parse("2021-09-14");
 		SwishReportConverter converter = new SwishReportConverter();
-		PaymentReport paymentReport = converter.convert("src/test/resources/Swishrapport.csv", fromDate, toDate);
+		PaymentReport paymentReport = converter.convertFromFile("src/test/resources/Swishrapport.csv", fromDate, toDate);
 		String json = new GsonBuilder().setPrettyPrinting().create().toJson(paymentReport);
 		System.out.println(json);
 		List<PaymentReportDetail> details = paymentReport.getPaymentReportGroup().get(0).getPaymentReportDetail();
