@@ -12,7 +12,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
-import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
@@ -92,14 +91,7 @@ public class AddClient implements Action {
 					&& clientSecret!=null && 
 					(refreshToken != null || legacy)) {
 				FortnoxClient3 fc3 = fa.getClient();
-				if (legacy) {
-					if(accessToken == null && authorizationCode != null) {
-						accessToken = fc3.getLegacyAccessToken(authorizationCode, clientSecret);
-					}
-					fc3.setKeyProvider(new LegacyTokenCredentialsProvider(accessToken));
-				} else {
-					fc3.setKeyProvider(new FileCredentialsProvider(orgNo));
-				}
+				fc3.setKeyProvider(new FileCredentialsProvider(orgNo));
 				try { 
 					cs = fc3.getCompanySetting();
 					if (cs!=null) {

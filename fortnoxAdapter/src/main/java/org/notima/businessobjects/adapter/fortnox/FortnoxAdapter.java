@@ -12,7 +12,6 @@ import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
-import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
@@ -1352,11 +1351,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			} else {
 				try {
 					FortnoxCredentialsProvider fcp = null;
-					if (fi.getLegacyAccessToken()!=null) {
-						fcp = new LegacyTokenCredentialsProvider(fi.getLegacyAccessToken());
-					} else {
-						fcp = new FileCredentialsProvider(orgNo);
-					}
+					fcp = new FileCredentialsProvider(orgNo);
 					client.setKeyProvider(fcp);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
