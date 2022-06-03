@@ -45,29 +45,30 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 
 		FortnoxCredentials credentials = new FileCredentialsProvider(orgNo).getCredentials();
 
+		if(credentials == null) {
+			sess.getConsole().println("No credentials found");
+			return null;
+		}
+		
 		try {
 			CompanySetting cs = fc.getCompanySetting();
 			sess.getConsole().println("[ " + cs.getOrganizationNumber() + " ] - " + cs.getName());
 			sess.getConsole().println("Contact: " + cs.getContactFirstName() + " " + cs.getContactLastName());
 			sess.getConsole().println("Email: " + cs.getEmail());
 			sess.getConsole().println("Subscription-ID: " + cs.getDatabaseNumber());
-			if(credentials == null) {
-				sess.getConsole().println("No credentials found");
-			}
-			else if(credentials.getLegacyToken() != null) {
-				sess.getConsole().println("Using Legacy Access Token");
-			}
-			else if(credentials.getAccessToken() != null) {
-				sess.getConsole().println("Using OAuth2 Access Token");
-				sess.getConsole().println("Last token refresh: " + dateFormat.format(new Date(credentials.getLastRefresh()).toString()));
-			}
+			
 		} catch(FortnoxAuthenticationException e) {
 			sess.getConsole().println("Authentication failed!");
 			sess.getConsole().println(e.getMessage());
 		}
-
-		//TODO: Show something else instead?
-		//sess.getConsole().println("Access-token: " + fc.getAccessTokenCurrent());
+			
+		if(credentials.getLegacyToken() != null) {
+				sess.getConsole().println("Using Legacy Access Token with client ID: " + credentials.getClientId());
+		}
+		else if(credentials.getAccessToken() != null) {
+			sess.getConsole().println("Using OAuth2 Access Token with client ID: " + credentials.getClientId());
+			sess.getConsole().println("Last token refresh: " + dateFormat.format(credentials.getLastRefreshAsDate()));
+		}
 		
 		return null;
 	}
