@@ -42,9 +42,13 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     public FortnoxCredentials getCredentials() throws Exception {
     	
     	FortnoxCredentials result = null;
+    	String clientId = null;
     	
         for(FortnoxCredentials credentials : getKeyList()) {
             if (credentials.getOrgNo().equals(orgNo)){
+            	if (clientId==null && credentials.getClientId()!=null) {
+            		clientId = credentials.getClientId();
+            	}
             	if (result!=null) {
             		if (result.getLastRefresh()<credentials.getLastRefresh()) {
             			result = credentials;
@@ -55,6 +59,9 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
             		result = credentials;
             	}
             }
+        }
+        if (clientId!=null && (result.getClientId()==null || result.getClientId().trim().length()==0)) {
+        	result.setClientId(clientId);
         }
         return result;
     }
