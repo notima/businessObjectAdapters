@@ -33,6 +33,8 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
         }
     }
 
+    
+    
     /**
      * Return the credentials with the highest lastRefresh.
      */
@@ -43,7 +45,15 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     	
         for(FortnoxCredentials credentials : getKeyList()) {
             if (credentials.getOrgNo().equals(orgNo)){
-                result = credentials;
+            	if (result!=null) {
+            		if (result.getLastRefresh()<credentials.getLastRefresh()) {
+            			result = credentials;
+            		} else {
+            			continue;
+            		}
+            	} else {
+            		result = credentials;
+            	}
             }
         }
         return result;
@@ -87,5 +97,26 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
         List<FortnoxCredentials> keyList = gson.fromJson(reader, KEYS_TYPE);
         return keyList != null ? keyList : new ArrayList<FortnoxCredentials>();
     }
+
+
+
+	@Override
+	public List<FortnoxCredentials> getAllCredentials() throws Exception {
+		
+		List<FortnoxCredentials> allCreds = new ArrayList<FortnoxCredentials>();
+		
+		for(FortnoxCredentials credentials : getKeyList()) {
+			if (credentials.getOrgNo().equals(orgNo))
+				allCreds.add(credentials);
+		}
+		
+		return allCreds;
+	}
+
+	@Override
+	public void removeCredential(FortnoxCredentials removeThis) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
     
 }

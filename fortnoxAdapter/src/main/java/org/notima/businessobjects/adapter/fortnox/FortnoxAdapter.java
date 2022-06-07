@@ -137,6 +137,15 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 			@Override
 			public void removeCredentials() throws Exception {}
+
+			@Override
+			public List<FortnoxCredentials> getAllCredentials() throws Exception {
+				throw new Exception(ERR_MSG);
+			}
+
+			@Override
+			public void removeCredential(FortnoxCredentials removeThis) throws Exception {
+				throw new Exception(ERR_MSG);			}
 			
 		});
 	}
