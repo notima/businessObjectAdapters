@@ -118,6 +118,7 @@ public class FortnoxPaymentBatchRunner {
 		av.remapAccountType(AccountingType.LIQUID_ASSET_AR, modeOfPaymentAccount);
 		av.remapAccountType(AccountingType.OTHER_EXPENSES_SALES, feeGlAccount);
 		av.remapAccountType(AccountingType.LIQUID_ASSET_CASH, intransitAccount);
+		av.balanceWithLine(AccountingType.ROUNDING);
 		
 		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
 		

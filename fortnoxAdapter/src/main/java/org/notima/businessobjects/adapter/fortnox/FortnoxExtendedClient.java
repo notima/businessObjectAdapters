@@ -26,6 +26,7 @@ import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.Order;
 import org.notima.api.fortnox.entities3.OrderSubset;
 import org.notima.api.fortnox.entities3.Orders;
+import org.notima.api.fortnox.entities3.PreDefinedAccount;
 import org.notima.api.fortnox.entities3.Supplier;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.WriteOff;
@@ -92,14 +93,17 @@ public class FortnoxExtendedClient {
 	private String clientOrgNo;
 	private String lastClientOrgNo;
 	private FortnoxAdapter 	bof;
+	private Integer	roundingAcct;
 	
 	private Logger log = LoggerFactory.getLogger(FortnoxExtendedClient.class);
 	
-	public FortnoxExtendedClient(FortnoxAdapter fortnoxAdapter) {
+	public FortnoxExtendedClient(FortnoxAdapter fortnoxAdapter) throws Exception {
 		bof = fortnoxAdapter;
 		clientOrgNo = bof.getCurrentTenant().getTaxId();
 		FortnoxClientInfo finfo = bof.getClientManager().getClientInfoByOrgNo(clientOrgNo);
 		currencies = new TreeMap<String,Currency>();
+		PreDefinedAccount pdef = getCurrentFortnoxClient().getPreDefinedAccount(FortnoxClient3.ACCT_ROUNDING);
+		roundingAcct = pdef.getAccount();
 	}
 
 	public FortnoxClient3 getCurrentFortnoxClient() {
@@ -782,6 +786,7 @@ public class FortnoxExtendedClient {
 			}
 			
 			voucher.currencyConvert(currency);
+			voucher.balanceVoucher(roundingAcct);
 			
 		}
 		
