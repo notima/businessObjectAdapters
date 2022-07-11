@@ -183,7 +183,7 @@ public class FortnoxPaymentBatchRunner {
 				payment,
 				dryRun);
 		
-		if (invoicePayment!=null && invoicePayment.getNumber()>0) {
+		if (invoicePayment!=null && invoicePayment.getNumber()!=null && invoicePayment.getNumber()>0) {
 			return new PaymentProcessResult(ResultCode.OK);
 		} else {
 			return new PaymentProcessResult(ResultCode.FAILED);
