@@ -25,6 +25,8 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     private Gson gson = new GsonBuilder().setPrettyPrinting().create();
     private File file;
 
+    private String clientId = null; 
+    
     public FileCredentialsProvider(String orgNo) throws IOException {
         super(orgNo);
         file = new File(System.getProperty(CREDENTIALS_FILE_PROPERTY));
@@ -32,17 +34,22 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
             Files.createFile(file.toPath());
         }
     }
+    
+    public String getClientId() {
+		return clientId;
+	}
 
-    
-    
-    /**
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	/**
      * Return the credentials with the highest lastRefresh.
      */
     @Override
     public FortnoxCredentials getCredentials() throws Exception {
     	
     	FortnoxCredentials result = null;
-    	String clientId = null;
     	
         for(FortnoxCredentials credentials : getKeyList()) {
             if (credentials.getOrgNo().equals(orgNo)){
