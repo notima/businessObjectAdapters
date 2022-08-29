@@ -98,7 +98,11 @@ public class SveaPmtAdminConverter {
 		bp.setAddressOfficial(dst.getBillLocation());
 		
 		// Get name from either billing address or shipping address (if billing address is empty)
-		bp.setName(s.getBillingAddress().getFullName()!=null ? s.getBillingAddress().getFullName() : s.getShippingAddress().getFullName());
+		try {
+			bp.setName(s.getBillingAddress().getFullName()!=null ? s.getBillingAddress().getFullName() : s.getShippingAddress().getFullName());
+		} catch (NullPointerException ne) {
+			bp.setName("");
+		}
 		if (bp.isCompany()) {
 			// Add contact
 			List<Person> contacts = new ArrayList<Person>();
