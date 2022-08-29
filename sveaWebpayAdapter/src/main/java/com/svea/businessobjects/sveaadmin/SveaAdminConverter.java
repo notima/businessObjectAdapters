@@ -48,7 +48,6 @@ import com.svea.webpayadminservice.client.OrderType;
  */
 public class SveaAdminConverter {
 
-	public static final String ATTR_PAYMENTDETAIL = "paymentDetail";
 	
 	/**
 	 * Checks if there's a difference between the order and the payout.
@@ -131,9 +130,6 @@ public class SveaAdminConverter {
 			if (i.getGrandTotal()!=d.getPaidAmt()) {
 				System.out.println("Order " + i.getDocumentKey() + " with total " + i.getGrandTotal() + " differs from payment with total: " + d.getPaidAmt());
 			}
-			
-			// Attach the payment detail as an attribute to the order
-			i.addAttribute(ATTR_PAYMENTDETAIL, d);
 			
 		} catch (Exception e) {
 			System.out.println("Order " + i.getDocumentKey() + " : " + e.getMessage());
