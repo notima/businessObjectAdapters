@@ -146,19 +146,9 @@ public class AccountingReportConverter {
 						dst.addVoucherLine(avl);
 					}
 					
-					// Opening balance is negative
-					if (pl.getOpeningBalance()<0 && pl.getEndingBalance()>=0) {
-						if (pl.getPaidOut()>0) {
-							 avl = new AccountingVoucherLine(BigDecimal.valueOf(-pl.getOpeningBalance()), AccountingType.LIABILITY_OTHER);
-						} else {
-							avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getPaidByCustomer()), AccountingType.LIABILITY_OTHER);
-						}
-						dst.addVoucherLine(avl);
-					}
-					
-					// Ending balance is negative
-					if (pl.getEndingBalance()<0) {
-						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getEndingBalance()-pl.getOpeningBalance()), AccountingType.LIABILITY_OTHER);
+					// Change of balance
+					if (pl.getChangeOfBalance()!=0) {
+						 avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getChangeOfBalance()), AccountingType.LIABILITY_OTHER);
 						dst.addVoucherLine(avl);
 					}
 					
