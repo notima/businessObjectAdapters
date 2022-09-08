@@ -11,10 +11,12 @@ import org.notima.generic.businessobjects.KeyValue;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.OrderLine;
+import org.notima.generic.businessobjects.OrderStatus;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
 import org.notima.generic.businessobjects.PaymentWriteOffs;
 import org.notima.generic.businessobjects.Person;
+import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.TaxSummary;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 
@@ -154,6 +156,9 @@ public class SveaAdminConverter {
 			ol.setTaxPercent(tax.getRate());
 			ol.setPriceActual(tax.calculateTotal());
 			lines.add(ol);
+		}
+		if (TaxSummary.containsKey(Tax.TAX_KEY_UNKNOWN, taxes)) {
+			o.setStatusEnum(OrderStatus.UNCLEAR);
 		}
 		return lines;
 		
