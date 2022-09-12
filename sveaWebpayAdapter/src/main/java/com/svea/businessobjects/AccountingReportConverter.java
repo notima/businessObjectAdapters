@@ -34,6 +34,7 @@ public class AccountingReportConverter {
 			case FeeDetail.FEETYPE_KICKBACK:
 				avl.setAcctType(AccountingType.REVENUE);
 				avl.setTaxKey("0");
+				avl.setDescription("Kickback");
 				break;
 			case FeeDetail.FEETYPE_DEVIATIONS:
 				avl.setAcctType(AccountingType.UNKNOWN_BALANCE_TRX);

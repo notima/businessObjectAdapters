@@ -189,15 +189,20 @@ public class SveaAdminConverter {
 	}
 	
 	private static OrderLine generateUnknownOrderLine(double amount) {
+		return(generateSpecifiedOrderLine(amount, Tax.TAX_KEY_UNKNOWN, "?", null, 0D));
+	}
+	
+	private static OrderLine generateSpecifiedOrderLine(double amount, String taxKey, String productKey, String comment, double taxAmount) {
 		OrderLine ol = new OrderLine();
-		ol.setTaxKey("?");
+		ol.setTaxKey(taxKey);
 		ol.setQtyEntered(1D);
 		ol.setPricesIncludeVAT(true);
-		ol.setProductKey("?");
-		ol.setTaxAmount(0D);
+		ol.setProductKey(productKey);
+		ol.setTaxAmount(taxAmount);
 		ol.setPriceActual(amount);
 		return ol;
 	}
+	
 	
 	
 	
