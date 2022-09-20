@@ -1,7 +1,9 @@
 package org.notima.fortnox.command.table;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.notima.api.fortnox.clients.FortnoxCredentialComparatorByRefresh;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
@@ -26,6 +28,8 @@ public class CredentialTable extends GenericTable {
 	
 	public CredentialTable(List<FortnoxCredentials> credentials) {
 		creds = credentials;
+		if (creds!=null)
+			Collections.sort(creds, new FortnoxCredentialComparatorByRefresh());
 		initColumns();
 		
 	}
