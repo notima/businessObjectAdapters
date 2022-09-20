@@ -92,7 +92,9 @@ public class ListInvoices extends FortnoxCommand implements Action {
 			
 			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
 			Invoices allInvoices = fc.getAllCustomerInvoicesByDateRange(fromDate, untilDate);
-			invoices.addAll(allInvoices.getInvoiceSubset());
+			if (allInvoices.getInvoiceSubset()!=null) {
+				invoices.addAll(allInvoices.getInvoiceSubset());
+			}
 			
 		}
 		
