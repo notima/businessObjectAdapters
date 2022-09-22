@@ -34,14 +34,11 @@ public class ListCredentials extends FortnoxCommand implements Action {
 
 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
+	private FortnoxClient3 fc;
+	private CompanySetting cs;
+	
 	@Override
 	public Object execute() throws Exception {
-		
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
-		if (fc == null) {
-			sess.getConsole().println("Can't get client for " + orgNo);
-			return null;
-		}
 
 		List<FortnoxCredentials> credentials = new FileCredentialsProvider(orgNo).getAllCredentials();
 
@@ -49,9 +46,19 @@ public class ListCredentials extends FortnoxCommand implements Action {
 			sess.getConsole().println("No credentials found");
 			return null;
 		}
+
+		CredentialTable table = new CredentialTable(credentials);
+
+		table.getShellTable().print(sess.getConsole());
+		
+		fc = getFortnoxClient(bofs, orgNo);
+		if (fc == null) {
+			sess.getConsole().println("Can't get client for " + orgNo);
+			return null;
+		}
 		
 		try {
-			CompanySetting cs = fc.getCompanySetting();
+			cs = fc.getCompanySetting();
 			sess.getConsole().println("[ " + cs.getOrganizationNumber() + " ] - " + cs.getName());
 			sess.getConsole().println("Contact: " + cs.getContactFirstName() + " " + cs.getContactLastName());
 			sess.getConsole().println("Email: " + cs.getEmail());
@@ -60,11 +67,11 @@ public class ListCredentials extends FortnoxCommand implements Action {
 		} catch(FortnoxAuthenticationException e) {
 			sess.getConsole().println("Authentication failed!");
 			sess.getConsole().println(e.getMessage());
+			if (e.getCredentials()!=null) {
+				sess.getConsole().println(e.getCredentials().toString());
+			}
 		}
 		
-		CredentialTable table = new CredentialTable(credentials);
-
-		table.getShellTable().print(sess.getConsole());
 		
 		return null;
 	}
