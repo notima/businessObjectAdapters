@@ -1361,6 +1361,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				try {
 					FortnoxCredentialsProvider fcp = null;
 					fcp = new FileCredentialsProvider(orgNo);
+					fcp.setDefaultClientId(clientManager.getDefaultClientId());
+					fcp.setDefaultClientSecret(clientManager.getDefaultClientSecret());
 					client.setKeyProvider(fcp);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
