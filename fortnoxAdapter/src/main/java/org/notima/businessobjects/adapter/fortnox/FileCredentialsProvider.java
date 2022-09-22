@@ -45,6 +45,8 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
 
 	/**
      * Return the credentials with the highest lastRefresh.
+     * 
+     * @throws Exception	If the credentials can't be read from the underlying system.
      */
     @Override
     public FortnoxCredentials getCredentials() throws Exception {
