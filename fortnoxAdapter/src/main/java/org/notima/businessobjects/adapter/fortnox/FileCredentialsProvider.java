@@ -26,6 +26,7 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     private File file;
 
     private String clientId = null; 
+    private String clientSecret = null;
     
     public FileCredentialsProvider(String orgNo) throws IOException {
         super(orgNo);
@@ -58,6 +59,9 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
             	if (clientId==null && credentials.getClientId()!=null) {
             		clientId = credentials.getClientId();
             	}
+            	if (clientSecret==null && credentials.getClientSecret()!=null) {
+            		clientSecret = credentials.getClientSecret();
+            	}
             	if (result!=null) {
             		if (result.getLastRefresh()<credentials.getLastRefresh()) {
             			result = credentials;
@@ -71,6 +75,15 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
         }
         if (clientId!=null && (result.getClientId()==null || result.getClientId().trim().length()==0)) {
         	result.setClientId(clientId);
+        }
+        if (clientSecret!=null && (result.getClientSecret()==null || result.getClientSecret().trim().length()==0)) {
+        	result.setClientSecret(clientSecret);
+        }
+        if (clientId==null) {
+        	result.setClientId(this.defaultClientId);
+        }
+        if (clientSecret==null) {
+        	result.setClientSecret(this.defaultClientSecret);
         }
         return result;
     }

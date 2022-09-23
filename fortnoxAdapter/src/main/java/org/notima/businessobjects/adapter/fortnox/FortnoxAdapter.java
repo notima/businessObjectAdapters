@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+import org.notima.api.fortnox.FortnoxAuthenticationException;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
@@ -150,10 +151,16 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		});
 	}
 	
+	/**
+	 * Create an adapter with a pre-initialized client / orgno.
+	 * 
+	 * @param orgNo
+	 * @throws IOException
+	 */
 	public FortnoxAdapter(String orgNo) throws IOException {
-		FortnoxClientInfo fci = null;
+		currentFortnoxTenant = null;
 		if (getClientManager()!=null) {
-			fci = getClientManager().getClientInfoByOrgNo(orgNo);
+			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(orgNo);
 		}
 		client = new FortnoxClient3(new FileCredentialsProvider(orgNo));
 	}
@@ -1333,46 +1340,23 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public void setTenant(String orgNo, String countryCode) throws NoSuchTenantException {
 
-		CompanySetting cs = null;
+		FortnoxCredentialsProvider fcp = null;
 		
-		if (client.hasCredentials()) {
-
-			try {
-				cs = client.getCompanySetting();
-				if (cs.getOrganizationNumber().equalsIgnoreCase(orgNo)) {
-					currentFortnoxTenant = null;	// Set to make sure current tenant is read using credentials
-					return;
-				} else {
-					
-					
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
+		try {
+			fcp = new FileCredentialsProvider(orgNo);
+		} catch (Exception ee) {
+			ee.printStackTrace();
 		}
+		if (fcp==null) {
+			throw new NoSuchTenantException(orgNo);
+		}
+		client = new FortnoxClient3(fcp);
 		
-		if (clientManager!=null) {
-			
-			FortnoxClientInfo fi = clientManager.getClientInfoByOrgNo(orgNo);
-			if (fi==null) {
-				throw new NoSuchTenantException("No such tenant " + orgNo);
-			} else {
-				try {
-					FortnoxCredentialsProvider fcp = null;
-					fcp = new FileCredentialsProvider(orgNo);
-					fcp.setDefaultClientId(clientManager.getDefaultClientId());
-					fcp.setDefaultClientSecret(clientManager.getDefaultClientSecret());
-					client.setKeyProvider(fcp);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				currentFortnoxTenant = fi;
-			}
-			
-		} else {
-			throw new NoSuchTenantException("Can't find a client manager with tenants");
+		currentFortnoxTenant = null;
+		if (getClientManager()!=null) {
+			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(orgNo);
+			fcp.setDefaultClientId(clientManager.getDefaultClientId());
+			fcp.setDefaultClientSecret(clientManager.getDefaultClientSecret());
 		}
 		
 	}
@@ -1381,14 +1365,24 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public BusinessPartner<Customer> getCurrentTenant() {
 		
 		if (client.hasCredentials()) {
-			// Read from credentials
-			CompanySetting cs;
+
 			try {
-				cs = client.getCompanySetting();
+
+				FortnoxCredentials fcreds = client.getCurrentCredentials();
 				BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
-				bp.setTaxId(cs.getOrganizationNumber());
-				bp.setName(cs.getName());
-				bp.setCountryCode(cs.getCountryCode());
+				bp.setTaxId(fcreds.getOrgNo());
+				
+				try {
+					CompanySetting cs = client.getCompanySetting();
+					if (cs!=null) {
+						bp = new BusinessPartner<Customer>();
+						bp.setName(cs.getName());
+						bp.setCountryCode(cs.getCountryCode());
+					}
+				} catch (FortnoxAuthenticationException e) {
+					logger.warn(e.toString());
+				}
+				
 				return bp;				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

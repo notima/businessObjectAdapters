@@ -1,5 +1,7 @@
 package org.notima.fortnox.command.table;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -9,6 +11,8 @@ import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
 public class CredentialTable extends GenericTable {
 
+	private DateFormat dfmt = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
+	
 	private List<FortnoxCredentials> creds;
 	
 	private Long counter = 1L;
@@ -19,6 +23,7 @@ public class CredentialTable extends GenericTable {
 		column("ClientId");
 		column("AccessToken");
 		column("Type");
+		column("RefreshToken");
 		column("Last refresh");
 		column("Timestamp");
 	
@@ -69,7 +74,8 @@ public class CredentialTable extends GenericTable {
 				cred.getClientId(),
 				cred.getAccessTokenAbbreviated(),
 				(cred.hasLegacyTokenAndClientSecret() ? "Legacy" : "Oauth2"), 
-				cred.getLastRefreshAsDate(),
+				cred.getRefreshTokenAbbreviated(),
+				dfmt.format(cred.getLastRefreshAsDate()),
 				cred.getLastRefresh());
 		
 	}
@@ -81,6 +87,7 @@ public class CredentialTable extends GenericTable {
 				cred.getClientId(),
 				cred.getLegacyTokenAbbreviated(),
 				"Legacy", 
+				"N/A",
 				"N/A",
 				"N/A");
 		
