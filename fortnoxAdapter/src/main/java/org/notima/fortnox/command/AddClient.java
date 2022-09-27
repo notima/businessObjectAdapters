@@ -12,6 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
@@ -124,7 +125,7 @@ public class AddClient implements Action {
 			props.setProperty("clientSecret", clientSecret);
 		}
 		
-		BusinessPartner<Customer> bp = fa.addTenant(orgNo, "SE", orgName, props);
+		BusinessPartner<FortnoxClientInfo> bp = fa.addTenant(orgNo, "SE", orgName, props);
 
 		if (bp!=null) {
 			sess.getConsole().println("Customer [" + bp.getTaxId() + "] " + bp.getName() + " added.");

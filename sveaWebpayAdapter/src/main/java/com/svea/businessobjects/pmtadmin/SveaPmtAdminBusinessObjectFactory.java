@@ -31,6 +31,7 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 		org.notima.api.webpay.pmtapi.entity.Invoice, 
 		org.notima.api.webpay.pmtapi.CheckoutOrder,
 		Object,
+		Object,
 		Object
 		> {
 
@@ -230,7 +231,7 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public BusinessPartner<?> lookupThisCompanyInformation() throws Exception {
+	public BusinessPartner<Object> lookupThisCompanyInformation() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

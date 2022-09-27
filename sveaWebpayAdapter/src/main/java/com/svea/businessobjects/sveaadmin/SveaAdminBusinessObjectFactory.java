@@ -64,6 +64,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 							  com.svea.webpayadminservice.client.Invoice,
 							  com.svea.webpayadminservice.client.Order,
 							  Object,
+							  Object,
 							  Object> implements FactoringEngine {
 
 	public static String SETTING_INCLUDE_CANCELLED_ROWS = "includeCancelledRows";
@@ -564,7 +565,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 	}
 
 	@Override
-	public BusinessPartner<?> lookupThisCompanyInformation() throws Exception {
+	public BusinessPartner<Object> lookupThisCompanyInformation() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
