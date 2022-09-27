@@ -1029,6 +1029,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	public static org.notima.generic.businessobjects.BusinessPartner<FortnoxClientInfo> convertToBusinessPartnerFromFortnoxClientInfo(FortnoxClientInfo src) {
 		
+		if (src==null) return null;
+		
 		BusinessPartner<FortnoxClientInfo> dst = new BusinessPartner<FortnoxClientInfo>();
 		
 		dst.setTaxId(src.getOrgNo());
@@ -1385,59 +1387,24 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		updateCurrentTenant();
 	}
 
-	private void updateCurrentTenant() {
+	private void updateCurrentTenant() throws NoSuchTenantException {
 
 		if (getClientManager()!=null) {
 			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(currentOrgNo);
 			currentFortnoxCredentials.setDefaultClientId(clientManager.getDefaultClientId());
 			currentFortnoxCredentials.setDefaultClientSecret(clientManager.getDefaultClientSecret());
+			currentTenant = convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
+		} else {
+			throw new NoSuchTenantException("Can't find client manager while looking for " + currentOrgNo);
 		}
-		BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
-		
-		bp.setTaxId(currentFortnoxTenant.getOrgNo());
-		bp.setName(currentFortnoxTenant.getOrgName());
-
 		
 	}
 	
 	@Override
 	public BusinessPartner<FortnoxClientInfo> getCurrentTenant() {
 		
-		if (fortnoxClient.hasCredentials()) {
-
-			try {
-
-				FortnoxCredentials fcreds = fortnoxClient.getCurrentCredentials();
-				BusinessPartner<FortnoxClientInfo> bp = new BusinessPartner<FortnoxClientInfo>();
-				bp.setTaxId(fcreds.getOrgNo());
-				
-				try {
-					CompanySetting cs = fortnoxClient.getCompanySetting();
-					if (cs!=null) {
-						bp = new BusinessPartner<FortnoxClientInfo>();
-						bp.setName(cs.getName());
-						bp.setCountryCode(cs.getCountryCode());
-					}
-				} catch (FortnoxAuthenticationException e) {
-					logger.warn(e.toString());
-				}
-				
-				return bp;				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
-		} else {
-			if (currentFortnoxTenant==null) return null;
-			
-			BusinessPartner<FortnoxClientInfo> bp = new BusinessPartner<FortnoxClientInfo>();
-			bp.setTaxId(currentFortnoxTenant.getOrgNo());
-			bp.setName(currentFortnoxTenant.getOrgName());
-			return bp;
-		}
+		return convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
 		
-		return null;
 	}
 
 	@Override
