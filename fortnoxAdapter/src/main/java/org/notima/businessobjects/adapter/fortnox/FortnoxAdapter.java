@@ -10,13 +10,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
-import org.notima.api.fortnox.FortnoxAuthenticationException;
 import org.notima.api.fortnox.FortnoxClient3;
-import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
-import org.notima.api.fortnox.clients.FortnoxCredentials;
+import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
+import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
@@ -48,13 +47,13 @@ import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.notima.util.EmailUtils;
 import org.notima.util.LocalDateUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +139,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 
 			@Override
-			public void removeCredentials() throws Exception {}
+			public void removeAllCredentials() throws Exception {}
 
 			@Override
 			public List<FortnoxCredentials> getAllCredentials() throws Exception {
@@ -150,6 +149,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			@Override
 			public void removeCredential(FortnoxCredentials removeThis) throws Exception {
 				throw new Exception(ERR_MSG);			}
+
+			@Override
+			public int removeCredentials(List<FortnoxCredentials> removeThese) throws Exception {
+				throw new Exception(ERR_MSG);
+			}
 			
 		});
 	}

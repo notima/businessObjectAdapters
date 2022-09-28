@@ -1,39 +1,27 @@
 package org.notima.businessobjects.adapter.fortnox;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
-
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileCredentialsProvider extends FortnoxCredentialsProvider {
-    public static final Type KEYS_TYPE = new TypeToken<List<FortnoxCredentials>>() {}.getType();
-    public static final String CREDENTIALS_FILE_PROPERTY = "FortnoxCredentialsFile";
+	
 
-    private Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    private File file;
+    protected static Logger	logger = LoggerFactory.getLogger(FileCredentialsProvider.class);    
 
     private String clientId = null; 
     private String clientSecret = null;
     
+    private CredentialsFile file = null;
+    
     public FileCredentialsProvider(String orgNo) throws IOException {
         super(orgNo);
-        file = new File(System.getProperty(CREDENTIALS_FILE_PROPERTY));
-        if(!file.exists()) {
-            Files.createFile(file.toPath());
-        }
+        file = new CredentialsFile();
     }
     
     public String getClientId() {
@@ -54,7 +42,7 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     	
     	FortnoxCredentials result = null;
     	
-        for(FortnoxCredentials credentials : getKeyList()) {
+        for(FortnoxCredentials credentials : file.getKeyList()) {
             if (credentials.getOrgNo().equals(orgNo)){
             	if (clientId==null && credentials.getClientId()!=null) {
             		clientId = credentials.getClientId();
@@ -79,54 +67,56 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
         if (clientSecret!=null && (result.getClientSecret()==null || result.getClientSecret().trim().length()==0)) {
         	result.setClientSecret(clientSecret);
         }
-        if (clientId==null) {
-        	result.setClientId(this.defaultClientId);
-        }
-        if (clientSecret==null) {
-        	result.setClientSecret(this.defaultClientSecret);
-        }
+        
+        checkClientIdAndSecret(result);
+        
         return result;
     }
 
+    private void checkClientIdAndSecret(FortnoxCredentials cred) {
+    	
+        if (clientId==null && !cred.hasClientId()) {
+        	cred.setClientId(this.defaultClientId);
+        }
+        if (clientSecret==null && !cred.hasClientSecret()) {
+        	cred.setClientSecret(this.defaultClientSecret);
+        }
+    	
+    }
+    
     @Override
     public void setCredentials(FortnoxCredentials credentials) throws Exception {
         credentials.setOrgNo(orgNo);
-        List<FortnoxCredentials> keys = getKeyList();
+        List<FortnoxCredentials> keys = file.getKeyList();
         boolean updated = false;
         for(int i = 0; i < keys.size(); i++) {
-            if(keys.get(0).getOrgNo().equals(orgNo)) {
+            if(keys.get(i).equals(credentials)) {
                 keys.set(i, credentials);
                 updated = true;
+                break;
             }
         }
         if(!updated) {
             keys.add(credentials);
         }
-        FileWriter fileWriter = new FileWriter(file.getPath());
-        gson.toJson(keys, fileWriter);
-        fileWriter.close();
+        
+        checkClientIdAndSecret(credentials);
+        
+        file.writeToFile();
+        logger.debug((updated ? "Updated" : "Added") + " credentials for " + credentials.getOrgNo() + " to file " + file.getFilePath());
     }
 
     @Override
-    public void removeCredentials() throws IOException {
-        List<FortnoxCredentials> credentialsList = getKeyList();
+    public void removeAllCredentials() throws Exception {
+        List<FortnoxCredentials> credentialsList = file.getKeyList();
+        List<FortnoxCredentials> credentialsToRemove = new ArrayList<FortnoxCredentials>();
         for(int i = 0; i < credentialsList.size(); i++) {
             if (credentialsList.get(i).getOrgNo().equals(orgNo)){
-                credentialsList.remove(i);
-                break;
+                credentialsToRemove.add(credentialsList.get(i));
             }
         }
-        FileWriter fileWriter = new FileWriter(file.getPath());
-        gson.toJson(credentialsList, fileWriter);
-        fileWriter.close();
+        removeCredentials(credentialsToRemove);
     }
-
-    private List<FortnoxCredentials> getKeyList() throws FileNotFoundException {
-        JsonReader reader = new JsonReader(new FileReader(file.getPath()));
-        List<FortnoxCredentials> keyList = gson.fromJson(reader, KEYS_TYPE);
-        return keyList != null ? keyList : new ArrayList<FortnoxCredentials>();
-    }
-
 
 
 	@Override
@@ -134,7 +124,7 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
 		
 		List<FortnoxCredentials> allCreds = new ArrayList<FortnoxCredentials>();
 		
-		for(FortnoxCredentials credentials : getKeyList()) {
+		for(FortnoxCredentials credentials : file.getKeyList()) {
 			if (credentials.getOrgNo().equals(orgNo))
 				allCreds.add(credentials);
 		}
@@ -144,8 +134,65 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
 
 	@Override
 	public void removeCredential(FortnoxCredentials removeThis) throws Exception {
-		// TODO Auto-generated method stub
+
+		List<FortnoxCredentials> credentials = file.getKeyList();
+		boolean removed = false;
+		
+		for (FortnoxCredentials credential : credentials) {
+			if (credential.equals(removeThis)) {
+				credentials.remove(credential);
+				removed = true;
+				break;
+			}
+		}
+		if (removed) {
+			file.writeToFile();
+			logger.debug("Removed one credential for " + orgNo + " from file " + file.getFilePath());
+		}
 		
 	}
-    
+
+	@Override
+	public int removeCredentials(List<FortnoxCredentials> removeThese) throws Exception {
+
+		if (removeThese==null || removeThese.size()==0)
+			return 0;
+		
+		List<FortnoxCredentials> credentials = file.getKeyList();
+		List<FortnoxCredentials> listToRemove = new ArrayList<FortnoxCredentials>();
+		
+		for (FortnoxCredentials credential : credentials) {
+			if (isInList(credential, removeThese)) {
+				listToRemove.add(credential);
+			}
+		}
+
+		int removeCount = 0;
+		
+		for (FortnoxCredentials remove : listToRemove) {
+			credentials.remove(remove);
+			removeCount++;
+		}
+		
+		if (removeCount>0) {
+			file.writeToFile();
+			logger.debug("Removed " + removeCount + " credential(s) for " + orgNo + " from file " + file.getFilePath());
+		}
+		
+		return removeCount;
+	}
+	
+	private boolean isInList(FortnoxCredentials credential, List<FortnoxCredentials> list) {
+		
+		if (list==null || list.size()==0) return false;
+		if (credential == null) return false;
+		
+		for (FortnoxCredentials c : list) {
+			if (c.equals(credential))
+				return true;
+		}
+		
+		return false;
+	}
+	
 }
