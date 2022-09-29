@@ -86,7 +86,7 @@ public class PurgeCredentials extends FortnoxCommand implements Action {
 		String reply = 
 				sess.readLine("Do you really want to remove all credentials older than " 
 						+ dateFormat.format(untilDate) + " for " 
-						+ bf.getCurrentTenant().getName() + "(y/n) ? ", null);
+						+ bf.getCurrentTenant().getName() + " (y/n) ? ", null);
 		if (reply!=null && reply.toLowerCase().startsWith("y")) {
 			return true;
 		}
@@ -109,6 +109,7 @@ public class PurgeCredentials extends FortnoxCommand implements Action {
 			Calendar now = Calendar.getInstance();
 			now.add(Calendar.DATE, -31);
 			untilRefresh = now.getTimeInMillis();
+			untilDate = now.getTime();
 		}
 	}
 	
