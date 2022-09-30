@@ -38,7 +38,10 @@ public class CredentialsFile {
     public List<FortnoxCredentials> getKeyList() throws FileNotFoundException {
         JsonReader reader = new JsonReader(new FileReader(file.getPath()));
         keyList = gson.fromJson(reader, KEYS_TYPE);
-        return keyList != null ? keyList : new ArrayList<FortnoxCredentials>();
+        if (keyList == null) {
+        	keyList = new ArrayList<FortnoxCredentials>();
+        }
+        return keyList;
     }
     
     public String getFilePath() {
