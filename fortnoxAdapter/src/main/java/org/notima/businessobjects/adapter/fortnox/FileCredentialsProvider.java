@@ -61,10 +61,10 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
             	}
             }
         }
-        if (clientId!=null && (result.getClientId()==null || result.getClientId().trim().length()==0)) {
+        if (result!=null && clientId!=null && (result.getClientId()==null || result.getClientId().trim().length()==0)) {
         	result.setClientId(clientId);
         }
-        if (clientSecret!=null && (result.getClientSecret()==null || result.getClientSecret().trim().length()==0)) {
+        if (result!=null && clientSecret!=null && (result.getClientSecret()==null || result.getClientSecret().trim().length()==0)) {
         	result.setClientSecret(clientSecret);
         }
         
@@ -74,6 +74,8 @@ public class FileCredentialsProvider extends FortnoxCredentialsProvider {
     }
 
     private void checkClientIdAndSecret(FortnoxCredentials cred) {
+    	
+    	if (cred==null) return;
     	
         if (clientId==null && !cred.hasClientId()) {
         	cred.setClientId(this.defaultClientId);
