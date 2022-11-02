@@ -175,18 +175,30 @@ public class FortnoxPaymentBatchRunner {
 		
 		prepareWriteOffs(payment);
 		
-		InvoicePayment invoicePayment = extendedClient.payCustomerInvoice(
-				modeOfPayment, 
-				inv, 
-				bookkeepPayment, 
-				processOptions.isFeesPerPayment(), 
-				payment,
-				dryRun);
+		InvoicePayment invoicePayment = null;
+		Exception paymentException = null;
+		
+		try {
+			invoicePayment = extendedClient.payCustomerInvoice(
+					modeOfPayment, 
+					inv, 
+					bookkeepPayment, 
+					processOptions.isFeesPerPayment(), 
+					payment,
+					dryRun);
+		} catch (Exception ee) {
+			paymentException = ee;
+		}
 		
 		if (invoicePayment!=null && invoicePayment.getNumber()!=null && invoicePayment.getNumber()>0) {
 			return new PaymentProcessResult(ResultCode.OK);
 		} else {
-			return new PaymentProcessResult(ResultCode.FAILED);
+			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.FAILED);
+			if (paymentException!=null) {
+				ppr.setException(paymentException);
+				ppr.setTextResultFromException();
+			}
+			return ppr;
 		}
 		
 	}
