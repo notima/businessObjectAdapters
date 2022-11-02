@@ -64,8 +64,12 @@ public class ProcessPaymentBatch implements Action {
 	
 	@Argument(index = 2, name = "paymentSource", description ="The payment source (normally a file)", required = true, multiValued = false)
 	@Completion(FileCompleter.class)
-	private String paymentSource = "";
+	private String paymentSource;
 
+	
+	private PaymentBatch pb;
+	private PaymentBatchTable paymentBatchTable;
+	private ReportFormatter<GenericTable> rf;
 
 	@Override
 	public Object execute() throws Exception {
@@ -81,39 +85,49 @@ public class ProcessPaymentBatch implements Action {
 			processOptions.setDryRun(true);
 		}
 		
-		PaymentBatch pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
+		pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
+		
 		if (matchOnly) {
 			paymentProcessor.lookupInvoiceReferences(pb);
-
-			PaymentBatchTable paymentBatchTable = new PaymentBatchTable(pb, true);
-			paymentBatchTable.getShellTable().print(sess.getConsole());
-
-			if (format!=null) {
-				
-				// Try to find a report formatter
-				@SuppressWarnings("unchecked")
-				ReportFormatter<GenericTable> rf = (ReportFormatter<GenericTable>) formatterFactory.getReportFormatter(GenericTable.class, format);
-				
-				if (rf!=null) {
-					Properties props = new Properties();
-					props.setProperty(BasicReportFormatter.OUTPUT_FILENAME, outFile);
-					
-					String of = rf.formatReport((GenericTable)paymentBatchTable, format, props);
-					sess.getConsole().println("Output file to: " + of);
-				} else {
-					sess.getConsole().println("Can't find formatter for " + format);
-				}
-				
-			}
-			
-			
 		} else {
 			paymentProcessor.processPaymentBatch(pb, processOptions);
 		}
 		
-		
+		formatReport();
 		
 		return null;
+	}
+	
+	private void constructOutFile() {
+		if (format!=null && outFile==null && rf!=null) {
+			// We need to construct an outfile.
+			outFile = paymentSource + "." + format;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void formatReport() throws Exception {
+		
+		paymentBatchTable = new PaymentBatchTable(pb, true);
+		paymentBatchTable.getShellTable().print(sess.getConsole());
+		
+		if (format!=null) {
+			
+			// Try to find a report formatter
+			rf = (ReportFormatter<GenericTable>) formatterFactory.getReportFormatter(GenericTable.class, format);
+			
+			if (rf!=null) {
+				Properties props = new Properties();
+				constructOutFile();
+				props.setProperty(BasicReportFormatter.OUTPUT_FILENAME, outFile);
+				
+				String of = rf.formatReport((GenericTable)paymentBatchTable, format, props);
+				sess.getConsole().println("Output file to: " + of);
+			} else {
+				sess.getConsole().println("Can't find formatter for " + format);
+			}
+		}
+
 	}
 	
 
