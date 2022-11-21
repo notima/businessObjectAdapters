@@ -11,7 +11,6 @@ import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
 import org.notima.generic.businessobjects.PaymentBatchProcessResult;
 import org.notima.generic.businessobjects.PaymentBatchProcessResult.ResultCode;
-import org.notima.generic.businessobjects.PaymentProcessResult;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
