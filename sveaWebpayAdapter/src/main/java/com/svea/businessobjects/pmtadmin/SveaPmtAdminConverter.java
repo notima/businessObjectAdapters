@@ -73,8 +73,12 @@ public class SveaPmtAdminConverter {
 		person.setPhone(s.getPhoneNumber());
 		person.setEmail(s.getEmailAddress());
 		if (person.getName()==null || person.getName().trim().length()==0) {
-			if (s.getBillingAddress()!=null)
+			if (s.getBillingAddress()!=null && s.getBillingAddress().getFullName()!=null && s.getBillingAddress().getFullName().trim().length()>0)
 					person.setName(s.getBillingAddress().getFullName());
+			else if (s.getEmailAddress()!=null) {
+				// Last resort
+				person.setName(s.getEmailAddress());
+			}
 		}
 		
 		dst.setBillPerson(person);
@@ -100,8 +104,11 @@ public class SveaPmtAdminConverter {
 		// Get name from either billing address or shipping address (if billing address is empty)
 		try {
 			bp.setName(s.getBillingAddress().getFullName()!=null ? s.getBillingAddress().getFullName() : s.getShippingAddress().getFullName());
+			if (bp.getName()==null || bp.getName().trim().length()==0)
+				bp.setName(s.getEmailAddress());
 		} catch (NullPointerException ne) {
-			bp.setName("");
+			// Last resort
+			bp.setName(s.getEmailAddress());
 		}
 		if (bp.isCompany()) {
 			// Add contact
