@@ -35,12 +35,24 @@ public class SveaPmtAdminConverter {
 		if (order.getNativeOrder()==null) return null;
 		
 		StringWriter sw = new StringWriter();
+		boolean orderConvertedToString = false;
 		
 		if (order.getNativeOrder() instanceof org.notima.api.webpay.pmtapi.entity.Order) {
 			
 			org.notima.api.webpay.pmtapi.entity.Order nativeOrder = (org.notima.api.webpay.pmtapi.entity.Order) order.getNativeOrder();
 			JAXB.marshal(nativeOrder, sw);			
+			orderConvertedToString = true;
+		}
+		
+		if (order.getNativeOrder() instanceof org.notima.api.webpay.pmtapi.CheckoutOrder) {
 			
+			org.notima.api.webpay.pmtapi.CheckoutOrder nativeOrder = (org.notima.api.webpay.pmtapi.CheckoutOrder) order.getNativeOrder();
+			JAXB.marshal(nativeOrder, sw);			
+			orderConvertedToString = true;
+		}
+		
+		if (!orderConvertedToString) {
+			System.err.println("Can't convert " + order.getNativeOrder().getClass().getCanonicalName() + " to a string representation");
 		}
 		
 		return sw.toString();
