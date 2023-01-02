@@ -45,13 +45,15 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	 * Initializes the business object factory
 	 * 
 	 * @param serverName
+	 * @param orgNo				The orgno this merchant id belongs to.
 	 * @param merchantId
 	 * @param secretWord
 	 */
-	public void addCredential(String serverName, String merchantId, String secretWord) {
+	public void addCredential(String serverName, String orgNo, String merchantId, String secretWord) {
 		
 		PmtApiCredential credential = new PmtApiCredential();
 		credential.setServer(serverName);
+		credential.setOrgNo(orgNo);
 		credential.setMerchantId(merchantId);
 		credential.setSecret(secretWord);
 		clients.addPmtApiClient(credential);
