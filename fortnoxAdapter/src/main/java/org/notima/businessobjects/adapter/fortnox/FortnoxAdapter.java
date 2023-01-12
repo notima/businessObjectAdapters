@@ -901,7 +901,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 			
 			if (il.getPriceActual()!=null) {
-				if (il.isPricesIncludeVAT()) {
+				if (il.isPricesIncludeVAT() && !src.isShowPricesIncludingVAT()) {
 					row.setPrice((double)il.getPriceActual()-(il.getTaxAmount()/il.getQtyEntered()));
 					row.setPrice((Math.round(row.getPrice()*100)/100.0));
 				}
@@ -916,8 +916,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			rowList.add(row);
 		}
 
-		// Always set the prices excluding VAT
-		dst.setVATIncluded(Boolean.valueOf(false));
+		if (src.isShowPricesIncludingVAT()) {
+			dst.setVATIncluded(Boolean.valueOf(true));
+		} else {
+			dst.setVATIncluded(Boolean.valueOf(false));
+		}
 		// Set as not completed as false by default.
 		dst.setNotCompleted(Boolean.FALSE);
 		
