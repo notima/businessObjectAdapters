@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
@@ -172,6 +173,27 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		currentFortnoxCredentials = new FileCredentialsProvider(currentOrgNo);
 		fortnoxClient = new FortnoxClient3(currentFortnoxCredentials);
+	}
+	
+	/**
+	 * Used for legacy authentication
+	 * 
+	 * @param accessToken
+	 * @param clientSecret
+	 */
+	public FortnoxAdapter(String accessToken, String clientSecret) throws Exception {
+		
+		currentFortnoxCredentials = new LegacyTokenCredentialsProvider(accessToken, clientSecret);
+		
+		fortnoxClient = new FortnoxClient3(currentFortnoxCredentials);
+		CompanySetting cs = fortnoxClient.getCompanySetting();
+		currentOrgNo = cs.getOrganizationNumber();
+		FortnoxClientInfo fci = new FortnoxClientInfo();
+		fci.setAccessToken(accessToken);
+		fci.setClientSecret(clientSecret);
+		fci.setCompanySetting(cs);
+		currentFortnoxTenant = fci;
+		
 	}
 	
 	/**
@@ -1437,10 +1459,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			try {
 				cs = fortnoxClient.getCompanySetting();
 				if (cs!=null) {
-					bp = new BusinessPartner<FortnoxClientInfo>();
-					bp.setName(cs.getName());
-					bp.setTaxId(cs.getOrganizationNumber());
-					bp.setCountryCode(cs.getCountryCode());
+					bp = createBpFromCompanySetting(cs);
 					listOfBp.add(bp);
 				}
 			} catch (Exception e) {
@@ -1452,6 +1471,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return result;
 	}
 
+	private BusinessPartner<FortnoxClientInfo> createBpFromCompanySetting(CompanySetting cs) {
+		BusinessPartner<FortnoxClientInfo> bp = new BusinessPartner<FortnoxClientInfo>();
+		bp.setName(cs.getName());
+		bp.setTaxId(cs.getOrganizationNumber());
+		bp.setCountryCode(cs.getCountryCode());
+		return bp;
+	}
+	
 	@Override
 	public String getSystemName() {
 		return SYSTEMNAME;
