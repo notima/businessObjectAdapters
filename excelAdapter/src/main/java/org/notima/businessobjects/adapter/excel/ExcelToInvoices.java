@@ -41,6 +41,25 @@ public class ExcelToInvoices {
 	private static int		 lastRowNo = -1;
 	private static int		 lastColNo = -1;
 	
+	private boolean			 priceIncludesTaxGlobal = false;
+	private double			 taxPercentGlobal = 0d;
+
+	public boolean isPriceIncludesTaxGlobal() {
+		return priceIncludesTaxGlobal;
+	}
+
+	public void setPriceIncludesTaxGlobal(boolean priceIncludesTaxGlobal) {
+		this.priceIncludesTaxGlobal = priceIncludesTaxGlobal;
+	}
+
+	public double getTaxPercentGlobal() {
+		return taxPercentGlobal;
+	}
+
+	public void setTaxPercentGlobal(double taxPercentGlobal) {
+		this.taxPercentGlobal = taxPercentGlobal;
+	}
+
 	/**
 	 * Create an excel file from customer list
 	 * 
@@ -208,6 +227,10 @@ public class ExcelToInvoices {
 			case 5:
 				il.setQtyEntered(1);
 				il.setPriceActual(Double.parseDouble(Long.toString(Math.round(cell.getNumericCellValue()))));
+				if (priceIncludesTaxGlobal) {
+					il.setTaxIncludedInPrice(true);
+					il.setTaxPercent(taxPercentGlobal);
+				}
 				break;
 				
 			case 6:
@@ -366,6 +389,10 @@ public class ExcelToInvoices {
 				
 			case 4:
 				il.setPriceActual(Math.round(cell.getNumericCellValue()*100.0)/100.0);
+				if (priceIncludesTaxGlobal) {
+					il.setTaxIncludedInPrice(true);
+					il.setTaxPercent(taxPercentGlobal);
+				}
 				break;
 				
 			case 5:
@@ -441,20 +468,17 @@ public class ExcelToInvoices {
 	 */
 	public InvoiceList createInvoiceListFromFile(String fileName, List<String> additional) throws Exception {
 		
-
-		ExcelToInvoices billing = new ExcelToInvoices();
-		
 		// Try to find file
 		File f = new File(fileName);
 		if (!f.exists()) {
 			// Try to look in classpath
-			URL url = billing.getClass().getResource(fileName);
+			URL url = this.getClass().getResource(fileName);
 			if (url!=null) {
 				fileName = url.getFile();
 			}
 		}
 		
-		List<Invoice<?>> invoices = billing.parseExcelList(fileName);
+		List<Invoice<?>> invoices = parseExcelList(fileName);
 
 		if (additional!=null && additional.size()>0) {
 			// See if additional billing lines should be added
@@ -466,7 +490,7 @@ public class ExcelToInvoices {
 			
 			for (String sn : additional) {
 			
-				billing.parseAdditionalBilling(invoiceMap, sn);
+				parseAdditionalBilling(invoiceMap, sn);
 				
 			}
 			
