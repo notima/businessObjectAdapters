@@ -230,6 +230,7 @@ public class ExcelToInvoices {
 				if (priceIncludesTaxGlobal) {
 					il.setTaxIncludedInPrice(true);
 					il.setTaxPercent(taxPercentGlobal);
+					il.calculateLineTotalIncTax(2);
 				}
 				break;
 				
@@ -289,6 +290,8 @@ public class ExcelToInvoices {
 		}
 		bp.setAddressOfficial(loc);
 		invoice.setBusinessPartner(bp);
+		if (priceIncludesTaxGlobal)
+			invoice.setShowPricesIncludingVAT(true);
 		
 		return invoice;
 	}
@@ -392,6 +395,7 @@ public class ExcelToInvoices {
 				if (priceIncludesTaxGlobal) {
 					il.setTaxIncludedInPrice(true);
 					il.setTaxPercent(taxPercentGlobal);
+					il.calculateLineTotalIncTax(2);
 				}
 				break;
 				
