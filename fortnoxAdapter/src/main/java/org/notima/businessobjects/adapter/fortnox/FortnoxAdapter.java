@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.FortnoxScopeException;
 import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
@@ -186,12 +187,16 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		currentFortnoxCredentials = new LegacyTokenCredentialsProvider(accessToken, clientSecret);
 		
 		fortnoxClient = new FortnoxClient3(currentFortnoxCredentials);
-		CompanySetting cs = fortnoxClient.getCompanySetting();
-		currentOrgNo = cs.getOrganizationNumber();
 		FortnoxClientInfo fci = new FortnoxClientInfo();
+		try {
+			CompanySetting cs = fortnoxClient.getCompanySetting();
+			currentOrgNo = cs.getOrganizationNumber();
+			fci.setCompanySetting(cs);
+		} catch (FortnoxScopeException ee) {
+			logger.warn(ee.getMessage());
+		}
 		fci.setAccessToken(accessToken);
 		fci.setClientSecret(clientSecret);
-		fci.setCompanySetting(cs);
 		currentFortnoxTenant = fci;
 		
 	}
@@ -959,6 +964,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dst.setDueDate(FortnoxClient3.s_dfmt.parse(src.getDueDate()));
 		dst.setOcr(src.getOCR());
 		dst.setNetTotal(src.getNet());
+		dst.setVatTotal(src.getTotalVAT());
 		dst.setPoDocumentNo(src.getExternalInvoiceReference2());
 		dst.setPaymentTermKey(src.getTermsOfPayment());
 		
