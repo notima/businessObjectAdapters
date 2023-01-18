@@ -1,7 +1,6 @@
 package org.notima.fortnox.command;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -14,15 +13,10 @@ import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.FinancialYearSubset;
 import org.notima.fortnox.command.table.RevenueAccountMapTable;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "show-revenue-account-map", description = "Show revenue account map for given client.")
 @Service
-public class ShowRevenueAccountMap extends FortnoxCommand implements Action {
-
-	@SuppressWarnings("rawtypes")
-	@Reference
-	private List<BusinessObjectFactory> bofs;
+public class ShowRevenueAccountMap extends FortnoxCommand2 implements Action {
 	
 	@Reference 
 	Session sess;
@@ -40,7 +34,7 @@ public class ShowRevenueAccountMap extends FortnoxCommand implements Action {
 	@Override
 	public Object execute() throws Exception {
 		
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		FortnoxClient3 fc = getFortnoxClient(orgNo);
 		if (fc == null) {
 			sess.getConsole().println("Can't get client for " + orgNo);
 			return null;

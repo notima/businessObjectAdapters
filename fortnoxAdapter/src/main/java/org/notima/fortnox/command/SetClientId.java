@@ -1,7 +1,5 @@
 package org.notima.fortnox.command;
 
-import java.util.List;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -12,15 +10,10 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
 import org.notima.businessobjects.adapter.fortnox.exception.InsufficientOrWrongInputException;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "set-fortnox-clientId", description = "Set client id")
 @Service
-public class SetClientId extends FortnoxCommand implements Action {
-
-	@SuppressWarnings("rawtypes")
-	@Reference
-	private List<BusinessObjectFactory> bofs;
+public class SetClientId extends FortnoxCommand2 implements Action {
 	
 	@Reference
 	private FortnoxClientManager 		fortnoxClientManager;
@@ -79,7 +72,7 @@ public class SetClientId extends FortnoxCommand implements Action {
 	
 	private void getFortnoxClient() throws InsufficientOrWrongInputException, Exception {
 
-		fc = getFortnoxClient(bofs, orgNo);
+		fc = getFortnoxClient(orgNo);
 		if (fc == null) {
 			throw new InsufficientOrWrongInputException("Can't get client for " + orgNo);
 		}

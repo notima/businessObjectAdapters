@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -19,31 +20,23 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
-import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
-import org.notima.businessobjects.adapter.tools.FactorySelector;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "purge-fortnox-credentials", description = "Purges old credentials for client")
 @Service
-public class PurgeCredentials extends FortnoxCommand implements Action {
+public class PurgeCredentials extends FortnoxCommand2 implements Action {
 
-	@SuppressWarnings("rawtypes")
-	@Reference
-	private List<BusinessObjectFactory> bofs;
-	
 	@Reference 
 	Session sess;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)	
 	private String orgNo = "";
 
 	@Option(name = "--untildate", description = "Purge at maximum until this date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String	untilDateStr;
 	
 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	
-	@SuppressWarnings("rawtypes")
-	private BusinessObjectFactory bf;	
 
 	private Date		   untilDate = null;
 	private long		   untilRefresh = 0;
@@ -54,10 +47,8 @@ public class PurgeCredentials extends FortnoxCommand implements Action {
 	
 	@Override
 	public Object execute() throws Exception {
-
-		FactorySelector selector = new FactorySelector(bofs);
 		
-		bf = selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
+		bf = this.getBusinessObjectFactoryForOrgNo(orgNo);
 
 		if (bf==null) {
 			sess.getConsole().println("No tenant found with orgNo [" + orgNo + "]");

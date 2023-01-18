@@ -2,11 +2,11 @@ package org.notima.fortnox.command;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -16,16 +16,12 @@ import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoicePayment;
 import org.notima.api.fortnox.entities3.ModeOfPayment;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "pay-fortnox-invoice", description = "Pays a specific invoice")
 @Service
-public class PayInvoice extends FortnoxCommand implements Action {
+public class PayInvoice extends FortnoxCommand2 implements Action {
 
-	@SuppressWarnings("rawtypes")
-	@Reference
-	private List<BusinessObjectFactory> bofs;
-	
 	@Reference 
 	Session sess;
 
@@ -46,6 +42,7 @@ public class PayInvoice extends FortnoxCommand implements Action {
 	
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)	
 	private String orgNo = "";
 
 	@Argument(index = 1, name = "invoiceNo", description ="The invoice no", required = true, multiValued = false)
@@ -57,7 +54,7 @@ public class PayInvoice extends FortnoxCommand implements Action {
 	@Override
 	public Object execute() throws Exception {
 		
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		FortnoxClient3 fc = getFortnoxClient(orgNo);
 		if (fc == null) {
 			sess.getConsole().println("Can't get client for " + orgNo);
 			return null;

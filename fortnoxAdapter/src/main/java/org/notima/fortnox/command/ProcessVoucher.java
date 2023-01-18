@@ -1,7 +1,6 @@
 package org.notima.fortnox.command;
 
 import java.io.File;
-import java.util.List;
 
 import javax.xml.bind.JAXB;
 
@@ -15,21 +14,17 @@ import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
-import org.notima.businessobjects.adapter.tools.FactorySelector;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "process-fortnox-voucher", description = "Process a Fortnox voucher")
 @Service
-@SuppressWarnings("rawtypes")
-public class ProcessVoucher implements Action {
+public class ProcessVoucher extends FortnoxCommand2 implements Action {
 
 	@Reference 
 	Session sess;
 	
-	@Reference
-	private List<BusinessObjectFactory> bofs;
-	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client to send the voucher", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)	
 	String orgNo = "";
 	
 	@Argument(index = 1, name = "voucherFile", description ="The voucher file to process (in Fortnox XML-format)", required = true, multiValued = false)
@@ -39,10 +34,8 @@ public class ProcessVoucher implements Action {
 	
 	@Override
 	public Object execute() throws Exception {
-
-		FactorySelector selector = new FactorySelector(bofs);
 		
-		BusinessObjectFactory bf = selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
+		bf = this.getBusinessObjectFactoryForOrgNo(orgNo);
 		
 		if (bf==null) {
 			sess.getConsole().println("No tenant found with orgNo [" + orgNo + "]");

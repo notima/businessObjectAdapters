@@ -2,11 +2,11 @@ package org.notima.fortnox.command;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -14,23 +14,20 @@ import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherRow;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "create-fortnox-voucher", description = "Create a Fortnox voucher")
 @Service
-@SuppressWarnings("rawtypes")
-public class CreateVoucher extends FortnoxCommand implements Action {
+public class CreateVoucher extends FortnoxCommand2 implements Action {
 
 	@Reference 
 	Session sess;
-	
-	@Reference
-	private List<BusinessObjectFactory> bofs;
 
 	@Option(name = "--date", description = "Accounting date (unless today)", required = false, multiValued = false)
 	private String dateStr;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)
 	private String orgNo = "";
 	
 	@Argument(index = 1, name = "series", description ="The series", required = true, multiValued = false)
@@ -52,7 +49,7 @@ public class CreateVoucher extends FortnoxCommand implements Action {
 	@Override
 	public Object execute() throws Exception {
 
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		FortnoxClient3 fc = getFortnoxClient(orgNo);
 		if (fc == null) {
 			sess.getConsole().println("Can't get client for " + orgNo);
 			return null;

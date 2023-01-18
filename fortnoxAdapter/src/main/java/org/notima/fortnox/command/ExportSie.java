@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -17,15 +16,11 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.api.fortnox.FortnoxClient3;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "export-sie", description = "Exports SIE-file for given client")
 @Service
-public class ExportSie extends FortnoxCommand implements Action {
-
-	@SuppressWarnings("rawtypes")
-	@Reference
-	private List<BusinessObjectFactory> bofs;
+public class ExportSie extends FortnoxCommand2 implements Action {
 	
 	@Reference 
 	Session sess;
@@ -42,12 +37,13 @@ public class ExportSie extends FortnoxCommand implements Action {
 	
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)	
 	private String orgNo = "";
 
 	@Override
 	public Object execute() throws Exception {
 		
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		FortnoxClient3 fc = getFortnoxClient(orgNo);
 		if (fc == null) {
 			sess.getConsole().println("Can't get client for " + orgNo);
 			return null;

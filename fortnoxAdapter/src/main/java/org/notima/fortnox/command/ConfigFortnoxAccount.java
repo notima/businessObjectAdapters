@@ -14,11 +14,12 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.entities3.Account;
 import org.notima.fortnox.command.completer.ConfigFortnoxAccountCompleter;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "config-fortnox-account", description = "Configure an account in the chart of accounts.")
 @Service
-public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
+public class ConfigFortnoxAccount extends FortnoxCommand2 implements Action {
 
 	public static final String CONF_ENABLED = "enabled";
 	public static final String CONF_NAME = "name";
@@ -33,10 +34,6 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 	};
 	
 	
-	@SuppressWarnings("rawtypes")
-	@Reference
-	private List<BusinessObjectFactory> bofs;
-	
 	@Reference 
 	Session sess;
 	
@@ -44,6 +41,7 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 	private Integer yearId;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)
 	private String orgNo = "";
 
 	@Argument(index = 1, name = "accountNo", description ="The account number to configure.", required = true, multiValued = false)
@@ -81,7 +79,7 @@ public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 		
 		try {
 		
-			FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+			FortnoxClient3 fc = getFortnoxClient(orgNo);
 			if (fc == null) {
 				sess.getConsole().println("Can't get client for " + orgNo);
 				return null;
