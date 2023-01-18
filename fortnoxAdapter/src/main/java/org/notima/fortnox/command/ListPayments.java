@@ -21,7 +21,7 @@ import org.notima.fortnox.command.table.InvoicePaymentHeaderTable;
 
 @Command(scope = "fortnox", name = "list-fortnox-payments", description = "Lists open payments in Fortnox")
 @Service
-public class ListPayments extends FortnoxCommand2 implements Action {
+public class ListPayments extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

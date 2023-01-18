@@ -13,7 +13,7 @@ import org.notima.businessobjects.adapter.fortnox.exception.InsufficientOrWrongI
 
 @Command(scope = "fortnox", name = "set-fortnox-clientId", description = "Set client id")
 @Service
-public class SetClientId extends FortnoxCommand2 implements Action {
+public class SetClientId extends FortnoxCommand implements Action {
 	
 	@Reference
 	private FortnoxClientManager 		fortnoxClientManager;

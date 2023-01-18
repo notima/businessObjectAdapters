@@ -8,7 +8,7 @@ import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.businessobjects.adapter.tools.FactorySelector;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
-public class FortnoxCommand2 {
+public class FortnoxCommand {
 
 	@Reference
 	protected List<BusinessObjectFactory> bofs;

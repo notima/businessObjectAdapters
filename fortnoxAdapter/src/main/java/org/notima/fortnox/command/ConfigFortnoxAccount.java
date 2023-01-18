@@ -19,7 +19,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "config-fortnox-account", description = "Configure an account in the chart of accounts.")
 @Service
-public class ConfigFortnoxAccount extends FortnoxCommand2 implements Action {
+public class ConfigFortnoxAccount extends FortnoxCommand implements Action {
 
 	public static final String CONF_ENABLED = "enabled";
 	public static final String CONF_NAME = "name";

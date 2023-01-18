@@ -20,7 +20,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "export-sie", description = "Exports SIE-file for given client")
 @Service
-public class ExportSie extends FortnoxCommand2 implements Action {
+public class ExportSie extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

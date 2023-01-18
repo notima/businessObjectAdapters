@@ -14,7 +14,7 @@ import org.notima.fortnox.command.table.CostCenterTable;
 
 @Command(scope = "fortnox", name = "show-fortnox-cost-centers", description = "List cost centers")
 @Service
-public class ShowCostCenters extends FortnoxCommand2 implements Action {
+public class ShowCostCenters extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

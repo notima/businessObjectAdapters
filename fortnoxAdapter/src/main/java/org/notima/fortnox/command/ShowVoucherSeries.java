@@ -15,7 +15,7 @@ import org.notima.fortnox.command.table.VoucherSeriesTable;
 
 @Command(scope = "fortnox", name = "show-fortnox-voucher-series", description = "List voucher series")
 @Service
-public class ShowVoucherSeries extends FortnoxCommand2 implements Action {
+public class ShowVoucherSeries extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

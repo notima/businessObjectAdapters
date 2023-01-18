@@ -16,7 +16,7 @@ import org.notima.fortnox.command.table.RevenueAccountMapTable;
 
 @Command(scope = "fortnox", name = "show-revenue-account-map", description = "Show revenue account map for given client.")
 @Service
-public class ShowRevenueAccountMap extends FortnoxCommand2 implements Action {
+public class ShowRevenueAccountMap extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

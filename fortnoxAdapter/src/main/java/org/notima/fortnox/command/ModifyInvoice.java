@@ -15,7 +15,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "modify-fortnox-invoice", description = "Modify a specific invoice")
 @Service
-public class ModifyInvoice extends FortnoxCommand2 implements Action  {
+public class ModifyInvoice extends FortnoxCommand implements Action  {
 	
 	@Reference 
 	Session session;

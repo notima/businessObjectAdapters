@@ -20,7 +20,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "pay-fortnox-invoice", description = "Pays a specific invoice")
 @Service
-public class PayInvoice extends FortnoxCommand2 implements Action {
+public class PayInvoice extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

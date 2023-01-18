@@ -14,7 +14,7 @@ import org.notima.fortnox.command.table.FinancialYearTable;
 
 @Command(scope = "fortnox", name = "show-fortnox-financial-years", description = "List financial years")
 @Service
-public class ShowFinancialYears extends FortnoxCommand2 implements Action {
+public class ShowFinancialYears extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

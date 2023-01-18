@@ -16,7 +16,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "config-fortnox-mode-of-payment", description = "Configure modes of payment.")
 @Service
-public class ConfigFortnoxModeOfPayment extends FortnoxCommand2 implements Action {
+public class ConfigFortnoxModeOfPayment extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

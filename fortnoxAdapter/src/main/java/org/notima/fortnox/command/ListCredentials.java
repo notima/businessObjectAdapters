@@ -21,7 +21,7 @@ import org.notima.fortnox.command.table.CredentialTable;
 
 @Command(scope = "fortnox", name = "list-fortnox-credentials", description = "List credentials for client")
 @Service
-public class ListCredentials extends FortnoxCommand2 implements Action {
+public class ListCredentials extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

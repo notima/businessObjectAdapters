@@ -27,7 +27,7 @@ import org.notima.fortnox.command.table.InvoiceHeaderTable;
 
 @Command(scope = "fortnox", name = "list-fortnox-invoices", description = "Lists invoices in Fortnox")
 @Service
-public class ListInvoices extends FortnoxCommand2 implements Action {
+public class ListInvoices extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

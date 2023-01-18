@@ -18,7 +18,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "create-fortnox-voucher", description = "Create a Fortnox voucher")
 @Service
-public class CreateVoucher extends FortnoxCommand2 implements Action {
+public class CreateVoucher extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

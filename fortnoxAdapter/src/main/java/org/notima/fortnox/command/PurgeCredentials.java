@@ -24,7 +24,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "purge-fortnox-credentials", description = "Purges old credentials for client")
 @Service
-public class PurgeCredentials extends FortnoxCommand2 implements Action {
+public class PurgeCredentials extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

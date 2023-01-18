@@ -17,7 +17,7 @@ import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
 
 @Command(scope = "fortnox", name = "show-fortnox-support-info", description = "Show support info for client")
 @Service
-public class ShowSupportInfo extends FortnoxCommand2 implements Action {
+public class ShowSupportInfo extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

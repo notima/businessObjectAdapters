@@ -15,7 +15,7 @@ import org.notima.fortnox.command.table.InvoiceLineTable;
 
 @Command(scope = "fortnox", name = "show-fortnox-invoice", description = "Show a specific invoice")
 @Service
-public class ShowInvoice extends FortnoxCommand2 implements Action {
+public class ShowInvoice extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

@@ -20,7 +20,7 @@ import org.notima.fortnox.command.table.CustomerHeaderTable;
 
 @Command(scope = "fortnox", name = "list-fortnox-customers", description = "Lists customers Fortnox")
 @Service
-public class ListCustomers extends FortnoxCommand2 implements Action {
+public class ListCustomers extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

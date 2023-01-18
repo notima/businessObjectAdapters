@@ -19,7 +19,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "attach-file-to-voucher", description = "Attach a file to a voucher.")
 @Service
-public class AttachFileToVoucher extends FortnoxCommand2 implements Action {
+public class AttachFileToVoucher extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

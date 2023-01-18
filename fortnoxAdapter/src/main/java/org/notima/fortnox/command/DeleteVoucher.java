@@ -18,7 +18,7 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "delete-fortnox-voucher", description = "Delete voucher in Fortnox")
 @Service
-public class DeleteVoucher extends FortnoxCommand2 implements Action {
+public class DeleteVoucher extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;

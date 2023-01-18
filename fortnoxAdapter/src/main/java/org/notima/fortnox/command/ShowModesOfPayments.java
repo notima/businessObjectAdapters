@@ -14,7 +14,7 @@ import org.notima.fortnox.command.table.ModesOfPaymentsTable;
 
 @Command(scope = "fortnox", name = "show-fortnox-modes-of-payments", description = "Lists modes of payments")
 @Service
-public class ShowModesOfPayments extends FortnoxCommand2 implements Action {
+public class ShowModesOfPayments extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

@@ -18,7 +18,7 @@ import org.notima.fortnox.command.table.PreDefinedAccountTable;
 
 @Command(scope = "fortnox", name = "show-fortnox-predefined-accounts", description = "List predefined accounts for given client.")
 @Service
-public class ShowPreDefinedAccounts extends FortnoxCommand2 implements Action {
+public class ShowPreDefinedAccounts extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;

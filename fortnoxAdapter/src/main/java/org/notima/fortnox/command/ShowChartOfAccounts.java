@@ -22,7 +22,7 @@ import org.notima.generic.businessobjects.BasicAccountingReportProvider;
 
 @Command(scope = "fortnox", name = "show-fortnox-coa", description = "List chart of accounts for given client.")
 @Service
-public class ShowChartOfAccounts extends FortnoxCommand2 implements Action {
+public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 	
 	@Reference 
 	Session sess;
