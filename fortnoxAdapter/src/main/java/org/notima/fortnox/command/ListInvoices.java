@@ -1,5 +1,6 @@
 package org.notima.fortnox.command;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -15,6 +16,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
@@ -53,6 +55,11 @@ public class ListInvoices extends FortnoxCommand2 implements Action {
 	@Completion(FortnoxTenantCompleter.class)
 	private String orgNo = "";
 
+	private Date fromDate = null, untilDate = null;
+
+	private Map<Object, InvoiceInterface> invoicesMap = null;
+	private List<InvoiceInterface> invoices; 
+	
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -65,18 +72,9 @@ public class ListInvoices extends FortnoxCommand2 implements Action {
 			return null;
 		}
 
-		Date fromDate = null, untilDate = null;
+		parseDates();
 		
-		if (fromDateStr!=null) {
-			fromDate = FortnoxClient3.s_dfmt.parse(fromDateStr);
-		}
-		if (untilDateStr!=null) {
-			untilDate = FortnoxClient3.s_dfmt.parse(untilDateStr);
-		}
-		
-		Map<Object, InvoiceInterface> invoicesMap = null;
-		
-		List<InvoiceInterface> invoices = new ArrayList<InvoiceInterface>();
+		invoices = new ArrayList<InvoiceInterface>();
 		
 		if (!all) {
 			if (unbooked) {
@@ -95,34 +93,8 @@ public class ListInvoices extends FortnoxCommand2 implements Action {
 			
 		}
 		
-		if (invoicesMap!=null) {
-			
-			Collection<InvoiceInterface> invoiceObjects = invoicesMap.values();
-			
-			Invoice inv = null;
-			InvoiceSubset invs = null;
-			for (InvoiceInterface oo : invoiceObjects) {
-				if (oo instanceof Invoice) {
-					inv = (Invoice)oo;
-					if (!inv.isCancelled() || showCancelled) {
-						invoices.add(oo);
-					}
-				}
-				if (oo instanceof InvoiceSubset) {
-					invs = (InvoiceSubset)oo;
-					if (!invs.isCancelled() || showCancelled) {
-						if (enrich) {
-							inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)oo).getDocumentNumber());
-							invoices.add(inv);
-						} else {
-							invoices.add(oo);
-						}
-					}
-				}
-				
-			}
-			
-		}
+		checkCancelledAndDateRange();
+		enrichIfNecessary();
 		
 		if (invoices.size()>0) {
 
@@ -136,5 +108,67 @@ public class ListInvoices extends FortnoxCommand2 implements Action {
 		return null;
 	}
 	
+	private void checkCancelledAndDateRange() throws Exception {
+		
+		if (invoicesMap!=null) {
+			
+			Collection<InvoiceInterface> invoiceObjects = invoicesMap.values();
+			
+			Invoice inv = null;
+			InvoiceSubset invs = null;
+			for (InvoiceInterface oo : invoiceObjects) {
+				
+				// Check date filter
+				if (!FortnoxUtil.isInDateRange(oo.getInvoiceDate(), fromDate, untilDate))
+					continue;
+				
+				if (oo instanceof Invoice) {
+					inv = (Invoice)oo;
+					if (!inv.isCancelled() || showCancelled) {
+						invoices.add(oo);
+					}
+				}
+				if (oo instanceof InvoiceSubset) {
+					invs = (InvoiceSubset)oo;
+					if (!invs.isCancelled() || showCancelled) {
+						invoices.add(oo);
+					}
+				}
+				
+			}
+			
+		}
+	
+	}
+
+	private void enrichIfNecessary() throws Exception {
+		if (!enrich) return;
+		List<InvoiceInterface> targetList = new ArrayList<InvoiceInterface>();
+		Invoice inv;
+		for (InvoiceInterface oo : invoices) {
+			
+			if (oo instanceof InvoiceSubset) {
+				inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)oo).getDocumentNumber());
+				targetList.add(inv);
+			} else {
+				targetList.add(oo);
+			}
+			
+		}
+		invoices = targetList;
+	}
+
+	
+	private void parseDates() throws ParseException {
+		
+		if (fromDateStr!=null) {
+			fromDate = FortnoxClient3.s_dfmt.parse(fromDateStr);
+		}
+		if (untilDateStr!=null) {
+			untilDate = FortnoxClient3.s_dfmt.parse(untilDateStr);
+		}
+		
+	}
+
 	
 }
