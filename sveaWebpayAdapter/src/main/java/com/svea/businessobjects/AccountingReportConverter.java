@@ -42,6 +42,9 @@ public class AccountingReportConverter {
 			case FeeDetail.ACCTTYPE_DEPOSIT:
 				avl.setAcctType(AccountingType.ASSET_DEPOSIT);
 				break;
+			case FeeDetail.REVENUE_INTEREST:
+				avl.setAcctType(AccountingType.INTEREST_INCOME);
+				break;
 			default:
 				avl.setAcctType(AccountingType.OTHER_EXPENSES_SALES);
 		
@@ -110,7 +113,7 @@ public class AccountingReportConverter {
 			if (src.getPayouts()!=null) {
 				for (PayoutLine pl : src.getPayouts()) {
 					
-					if (pl.getFeeAmount()!=0) {
+					if (pl.getFeeAmount()!=0 || (pl.getFeeSpecification()!=null && pl.getFeeSpecification().size()>1)) {
 						
 						if (pl.getFeeSpecification()==null || pl.getFeeSpecification().isEmpty()) {
 							avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getFeeAmount()), AccountingType.OTHER_EXPENSES_SALES);
