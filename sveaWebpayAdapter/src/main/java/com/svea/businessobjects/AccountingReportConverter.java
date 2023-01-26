@@ -82,6 +82,8 @@ public class AccountingReportConverter {
 			dst.setProjectCode(src.getProjectCode());
 			
 			dst.setAcctDate(src.getAcctDate());
+			dst.setSourceCurrency(src.getCurrency());
+			
 			result.add(dst);
 
 			if (src.getRevenues()!=null) {
