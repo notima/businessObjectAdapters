@@ -14,8 +14,6 @@ import javax.xml.bind.JAXB;
 import org.notima.api.fortnox.Fortnox4JSettings;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
-import org.notima.api.fortnox.clients.FortnoxClientInfo;
-import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Currency;
 import org.notima.api.fortnox.entities3.Customer;
@@ -89,7 +87,6 @@ public class FortnoxExtendedClient {
 	public static String DEFAULT_NEW_SUPPLIER_NAME = "Supplier created by Fortnox4J"; 
 	
 	// Cache functions
-	private FortnoxClientManager clientManager;
 	private String clientOrgNo;
 	private String lastClientOrgNo;
 	private FortnoxAdapter 	bof;
@@ -100,7 +97,6 @@ public class FortnoxExtendedClient {
 	public FortnoxExtendedClient(FortnoxAdapter fortnoxAdapter) throws Exception {
 		bof = fortnoxAdapter;
 		clientOrgNo = bof.getCurrentTenant().getTaxId();
-		FortnoxClientInfo finfo = bof.getClientManager().getClientInfoByOrgNo(clientOrgNo);
 		currencies = new TreeMap<String,Currency>();
 		PreDefinedAccount pdef = getCurrentFortnoxClient().getPreDefinedAccount(FortnoxClient3.ACCT_ROUNDING);
 		roundingAcct = pdef.getAccount();
@@ -159,7 +155,6 @@ public class FortnoxExtendedClient {
 		}
 		
 		this.clientOrgNo = orgNo;
-		this.clientManager = bof.getClientManager();
 		
 		return bof;
 	}
@@ -311,10 +306,10 @@ public class FortnoxExtendedClient {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<org.notima.generic.businessobjects.Invoice> getOverdueInvoices(
+	public List<org.notima.generic.businessobjects.Invoice<?>> getOverdueInvoices(
 			) throws Exception {
 		
-		List<org.notima.generic.businessobjects.Invoice> result = new ArrayList<org.notima.generic.businessobjects.Invoice>();
+		List<org.notima.generic.businessobjects.Invoice<?>> result = new ArrayList<org.notima.generic.businessobjects.Invoice<?>>();
 		
 		List<org.notima.api.fortnox.entities3.Invoice> finvoices = getFortnoxInvoices(
 				FortnoxClient3.FILTER_UNPAID_OVERDUE);
@@ -657,7 +652,7 @@ public class FortnoxExtendedClient {
 			Invoice invoice,
 			boolean bookkeepPayment,
 			boolean includeWriteOffs,
-			Payment payment,
+			Payment<?> payment,
 			boolean dryRun) throws Exception {
 		
 		// TODO: Use FortnoxClient3.payCustomerInvoice to avoid duplicating code
@@ -790,7 +785,9 @@ public class FortnoxExtendedClient {
 			
 		}
 		
-		JAXB.marshal(voucher, System.out);
+		if (log.isDebugEnabled()) {
+			JAXB.marshal(voucher, System.out);
+		}
 
 		voucher = bof.getClient().setVoucher(voucher);
 		
@@ -879,7 +876,7 @@ public class FortnoxExtendedClient {
 		
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes"})
 	public org.notima.api.fortnox.entities3.Customer persistCustomerFromCanonical(
 			org.notima.generic.businessobjects.BusinessPartner bp 
 			) throws Exception {
@@ -930,7 +927,7 @@ public class FortnoxExtendedClient {
 		}
 		if (result==null) {
 			// Customer doesn't exist
-			result = bof.getClient().setCustomer(bof.convertFromBusinessPartner(bp));
+			result = bof.getClient().setCustomer(FortnoxAdapter.convertFromBusinessPartner(bp));
 		}
 
 		return result;
