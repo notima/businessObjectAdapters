@@ -13,12 +13,12 @@ public class FortnoxCommand {
 	@Reference
 	protected List<BusinessObjectFactory> bofs;
 	
-	protected BusinessObjectFactory bf;
+	protected FortnoxAdapter bf;
 	
-	protected BusinessObjectFactory getBusinessObjectFactoryForOrgNo(String orgNo) throws Exception {
+	protected FortnoxAdapter getBusinessObjectFactoryForOrgNo(String orgNo) throws Exception {
 		
 		FactorySelector selector = new FactorySelector(bofs);
-		bf = selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
+		bf = (FortnoxAdapter)selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
 		
 		return bf;
 	}

@@ -57,7 +57,7 @@ public class ListInvoices extends FortnoxCommand implements Action {
 
 	private Date fromDate = null, untilDate = null;
 
-	private Map<Object, InvoiceInterface> invoicesMap = null;
+	private Map<Object, Object> invoicesMap = null;
 	private List<InvoiceInterface> invoices; 
 	
 	
@@ -112,7 +112,13 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		
 		if (invoicesMap!=null) {
 			
-			Collection<InvoiceInterface> invoiceObjects = invoicesMap.values();
+			Collection<InvoiceInterface> invoiceObjects = new ArrayList<InvoiceInterface>();
+			
+			for (Object o :	invoicesMap.values()) {
+				if (o instanceof InvoiceInterface) {
+					invoiceObjects.add((InvoiceInterface)o);
+				}
+			}
 			
 			Invoice inv = null;
 			InvoiceSubset invs = null;
