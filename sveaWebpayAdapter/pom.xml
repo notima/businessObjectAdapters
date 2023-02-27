@@ -125,12 +125,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.svea</groupId>
-			<artifactId>webpayadmin-reports</artifactId>
-			<version>${webpayadminreports.version}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.notima</groupId>
 			<artifactId>swish4j</artifactId>
 			<version>${swish4j.version}</version>

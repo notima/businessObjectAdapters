@@ -45,6 +45,7 @@
 				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>fortnoxClients.xml</exclude>
+					<exclude>*.json</exclude>
 					<exclude>log4j.xml</exclude>
 				</excludes>
 			</resource>

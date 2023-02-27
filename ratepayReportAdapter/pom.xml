@@ -38,7 +38,7 @@
 
 		<resources>
 			<resource>
-				<directory>src/test/resources/reports</directory>
+				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>*</exclude>
 				</excludes>
@@ -46,8 +46,13 @@
 					<include>ratepay-example.properties</include>
 				</includes>
 			</resource>
+			<resource>
+				<directory>src/test/resources/reports</directory>
+				<excludes>
+					<exclude>*</exclude>
+				</excludes>
+			</resource>
 		</resources>
-
 
 		<plugins>
 			
