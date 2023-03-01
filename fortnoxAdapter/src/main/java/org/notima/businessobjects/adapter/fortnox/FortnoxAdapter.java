@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.FortnoxInvoiceException;
 import org.notima.api.fortnox.FortnoxScopeException;
 import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
@@ -570,8 +571,12 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param invoice	The invoice to persist.
 	 * @return
 	 * @throws Exception
+	 * @throws FortnoxInvoiceException
+	 * @throws FortnoxScopeException
 	 */
-	protected org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> persistCanonicalInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) throws Exception {
+	protected org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> 
+		persistCanonicalInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) 
+				throws Exception, FortnoxInvoiceException, FortnoxScopeException {
 
 		// Check that the business partner exists
 		Customer cust = fortnoxClient.getCustomerByCustNo(invoice.getBusinessPartner().getIdentityNo());
