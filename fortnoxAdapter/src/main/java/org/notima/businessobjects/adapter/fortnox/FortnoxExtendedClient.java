@@ -14,6 +14,8 @@ import javax.xml.bind.JAXB;
 import org.notima.api.fortnox.Fortnox4JSettings;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
+import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.FortnoxScopeException;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Currency;
 import org.notima.api.fortnox.entities3.Customer;
@@ -767,8 +769,10 @@ public class FortnoxExtendedClient {
 	 * @param rate
 	 * @return
 	 * @throws Exception
+	 * @throws FortnoxException
+	 * @throws FortnoxScopeException
 	 */
-	public Voucher accountFortnoxVoucher(Voucher voucher, String srcCurrency, double rate) throws Exception {
+	public Voucher accountFortnoxVoucher(Voucher voucher, String srcCurrency, double rate) throws FortnoxException, FortnoxScopeException, Exception {
 		
 		if (srcCurrency!=null && !srcCurrency.equalsIgnoreCase(FortnoxClient3.DEFAULT_ACCOUNTING_CURRENCY)) {
 			
