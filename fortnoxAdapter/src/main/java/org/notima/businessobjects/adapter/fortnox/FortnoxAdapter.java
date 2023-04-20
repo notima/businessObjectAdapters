@@ -877,7 +877,6 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		// Add invoice row
 		InvoiceRows rows;
-		InvoiceRow row;
 		rows = new org.notima.api.fortnox.entities3.InvoiceRows();
 		dst.setInvoiceRows(rows);		
 		List<InvoiceRow> rowList = new ArrayList<InvoiceRow>();
@@ -889,43 +888,12 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				dst.setRoundOff(il.getPriceActual());
 				continue;
 			}
-			
-			row = new InvoiceRow();
-			row.setArticleNumber(il.getProductKey());
-			row.setDescription(il.getName()!=null ? il.getName() : il.getDescription());
-			row.setDeliveredQuantity((double)il.getQtyEntered());
-			if (!row.hasDescription()) {
-				// Empty description if missing
-				row.setDescription(".");
-			}
-			
-			// Try to set default account number if not set
-			if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
 
-				String accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
-				
-				row.setAccountNumber(accountNo);
-					
-			} else {
-				row.setAccountNumber(il.getAccountNo());
-			}
+			addCanonicalInvoiceLineToFortnoxInvoiceRow(src, il, rowList);
 			
-			if (il.getPriceActual()!=null) {
-				if (il.isPricesIncludeVAT() && !src.isShowPricesIncludingVAT()) {
-					row.setPrice((double)il.getPriceActual()-(il.getTaxAmount()/il.getQtyEntered()));
-					row.setPrice((Math.round(row.getPrice()*100)/100.0));
-				}
-				else
-					row.setPrice((double)il.getPriceActual());
-				row.setVAT((double)il.getTaxPercent());
-			} else {
-				row.setPrice(null);
-				row.setVAT(null);
-			}
-			row.setUnit(il.getUOM());
-			rowList.add(row);
 		}
 
+		
 		if (src.isShowPricesIncludingVAT()) {
 			dst.setVATIncluded(Boolean.valueOf(true));
 		} else {
@@ -935,6 +903,57 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dst.setNotCompleted(Boolean.FALSE);
 		
 		return dst;
+		
+	}
+
+	/**
+	 * 
+	 * @param src					The invoice header (source)
+	 * @param il					The invoice line to be added
+	 * @param fortnoxDstRowList		Initialized Fortnox invoice lines.
+	 * @throws Exception
+	 */
+	public void addCanonicalInvoiceLineToFortnoxInvoiceRow(
+			org.notima.generic.businessobjects.Invoice<?> src, 
+			InvoiceLine il, 
+			List<InvoiceRow> fortnoxDstRowList) throws Exception {
+		
+		InvoiceRow row;
+
+		row = new InvoiceRow();
+		row.setArticleNumber(il.getProductKey());
+		row.setDescription(il.getName()!=null ? il.getName() : il.getDescription());
+		row.setDeliveredQuantity((double)il.getQtyEntered());
+		if (!row.hasDescription()) {
+			// Empty description if missing
+			row.setDescription(".");
+		}
+		
+		// Try to set default account number if not set
+		if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
+
+			String accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
+			
+			row.setAccountNumber(accountNo);
+				
+		} else {
+			row.setAccountNumber(il.getAccountNo());
+		}
+		
+		if (il.getPriceActual()!=null) {
+			if (il.isPricesIncludeVAT() && !src.isShowPricesIncludingVAT()) {
+				row.setPrice((double)il.getPriceActual()-(il.getTaxAmount()/il.getQtyEntered()));
+				row.setPrice((Math.round(row.getPrice()*100)/100.0));
+			}
+			else
+				row.setPrice((double)il.getPriceActual());
+			row.setVAT((double)il.getTaxPercent());
+		} else {
+			row.setPrice(null);
+			row.setVAT(null);
+		}
+		row.setUnit(il.getUOM());
+		fortnoxDstRowList.add(row);
 		
 	}
 	
