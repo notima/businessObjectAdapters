@@ -71,6 +71,8 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 		if (o==null) return null;
 		Order<org.notima.api.webpay.pmtapi.CheckoutOrder> result = SveaPmtAdminConverter.convert(o);
 		result.setNativeOrder(o);
+		// Add merchantId as attribute
+		result.addAttribute("merchantId", o.getMerchantId());
 		return result;
 	}
 
