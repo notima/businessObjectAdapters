@@ -2,6 +2,7 @@ package org.notima.fortnox.command;
 
 import java.util.List;
 
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.businessobjects.adapter.tools.FactorySelector;
@@ -9,6 +10,19 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 public class FortnoxCommand {
 
+	@Reference
+	protected List<BusinessObjectFactory> bofs;
+	
+	protected FortnoxAdapter bf;
+	
+	protected FortnoxAdapter getBusinessObjectFactoryForOrgNo(String orgNo) throws Exception {
+		
+		FactorySelector selector = new FactorySelector(bofs);
+		bf = (FortnoxAdapter)selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
+		
+		return bf;
+	}
+	
 	/**
 	 * Gets the fortnox client.
 	 * 
@@ -16,12 +30,9 @@ public class FortnoxCommand {
 	 * @return
 	 * @throws Exception
 	 */
-	@SuppressWarnings("rawtypes")
-	protected FortnoxClient3 getFortnoxClient(List<BusinessObjectFactory> bofs, String orgNo) throws Exception {
+	protected FortnoxClient3 getFortnoxClient(String orgNo) throws Exception {
 		
-		FactorySelector selector = new FactorySelector(bofs);
-		
-		BusinessObjectFactory bf = selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
+		getBusinessObjectFactoryForOrgNo(orgNo);
 
 		if (bf==null) {
 			return null;

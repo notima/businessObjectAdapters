@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.notima.api.webpay.pmtapi.PmtApiClientCollection;
-import org.notima.api.webpay.pmtapi.PmtApiClientRF;
 import org.notima.api.webpay.pmtapi.PmtApiCredential;
 import org.notima.api.webpay.pmtapi.exception.NoSuchOrderException;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
@@ -32,6 +31,7 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 		org.notima.api.webpay.pmtapi.entity.Invoice, 
 		org.notima.api.webpay.pmtapi.CheckoutOrder,
 		Object,
+		Object,
 		Object
 		> {
 
@@ -45,13 +45,15 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	 * Initializes the business object factory
 	 * 
 	 * @param serverName
+	 * @param orgNo				The orgno this merchant id belongs to.
 	 * @param merchantId
 	 * @param secretWord
 	 */
-	public void addCredential(String serverName, String merchantId, String secretWord) {
+	public void addCredential(String serverName, String orgNo, String merchantId, String secretWord) {
 		
 		PmtApiCredential credential = new PmtApiCredential();
 		credential.setServer(serverName);
+		credential.setOrgNo(orgNo);
 		credential.setMerchantId(merchantId);
 		credential.setSecret(secretWord);
 		clients.addPmtApiClient(credential);
@@ -69,6 +71,8 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 		if (o==null) return null;
 		Order<org.notima.api.webpay.pmtapi.CheckoutOrder> result = SveaPmtAdminConverter.convert(o);
 		result.setNativeOrder(o);
+		// Add merchantId as attribute
+		result.addAttribute("merchantId", o.getMerchantId());
 		return result;
 	}
 
@@ -231,7 +235,7 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public BusinessPartner<?> lookupThisCompanyInformation() throws Exception {
+	public BusinessPartner<Object> lookupThisCompanyInformation() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

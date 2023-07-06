@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -15,21 +16,15 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.InvoicePayment;
 import org.notima.api.fortnox.entities3.InvoicePaymentSubset;
 import org.notima.api.fortnox.entities3.InvoicePayments;
-import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
-import org.notima.businessobjects.adapter.tools.FactorySelector;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.InvoicePaymentHeaderTable;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "fortnox", name = "list-fortnox-payments", description = "Lists open payments in Fortnox")
 @Service
-@SuppressWarnings("rawtypes")
 public class ListPayments extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;
-	
-	@Reference
-	private List<BusinessObjectFactory> bofs;
 	
 	@Option(name = "-e", aliases = {
 	"--enrich" }, description = "Read the complete invoice, not just the subset", required = false, multiValued = false)
@@ -45,14 +40,13 @@ public class ListPayments extends FortnoxCommand implements Action {
 	private String untilDateStr;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)	
 	private String orgNo = "";
 	
 	@Override
 	public Object execute() throws Exception {
 
-		FactorySelector selector = new FactorySelector(bofs);
-		
-		BusinessObjectFactory bf = selector.getFactoryWithTenant(FortnoxAdapter.SYSTEMNAME, orgNo, null);
+		bf = this.getBusinessObjectFactoryForOrgNo(orgNo);
 
 		if (bf==null) {
 			sess.getConsole().println("No tenant found with orgNo [" + orgNo + "]");
@@ -68,7 +62,7 @@ public class ListPayments extends FortnoxCommand implements Action {
 			untilDate = FortnoxClient3.s_dfmt.parse(untilDateStr);
 		}
 			
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
+		FortnoxClient3 fc = getFortnoxClient(orgNo);
 		InvoicePayments payments = fc.getInvoicePayments();
 		
 		if (payments.getInvoicePaymentSubset()!=null) {

@@ -36,7 +36,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 */
 	@Override
 	public Invoice<org.notima.api.fortnox.entities3.Invoice> fromNativeInvoice(org.notima.api.fortnox.entities3.Invoice src) throws Exception {
-		return FortnoxAdapter.convert((org.notima.api.fortnox.entities3.Invoice)src);
+		return FortnoxAdapter.convertToCanonicalInvoice((org.notima.api.fortnox.entities3.Invoice)src);
 	}
 
 	/**
@@ -67,6 +67,9 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			case AccountingType.OTHER_EXPENSES_SALES:
 				// TODO: Below must be configurable
 				acctNo = "6590";
+				break;
+			case AccountingType.INTEREST_INCOME:
+				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_INTEREST);
 				break;
 			case AccountingType.LIQUID_ASSET_CASH:
 				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_CASHBYCARD);
@@ -139,7 +142,8 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			r.setCredit(avl.getCreditAmount().doubleValue());
 			r.setDebit(avl.getDebitAmount().doubleValue());
 			if (avl.getDescription()!=null && avl.getDescription().trim().length()>0) {
-				r.setDescription(avl.getDescription());
+				r.appendTransactionInformation(avl.getDescription());
+				// TODO: Check if description is needed
 			}
 			r.setCostCenter(avl.getCostCenter());
 			r.setProject(avl.getProjectCode());
@@ -199,6 +203,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 * @param totalAmount		The total amount of the transaction
 	 * @param vatAmount			The VAT amount.
 	 * @param description		The description for the voucher text.
+	 * @param costCenter		Cost Center if any
 	 * @return	A Fortnox Voucher
 	 */
 	public Voucher createSingleCostWithVatTransactionVoucher(
@@ -209,9 +214,12 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			String vatAcct,
 			double totalAmount,
 			double vatAmount,
-			String description) {
+			String description,
+			String costCenter) {
 
 		Voucher result = new Voucher();
+		if (costCenter!=null && costCenter.trim().length()>0)
+			result.setCostCenter(costCenter);
 		
 		if (acctDate==null) {
 			acctDate = Calendar.getInstance().getTime();

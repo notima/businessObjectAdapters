@@ -26,6 +26,7 @@ Object,
 Object,
 Object,
 Object,
+Object,
 Object> {
 
 	public static final String SYSTEM_NAME = "SIE";
@@ -103,7 +104,7 @@ Object> {
 	}
 
 	@Override
-	public BusinessPartner<?> lookupThisCompanyInformation() throws Exception {
+	public BusinessPartner<Object> lookupThisCompanyInformation() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

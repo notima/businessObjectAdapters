@@ -11,10 +11,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
+import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
-import org.notima.api.fortnox.entities3.Customer;
 import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.generic.businessobjects.BusinessPartner;
@@ -44,6 +46,9 @@ public class AddClient implements Action {
     @Argument(index = 1, name = "authorizationCode", description = "API code provided by client used to retrieve an access token", required = false, multiValued = false)
     String authorizationCode;
    
+    @Option(name = "--legacy", description = "Use legacy API-code calls", required = false, multiValued = false)
+    boolean legacy;
+    
     @Option(name = "--orgName", description = "The name of the organisation", required = false, multiValued = false)
     private String orgName;
     
@@ -55,6 +60,10 @@ public class AddClient implements Action {
 
     @Option(name = "--clientSecret", description = "The client secret for our Fortnox integration. If omitted, the default client secret is used (if set).", required = false, multiValued = false)
     private String clientSecret;
+    
+    private FortnoxAdapter fa;
+    private FortnoxClient3			   fc3;
+    private FortnoxCredentialsProvider credentialsProvider;
     
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -73,9 +82,10 @@ public class AddClient implements Action {
 			return null;
 		}
 		
-		FortnoxAdapter fa = (FortnoxAdapter)b;
+		fa = (FortnoxAdapter)b;
 		FortnoxClientManager mgr = fa.getClientManager();
-
+		fc3 = fa.getClient();
+		
 		if (mgr!=null) {
 			if (mgr.getDefaultClientSecret()!=null && clientSecret==null) {
 				clientSecret = mgr.getDefaultClientSecret();
@@ -83,10 +93,23 @@ public class AddClient implements Action {
 		}
 		
 		CompanySetting cs = null;
-		if (orgNo==null) {
-			if (accessToken!=null && clientSecret!=null && refreshToken != null) {
-				FortnoxClient3 fc3 = fa.getClient();
-				fc3.setKeyProvider(new FileCredentialsProvider(orgNo));
+		if (orgNo!=null) {
+			if ((accessToken!=null || (legacy && authorizationCode!=null))
+					&& clientSecret!=null && 
+					(refreshToken != null || legacy)) {
+				
+				// TODO: Look this over since it's not checked for new access token (oauth)
+				credentialsProvider = new FileCredentialsProvider(orgNo);
+				FortnoxCredentials credentials = new FortnoxCredentials();
+				if (legacy) {
+					credentials.setLegacyToken(accessToken);
+				} else {
+					credentials.setAccessToken(accessToken);
+				}
+				credentials.setClientSecret(clientSecret);
+				credentialsProvider.setCredentials(credentials);
+				
+				fc3.setKeyProvider(credentialsProvider);
 				try { 
 					cs = fc3.getCompanySetting();
 					if (cs!=null) {
@@ -119,7 +142,7 @@ public class AddClient implements Action {
 			props.setProperty("clientSecret", clientSecret);
 		}
 		
-		BusinessPartner<Customer> bp = fa.addTenant(orgNo, "SE", orgName, props);
+		BusinessPartner<FortnoxClientInfo> bp = fa.addTenant(orgNo, "SE", orgName, props);
 
 		if (bp!=null) {
 			sess.getConsole().println("Customer [" + bp.getTaxId() + "] " + bp.getName() + " added.");

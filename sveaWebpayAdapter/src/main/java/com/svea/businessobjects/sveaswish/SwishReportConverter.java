@@ -23,38 +23,55 @@ public class SwishReportConverter {
 
     private static final String PAYMENT_TYPE_NAME = "Swish";
 
+    private Date fromDate;
+    private Date toDate;
+    
+    private SettlementReport settlementReport;
+    
     public PaymentReport convert(String sourceFile) throws IOException, ParseException {
         File reportFile = new File(sourceFile);
         FileInputStream reportInputStream = new FileInputStream(reportFile);
-        SettlementReport report = new SettlementReportParser().parseFile(reportInputStream);
-        return convert(report);
+        settlementReport = new SettlementReportParser().parseFile(reportInputStream);
+        return convertFromSettlementReport(settlementReport);
     }
 
-    public PaymentReport convert(String sourceFile, Date fromDate, Date toDate) throws IOException, ParseException {
+    public PaymentReport convertFromFile(String sourceFile, Date fromDate, Date toDate) throws IOException, ParseException {
         File reportFile = new File(sourceFile);
         FileInputStream reportInputStream = new FileInputStream(reportFile);
-        SettlementReport report = new SettlementReportParser().parseFile(reportInputStream);
-        return convert(report, fromDate, toDate);
+        settlementReport = new SettlementReportParser().parseFile(reportInputStream);
+        this.fromDate = fromDate;
+        this.toDate = toDate;
+        return convertTheSettlementReport();
     }
 
-    public PaymentReport convert(SettlementReport swishReport) {
-        Date fromDate = new Date(0);
-        Date toDate = new Date(Long.MAX_VALUE);
-        return convert(swishReport, fromDate, toDate);
+    public PaymentReport convertFromSettlementReport(SettlementReport settlementReport) {
+        this.settlementReport = settlementReport;
+        return convertTheSettlementReport();
     }
 
-    public PaymentReport convert(SettlementReport swishReport, Date fromDate, Date toDate) {
+    private void determineDatesFromSettlementReport() {
+
+    	if (fromDate==null)
+    		fromDate = settlementReport.getFirstBookkeepingDate();
+    	if (toDate==null)
+    		toDate = settlementReport.getLastBookkeepingDate();
+    	
+    }
+    
+    private PaymentReport convertTheSettlementReport() {
+    	
+    	determineDatesFromSettlementReport();
+    	
         PaymentReport paymentReport = new PaymentReport();
         PaymentReportGroup group = new PaymentReportGroup();
         group.setCurrency("SEK");
-        // TODO: The reconciliation date must be derived from the rows
         group.setReconciliationDate(fromDate);
         // TODO: This must be done in another way
-        if (swishReport.getRows()!=null && swishReport.getRows().size()>0) {
-        	group.setPaymentTypeReference(swishReport.getRows().get(0).getRecipientNumber());
+        if (settlementReport.getRows()!=null && settlementReport.getRows().size()>0) {
+        	group.setPaymentTypeReference(settlementReport.getRows().get(0).getRecipientNumber());
         }
         group.setPaymentType(PAYMENT_TYPE_NAME);
-        List<PaymentReportDetail> rows = convertRows(swishReport.getRows(), fromDate, toDate);
+        List<PaymentReportDetail> rows = convertRows(settlementReport.getRows());
         for (PaymentReportDetail detail : rows) {
         	group.addDetail(detail);
         }
@@ -62,7 +79,7 @@ public class SwishReportConverter {
         return paymentReport;
     }
 
-    private List<PaymentReportDetail> convertRows(List<SettlementReportRow> rows, Date fromDate, Date toDate) {
+    private List<PaymentReportDetail> convertRows(List<SettlementReportRow> rows) {
         List<PaymentReportDetail> details = new ArrayList<PaymentReportDetail>();
         LocalDate from = LocalDateUtils.asLocalDate(fromDate);
         LocalDate until = LocalDateUtils.asLocalDate(toDate);

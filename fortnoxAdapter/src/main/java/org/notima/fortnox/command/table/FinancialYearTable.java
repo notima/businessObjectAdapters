@@ -19,8 +19,10 @@ public class FinancialYearTable extends ShellTable {
 	public FinancialYearTable(FinancialYears vv) {
 		initColumns();
 
-		for (FinancialYearSubset vs : vv.getFinancialYearSubset()) {
-			addRow(vs);
+		if (vv.getFinancialYearSubset()!=null) {
+			for (FinancialYearSubset vs : vv.getFinancialYearSubset()) {
+				addRow(vs);
+			}
 		}
 		
 	}

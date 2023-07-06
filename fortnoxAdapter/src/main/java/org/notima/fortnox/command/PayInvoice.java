@@ -2,11 +2,11 @@ package org.notima.fortnox.command;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
@@ -16,16 +16,14 @@ import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoicePayment;
 import org.notima.api.fortnox.entities3.ModeOfPayment;
-import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.businessobjects.adapter.fortnox.FortnoxExtendedClient;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
+import org.notima.generic.businessobjects.Payment;
 
 @Command(scope = "fortnox", name = "pay-fortnox-invoice", description = "Pays a specific invoice")
 @Service
 public class PayInvoice extends FortnoxCommand implements Action {
 
-	@SuppressWarnings("rawtypes")
-	@Reference
-	private List<BusinessObjectFactory> bofs;
-	
 	@Reference 
 	Session sess;
 
@@ -46,6 +44,7 @@ public class PayInvoice extends FortnoxCommand implements Action {
 	
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)	
 	private String orgNo = "";
 
 	@Argument(index = 1, name = "invoiceNo", description ="The invoice no", required = true, multiValued = false)
@@ -54,38 +53,33 @@ public class PayInvoice extends FortnoxCommand implements Action {
 	@Argument(index = 2, name = "modeOfPayment", description ="The mode of payment", required = true, multiValued = false)
 	private String modeOfPayment;
 	
+	private FortnoxClient3 fc;
+	private FortnoxExtendedClient fec;
+	
+	private Invoice invoice;
+
+	private Date	payDate;
+	
+	private String	message;
+	
+	private Double	payAmt;
+	
+	private Payment<InvoicePayment> canonicalPayment;
+	
+	
 	@Override
 	public Object execute() throws Exception {
 		
-		FortnoxClient3 fc = getFortnoxClient(bofs, orgNo);
-		if (fc == null) {
-			sess.getConsole().println("Can't get client for " + orgNo);
-			return null;
-		}
-		
-		Invoice invoice = fc.getInvoice(invoiceNo);
+		getFortnoxClient();
 
-		if (invoice==null) {
-			sess.getConsole().println("Invoice " + invoiceNo + " not found.");
-			return null;
-		}
+		getInvoice();
 		
 		if (iap) {
 			// Invoice date as pay date
 			payDateStr = invoice.getInvoiceDate();
 		}
 
-		Date payDate = null;
-		if (payDateStr==null) {
-			payDate = Calendar.getInstance().getTime();
-			payDateStr = FortnoxClient3.s_dfmt.format(payDate);
-		} else {
-			try {
-				payDate = FortnoxClient3.s_dfmt.parse(payDateStr);
-			} catch (Exception e) {
-				sess.getConsole().println("Invalid date: " + payDateStr);
-			}
-		}
+		determinePayDate();
 		
 		if (!invoice.isBooked()) {
 			String reply = noConfirm ? "y" : sess.readLine("The invoice is not booked. Do you want to book it? (y/n) ", null);
@@ -112,7 +106,6 @@ public class PayInvoice extends FortnoxCommand implements Action {
 
 		// Check open amount
 		Double openAmt = invoice.getBalance();
-		Double payAmt;
 		if (amount!=null && amount!=0.0) {
 			payAmt = amount;
 		} else {
@@ -135,7 +128,7 @@ public class PayInvoice extends FortnoxCommand implements Action {
 		}
 
 		// Confirm payment
-		String reply = noConfirm ? "y" : sess.readLine("Do you want to pay invoice " + invoiceNo + " on " + payDateStr + " with amt " + payAmt + " using account " + mp.getAccountNumber() + ": (y/n) ", null);
+		String reply = noConfirm ? "y" : sess.readLine("Do you want to pay invoice " + invoiceNo + " on " + payDateStr + " with amt " + payAmt + " " + invoice.getCurrency() + " using account " + mp.getAccountNumber() + ": (y/n) ", null);
 
 		if (reply.equalsIgnoreCase("y")) {
 			
@@ -156,16 +149,19 @@ public class PayInvoice extends FortnoxCommand implements Action {
 			sess.getConsole().println("Payment cancelled");
 			return null;
 		}
+
+		createCanonicalPayment();
 		
 		InvoicePayment pmt = null;
 		
 		try {
-			pmt = fc.payCustomerInvoice(
-					Integer.parseInt(invoiceNo), 
-					mp, 
-					payDate, 
-					payAmt, 
-					null, !noBookkeepPayment);
+			pmt = fec.payCustomerInvoice(
+					mp.getCode(),
+					invoice,
+					!noBookkeepPayment, 
+					false, 
+					canonicalPayment, 
+					false);
 			
 			if (pmt!=null) {
 				sess.getConsole().println("Payment # " + pmt.getNumber() + " created.");
@@ -180,6 +176,51 @@ public class PayInvoice extends FortnoxCommand implements Action {
 		
 		return null;
 	}
+
+	
+	private void getFortnoxClient() throws Exception {
+		
+		fec = new FortnoxExtendedClient(getBusinessObjectFactoryForOrgNo(orgNo));
+		fc = fec.getCurrentFortnoxClient();
+		
+	}
+
+	private void getInvoice() throws Exception {
+
+		invoice = fc.getInvoice(invoiceNo);
+
+		if (invoice==null) {
+			message  = "Invoice " + invoiceNo + " not found.";
+			throw new Exception(message);
+		}
+
+	}
+	
+	private void determinePayDate() throws Exception {
+		payDate = null;
+		if (payDateStr==null) {
+			payDate = Calendar.getInstance().getTime();
+			payDateStr = FortnoxClient3.s_dfmt.format(payDate);
+		} else {
+			try {
+				payDate = FortnoxClient3.s_dfmt.parse(payDateStr);
+			} catch (Exception e) {
+				message = "Invalid date: " + payDateStr;
+				throw new Exception(message);
+			}
+		}
+	}
+
+	private void createCanonicalPayment() {
+		
+		canonicalPayment = new Payment<InvoicePayment>();
+		canonicalPayment.setInvoiceNo(invoice.getDocumentNumber());
+		canonicalPayment.setCurrency(invoice.getCurrency());
+		canonicalPayment.setPaymentDate(payDate);
+		canonicalPayment.setAmount(payAmt);
+		
+	}
+	
 	
 	
 }

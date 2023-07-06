@@ -26,7 +26,8 @@ public class SveaPmtGwBusinessObjectFactory extends BasicBusinessObjectFactory <
 		Object,		// Invoice 
 		com.svea.webpay.paymentgw.entity.Transaction,	// Order
 		Object,		// Product
-		com.svea.webpay.paymentgw.entity.Customer // BusinessPartner
+		com.svea.webpay.paymentgw.entity.Customer, // BusinessPartner
+		Object		// Tenant (UG)
 		>
 		
 {
@@ -52,7 +53,7 @@ public class SveaPmtGwBusinessObjectFactory extends BasicBusinessObjectFactory <
 	}
 
 	@Override
-	public BusinessPartnerList<Customer> listTenants() {
+	public BusinessPartnerList<Object> listTenants() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -77,7 +78,7 @@ public class SveaPmtGwBusinessObjectFactory extends BasicBusinessObjectFactory <
 	}
 
 	@Override
-	public BusinessPartner<?> lookupThisCompanyInformation() throws Exception {
+	public BusinessPartner<Object> lookupThisCompanyInformation() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

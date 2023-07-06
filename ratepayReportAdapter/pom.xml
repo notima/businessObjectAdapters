@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.8.12-SNAPSHOT</version>
+		<version>1.8.13-SNAPSHOT</version>
 	</parent>
 	<artifactId>ratepayAdapter</artifactId>
 	<packaging>bundle</packaging>
@@ -38,7 +38,7 @@
 
 		<resources>
 			<resource>
-				<directory>src/test/resources/reports</directory>
+				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>*</exclude>
 				</excludes>
@@ -46,8 +46,13 @@
 					<include>ratepay-example.properties</include>
 				</includes>
 			</resource>
+			<resource>
+				<directory>src/test/resources/reports</directory>
+				<excludes>
+					<exclude>*</exclude>
+				</excludes>
+			</resource>
 		</resources>
-
 
 		<plugins>
 			

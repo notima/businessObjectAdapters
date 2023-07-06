@@ -11,11 +11,14 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxClient3;
-import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
-import org.notima.api.fortnox.clients.FortnoxCredentials;
+import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.FortnoxInvoiceException;
+import org.notima.api.fortnox.FortnoxScopeException;
+import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
+import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
@@ -47,12 +50,13 @@ import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.ifacebusinessobjects.FactoringReservation;
+import org.notima.util.EmailUtils;
 import org.notima.util.LocalDateUtils;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +86,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		org.notima.api.fortnox.entities3.Invoice,
 		org.notima.api.fortnox.entities3.Order,
 		Object,
-		org.notima.api.fortnox.entities3.Customer
+		org.notima.api.fortnox.entities3.Customer,
+		FortnoxClientInfo
 		> {
 		
 	/**
@@ -97,9 +102,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	public static final String SYSTEMNAME = "Fortnox";
 	
-	private FortnoxClient3 client;
+	private FortnoxClient3 fortnoxClient;
 	
-	private FortnoxClientInfo	currentTenant = null;
+	private FortnoxClientInfo			currentFortnoxTenant = null;
+	private FortnoxCredentialsProvider	currentFortnoxCredentials = null;
+	private String						currentOrgNo = null;
 	
 	private FortnoxClientManager clientManager;
 	
@@ -121,7 +128,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * 
 	 */
 	public FortnoxAdapter() throws IOException {
-		client = new FortnoxClient3(new FortnoxCredentialsProvider("") {
+		fortnoxClient = new FortnoxClient3(new FortnoxCredentialsProvider("") {
 			private final String ERR_MSG = "A Fortnox adapter tried to call the fortnox api without a valid key provider. Make sure to set the tenant of the Fortnox adapter";
 
 			@Override
@@ -133,19 +140,73 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			public void setCredentials(FortnoxCredentials key) throws Exception {
 				throw new Exception(ERR_MSG);
 			}
+
+			@Override
+			public void removeAllCredentials() throws Exception {}
+
+			@Override
+			public List<FortnoxCredentials> getAllCredentials() throws Exception {
+				throw new Exception(ERR_MSG);
+			}
+
+			@Override
+			public void removeCredential(FortnoxCredentials removeThis) throws Exception {
+				throw new Exception(ERR_MSG);			}
+
+			@Override
+			public int removeCredentials(List<FortnoxCredentials> removeThese) throws Exception {
+				throw new Exception(ERR_MSG);
+			}
 			
 		});
 	}
-
+	
+	/**
+	 * Create an adapter with a pre-initialized client / orgno.
+	 * 
+	 * @param orgNo
+	 * @throws IOException
+	 */
 	public FortnoxAdapter(String orgNo) throws IOException {
-		client = new FortnoxClient3(new FileCredentialsProvider(orgNo));
+		currentFortnoxTenant = null;
+		currentOrgNo = orgNo;
+		if (getClientManager()!=null) {
+			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(currentOrgNo);
+		}
+		currentFortnoxCredentials = new FileCredentialsProvider(currentOrgNo);
+		fortnoxClient = new FortnoxClient3(currentFortnoxCredentials);
+	}
+	
+	/**
+	 * Used for legacy authentication
+	 * 
+	 * @param accessToken
+	 * @param clientSecret
+	 */
+	public FortnoxAdapter(String accessToken, String clientSecret) throws Exception {
+		
+		currentFortnoxCredentials = new LegacyTokenCredentialsProvider(accessToken, clientSecret);
+		
+		fortnoxClient = new FortnoxClient3(currentFortnoxCredentials);
+		FortnoxClientInfo fci = new FortnoxClientInfo();
+		try {
+			CompanySetting cs = fortnoxClient.getCompanySetting();
+			currentOrgNo = cs.getOrganizationNumber();
+			fci.setCompanySetting(cs);
+		} catch (FortnoxScopeException ee) {
+			logger.warn(ee.getMessage());
+		}
+		fci.setAccessToken(accessToken);
+		fci.setClientSecret(clientSecret);
+		currentFortnoxTenant = fci;
+		
 	}
 	
 	/**
 	 * @return 	Returns the native Fortnox Client.
 	 */
 	public FortnoxClient3 getClient() {
-		return client;
+		return fortnoxClient;
 	}
 
 	
@@ -203,17 +264,19 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @return		The tenant represented as a business partner.
 	 */
 	@Override
-	public BusinessPartner<Customer> addTenant(String orgNo, String countryCode, String name, Properties props) {
+	public BusinessPartner<FortnoxClientInfo> addTenant(String orgNo, String countryCode, String name, Properties props) {
 		
 		FortnoxClientInfo fi = null;
 		
 		// Get properties
+		String authorizationCode = null;
 		String accessToken = null;
 		String clientSecret = null;
 		String clientId = null;
 		String refreshToken = null;
 
 		if (props!=null) {
+			authorizationCode = props.getProperty("apiCode");
 			accessToken = props.getProperty("accessToken");
 			clientSecret = props.getProperty("clientSecret");
 			clientId = props.getProperty("clientId");
@@ -227,7 +290,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 		}
 
-		BusinessPartner<Customer> bp = null;
+		BusinessPartner<FortnoxClientInfo> bp = null;
 
 		// TODO Method to add tenant
 
@@ -245,21 +308,27 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			fi.setClientId(clientId);
 		if (accessToken!=null) {
 			FortnoxCredentials credentials = new FortnoxCredentials();
-			credentials.setAccessToken(accessToken);
-			credentials.setRefreshToken(refreshToken);
+			if(authorizationCode != null) {
+				credentials.setLegacyToken(accessToken);
+				credentials.setAuthorizationCode(authorizationCode);
+			} else {
+				credentials.setAccessToken(accessToken);
+				credentials.setRefreshToken(refreshToken);
+			}
 			try {
 				new FileCredentialsProvider(orgNo).setCredentials(credentials);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+
+		try{
+			clientManager.updateAndSaveClientInfo(fi);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		Customer tenant = new Customer();
-		tenant.setOrganisationNumber(fi.getOrgNo());
-		tenant.setName(fi.getOrgName());
-		tenant.setCountryCode(countryCode);
-		
-		bp = convert(tenant);
+		bp = convertToBusinessPartnerFromFortnoxClientInfo(fi);
 		
 		return bp;
 	}
@@ -294,7 +363,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 */
 	public String getRevenueAccount(String type) throws Exception {
 		if (revenueAccountMap==null)
-			revenueAccountMap = client.getRevenueAccountMap(currentDate);
+			revenueAccountMap = fortnoxClient.getRevenueAccountMap(currentDate);
 		
 		Integer account = revenueAccountMap.get(type);
 		
@@ -313,7 +382,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 */
 	public String getPredefinedAccount(String type) throws Exception {
 		if (preDefinedAccountMap==null) {
-			preDefinedAccountMap = client.getPredefinedAccountMap();  
+			preDefinedAccountMap = fortnoxClient.getPredefinedAccountMap();  
 		}
 		
 		PreDefinedAccountSubset pdas = preDefinedAccountMap.get(type);
@@ -350,16 +419,16 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 */
 	@Override
 	public BusinessPartner<Customer> lookupBusinessPartner(String key) throws Exception {
-		Customer c = client.getCustomerByCustNo(key);
+		Customer c = fortnoxClient.getCustomerByCustNo(key);
 		if (c==null) return null;
-		return convert(c);
+		return convertToBusinessPartner(c);
 	}
 
 	@Override
 	public List<BusinessPartner<Customer>> lookupAllBusinessPartners() throws Exception {
 		List<BusinessPartner<Customer>> result = new ArrayList<BusinessPartner<Customer>>();
 		
-		Customers contacts = client.getCustomers();
+		Customers contacts = fortnoxClient.getCustomers();
 		if (contacts!=null && contacts.getCustomerSubset()!=null) {
 			for(CustomerSubset c: contacts.getCustomerSubset()) {
 				result.add(convert(c));
@@ -368,7 +437,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		while(contacts.getTotalPages()>contacts.getCurrentPage()) {
 			// Pause not to exceed call limit
 			Thread.sleep(100);
-			contacts = client.getCustomers(contacts.getCurrentPage()+1);
+			contacts = fortnoxClient.getCustomers(contacts.getCurrentPage()+1);
 			if (contacts!=null && contacts.getCustomerSubset()!=null) {
 				for(CustomerSubset c: contacts.getCustomerSubset()) {
 					result.add(convert(c));
@@ -417,8 +486,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public Invoice<org.notima.api.fortnox.entities3.Invoice> lookupInvoice(String key) throws Exception {
 		
-		org.notima.api.fortnox.entities3.Invoice src = client.getInvoice(key);
-		Invoice<org.notima.api.fortnox.entities3.Invoice> dst = convert(src);
+		org.notima.api.fortnox.entities3.Invoice src = fortnoxClient.getInvoice(key);
+		Invoice<org.notima.api.fortnox.entities3.Invoice> dst = convertToCanonicalInvoice(src);
 		dst.setDocumentKey(key);
 		return dst;
 		
@@ -427,7 +496,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public org.notima.api.fortnox.entities3.Invoice lookupNativeInvoice(String key) throws Exception {
 		
-		org.notima.api.fortnox.entities3.Invoice raw = client.getInvoice(key);
+		org.notima.api.fortnox.entities3.Invoice raw = fortnoxClient.getInvoice(key);
 		return raw;
 		
 	}
@@ -487,7 +556,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public Object persist(Object o) throws Exception {
 
 		if (o instanceof org.notima.generic.businessobjects.Invoice) {
-			return persist((org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice>)o);
+			return persistCanonicalInvoice((org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice>)o);
 		}
 		if (o instanceof org.notima.generic.businessobjects.BusinessPartner) {
 			return persistBusinessPartner((org.notima.generic.businessobjects.BusinessPartner)o);
@@ -502,19 +571,23 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param invoice	The invoice to persist.
 	 * @return
 	 * @throws Exception
+	 * @throws FortnoxInvoiceException
+	 * @throws FortnoxScopeException
 	 */
-	protected org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> persist(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) throws Exception {
+	protected org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> 
+		persistCanonicalInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) 
+				throws Exception, FortnoxInvoiceException, FortnoxScopeException {
 
 		// Check that the business partner exists
-		Customer cust = client.getCustomerByCustNo(invoice.getBusinessPartner().getIdentityNo());
+		Customer cust = fortnoxClient.getCustomerByCustNo(invoice.getBusinessPartner().getIdentityNo());
 		if (cust==null) {
-			cust = convert(invoice.getBusinessPartner());
-			client.setCustomer(cust);
+			cust = convertFromBusinessPartner(invoice.getBusinessPartner());
+			fortnoxClient.setCustomer(cust);
 		}
 		
-		org.notima.api.fortnox.entities3.Invoice dst = convert(invoice);
+		org.notima.api.fortnox.entities3.Invoice dst = convertToFortnoxInvoice(invoice);
 	
-		dst = client.setInvoice(dst);
+		dst = fortnoxClient.setInvoice(dst);
 		if (dst==null) {
 			throw new Exception("Invoice not saved: " + invoice.getDocumentKey());
 		}
@@ -528,7 +601,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	public org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> persistInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> invoice) throws Exception {
 		
-		return persist(invoice);
+		return persistCanonicalInvoice(invoice);
 	}
 
 	@Override
@@ -536,7 +609,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		org.notima.api.fortnox.entities3.Invoice dst = (org.notima.api.fortnox.entities3.Invoice)invoice;
 		
-		dst = client.setInvoice(dst);
+		dst = fortnoxClient.setInvoice(dst);
 
 		return dst;
 	}
@@ -545,13 +618,13 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (!bpartner.getIsVendor()) {
 		
-			Customer dstContact = convert(bpartner);
+			Customer dstContact = convertFromBusinessPartner(bpartner);
 	
 			// Check if business partner already exists
 			Customer checkContact = null;
 			if (dstContact.getCustomerNumber()!=null) {
 				try {
-					checkContact = client.getCustomerByCustNo(dstContact.getCustomerNumber());
+					checkContact = fortnoxClient.getCustomerByCustNo(dstContact.getCustomerNumber());
 				} catch (FortnoxException fe) {
 					checkContact = null;
 				}
@@ -573,7 +646,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 			
 			// Save
-			dstContact = client.setCustomer(dstContact);
+			dstContact = fortnoxClient.setCustomer(dstContact);
 			bpartner.setIdentityNo(dstContact.getCustomerNumber());
 		
 		} else {
@@ -591,7 +664,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param bpartner		The business partner to convert
 	 * @return				A Fortnox representation of business partner (customer)
 	 */
-	public static org.notima.api.fortnox.entities3.Customer convert(org.notima.generic.businessobjects.BusinessPartner<?> bpartner) {
+	public static org.notima.api.fortnox.entities3.Customer convertFromBusinessPartner(org.notima.generic.businessobjects.BusinessPartner<?> bpartner) {
 		
 		Customer dstContact = new Customer();
 		
@@ -628,7 +701,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			dstContact.setZipCode(loc.getPostal());
 			dstContact.setCountryCode(loc.getCountryCode());
 			
-			if (dstContact.getEmail()==null)
+			if (EmailUtils.isValidEmail(dstContact.getEmail()))
 				dstContact.setEmail(loc.getEmail());
 			if (dstContact.getPhone1()==null)
 				dstContact.setPhone1(loc.getPhone());
@@ -731,7 +804,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param src
 	 * @return
 	 */
-	public org.notima.api.fortnox.entities3.Invoice convert(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> src) throws Exception {
+	public org.notima.api.fortnox.entities3.Invoice convertToFortnoxInvoice(org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> src) throws Exception {
 		
 		org.notima.api.fortnox.entities3.Invoice dst = new org.notima.api.fortnox.entities3.Invoice();
 
@@ -794,14 +867,16 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		
 		dst.setCurrency(src.getCurrency());
-		if (src.getOrderKey()!=null || src.getPoDocumentNo()!=null) {
-			dst.setYourOrderNumber(src.getOrderKey());
+		if (src.getPoDocumentNo()!=null) {
+			dst.setYourOrderNumber(src.getPoDocumentNo());
+		}
+		if (src.getOrderKey()!=null) {
 			dst.setExternalInvoiceReference2(src.getOrderKey());
 		}
+		dst.setExternalInvoiceReference1(src.getExternalReference1());
 		
 		// Add invoice row
 		InvoiceRows rows;
-		InvoiceRow row;
 		rows = new org.notima.api.fortnox.entities3.InvoiceRows();
 		dst.setInvoiceRows(rows);		
 		List<InvoiceRow> rowList = new ArrayList<InvoiceRow>();
@@ -813,49 +888,72 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				dst.setRoundOff(il.getPriceActual());
 				continue;
 			}
-			
-			row = new InvoiceRow();
-			row.setArticleNumber(il.getProductKey());
-			row.setDescription(il.getName()!=null ? il.getName() : il.getDescription());
-			row.setDeliveredQuantity((double)il.getQtyEntered());
-			if (!row.hasDescription()) {
-				// Empty description if missing
-				row.setDescription(".");
-			}
-			
-			// Try to set default account number if not set
-			if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
 
-				String accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
-				
-				row.setAccountNumber(accountNo);
-					
-			} else {
-				row.setAccountNumber(il.getAccountNo());
-			}
+			addCanonicalInvoiceLineToFortnoxInvoiceRow(src, il, rowList);
 			
-			if (il.getPriceActual()!=null) {
-				if (il.isPricesIncludeVAT()) {
-					row.setPrice((double)il.getPriceActual()-(il.getTaxAmount()/il.getQtyEntered()));
-					row.setPrice((Math.round(row.getPrice()*100)/100.0));
-				}
-				else
-					row.setPrice((double)il.getPriceActual());
-				row.setVAT((double)il.getTaxPercent());
-			} else {
-				row.setPrice(null);
-				row.setVAT(null);
-			}
-			row.setUnit(il.getUOM());
-			rowList.add(row);
 		}
 
-		// Always set the prices excluding VAT
-		dst.setVATIncluded(Boolean.valueOf(false));
+		
+		if (src.isShowPricesIncludingVAT()) {
+			dst.setVATIncluded(Boolean.valueOf(true));
+		} else {
+			dst.setVATIncluded(Boolean.valueOf(false));
+		}
 		// Set as not completed as false by default.
 		dst.setNotCompleted(Boolean.FALSE);
 		
 		return dst;
+		
+	}
+
+	/**
+	 * 
+	 * @param src					The invoice header (source)
+	 * @param il					The invoice line to be added
+	 * @param fortnoxDstRowList		Initialized Fortnox invoice lines.
+	 * @throws Exception
+	 */
+	public void addCanonicalInvoiceLineToFortnoxInvoiceRow(
+			org.notima.generic.businessobjects.Invoice<?> src, 
+			InvoiceLine il, 
+			List<InvoiceRow> fortnoxDstRowList) throws Exception {
+		
+		InvoiceRow row;
+
+		row = new InvoiceRow();
+		row.setArticleNumber(il.getProductKey());
+		row.setDescription(il.getName()!=null ? il.getName() : il.getDescription());
+		row.setDeliveredQuantity((double)il.getQtyEntered());
+		if (!row.hasDescription()) {
+			// Empty description if missing
+			row.setDescription(".");
+		}
+		
+		// Try to set default account number if not set
+		if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
+
+			String accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
+			
+			row.setAccountNumber(accountNo);
+				
+		} else {
+			row.setAccountNumber(il.getAccountNo());
+		}
+		
+		if (il.getPriceActual()!=null) {
+			if (il.isPricesIncludeVAT() && !src.isShowPricesIncludingVAT()) {
+				row.setPrice((double)il.getPriceActual()-(il.getTaxAmount()/il.getQtyEntered()));
+				row.setPrice((Math.round(row.getPrice()*100)/100.0));
+			}
+			else
+				row.setPrice((double)il.getPriceActual());
+			row.setVAT((double)il.getTaxPercent());
+		} else {
+			row.setPrice(null);
+			row.setVAT(null);
+		}
+		row.setUnit(il.getUOM());
+		fortnoxDstRowList.add(row);
 		
 	}
 	
@@ -866,7 +964,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @param src		The invoice to be converted
 	 * @return
 	 */
-	public static org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> convert(org.notima.api.fortnox.entities3.Invoice src) throws Exception {
+	public static org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> convertToCanonicalInvoice(org.notima.api.fortnox.entities3.Invoice src) throws Exception {
 	
 		org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> dst = new org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice>();
 
@@ -882,6 +980,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 				logger.warn("Can't parse delivery date " + src.getDeliveryDate() + " on invoice " + src.getDocumentNumber());
 			}
 		}
+		dst.setExternalReference1(src.getExternalInvoiceReference1());
 		dst.setGrandTotal(src.getTotal());
 		// Set open amount
 		dst.setOpenAmt(src.getBalance());
@@ -889,6 +988,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dst.setDueDate(FortnoxClient3.s_dfmt.parse(src.getDueDate()));
 		dst.setOcr(src.getOCR());
 		dst.setNetTotal(src.getNet());
+		dst.setVatTotal(src.getTotalVAT());
 		dst.setPoDocumentNo(src.getExternalInvoiceReference2());
 		dst.setPaymentTermKey(src.getTermsOfPayment());
 		
@@ -986,7 +1086,35 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	}
 	
-	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convert(org.notima.api.fortnox.entities3.Customer src) {
+	public static org.notima.generic.businessobjects.BusinessPartner<FortnoxClientInfo> convertToBusinessPartnerFromFortnoxClientInfo(FortnoxClientInfo src) {
+		
+		if (src==null) return null;
+		
+		BusinessPartner<FortnoxClientInfo> dst = new BusinessPartner<FortnoxClientInfo>();
+		
+		dst.setTaxId(src.getOrgNo());
+		dst.setName(src.getOrgName());
+		// A Fortnox entity is always a company
+		dst.setCompany(true);
+		dst.setCountryCode(src.getCountryCode());
+		List<Person> contacts = new ArrayList<Person>();
+		if (src.getContactName()!=null) {
+			Person contact = new Person();
+			contact.setName(src.getContactName());
+			contact.setEmail(src.getContactEmail());
+			contacts.add(contact);
+		}
+		dst.setContacts(contacts);
+		
+		if (src.getCompanySetting()!=null) {
+			// Todo add address etc.
+		}
+		
+		return dst;
+		
+	}
+	
+	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convertToBusinessPartner(org.notima.api.fortnox.entities3.Customer src) {
 		
 		BusinessPartner<Customer> dst = new BusinessPartner<Customer>();
 		
@@ -1071,7 +1199,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Invoice subset
 		if (LIST_EXTERNAL_INVOICE_REFERENCE1.equalsIgnoreCase(listName)) {
 			
-			Invoices invoices = client.getInvoices(null);
+			Invoices invoices = fortnoxClient.getInvoices(null);
 			
 			Map<Object, Object> result = new TreeMap<Object,Object>();
 			if (invoices!=null && invoices.getInvoiceSubset()!=null) {
@@ -1086,7 +1214,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (LIST_EXTERNAL_INVOICE_REFERENCE2.equalsIgnoreCase(listName)) {
 			
-			Invoices invoices = client.getInvoices(null);
+			Invoices invoices = fortnoxClient.getInvoices(null);
 			
 			Map<Object, Object> result = new TreeMap<Object,Object>();
 			if (invoices!=null && invoices.getInvoiceSubset()!=null) {
@@ -1136,7 +1264,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 */
 	private Map<Object,Object> getFiltered(String filter) throws Exception {
 		
-		Invoices invoices = client.getInvoices(filter);
+		Invoices invoices = fortnoxClient.getInvoices(filter);
 		
 		Map<Object, Object> result = new TreeMap<Object,Object>();
 		if (invoices!=null && invoices.getInvoiceSubset()!=null) {
@@ -1174,7 +1302,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		Invoice<org.notima.api.fortnox.entities3.Invoice> invoice;
 		DunningEntry<org.notima.api.fortnox.entities3.Customer, org.notima.api.fortnox.entities3.Invoice> de;
 		
-		CompanySetting cs = client.getCompanySetting();
+		CompanySetting cs = fortnoxClient.getCompanySetting();
 		
 		// TODO: Add addInvoice method to DunningRun. Invoices with the same debtor/creditor is located
 		//		 with the same dunning entry.
@@ -1261,15 +1389,15 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	}
 
 	@Override
-	public BusinessPartner<CompanySetting> lookupThisCompanyInformation() throws Exception {
+	public BusinessPartner<FortnoxClientInfo> lookupThisCompanyInformation() throws Exception {
 		
-		CompanySetting cs = client.getCompanySetting();
-		BusinessPartner<CompanySetting> result = new BusinessPartner<CompanySetting>();
+		CompanySetting cs = fortnoxClient.getCompanySetting();
+		BusinessPartner<FortnoxClientInfo> result = new BusinessPartner<FortnoxClientInfo>();
 		result.setName(cs.getName());
 		result.setTaxId(cs.getOrganizationNumber());
 		result.setVatNo(cs.getVatNumber());
 		result.setIdentityNo(cs.getDatabaseNumber());
-		result.setNativeBusinessPartner(cs);
+		result.setNativeBusinessPartner(currentFortnoxTenant);
 		Location officialAddress = new Location();
 		officialAddress.setAddress1(cs.getAdress());
 		officialAddress.setCity(cs.getCity());
@@ -1299,109 +1427,72 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public void setTenant(String orgNo, String countryCode) throws NoSuchTenantException {
 
-		CompanySetting cs = null;
+		currentOrgNo = null;
 		
-		if (client.hasCredentials()) {
+		try {
+			currentFortnoxCredentials = new FileCredentialsProvider(orgNo);
+		} catch (Exception ee) {
+			ee.printStackTrace();
+		}
+		if (currentFortnoxCredentials==null) {
+			throw new NoSuchTenantException(orgNo);
+		}
+		
+		currentOrgNo = orgNo;
+		fortnoxClient = new FortnoxClient3(currentFortnoxCredentials);
+		
+		currentFortnoxTenant = null;
 
-			try {
-				cs = client.getCompanySetting();
-				if (cs.getOrganizationNumber().equalsIgnoreCase(orgNo)) {
-					currentTenant = null;	// Set to make sure current tenant is read using credentials
-					return;
-				} else {
-					
-					
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
+		updateCurrentTenant();
+	}
+
+	private void updateCurrentTenant() throws NoSuchTenantException {
+
+		if (getClientManager()!=null) {
+			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(currentOrgNo);
+			currentFortnoxCredentials.setDefaultClientId(clientManager.getDefaultClientId());
+			currentFortnoxCredentials.setDefaultClientSecret(clientManager.getDefaultClientSecret());
+			currentTenant = convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
+		} else {
+			throw new NoSuchTenantException("Can't find client manager while looking for " + currentOrgNo);
 		}
 		
-		if (clientManager!=null) {
-			
-			FortnoxClientInfo fi = clientManager.getClientInfoByOrgNo(orgNo);
-			if (fi==null) {
-				throw new NoSuchTenantException("No such tenant " + orgNo);
-			} else {
-				try {
-					client.setKeyProvider(new FileCredentialsProvider(orgNo));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				currentTenant = fi;
-			}
-			
-		} else {
-			throw new NoSuchTenantException("Can't find a client manager with tenants");
-		}
+	}
+	
+	@Override
+	public BusinessPartner<FortnoxClientInfo> getCurrentTenant() {
+		
+		return convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
 		
 	}
 
 	@Override
-	public BusinessPartner<Customer> getCurrentTenant() {
-		
-		if (client.hasCredentials()) {
-			// Read from credentials
-			CompanySetting cs;
-			try {
-				cs = client.getCompanySetting();
-				BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
-				bp.setTaxId(cs.getOrganizationNumber());
-				bp.setName(cs.getName());
-				bp.setCountryCode(cs.getCountryCode());
-				return bp;				
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	public BusinessPartnerList<FortnoxClientInfo> listTenants() {
 
-		} else {
-			if (currentTenant==null) return null;
-			
-			BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
-			bp.setTaxId(currentTenant.getOrgNo());
-			bp.setName(currentTenant.getOrgName());
-			return bp;
-		}
-		
-		return null;
-	}
-
-	@Override
-	public BusinessPartnerList<Customer> listTenants() {
-
-		BusinessPartnerList<Customer> result = new BusinessPartnerList<Customer>();
-		List<BusinessPartner<Customer>> listOfBp = new ArrayList<BusinessPartner<Customer>>();
+		BusinessPartnerList<FortnoxClientInfo> result = new BusinessPartnerList<FortnoxClientInfo>();
+		List<BusinessPartner<FortnoxClientInfo>> listOfBp = new ArrayList<BusinessPartner<FortnoxClientInfo>>();
 		result.setBusinessPartner(listOfBp);
 		
-		BusinessPartner<Customer> bp = null;
+		BusinessPartner<FortnoxClientInfo> bp = null;
 		
 		if (clientManager!=null && clientManager.getFortnoxClients()!=null) {
 			
 			for (FortnoxClientInfo fi : clientManager.getFortnoxClients()) {
 				
-				bp = new BusinessPartner<Customer>();
-				bp.setName(fi.getOrgName());
-				bp.setTaxId(fi.getOrgNo());
-				bp.setCountryCode("SE");
+				bp = convertToBusinessPartnerFromFortnoxClientInfo(fi);
 				listOfBp.add(bp);
 				
 			}
 			
 		}
 		
-		if (bp==null && client.hasCredentials()) {
+		if (bp==null && fortnoxClient.hasCredentials()) {
 			
 			CompanySetting cs;
 			try {
-				cs = client.getCompanySetting();
+				cs = fortnoxClient.getCompanySetting();
 				if (cs!=null) {
-					bp = new BusinessPartner<Customer>();
-					bp.setName(cs.getName());
-					bp.setTaxId(cs.getOrganizationNumber());
-					bp.setCountryCode(cs.getCountryCode());
+					bp = createBpFromCompanySetting(cs);
 					listOfBp.add(bp);
 				}
 			} catch (Exception e) {
@@ -1413,6 +1504,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return result;
 	}
 
+	private BusinessPartner<FortnoxClientInfo> createBpFromCompanySetting(CompanySetting cs) {
+		BusinessPartner<FortnoxClientInfo> bp = new BusinessPartner<FortnoxClientInfo>();
+		bp.setName(cs.getName());
+		bp.setTaxId(cs.getOrganizationNumber());
+		bp.setCountryCode(cs.getCountryCode());
+		return bp;
+	}
+	
 	@Override
 	public String getSystemName() {
 		return SYSTEMNAME;
@@ -1438,7 +1537,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		for (AccountingVoucher v : vouchers) {
 			target = conv.mapFromBusinessObjectVoucher(this, v.getVoucherSeries(), v);
 			try {
-				fortnoxVoucher = client.setVoucher(target);
+				fortnoxVoucher = fortnoxClient.setVoucher(target);
 				v.setVoucherNo(fortnoxVoucher.getVoucherNumber().toString());
 				result.add(v);
 			} catch (Exception e) {
@@ -1462,8 +1561,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public String attachFileToVoucher(AccountingVoucher voucher, String fileName) throws Exception {
 		
-		FortnoxFile ff = client.uploadFile(fileName, FortnoxClient3.INBOX_VOUCHERS);
-		VoucherFileConnection vfc =  client.setVoucherFileConnection(ff.getId(), voucher.getVoucherNo(), voucher.getVoucherSeries(), LocalDateUtils.asDate(voucher.getAcctDate()));
+		FortnoxFile ff = fortnoxClient.uploadFile(fileName, FortnoxClient3.INBOX_VOUCHERS);
+		VoucherFileConnection vfc =  fortnoxClient.setVoucherFileConnection(ff.getId(), voucher.getVoucherNo(), voucher.getVoucherSeries(), LocalDateUtils.asDate(voucher.getAcctDate()));
 
 		return vfc.getFileId();
 		

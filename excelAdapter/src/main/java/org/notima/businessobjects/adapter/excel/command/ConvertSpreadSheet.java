@@ -29,7 +29,12 @@ public class ConvertSpreadSheet implements Action {
 	@Option(name = "-of", description = "Outfile. If unspecified and out.xml-file at the same location is used", required = false, multiValued = false)
 	@Completion(FileCompleter.class)
 	private String outFile;
-	
+
+	@Option(name = "--price-includes-tax", description = "If prices in Excel spreadsheet contains tax", required = false, multiValued = false)
+	private boolean priceIncludesTax;
+
+	@Option(name = "--taxPercent", description = "Used in conjunction with --price-includes-tax", required = false, multiValued = false)
+	private double taxPercent;
 	
 	@Argument(index = 0, name = "destinationFormat", description ="The destination format (implicits source format)", required = true, multiValued = false)
 	@Completion(OutputFormatCompleter.class)
@@ -42,12 +47,13 @@ public class ConvertSpreadSheet implements Action {
 	@Argument(index = 2, name = "inputFiles", description ="Additional input file(s) to convert (or sheet numbers)", required = false, multiValued = true)
 	@Completion(FileCompleter.class)
 	private List<String> inputFiles;
+
+	private ExcelToInvoices eti = new ExcelToInvoices();
 	
 	@Override
 	public Object execute() throws Exception {
 
-
-		ExcelToInvoices eti = new ExcelToInvoices();
+		checkParams();
 
 		InvoiceList il = eti.createInvoiceListFromFile(inputFile, inputFiles);
 
@@ -75,4 +81,13 @@ public class ConvertSpreadSheet implements Action {
 		return null;
 	}
 
+	private void checkParams() throws Exception {
+		if (priceIncludesTax && taxPercent==0d) {
+			throw new Exception("Tax percent must be specified if --price-includes-tax is used");
+		}
+		eti.setPriceIncludesTaxGlobal(priceIncludesTax);
+		eti.setTaxPercentGlobal(taxPercent);
+	}
+	
+	
 }

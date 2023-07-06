@@ -40,10 +40,13 @@ public class InvoiceHeaderTable extends GenericTable {
 		column("Customer name");
 		column("Order #");
 		column("Your Order #");
+		column("Our reference");
 		column("ExtRef1");
 		column("ExtRef2");
 		column("Grand total").alignRight();
 		column("Open amt").alignRight();
+		column("Curr");
+		column("Ctry");
 		column("Pmt term");
 		column("Not completed");
 		column("Warehouse Ready");
@@ -89,10 +92,13 @@ public class InvoiceHeaderTable extends GenericTable {
 				is.getCustomerName(),
 				"N/A",
 				"N/A",
+				"N/A",
 				is.getExternalInvoiceReference1(),
 				is.getExternalInvoiceReference2(),
 				nfmt.format(is.getTotal()),
 				nfmt.format(is.getBalance()),
+				is.getCurrency(),
+				"N/A",
 				is.getTermsOfPayment(),
 				"N/A", 
 				"N/A")
@@ -109,10 +115,13 @@ public class InvoiceHeaderTable extends GenericTable {
 				invoice.getCustomerName(),
 				invoice.getOrderReference(),
 				invoice.getYourOrderNumber(),
+				invoice.getOurReference(),
 				invoice.getExternalInvoiceReference1(),
 				invoice.getExternalInvoiceReference2(),
 				nfmt.format(invoice.getTotal()),
 				nfmt.format(invoice.getBalance()),
+				invoice.getCurrency(),
+				invoice.getCountry(),
 				invoice.getTermsOfPayment(),
 				invoice.isNotCompleted(),
 				invoice.getWarehouseReady()

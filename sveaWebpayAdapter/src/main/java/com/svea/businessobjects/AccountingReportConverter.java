@@ -34,12 +34,16 @@ public class AccountingReportConverter {
 			case FeeDetail.FEETYPE_KICKBACK:
 				avl.setAcctType(AccountingType.REVENUE);
 				avl.setTaxKey("0");
+				avl.setDescription("Kickback");
 				break;
 			case FeeDetail.FEETYPE_DEVIATIONS:
 				avl.setAcctType(AccountingType.UNKNOWN_BALANCE_TRX);
 				break;
 			case FeeDetail.ACCTTYPE_DEPOSIT:
 				avl.setAcctType(AccountingType.ASSET_DEPOSIT);
+				break;
+			case FeeDetail.REVENUE_INTEREST:
+				avl.setAcctType(AccountingType.INTEREST_INCOME);
 				break;
 			default:
 				avl.setAcctType(AccountingType.OTHER_EXPENSES_SALES);
@@ -78,10 +82,14 @@ public class AccountingReportConverter {
 			dst.setProjectCode(src.getProjectCode());
 			
 			dst.setAcctDate(src.getAcctDate());
+			dst.setSourceCurrency(src.getCurrency());
+			
 			result.add(dst);
 
 			if (src.getRevenues()!=null) {
 				for (RevenueLine rl : src.getRevenues()) {
+					
+					avl = null;
 					
 					if (rl.getTaxAmount()!=0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(-rl.getTaxAmount()), AccountingType.LIABILITY_VAT);
@@ -91,7 +99,14 @@ public class AccountingReportConverter {
 					if (rl.getTaxBase()!=0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(-rl.getTaxBase()), "?".equals(rl.getTaxKey()) ? AccountingType.REVENUE_UNCLEAR : AccountingType.REVENUE);
 						avl.setTaxKey(rl.getTaxKey());
+						if (rl.getRevenueAcctNo()!=null && rl.getRevenueAcctNo().trim().length()>0) {
+							avl.setAcctNo(rl.getRevenueAcctNo());
+						}
 						dst.addVoucherLine(avl);
+					}
+					
+					if (avl!=null && rl.getDescription()!=null) {
+						avl.setDescription(rl.getDescription());
 					}
 					
 				}
@@ -100,7 +115,7 @@ public class AccountingReportConverter {
 			if (src.getPayouts()!=null) {
 				for (PayoutLine pl : src.getPayouts()) {
 					
-					if (pl.getFeeAmount()!=0) {
+					if (pl.getFeeAmount()!=0 || (pl.getFeeSpecification()!=null && pl.getFeeSpecification().size()>1)) {
 						
 						if (pl.getFeeSpecification()==null || pl.getFeeSpecification().isEmpty()) {
 							avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getFeeAmount()), AccountingType.OTHER_EXPENSES_SALES);
@@ -137,19 +152,9 @@ public class AccountingReportConverter {
 						dst.addVoucherLine(avl);
 					}
 					
-					// Opening balance is negative
-					if (pl.getOpeningBalance()<0 && pl.getEndingBalance()>=0) {
-						if (pl.getPaidOut()>0) {
-							 avl = new AccountingVoucherLine(BigDecimal.valueOf(-pl.getOpeningBalance()), AccountingType.LIABILITY_OTHER);
-						} else {
-							avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getPaidByCustomer()), AccountingType.LIABILITY_OTHER);
-						}
-						dst.addVoucherLine(avl);
-					}
-					
-					// Ending balance is negative
-					if (pl.getEndingBalance()<0) {
-						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getEndingBalance()-pl.getOpeningBalance()), AccountingType.LIABILITY_OTHER);
+					// Change of balance
+					if (pl.getChangeOfBalance()!=0) {
+						 avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getChangeOfBalance()), AccountingType.LIABILITY_OTHER);
 						dst.addVoucherLine(avl);
 					}
 					

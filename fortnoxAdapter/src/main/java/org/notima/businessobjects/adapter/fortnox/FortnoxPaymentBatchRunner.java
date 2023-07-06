@@ -118,6 +118,7 @@ public class FortnoxPaymentBatchRunner {
 		av.remapAccountType(AccountingType.LIQUID_ASSET_AR, modeOfPaymentAccount);
 		av.remapAccountType(AccountingType.OTHER_EXPENSES_SALES, feeGlAccount);
 		av.remapAccountType(AccountingType.LIQUID_ASSET_CASH, intransitAccount);
+		av.balanceWithLine(AccountingType.ROUNDING);
 		
 		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
 		
@@ -174,18 +175,30 @@ public class FortnoxPaymentBatchRunner {
 		
 		prepareWriteOffs(payment);
 		
-		InvoicePayment invoicePayment = extendedClient.payCustomerInvoice(
-				modeOfPayment, 
-				inv, 
-				bookkeepPayment, 
-				processOptions.isFeesPerPayment(), 
-				payment,
-				dryRun);
+		InvoicePayment invoicePayment = null;
+		Exception paymentException = null;
 		
-		if (invoicePayment!=null && invoicePayment.getNumber()>0) {
+		try {
+			invoicePayment = extendedClient.payCustomerInvoice(
+					modeOfPayment, 
+					inv, 
+					bookkeepPayment, 
+					processOptions.isFeesPerPayment(), 
+					payment,
+					dryRun);
+		} catch (Exception ee) {
+			paymentException = ee;
+		}
+		
+		if (invoicePayment!=null && invoicePayment.getNumber()!=null && invoicePayment.getNumber()>0) {
 			return new PaymentProcessResult(ResultCode.OK);
 		} else {
-			return new PaymentProcessResult(ResultCode.FAILED);
+			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.FAILED);
+			if (paymentException!=null) {
+				ppr.setException(paymentException);
+				ppr.setTextResultFromException();
+			}
+			return ppr;
 		}
 		
 	}

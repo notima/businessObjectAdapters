@@ -14,8 +14,8 @@ import javax.xml.bind.JAXB;
 import org.notima.api.fortnox.Fortnox4JSettings;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
-import org.notima.api.fortnox.clients.FortnoxClientInfo;
-import org.notima.api.fortnox.clients.FortnoxClientManager;
+import org.notima.api.fortnox.FortnoxException;
+import org.notima.api.fortnox.FortnoxScopeException;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Currency;
 import org.notima.api.fortnox.entities3.Customer;
@@ -26,6 +26,7 @@ import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.Order;
 import org.notima.api.fortnox.entities3.OrderSubset;
 import org.notima.api.fortnox.entities3.Orders;
+import org.notima.api.fortnox.entities3.PreDefinedAccount;
 import org.notima.api.fortnox.entities3.Supplier;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.WriteOff;
@@ -88,18 +89,19 @@ public class FortnoxExtendedClient {
 	public static String DEFAULT_NEW_SUPPLIER_NAME = "Supplier created by Fortnox4J"; 
 	
 	// Cache functions
-	private FortnoxClientManager clientManager;
 	private String clientOrgNo;
 	private String lastClientOrgNo;
 	private FortnoxAdapter 	bof;
+	private Integer	roundingAcct;
 	
 	private Logger log = LoggerFactory.getLogger(FortnoxExtendedClient.class);
 	
-	public FortnoxExtendedClient(FortnoxAdapter fortnoxAdapter) {
+	public FortnoxExtendedClient(FortnoxAdapter fortnoxAdapter) throws Exception {
 		bof = fortnoxAdapter;
 		clientOrgNo = bof.getCurrentTenant().getTaxId();
-		FortnoxClientInfo finfo = bof.getClientManager().getClientInfoByOrgNo(clientOrgNo);
 		currencies = new TreeMap<String,Currency>();
+		PreDefinedAccount pdef = getCurrentFortnoxClient().getPreDefinedAccount(FortnoxClient3.ACCT_ROUNDING);
+		roundingAcct = pdef.getAccount();
 	}
 
 	public FortnoxClient3 getCurrentFortnoxClient() {
@@ -120,10 +122,10 @@ public class FortnoxExtendedClient {
 	}
 	
 	/**
-	 * Return true if the given parameter is equal to the last access token used.
+	 * Return true if the given parameter is equal to the last orgNo used.
 	 * 
-	 * @param accessToken
-	 * @return	True if accesstoken hasn't changed.
+	 * @param orgNo
+	 * @return	True if orgNo hasn't changed.
 	 */
 	public boolean isLastOrgNo(String orgNo) {
 		if (orgNo==null || lastClientOrgNo==null)
@@ -139,8 +141,7 @@ public class FortnoxExtendedClient {
 	/**
 	 * Keeps a cached business object factory
 	 * 
-	 * @param accessToken
-	 * @param clientSecret
+	 * @param orgNo
 	 * @return	The current FortnoxAdapter (if none is initialized, it's initialized)
 	 * @throws Exception
 	 */
@@ -156,7 +157,6 @@ public class FortnoxExtendedClient {
 		}
 		
 		this.clientOrgNo = orgNo;
-		this.clientManager = bof.getClientManager();
 		
 		return bof;
 	}
@@ -308,17 +308,17 @@ public class FortnoxExtendedClient {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<org.notima.generic.businessobjects.Invoice> getOverdueInvoices(
+	public List<org.notima.generic.businessobjects.Invoice<?>> getOverdueInvoices(
 			) throws Exception {
 		
-		List<org.notima.generic.businessobjects.Invoice> result = new ArrayList<org.notima.generic.businessobjects.Invoice>();
+		List<org.notima.generic.businessobjects.Invoice<?>> result = new ArrayList<org.notima.generic.businessobjects.Invoice<?>>();
 		
 		List<org.notima.api.fortnox.entities3.Invoice> finvoices = getFortnoxInvoices(
 				FortnoxClient3.FILTER_UNPAID_OVERDUE);
 		
 		if (finvoices!=null) {
 			for (org.notima.api.fortnox.entities3.Invoice ii : finvoices)
-			result.add(FortnoxAdapter.convert(ii));
+			result.add(FortnoxAdapter.convertToCanonicalInvoice(ii));
 		}
 		
 		return result;
@@ -654,7 +654,7 @@ public class FortnoxExtendedClient {
 			Invoice invoice,
 			boolean bookkeepPayment,
 			boolean includeWriteOffs,
-			Payment payment,
+			Payment<?> payment,
 			boolean dryRun) throws Exception {
 		
 		// TODO: Use FortnoxClient3.payCustomerInvoice to avoid duplicating code
@@ -769,8 +769,10 @@ public class FortnoxExtendedClient {
 	 * @param rate
 	 * @return
 	 * @throws Exception
+	 * @throws FortnoxException
+	 * @throws FortnoxScopeException
 	 */
-	public Voucher accountFortnoxVoucher(Voucher voucher, String srcCurrency, double rate) throws Exception {
+	public Voucher accountFortnoxVoucher(Voucher voucher, String srcCurrency, double rate) throws FortnoxException, FortnoxScopeException, Exception {
 		
 		if (srcCurrency!=null && !srcCurrency.equalsIgnoreCase(FortnoxClient3.DEFAULT_ACCOUNTING_CURRENCY)) {
 			
@@ -783,10 +785,13 @@ public class FortnoxExtendedClient {
 			}
 			
 			voucher.currencyConvert(currency);
+			voucher.balanceVoucher(roundingAcct);
 			
 		}
 		
-		JAXB.marshal(voucher, System.out);
+		if (log.isDebugEnabled()) {
+			JAXB.marshal(voucher, System.out);
+		}
 
 		voucher = bof.getClient().setVoucher(voucher);
 		
@@ -862,20 +867,20 @@ public class FortnoxExtendedClient {
 		org.notima.generic.businessobjects.Invoice invoice = bbc.toInvoice(order);
 		
 		Customer fortnoxCustomer = persistCustomerFromCanonical(order.getBusinessPartner());
-		invoice.setBusinessPartner(FortnoxAdapter.convert(fortnoxCustomer));
+		invoice.setBusinessPartner(FortnoxAdapter.convertToBusinessPartner(fortnoxCustomer));
 		if (invoiceDate!=null) {
 			invoice.setInvoiceDate(invoiceDate);
 		}
 		
 		bof.getClient().setUseArticles(useArticles!=null && useArticles.booleanValue());
 		
-		org.notima.generic.businessobjects.Invoice result = (org.notima.generic.businessobjects.Invoice)bof.persist(invoice);
+		org.notima.generic.businessobjects.Invoice result = (org.notima.generic.businessobjects.Invoice)bof.persistCanonicalInvoice(invoice);
 		
 		return result;
 		
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"rawtypes"})
 	public org.notima.api.fortnox.entities3.Customer persistCustomerFromCanonical(
 			org.notima.generic.businessobjects.BusinessPartner bp 
 			) throws Exception {
@@ -926,7 +931,7 @@ public class FortnoxExtendedClient {
 		}
 		if (result==null) {
 			// Customer doesn't exist
-			result = bof.getClient().setCustomer(bof.convert(bp));
+			result = bof.getClient().setCustomer(FortnoxAdapter.convertFromBusinessPartner(bp));
 		}
 
 		return result;
@@ -990,6 +995,7 @@ public class FortnoxExtendedClient {
 	 * @param vatAccount
 	 * @param description
 	 * @param voucherSeries
+	 * @param costCenter
 	 * @return
 	 * @throws Exception	if something goes wrong.
 	 */
@@ -1001,7 +1007,8 @@ public class FortnoxExtendedClient {
 			String srcAccount,
 			String vatAccount,
 			String description,
-			String voucherSeries
+			String voucherSeries,
+			String costCenter
 			) throws Exception {
 
 		Date trxDate = null;
@@ -1021,7 +1028,8 @@ public class FortnoxExtendedClient {
 				vatAccount, 
 				(double)totalAmount, 
 				(double)vatAmount, 
-				description);
+				description,
+				costCenter);
 
 		bof = getFortnoxAdapter(clientOrgNo);
 		

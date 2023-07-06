@@ -5,9 +5,11 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
@@ -30,6 +32,7 @@ public class RemoveClient implements Action {
 	private Session sess;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client to remove", required = true, multiValued = false)
+	@Completion(FortnoxTenantCompleter.class)
 	String orgNo;
     
 	@SuppressWarnings("rawtypes")

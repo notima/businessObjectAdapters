@@ -86,7 +86,7 @@ public class Activator extends BaseActivator {
 		if (fortnoxClientsFile!=null) {
 			
 			System.setProperty(FortnoxClient3.DFortnox4JFile, fortnoxClientsFile);
-			System.setProperty(FileCredentialsProvider.CREDENTIALS_FILE_PROPERTY, fortnoxCredentialsFile);
+			System.setProperty(CredentialsFile.CREDENTIALS_FILE_PROPERTY, fortnoxCredentialsFile);
 			FortnoxClientManager mgr = null;
 			
 			try {

@@ -11,18 +11,19 @@ import org.notima.generic.businessobjects.KeyValue;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.OrderLine;
+import org.notima.generic.businessobjects.OrderStatus;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
 import org.notima.generic.businessobjects.PaymentWriteOffs;
 import org.notima.generic.businessobjects.Person;
+import org.notima.generic.businessobjects.Tax;
+import org.notima.generic.businessobjects.TaxSummary;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 
 import com.svea.businessobjects.SveaUtility;
-import com.svea.webpay.common.conv.InvalidTaxIdFormatException;
 import com.svea.webpay.common.conv.JsonUtil;
 import com.svea.webpay.common.conv.TaxIdFormatter;
 import com.svea.webpay.common.conv.TaxIdStructure;
-import com.svea.webpay.common.conv.UnknownTaxIdFormatException;
 import com.svea.webpay.common.reconciliation.FeeDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportDetail;
 import com.svea.webpay.common.reconciliation.PaymentReportGroup;
@@ -49,6 +50,162 @@ import com.svea.webpayadminservice.client.OrderType;
  */
 public class SveaAdminConverter {
 
+	
+	/**
+	 * Checks if there's a difference between the order and the payout.
+	 * If there's a difference the order is adjusted to align with the payout.
+	 * 
+	 * The corresponding payment detail is attached to the order as an attribute named "ATTR_PAYMENTDETAIL".
+	 * 
+	 * @param i		The order corresponding to the pay out references
+	 * @param d		The payment detail.
+	 * @return		An order that corresponds to the amount of the payment detail.
+	 */
+	public static Order<?> checkDifferenceAndAdjustIfNecessary(Order<?> i, PaymentReportDetail d) {
+		BasicBusinessObjectConverter<Object,Object> bboc = new BasicBusinessObjectConverter<Object,Object>();
+		
+		try {
+			
+			// TODO: Change rounding precision if currency is other than SEK.
+			double roundedGrandTotal = FeeDetail.roundFee(i.getGrandTotal(), 0);
+			if (d.getPaidAmt() == -roundedGrandTotal) {
+				
+				// We have a credited order in full
+				i = bboc.negateOrder(i);
+				
+			} else if (d.getPaidAmt()<0) {
+				// The paid amount is negative.
+				
+				 if (i.getGrandTotal()>=0 && (i.getGrandTotal()+d.getPaidAmt())>=0) {
+					
+					// If there's a credit and the credit is less than the grand total of the order. 
+					i = bboc.createCreditOrderFromAmount(i, -d.getPaidAmt());
+					
+				 } else if (i.getGrandTotal()>=0 && (i.getGrandTotal()+d.getPaidAmt())<=0){
+	
+					// If there's a credit and the credit is more than the total of the order.
+					 
+					double previousTotal = i.getGrandTotal();
+					// TODO: This if / else leads to the same result.
+					if (previousTotal==0 && (i.getLines()==null || i.getLines().isEmpty())) {
+						// We have a cancelled order with no lines.
+						previousTotal = -d.getPaidAmt();
+						// Create a credit order from amount
+						i = bboc.createCreditOrderFromAmount(i, previousTotal);
+						
+					} else {
+						
+						// The credited amount is larger than the order amount and 
+						// we have order lines.
+						
+						i = bboc.createCreditOrderFromAmount(i, -d.getPaidAmt());
+						
+					}
+					i.calculateGrandTotal();
+					 
+				 }
+				
+			} else if (i.getGrandTotal()<d.getPaidAmt()) {
+				// If there's a payout bigger than the order
+				double difference = d.getPaidAmt() - i.getGrandTotal();
+				// TODO: Make currency precision aware
+				if (Math.abs(difference)>1) {
+					List<OrderLine> lines = generateOrderLinesFromAmount(i, d.getPaidAmt()-i.getGrandTotal());
+					// Clear previous lines.
+					i.getOrderInvoiceLines().clear();
+					// Add the generated lines
+					for (OrderLine l : lines) {
+						i.addOrderLine(l);
+					}
+					i.calculateGrandTotal();
+				}
+				
+			} else if (d.getPaidAmt()<i.getGrandTotal()) {
+				double difference = i.getGrandTotal() - d.getPaidAmt();
+				// TODO: Make currency precision aware
+				if (Math.abs(difference)>1) { 
+					// If there's a payout less than the order but not negative
+					i = bboc.createOrderFromAmount(i, d.getPaidAmt());
+				}
+			}
+			
+			if (i.getGrandTotal()!=d.getPaidAmt()) {
+				System.out.println("Order " + i.getDocumentKey() + " with total " + i.getGrandTotal() + " differs from payment with total: " + d.getPaidAmt());
+			}
+			
+		} catch (Exception e) {
+			System.out.println("Order " + i.getDocumentKey() + " : " + e.getMessage());
+		}
+		return i;
+		
+	}
+	
+	public static List<OrderLine> generateOrderLinesFromAmount(Order<?> o, double amount) {
+
+		List<OrderLine> lines = new ArrayList<OrderLine>();
+		if (o==null) return lines;
+		
+		List<TaxSummary> taxes = o.calculateSuggestedTaxDistribution(amount);
+		OrderLine ol = null;
+		for (TaxSummary tax : taxes) {
+			ol = new OrderLine();
+			ol.setTaxKey(tax.getKey());
+			ol.setQtyEntered(1D);			
+			ol.setTaxAmount(tax.getTaxAmount());
+			ol.setPricesIncludeVAT(true);
+			ol.setTaxPercent(tax.getRate());
+			ol.setPriceActual(tax.calculateTotal());
+			lines.add(ol);
+		}
+		if (TaxSummary.containsKey(Tax.TAX_KEY_UNKNOWN, taxes)) {
+			o.setStatusEnum(OrderStatus.UNCLEAR);
+		}
+		return lines;
+		
+	}
+	
+	/**
+	 * If the order can't be resolved, this method will generate an unknown order.
+	 * 
+	 * @param d					The payment report detail.
+	 * @param unknownStatus		The unknown status (user defined).
+	 * @return					An unknown order.
+	 */
+	public static Order<Object> generateUnknownOrder(PaymentReportDetail d, String unknownStatus) {
+		
+		Order<Object> o = new Order<Object>();
+		o.setOrderKey(d.getClientOrderNo());
+		String comment = d.getReference(PaymentReportDetail.REF_COMMENT);
+		if (comment!=null && comment.trim().length()>0) {
+			BusinessPartner<Object> bp = new BusinessPartner<Object>();
+			bp.setName(comment);
+			o.setBpartner(bp);
+		}
+		o.addOrderLine(generateUnknownOrderLine(d.getPaidAmt()));
+		o.calculateGrandTotal();
+		o.setStatus(unknownStatus);
+		
+		return o;
+	}
+	
+	private static OrderLine generateUnknownOrderLine(double amount) {
+		return(generateSpecifiedOrderLine(amount, Tax.TAX_KEY_UNKNOWN, "?", null, 0D));
+	}
+	
+	private static OrderLine generateSpecifiedOrderLine(double amount, String taxKey, String productKey, String comment, double taxAmount) {
+		OrderLine ol = new OrderLine();
+		ol.setTaxKey(taxKey);
+		ol.setQtyEntered(1D);
+		ol.setPricesIncludeVAT(true);
+		ol.setProductKey(productKey);
+		ol.setTaxAmount(taxAmount);
+		ol.setPriceActual(amount);
+		return ol;
+	}
+	
+	
+	
+	
 	/**
 	 * Creates an order request including payment plan details
 	 * 
@@ -139,6 +296,7 @@ public class SveaAdminConverter {
 	 * @param src	A webpay invoice.
 	 * @return		An invoice in business objects format.
 	 */
+	@SuppressWarnings("rawtypes")
 	public static org.notima.generic.businessobjects.Invoice<com.svea.webpayadminservice.client.Invoice> convert(com.svea.webpayadminservice.client.Invoice src) throws Exception {
 		
 		if (src==null) return null;
@@ -184,8 +342,8 @@ public class SveaAdminConverter {
 		if (src==null) return null;
 		
 		org.notima.generic.businessobjects.Order<com.svea.webpayadminservice.client.Order> dst = new org.notima.generic.businessobjects.Order<com.svea.webpayadminservice.client.Order>(); 
-
-		dst.setDocumentKey(src.getClientOrderId());
+		dst.setDocumentKey(Long.toString(src.getSveaOrderId()));
+		dst.setOrderKey(src.getClientOrderId());
 		dst.setCurrency(src.getCurrency());
 		dst.setSalesOrder(true);
 		dst.setDocumentDate(src.getCreatedDate().toGregorianCalendar().getTime());
@@ -443,6 +601,7 @@ public class SveaAdminConverter {
 	 * @return				A list of payments.
 	 * @throws ParseException	If report can't be parsed.
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Payment<PaymentReportDetail>> convert(PaymentReportGroup group, boolean retriesOnly, boolean includeFees) throws ParseException {
 		
 		List<Payment<PaymentReportDetail>> dstList = new ArrayList<Payment<PaymentReportDetail>>();
@@ -473,6 +632,7 @@ public class SveaAdminConverter {
 	 * @return				A payment
 	 * @throws ParseException	If something goes wrong
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Payment convert(PaymentReportDetail src, PaymentReportGroup group, boolean includeFees) throws ParseException {
 		
 		Payment dst = new Payment();

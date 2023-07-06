@@ -1,8 +1,11 @@
 package com.svea.businessobjects.pmtadmin;
 
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.JAXB;
 
 import org.notima.api.webpay.pmtapi.PmtApiUtil;
 import org.notima.api.webpay.pmtapi.entity.Credit;
@@ -21,6 +24,41 @@ import com.svea.webpay.common.conv.UnknownTaxIdFormatException;
 
 public class SveaPmtAdminConverter {
 
+	/**
+	 * Prints a native order as a string.
+	 * 
+	 * @param order
+	 * @return	The string representation of the native order.
+	 */
+	public static String nativeOrderToString(Order<?> order) {
+		
+		if (order.getNativeOrder()==null) return null;
+		
+		StringWriter sw = new StringWriter();
+		boolean orderConvertedToString = false;
+		
+		if (order.getNativeOrder() instanceof org.notima.api.webpay.pmtapi.entity.Order) {
+			
+			org.notima.api.webpay.pmtapi.entity.Order nativeOrder = (org.notima.api.webpay.pmtapi.entity.Order) order.getNativeOrder();
+			JAXB.marshal(nativeOrder, sw);			
+			orderConvertedToString = true;
+		}
+		
+		if (order.getNativeOrder() instanceof org.notima.api.webpay.pmtapi.CheckoutOrder) {
+			
+			org.notima.api.webpay.pmtapi.CheckoutOrder nativeOrder = (org.notima.api.webpay.pmtapi.CheckoutOrder) order.getNativeOrder();
+			JAXB.marshal(nativeOrder, sw);			
+			orderConvertedToString = true;
+		}
+		
+		if (!orderConvertedToString) {
+			System.err.println("Can't convert " + order.getNativeOrder().getClass().getCanonicalName() + " to a string representation");
+		}
+		
+		return sw.toString();
+		
+	}
+	
 	@SuppressWarnings("rawtypes")
 	public static Order<org.notima.api.webpay.pmtapi.CheckoutOrder> convert(org.notima.api.webpay.pmtapi.CheckoutOrder src) throws ParseException {
 		if (src==null) return null;
@@ -47,8 +85,12 @@ public class SveaPmtAdminConverter {
 		person.setPhone(s.getPhoneNumber());
 		person.setEmail(s.getEmailAddress());
 		if (person.getName()==null || person.getName().trim().length()==0) {
-			if (s.getBillingAddress()!=null)
+			if (s.getBillingAddress()!=null && s.getBillingAddress().getFullName()!=null && s.getBillingAddress().getFullName().trim().length()>0)
 					person.setName(s.getBillingAddress().getFullName());
+			else if (s.getEmailAddress()!=null) {
+				// Last resort
+				person.setName(s.getEmailAddress());
+			}
 		}
 		
 		dst.setBillPerson(person);
@@ -72,7 +114,14 @@ public class SveaPmtAdminConverter {
 		bp.setAddressOfficial(dst.getBillLocation());
 		
 		// Get name from either billing address or shipping address (if billing address is empty)
-		bp.setName(s.getBillingAddress().getFullName()!=null ? s.getBillingAddress().getFullName() : s.getShippingAddress().getFullName());
+		try {
+			bp.setName(s.getBillingAddress().getFullName()!=null ? s.getBillingAddress().getFullName() : s.getShippingAddress().getFullName());
+			if (bp.getName()==null || bp.getName().trim().length()==0)
+				bp.setName(s.getEmailAddress());
+		} catch (NullPointerException ne) {
+			// Last resort
+			bp.setName(s.getEmailAddress());
+		}
 		if (bp.isCompany()) {
 			// Add contact
 			List<Person> contacts = new ArrayList<Person>();
@@ -98,22 +147,24 @@ public class SveaPmtAdminConverter {
 					}
 				}
 				
-				// TODO: It seemed as if a temporary problem at the API (sept 2021) caused 
-				// credited rows to not show up in the original order rows.
-				// Commenting out below since it's now working, 2021-09-23
+				// Only consider credits if everything is credited and there are no order rows.
+				// If everything is credited we have no rows at all to calculate VAT.
+				// TODO: Make a more in depth algorithm on this
+				if (d.getDeliveryAmount().equals(d.getCreditedAmount()) && (d.getOrderRows()==null || d.getOrderRows().size()==0)) {
 				
-				/** if (d.getCredits()!=null) {
-					for (Credit cr : d.getCredits()) {
-						if (cr.getOrderRows()!=null) {
-							for (OrderRow creditedOrderRow : cr.getOrderRows()) {
-								ll = convert(creditedOrderRow);
-								// Set to zero delivered.
-								ll.setQtyDelivered(0);
-								ol.add(ll);
+					if (d.getCredits()!=null) {
+						for (Credit cr : d.getCredits()) {
+							if (cr.getOrderRows()!=null) {
+								for (OrderRow creditedOrderRow : cr.getOrderRows()) {
+									ll = convert(creditedOrderRow);
+									// Set to zero delivered.
+									ll.setQtyDelivered(0);
+									ol.add(ll);
+								}
 							}
 						}
 					}
-				} */
+				}
 			}
 		}
 		
