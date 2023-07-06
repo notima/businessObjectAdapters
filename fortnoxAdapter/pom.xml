@@ -20,6 +20,13 @@
 	<dependencies>
 		
 		<dependency>
+		    <groupId>org.apache.karaf.scheduler</groupId>
+		    <artifactId>org.apache.karaf.scheduler.core</artifactId>
+		    <version>${karaf.version}</version>
+		    <scope>provided</scope>
+		</dependency>
+		
+		<dependency>
 			<groupId>org.notima.api</groupId>
 			<artifactId>fortnox4j</artifactId>
 			<version>${fortnox4j.version}</version>
@@ -80,7 +87,8 @@
 										org.notima.businessobjects.adapter.fortnox.exception.*,	
 										org.notima.fortnox.command*,
 										org.notima.fortnox.command.completer,
-										org.notima.fortnox.command.table
+										org.notima.fortnox.command.table,
+										org.notima.fortnox.scheduler*
 										</Export-Package>
 		        		<Private-Package>
         					org.apache.karaf.util.tracker,

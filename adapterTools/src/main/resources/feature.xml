@@ -67,6 +67,8 @@
 
     <feature name="notima-fortnox4j" description="Notima Fortnox4J Adapter" version="${project.version}" install="manual">
         <feature prerequisite="true" dependency="false">wrap</feature>
+        <feature>scr</feature>
+        <feature>scheduler</feature>
         <feature>notima-businessobjects</feature>
         <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
         <bundle>mvn:com.diffplug.osgi/com.diffplug.osgi.extension.com.sun.net.httpserver/0.0.0</bundle>
