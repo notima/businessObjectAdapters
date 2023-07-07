@@ -1054,7 +1054,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Add invoice lines
 		InvoiceRows rows = src.getInvoiceRows();
 		for (InvoiceRow r : rows.getInvoiceRow()) {
-			dst.addInvoiceLine(convert(r));
+			dst.addInvoiceLine(convert(r, src.isVATIncluded()));
 		}
 		if(src.getRoundOff() != 0 ){
 			InvoiceRow ir = new InvoiceRow();
@@ -1063,14 +1063,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			ir.setDeliveredQuantity(1.0);
 			ir.setVAT(0.0);
 			ir.setDeliveredQuantity(1.0);
-			dst.addInvoiceLine(convert(ir));
+			dst.addInvoiceLine(convert(ir, false));
 		}
 		
 		return dst;
 		
 	}
 	
-	public static org.notima.generic.businessobjects.InvoiceLine convert(org.notima.api.fortnox.entities3.InvoiceRow src) {
+	public static org.notima.generic.businessobjects.InvoiceLine convert(org.notima.api.fortnox.entities3.InvoiceRow src, boolean vatIncluded) {
 		
 		org.notima.generic.businessobjects.InvoiceLine dst = new org.notima.generic.businessobjects.InvoiceLine();
 		
@@ -1079,6 +1079,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dst.setPriceActual(src.getPrice());
 		dst.setQtyEntered(src.getDeliveredQuantity());
 		dst.setTaxPercent(src.getVAT());
+		dst.setTaxIncludedInPrice(vatIncluded);
 		dst.setUOM(src.getUnit());
 		dst.setAccountNo(src.getAccountNumber());
 		
