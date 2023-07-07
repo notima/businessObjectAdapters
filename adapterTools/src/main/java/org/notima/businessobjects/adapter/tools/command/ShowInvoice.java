@@ -85,6 +85,7 @@ public class ShowInvoice implements Action {
 			
 			if (invoiceNative==null) {
 				StringWriter sw = new StringWriter();
+				invoice.setNativeInvoice(null);
 				JAXB.marshal(invoice,  sw);
 				sess.getConsole().println(sw.toString());
 			} else {
