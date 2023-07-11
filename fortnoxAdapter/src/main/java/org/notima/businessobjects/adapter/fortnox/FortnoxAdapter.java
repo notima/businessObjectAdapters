@@ -991,7 +991,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dst.setVatTotal(src.getTotalVAT());
 		dst.setPoDocumentNo(src.getExternalInvoiceReference2());
 		dst.setPaymentTermKey(src.getTermsOfPayment());
-		dst.setComment(src.getComments());
+		dst.setComment(src.getRemarks());
 		
 		if (src.getInvoicePeriodStart()!=null) {
 			try {
