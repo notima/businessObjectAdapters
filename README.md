@@ -19,9 +19,9 @@ https://github.com/sveawebpay/webpayadminreports
 
 https://github.com/notima/swish4j
 
-If the project is a release version, you'll only have to checkout and compile the sveawebpay projects.
+If the project is a release version, you'll only have to checkout and compile the project itself.
 
-## Installation in Karaf
+## Installation in Karaf (fortnox adapter)
 
 	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/LATEST/xml/features
 	
