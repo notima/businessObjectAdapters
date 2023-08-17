@@ -15,6 +15,7 @@ import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
+import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -24,7 +25,8 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(BusinessObjectFactory.class),
-				@ProvideService(PaymentBatchProcessor.class)
+				@ProvideService(PaymentBatchProcessor.class),
+				@ProvideService(TaxRateProvider.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -120,6 +122,15 @@ public class Activator extends BaseActivator {
 			
 			register(PaymentBatchProcessor.class, fpbp, props);
 			log.info("Registered FortnoxPaymentBatchProcessor.");
+			
+			TaxRateProvider trp = new FortnoxTaxRateProvider();
+			register(TaxRateProvider.class, trp, props);
+			try {
+				((FortnoxTaxRateProvider)trp).start(bundleContext);
+				log.info("Registered Fortnox Tax Rate Provider");
+			} catch (Exception e) {
+				log.error("Not able to start Fortnox Tax Rate Provider");
+			}
 
 		}
 		

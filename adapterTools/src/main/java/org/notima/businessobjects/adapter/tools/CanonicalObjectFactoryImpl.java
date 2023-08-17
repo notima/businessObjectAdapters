@@ -11,6 +11,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
+import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -31,6 +32,8 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, PaymentFactory> paymentFactories = new TreeMap<String, PaymentFactory>();
 	
 	private Map<String, PaymentBatchProcessor> paymentBatchProcessors = new TreeMap<String, PaymentBatchProcessor>();
+	
+	private Map<String, TaxRateProvider> taxRateProviders = new TreeMap<String, TaxRateProvider>();
 	
 	private BundleContext ctx;
 
@@ -136,6 +139,26 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 	}
 	
+	public void resetTaxRateProviders() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		
+		Collection<ServiceReference<TaxRateProvider>> references = ctx.getServiceReferences(TaxRateProvider.class, null);		
+
+		taxRateProviders.clear();
+		
+		if (references!=null) {
+			TaxRateProvider srv;
+			for (ServiceReference<TaxRateProvider> sr : references) {
+				srv = ctx.getService(sr);
+				taxRateProviders.put(srv.getSystemName(), srv);
+			}
+		}
+		
+		
+	}
+	
 	public Collection<PaymentBatchProcessor> listPaymentBatchProcessors() {
 		try {
 			resetPaymentBatchProcessors();
@@ -189,7 +212,32 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		
 	}
 	
+	@Override
+	public TaxRateProvider lookupTaxRateProvider(String adapterName) {
 
+		try {
+			resetTaxRateProviders();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+		
+		TaxRateProvider trp = null;
+		
+		if (adapterName==null) {
+			return null;
+		} else {
+			trp = taxRateProviders.get(adapterName);
+		}
+		if (trp==null)
+			log.warn("Tax rate provider: {} not found.", adapterName);
+		
+		return trp;
+		
+	}
+	
+	
 	/**
 	 * Looks up an adapter with given name.
 	 * 
@@ -316,6 +364,18 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		
 		return result;
 		
+	}
+
+	@Override
+	public Collection<TaxRateProvider> listTaxRateProviders() {
+		try {
+			resetTaxRateProviders();
+			return taxRateProviders.values();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	

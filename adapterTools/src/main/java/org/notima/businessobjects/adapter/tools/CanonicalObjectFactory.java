@@ -9,6 +9,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
+import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 
 /**
  * Used to lookup canonical objects from active adapters.
@@ -31,6 +32,10 @@ public interface CanonicalObjectFactory {
 	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName);
 	
 	public Collection<PaymentBatchProcessor> listPaymentBatchProcessors();
+	
+	public TaxRateProvider lookupTaxRateProvider(String systemName);
+	
+	public Collection<TaxRateProvider> listTaxRateProviders();
 	
 	public Invoice<?> lookupCustomerInvoice(String adapterName, String orgNo, String countryCode, String invoiceNo) throws NoSuchTenantException;
 	
