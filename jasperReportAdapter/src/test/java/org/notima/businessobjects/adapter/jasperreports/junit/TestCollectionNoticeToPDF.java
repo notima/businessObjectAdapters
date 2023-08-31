@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.notima.businessobjects.adapter.jasperreports.JasperBasePdfFormatter;
 import org.notima.businessobjects.adapter.jasperreports.JasperInvoiceCollectionFormatter;
-import org.notima.businessobjects.adapter.jasperreports.JasperInvoiceReminderFormatter;
 import org.notima.businessobjects.adapter.jasperreports.ds.DunningEntryXmlDataSource;
 import org.notima.generic.businessobjects.DunningEntry;
 import org.notima.generic.businessobjects.DunningRun;
@@ -49,10 +48,18 @@ public class TestCollectionNoticeToPDF {
 			props.put(JasperBasePdfFormatter.JASPER_REPORT_NAME, dfmt.format(Calendar.getInstance().getTime()) + " - The ultimate report");
 			
 			JasperInvoiceCollectionFormatter formatter = new JasperInvoiceCollectionFormatter();
+			formatter.setUsePlusgirot(true);
 			
-			String path = formatter.formatReminder(list.iterator().next(), formatter.getFormats()[0], props);
-
-			System.out.println(path);
+			String outputFileName;
+			String path;
+			
+			for (DunningEntry<?,?> entry : list) {
+				outputFileName = entry.getDebtor().getName();
+				entry.setBgNo("XXXX-XXXX");
+				props.put(JasperBasePdfFormatter.JASPER_OUTPUT_FILENAME, outputFileName);
+				path = formatter.formatReminder(entry, formatter.getFormats()[0], props);
+				System.out.println(path);
+			}
 			
 		} catch (Exception e) {
 

@@ -10,6 +10,8 @@ public class JasperInvoiceCollectionFormatter extends JasperBasePdfFormatter imp
 	
 	public final static String JASPER_COMPANY_NAME = "JasperCompanyName";
 	public final static String JASPER_TAX_ID = "JasperTaxId";
+	
+	private boolean usePlusgirot = false;
 
 	@Override
 	public String formatReminder(DunningEntry<?, ?> dunningEntry, String format, Properties props) throws Exception {
@@ -20,7 +22,7 @@ public class JasperInvoiceCollectionFormatter extends JasperBasePdfFormatter imp
 		
 		String jasperFile = props.getProperty(JASPER_FILE);
 		// Lookup default jasper file as a resource
-		URL url = ClassLoader.getSystemResource("reports/CollectionNotice.jasper");
+		URL url = ClassLoader.getSystemResource("reports/CollectionNotice" + (usePlusgirot ? "PG" : "") + ".jasper");
 		if (url!=null) {
 			jasperFile = url.getFile();
 		} else {
@@ -42,6 +44,14 @@ public class JasperInvoiceCollectionFormatter extends JasperBasePdfFormatter imp
 			return null;
 		}
 
+	}
+
+	public boolean isUsePlusgirot() {
+		return usePlusgirot;
+	}
+
+	public void setUsePlusgirot(boolean usePlusgirot) {
+		this.usePlusgirot = usePlusgirot;
 	}
 
 	
