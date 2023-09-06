@@ -4,6 +4,7 @@ import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 
 import java.util.List;
 
+import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.OrderInvoice;
@@ -21,6 +22,7 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 	private TaxSubjectIdentifier tsi;
 	private List<Tax>		    validTaxRates;
 	private String				validationMessage;
+	private boolean				adjustToClosestTaxRate = false;
 	
 	public FortnoxOrderInvoiceLineValidator(TaxSubjectIdentifier documentSender, TaxRateProvider trp) {
 		
@@ -50,18 +52,52 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 	
 	@Override
 	public boolean isLineValid() {
+		
+		if (!checkValidTaxRate())
+			return false;
+		
+		return true;
+		
+	}
+	
+	private boolean checkValidTaxRate() {
+
 		// Calculate tax rate
 		double lineTaxRate = theLine.getTaxPercent();
 		Tax closestTaxRate = findClosestTaxRate(lineTaxRate);
 		
 		if (lineTaxRate == closestTaxRate.getRate())
 			return true;
-		else
+		else {
 			validationMessage = "Actual tax rate: " + lineTaxRate + ". Closest tax rate: " + closestTaxRate.getRate();
+			if (adjustToClosestTaxRate) {
+				adjustLineToTaxRate(closestTaxRate.getRate());
+				return true;
+			}
+		}
 		
 		return false;
+		
 	}
+	
+	private void adjustLineToTaxRate(double newRate) {
 
+		double totalPriceIncVAT;
+		if (theLine.isPricesIncludeVAT()) {
+			totalPriceIncVAT = theLine.getPriceActual();
+			theLine.setTaxPercent(newRate);
+		} else {
+			totalPriceIncVAT = theLine.getPriceActual() * (1 + (theLine.getTaxPercent()/100.0));
+			theLine.setPriceActual(totalPriceIncVAT / (1 + (newRate / 100.0)));
+			theLine.setTaxPercent(newRate);
+		}
+		theLine.calculateLineTotalIncTax(FortnoxClient3.DEFAULT_ROUNDING_PRECISION);
+
+		validationMessage += ". Adjusted to tax rate: " + newRate;
+		
+	}
+	
+	
 	@Override
 	public String getValidationMessage() {
 		return validationMessage;
@@ -82,7 +118,13 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 		
 		return closestTaxRate;
 	}
-	
-	
+
+	public boolean isAdjustToClosestTaxRate() {
+		return adjustToClosestTaxRate;
+	}
+
+	public void setAdjustToClosestTaxRate(boolean adjustToClosestTaxRate) {
+		this.adjustToClosestTaxRate = adjustToClosestTaxRate;
+	}
 
 }
