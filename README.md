@@ -5,6 +5,8 @@ This code suite is developed and tested on JDK 8.
 
 	sudo apt install openjdk-8-jdk
 
+and [Apache Karaf 4.2.11](https://karaf.apache.org/archives.html).
+
 ## Prerequisites
 
 To compile this project in a SNAPSHOT-version, you'll first have to checkout and compile below projects
