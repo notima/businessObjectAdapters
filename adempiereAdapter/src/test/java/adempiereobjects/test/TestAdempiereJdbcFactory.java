@@ -55,7 +55,7 @@ public class TestAdempiereJdbcFactory {
 		try {
 			//Product product = factory.lookupProductByEan("074603003287");
 			//Invoice invoice = factory.lookupInvoice("1000887");
-			DunningRun dun = factory.lookupDunningRun("1000002");
+			DunningRun dun = factory.lookupDunningRun("1000002", null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());

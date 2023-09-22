@@ -76,7 +76,7 @@ public class TestFortnoxAdapterMethods extends FortnoxAdapterTestBase {
 	public void testLookupDunningRun() {
 		try {
 			
-			DunningRun<?,?> dr = factory.lookupDunningRun("excludeNegativeOpenAmount");
+			DunningRun<?,?> dr = factory.lookupDunningRun("excludeNegativeOpenAmount", null);
 			if (dr!=null && dr.getEntries()!=null) {
 				log.info("Retrieved {} entries in a dunning run.", dr.getEntries().size());
 			} else {

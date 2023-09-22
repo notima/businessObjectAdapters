@@ -1293,41 +1293,13 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	}
 
 	@Override
-	public DunningRun<Customer,org.notima.api.fortnox.entities3.Invoice> lookupDunningRun(String key) throws Exception {
+	public DunningRun<Customer,org.notima.api.fortnox.entities3.Invoice> lookupDunningRun(String key, Date dueDateUntil) throws Exception {
 
-		DunningRun<Customer,org.notima.api.fortnox.entities3.Invoice> dr = new DunningRun<Customer,org.notima.api.fortnox.entities3.Invoice>();
+		FortnoxDunningRunner dunningRunner = new FortnoxDunningRunner(this, key);
+		dunningRunner.setUntilDueDate(dueDateUntil);
+		dunningRunner.runDunningRun();
+		return dunningRunner.getDunningRunResult();
 		
-		boolean excludeNegativeOpenAmount = key!=null && "excludeNegativeOpenAmount".equalsIgnoreCase(key);
-		
-		Map<Object,Object> overdueList = lookupList(LIST_UNPAIDOVERDUE);
-		
-		Invoice<org.notima.api.fortnox.entities3.Invoice> invoice;
-		DunningEntry<org.notima.api.fortnox.entities3.Customer, org.notima.api.fortnox.entities3.Invoice> de;
-		
-		CompanySetting cs = fortnoxClient.getCompanySetting();
-		
-		// TODO: Add addInvoice method to DunningRun. Invoices with the same debtor/creditor is located
-		//		 with the same dunning entry.
-		for (Object o : overdueList.keySet()) {
-			invoice = lookupInvoice(o.toString());
-			de = new DunningEntry<Customer, org.notima.api.fortnox.entities3.Invoice>();
-			de.setCreditor(convert(cs));
-			de.setBgNo(getBgNo(cs));
-			de.setDebtor((BusinessPartner<Customer>) invoice.getBusinessPartner());
-			de.getDebtor().setAddressOfficial(invoice.getBillLocation());
-			de.setOcrNo(invoice.getOcr());
-			de.setLetterNo(invoice.getDocumentKey());
-			invoice.setPaymentTermKey(invoice.getLines().get(0).getName());
-			if (invoice!=null) {
-				if (excludeNegativeOpenAmount && invoice.getOpenAmt()<0)
-					continue;
-				de.addInvoice(invoice);
-				dr.addDunningEntry(de);
-				invoice.setNativeInvoice(null);
-			}
-		}
-		
-		return dr;
 	}
 	
 	/**

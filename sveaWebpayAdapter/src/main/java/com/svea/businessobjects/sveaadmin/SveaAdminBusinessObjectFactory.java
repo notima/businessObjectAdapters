@@ -1,5 +1,6 @@
 package com.svea.businessobjects.sveaadmin;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -200,7 +201,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 	}
 
 	@Override
-	public DunningRun lookupDunningRun(String key) throws Exception {
+	public DunningRun lookupDunningRun(String key, Date dueDateUntil) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -113,7 +114,7 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public DunningRun lookupDunningRun(String key) throws Exception{
+	public DunningRun lookupDunningRun(String key, Date dueDateUntil) throws Exception{
 		
 		int dunningRunId = Integer.parseInt(key);
 		DunningRun dun = AdempiereDunningRun.load(dunningRunId, m_conn);

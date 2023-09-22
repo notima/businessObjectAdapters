@@ -1,7 +1,10 @@
 package org.notima.businessobjects.adapter.tools.command;
 
 import java.io.File;
-import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.xml.bind.JAXB;
 
@@ -21,6 +24,8 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 @Service
 public class CreateDunningRun implements Action {
 
+	public static DateFormat	s_dfmt = new SimpleDateFormat("yyyy-MM-dd");	
+	
 	@Reference
 	private CanonicalObjectFactory cof;
 	
@@ -33,11 +38,16 @@ public class CreateDunningRun implements Action {
 	@Argument(index = 1, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
 	
+	@Option(name = "--duedateuntil", description = "Select invoices with max this due date. (format yyyy-mm-dd)", required = false, multiValued = false)
+	private String dueDateUntilStr;
+	
     @Option(name = "-co", aliases = { "--country-code" }, description = "Country code for the orgNo", required = false, multiValued = false)
     private String countryCode = "SE";
 	
     @Option(name = "-of", aliases = { "--outfile" }, description = "Write the dunning run to file", required = false, multiValued = false)
     private String outFile;
+    
+    private Date dueDateUntil;
     
 	private BusinessObjectFactory<?,?,?,?,?,?> bof;
 
@@ -48,6 +58,8 @@ public class CreateDunningRun implements Action {
 		
 		initBusinessObjectFactory();
 		
+		parseDates();
+		
 		createDunningRun();
 		
 		writeToFileIfApplicable();
@@ -57,6 +69,14 @@ public class CreateDunningRun implements Action {
 	}
 	
 	
+	private void parseDates() throws ParseException {
+		
+		if (dueDateUntilStr!=null) {
+			dueDateUntil = s_dfmt.parse(dueDateUntilStr);
+		}
+		
+	}
+	
 	private void initBusinessObjectFactory() throws NoSuchTenantException {
 	
 		bof = cof.lookupAdapter(adapterName);
@@ -65,7 +85,7 @@ public class CreateDunningRun implements Action {
 	}
 	
 	private void createDunningRun() throws Exception {
-		dunningRun = bof.lookupDunningRun(null);
+		dunningRun = bof.lookupDunningRun(null, dueDateUntil);
 	}
 	
 	private void writeToFileIfApplicable() {
