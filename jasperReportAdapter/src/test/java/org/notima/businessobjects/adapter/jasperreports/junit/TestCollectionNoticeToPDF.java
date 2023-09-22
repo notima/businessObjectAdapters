@@ -48,14 +48,15 @@ public class TestCollectionNoticeToPDF {
 			props.put(JasperBasePdfFormatter.JASPER_REPORT_NAME, dfmt.format(Calendar.getInstance().getTime()) + " - The ultimate report");
 			
 			JasperInvoiceCollectionFormatter formatter = new JasperInvoiceCollectionFormatter();
-			formatter.setUsePlusgirot(true);
+			formatter.setUsePlusgirot(false);
 			
 			String outputFileName;
 			String path;
+			int reminderCount = 1;
 			
 			for (DunningEntry<?,?> entry : list) {
-				outputFileName = entry.getDebtor().getName();
-				entry.setBgNo("XXXX-XXXX");
+				outputFileName = entry.getDebtor().getName() + "-" + reminderCount;
+				reminderCount++;
 				props.put(JasperBasePdfFormatter.JASPER_OUTPUT_FILENAME, outputFileName);
 				path = formatter.formatReminder(entry, formatter.getFormats()[0], props);
 				System.out.println(path);
