@@ -26,6 +26,7 @@ public class CredentialTable extends GenericTable {
 		column("RefreshToken");
 		column("Last refresh");
 		column("Timestamp");
+		column("Expires in");
 	
 		addRows();
 		
@@ -76,7 +77,8 @@ public class CredentialTable extends GenericTable {
 				(cred.hasLegacyTokenAndClientSecret() ? "Legacy" : "Oauth2"), 
 				cred.getRefreshTokenAbbreviated(),
 				dfmt.format(cred.getLastRefreshAsDate()),
-				cred.getLastRefresh());
+				cred.getLastRefresh(),
+				cred.getExpiresIn());
 		
 	}
 	
@@ -87,6 +89,7 @@ public class CredentialTable extends GenericTable {
 				cred.getClientId(),
 				cred.getLegacyTokenAbbreviated(),
 				"Legacy", 
+				"N/A",
 				"N/A",
 				"N/A",
 				"N/A");
