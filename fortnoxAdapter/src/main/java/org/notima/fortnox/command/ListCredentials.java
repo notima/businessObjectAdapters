@@ -19,7 +19,7 @@ import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.CredentialTable;
 
-@Command(scope = _CommandNames.SCOPE, name = _CommandNames.ListCredentials, description = "List credentials for client")
+@Command(scope = _FortnoxCommandNames.SCOPE, name = _FortnoxCommandNames.ListCredentials, description = "List credentials for client")
 @Service
 public class ListCredentials extends FortnoxCommand implements Action {
 	
@@ -63,7 +63,7 @@ public class ListCredentials extends FortnoxCommand implements Action {
 			sess.getConsole().println("Subscription-ID: " + cs.getDatabaseNumber());
 			
 			if (credentials.size()>4) {
-				sess.getConsole().println("\nUse " + _CommandNames.PurgeCredentials + " to purge old credentials.");
+				sess.getConsole().println("\nUse " + _FortnoxCommandNames.PurgeCredentials + " to purge old credentials.");
 			}
 			
 		} catch(FortnoxAuthenticationException e) {

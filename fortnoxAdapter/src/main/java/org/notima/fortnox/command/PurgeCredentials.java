@@ -22,7 +22,7 @@ import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
-@Command(scope = "fortnox", name = _CommandNames.PurgeCredentials, description = "Purges old credentials for client")
+@Command(scope = "fortnox", name = _FortnoxCommandNames.PurgeCredentials, description = "Purges old credentials for client")
 @Service
 public class PurgeCredentials extends FortnoxCommand implements Action {
 

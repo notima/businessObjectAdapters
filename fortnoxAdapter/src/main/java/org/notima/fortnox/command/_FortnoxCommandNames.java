@@ -1,6 +1,6 @@
 package org.notima.fortnox.command;
 
-public class _CommandNames {
+public class _FortnoxCommandNames {
 
 	public static final String SCOPE = "fortnox";
 	
