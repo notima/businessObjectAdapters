@@ -19,7 +19,7 @@ import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.CredentialTable;
 
-@Command(scope = "fortnox", name = _CommandNames.ListCredentials, description = "List credentials for client")
+@Command(scope = _CommandNames.SCOPE, name = _CommandNames.ListCredentials, description = "List credentials for client")
 @Service
 public class ListCredentials extends FortnoxCommand implements Action {
 	
