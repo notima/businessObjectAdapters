@@ -1,5 +1,10 @@
 package org.notima.fortnox.command;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -9,7 +14,12 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.Invoice;
+import org.notima.api.fortnox.entities3.InvoiceInterface;
+import org.notima.api.fortnox.entities3.InvoiceSubset;
+import org.notima.api.fortnox.entities3.Invoices;
+import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.fortnox.command.completer.FortnoxInvoicePropertyCompleter;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
@@ -18,10 +28,13 @@ import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 public class ModifyInvoice extends FortnoxCommand implements Action  {
 	
 	@Reference 
-	Session session;
+	Session sess;
 	
 	@Option(name = "--no-confirm", description = "Don't confirm anything. Default is to confirm", required = false, multiValued = false)
 	private boolean noConfirm = false;
+
+	@Option(name = "--all", description = "Modify all invoices according to filter (unbooked, TODO-date)", required = false, multiValued = false)
+	private String filter;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	@Completion(FortnoxTenantCompleter.class)	
@@ -38,90 +51,126 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
     private String newValue;
 
 	private FortnoxClient3 fortnoxClient;
-	private Invoice invoice;
 
     @Override
     public Object execute() throws Exception {
-        fortnoxClient = this.getFortnoxClient(orgNo);
+		fortnoxClient = this.getFortnoxClient(orgNo);
 		if (fortnoxClient == null) {
-			session.getConsole().println("Can't get client for " + orgNo);
+			sess.getConsole().println("Can't get client for " + orgNo);
 			return null;
 		}
 		
-		invoice = fortnoxClient.getInvoice(invoiceNo);
+		if (!(filter == null)){
+			String reply = noConfirm ? "y" : sess.readLine("Do you want to modify invoice all unbooked invoices? (y/n) ", null);
+			if (!reply.equalsIgnoreCase("y")) {
+			sess.getConsole().println("Modification cancelled.");
+			return null;
+		}
+			modifyPropertyAll();
+			return null;
+		}
+		Invoice invoice = fortnoxClient.getInvoice(invoiceNo);
 
         if(invoice == null){
-            session.getConsole().println("Can't get invoice " + invoiceNo);
+            sess.getConsole().println("Can't get invoice " + invoiceNo);
             return null;
         }
 
         String clientName = fortnoxClient.getCompanySetting().getName();
 		
-		String reply = noConfirm ? "y" : session.readLine("Do you want to modify invoice " + invoiceNo + " " + invoice.getCustomerName() + " for client " + clientName + "? (y/n) ", null);
+		String reply = noConfirm ? "y" : sess.readLine("Do you want to modify invoice " + invoiceNo + " " + invoice.getCustomerName() + " for client " + clientName + "? (y/n) ", null);
 		if (!reply.equalsIgnoreCase("y")) {
-			session.getConsole().println("Modification cancelled.");
+			sess.getConsole().println("Modification cancelled.");
 			return null;
 		}
 
-		modifyProperty();
+
+		modifyPropertySingle(invoice);
+
+
 
 		return null;
 
     }
 
-	private void modifyProperty() {
+	private void modifyPropertySingle(Invoice invoiceModifier) {
 
         switch (propertyToModify){
 			
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_WAREHOUSE_READY:
 				try {
-					invoice = fortnoxClient.warehouseReadyInvoice(invoiceNo);
+					invoiceModifier = fortnoxClient.warehouseReadyInvoice(invoiceNo);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_FIX_COMMENT_LINES:
-				int count = invoice.fixInvoiceLines();
+				int count = invoiceModifier.fixInvoiceLines();
 				if (count>0) {
 					try {
-						fortnoxClient.setInvoice(invoice);
+						fortnoxClient.setInvoice(invoiceModifier);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-				session.getConsole().println(count + " lines adjusted.");
+				sess.getConsole().println(count + " lines adjusted.");
 				break;
 
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_DUE_DATE:
-				String olddueDate = invoice.getDueDate();
+				String olddueDate = invoiceModifier.getDueDate();
 
-				invoice.setDueDate(newValue);
+				invoiceModifier.setDueDate(newValue);
 				try {
-					fortnoxClient.setInvoice(invoice);
+					fortnoxClient.setInvoice(invoiceModifier);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				session.getConsole().println("Old due date: " + olddueDate + ", New due date: " + invoice.getDueDate());
+				sess.getConsole().println("Old due date: " + olddueDate + ", New due date: " + invoiceModifier.getDueDate());
 
 				break;
 
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_INVOICE_DATE:
-				String oldInvoiceDate = invoice.getInvoiceDate();
+				String oldInvoiceDate = invoiceModifier.getInvoiceDate();
 
-				invoice.setInvoiceDate(newValue);
+				invoiceModifier.setInvoiceDate(newValue);
 				try {
-					fortnoxClient.setInvoice(invoice);
+					fortnoxClient.setInvoice(invoiceModifier);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				session.getConsole().println(String.format("Old Invoice date: " + oldInvoiceDate + ", New invoice date: " + invoice.getInvoiceDate()));
+				sess.getConsole().println(String.format("Old Invoice date: " + oldInvoiceDate + ", New invoice date: " + invoiceModifier.getInvoiceDate()));
 
 				break;
 
 			default:
-				session.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
+				sess.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
             	break;
 		}
+	}
+
+	private Object modifyPropertyAll(){
+		
+		Invoices invoices = null;
+
+		try{
+			invoices = fortnoxClient.getInvoices(FortnoxClient3.FILTER_UNBOOKED);
+		}catch (Exception e1){
+			e1.printStackTrace();
+		}
+
+		for(InvoiceSubset invoiceSubset : invoices.getInvoiceSubset()){
+			Invoice inv = null;
+			try{
+				inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)invoiceSubset).getDocumentNumber());
+			} catch(Exception e2){
+				e2.printStackTrace();
+			}
+
+			modifyPropertySingle(inv);
+
+		}
+		return null;
+
 	}
 }
