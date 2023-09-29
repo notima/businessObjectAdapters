@@ -1,10 +1,5 @@
 package org.notima.fortnox.command;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -14,12 +9,10 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
-import org.notima.api.fortnox.FortnoxUtil;
+import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.Invoice;
-import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
-import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.fortnox.command.completer.FortnoxInvoicePropertyCompleter;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
@@ -47,10 +40,12 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
     @Completion(FortnoxInvoicePropertyCompleter.class)
     private String propertyToModify;
 
-    @Argument(index = 3, name = "value", description = "The new value for the property", required = true, multiValued = false)
+    @Argument(index = 3, name = "value", description = "The new value for the property", required = false, multiValued = false)
     private String newValue;
 
 	private FortnoxClient3 fortnoxClient;
+	
+	private Invoice		   invoiceToModify;
 
     @Override
     public Object execute() throws Exception {
@@ -69,47 +64,44 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 			modifyPropertyAll();
 			return null;
 		}
-		Invoice invoice = fortnoxClient.getInvoice(invoiceNo);
+		invoiceToModify = fortnoxClient.getInvoice(invoiceNo);
 
-        if(invoice == null){
+        if(invoiceToModify == null){
             sess.getConsole().println("Can't get invoice " + invoiceNo);
             return null;
         }
 
         String clientName = fortnoxClient.getCompanySetting().getName();
 		
-		String reply = noConfirm ? "y" : sess.readLine("Do you want to modify invoice " + invoiceNo + " " + invoice.getCustomerName() + " for client " + clientName + "? (y/n) ", null);
+		String reply = noConfirm ? "y" : sess.readLine("Do you want to modify invoice " + invoiceNo + " " + invoiceToModify.getCustomerName() + " for client " + clientName + "? (y/n) ", null);
 		if (!reply.equalsIgnoreCase("y")) {
 			sess.getConsole().println("Modification cancelled.");
 			return null;
 		}
 
-
-		modifyPropertySingle(invoice);
-
-
+		modifyPropertySingle();
 
 		return null;
 
     }
 
-	private void modifyPropertySingle(Invoice invoiceModifier) {
+	private void modifyPropertySingle() throws Exception {
 
         switch (propertyToModify){
 			
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_WAREHOUSE_READY:
 				try {
-					invoiceModifier = fortnoxClient.warehouseReadyInvoice(invoiceNo);
+					invoiceToModify = fortnoxClient.warehouseReadyInvoice(invoiceNo);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 				break;
 
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_FIX_COMMENT_LINES:
-				int count = invoiceModifier.fixInvoiceLines();
+				int count = invoiceToModify.fixInvoiceLines();
 				if (count>0) {
 					try {
-						fortnoxClient.setInvoice(invoiceModifier);
+						fortnoxClient.setInvoice(invoiceToModify);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -118,38 +110,50 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 				break;
 
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_DUE_DATE:
-				String olddueDate = invoiceModifier.getDueDate();
+				String olddueDate = invoiceToModify.getDueDate();
 
-				invoiceModifier.setDueDate(newValue);
+				invoiceToModify.setDueDate(newValue);
 				try {
-					fortnoxClient.setInvoice(invoiceModifier);
+					fortnoxClient.setInvoice(invoiceToModify);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				sess.getConsole().println("Old due date: " + olddueDate + ", New due date: " + invoiceModifier.getDueDate());
+				sess.getConsole().println("Old due date: " + olddueDate + ", New due date: " + invoiceToModify.getDueDate());
 
 				break;
 
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_INVOICE_DATE:
-				String oldInvoiceDate = invoiceModifier.getInvoiceDate();
+				String oldInvoiceDate = invoiceToModify.getInvoiceDate();
 
-				invoiceModifier.setInvoiceDate(newValue);
+				invoiceToModify.setInvoiceDate(newValue);
 				try {
-					fortnoxClient.setInvoice(invoiceModifier);
+					fortnoxClient.setInvoice(invoiceToModify);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				sess.getConsole().println(String.format("Old Invoice date: " + oldInvoiceDate + ", New invoice date: " + invoiceModifier.getInvoiceDate()));
+				sess.getConsole().println(String.format("Old Invoice date: " + oldInvoiceDate + ", New invoice date: " + invoiceToModify.getInvoiceDate()));
 
 				break;
 
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE:
+				copyCustomerNameToInvoice();
+				break;
+				
 			default:
 				sess.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
             	break;
 		}
 	}
 
-	private Object modifyPropertyAll(){
+	private void copyCustomerNameToInvoice() throws Exception {
+		
+		Customer customer = fortnoxClient.getCustomerByCustNo(invoiceToModify.getCustomerNumber());
+		invoiceToModify.setCustomerName(customer.getName());
+		fortnoxClient.setInvoice(invoiceToModify);
+		
+	}
+	
+	private Object modifyPropertyAll() throws Exception {
 		
 		Invoices invoices = null;
 
@@ -160,14 +164,13 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 		}
 
 		for(InvoiceSubset invoiceSubset : invoices.getInvoiceSubset()){
-			Invoice inv = null;
 			try{
-				inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)invoiceSubset).getDocumentNumber());
+				invoiceToModify = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)invoiceSubset).getDocumentNumber());
 			} catch(Exception e2){
 				e2.printStackTrace();
 			}
 
-			modifyPropertySingle(inv);
+			modifyPropertySingle();
 
 		}
 		return null;
