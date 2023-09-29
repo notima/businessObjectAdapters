@@ -37,15 +37,18 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
     @Argument(index = 3, name = "value", description = "The new value for the property", required = true, multiValued = false)
     private String newValue;
 
+	private FortnoxClient3 fortnoxClient;
+	private Invoice invoice;
+
     @Override
     public Object execute() throws Exception {
-        FortnoxClient3 fortnoxClient = this.getFortnoxClient(orgNo);
+        fortnoxClient = this.getFortnoxClient(orgNo);
 		if (fortnoxClient == null) {
 			session.getConsole().println("Can't get client for " + orgNo);
 			return null;
 		}
-
-		Invoice invoice = fortnoxClient.getInvoice(invoiceNo);
+		
+		invoice = fortnoxClient.getInvoice(invoiceNo);
 
         if(invoice == null){
             session.getConsole().println("Can't get invoice " + invoiceNo);
@@ -59,28 +62,66 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 			session.getConsole().println("Modification cancelled.");
 			return null;
 		}
-        
-        if(propertyToModify.equalsIgnoreCase(FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_WAREHOUSE_READY)){
-        	
-        	// This is a command
-            invoice = fortnoxClient.warehouseReadyInvoice(invoiceNo);
-            
-        } else if (propertyToModify.equalsIgnoreCase(FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_FIX_COMMENT_LINES)) {
-        	
-        	int count = invoice.fixInvoiceLines();
-        	if (count>0) {
-        		fortnoxClient.setInvoice(invoice);
-        	}
-        	session.getConsole().println(count + " lines adjusted.");
-        	
-        }else{
-            session.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
-            return null;
-        }
 
-        //fortnoxClient.setInvoice(invoice);
+		modifyProperty();
 
-        return null;
+		return null;
+
     }
-    
+
+	private void modifyProperty() {
+
+        switch (propertyToModify){
+			
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_WAREHOUSE_READY:
+				try {
+					invoice = fortnoxClient.warehouseReadyInvoice(invoiceNo);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				break;
+
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_FIX_COMMENT_LINES:
+				int count = invoice.fixInvoiceLines();
+				if (count>0) {
+					try {
+						fortnoxClient.setInvoice(invoice);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+				session.getConsole().println(count + " lines adjusted.");
+				break;
+
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_DUE_DATE:
+				String olddueDate = invoice.getDueDate();
+
+				invoice.setDueDate(newValue);
+				try {
+					fortnoxClient.setInvoice(invoice);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				session.getConsole().println("Old due date: " + olddueDate + ", New due date: " + invoice.getDueDate());
+
+				break;
+
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_INVOICE_DATE:
+				String oldInvoiceDate = invoice.getInvoiceDate();
+
+				invoice.setInvoiceDate(newValue);
+				try {
+					fortnoxClient.setInvoice(invoice);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				session.getConsole().println(String.format("Old Invoice date: " + oldInvoiceDate + ", New invoice date: " + invoice.getInvoiceDate()));
+
+				break;
+
+			default:
+				session.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
+            	break;
+		}
+	}
 }

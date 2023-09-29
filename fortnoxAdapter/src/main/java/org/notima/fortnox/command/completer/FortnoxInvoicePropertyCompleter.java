@@ -14,10 +14,14 @@ public class FortnoxInvoicePropertyCompleter implements Completer {
 	
     public static final String INVOICE_PROPERTY_WAREHOUSE_READY = "warehouseReady";
     public static final String INVOICE_PROPERTY_FIX_COMMENT_LINES = "fixCommentLines";
+	public static final String INVOICE_PROPERTY_DUE_DATE = "dueDate";
+	public static final String INVOICE_PROPERTY_INVOICE_DATE = "invoiceDate";
 
     public static final String[] InvoiceProperties = new String[] {
     	INVOICE_PROPERTY_WAREHOUSE_READY,
-    	INVOICE_PROPERTY_FIX_COMMENT_LINES
+    	INVOICE_PROPERTY_FIX_COMMENT_LINES,
+		INVOICE_PROPERTY_DUE_DATE,
+		INVOICE_PROPERTY_INVOICE_DATE
     };
     
 	@Override
