@@ -1,9 +1,7 @@
 package org.notima.fortnox.command;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +23,7 @@ import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.InvoiceHeaderTable;
 
-@Command(scope = "fortnox", name = "list-fortnox-invoices", description = "Lists invoices in Fortnox")
+@Command(scope = _FortnoxCommandNames.SCOPE, name = _FortnoxCommandNames.ListInvoices, description = "Lists invoices in Fortnox")
 @Service
 public class ListInvoices extends FortnoxCommand implements Action {
 
@@ -39,10 +37,10 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	@Option(name = "--all", description = "Show all invoices", required = false, multiValued = false)
 	private boolean all;
 	
-	@Option(name = "--fromdate", description = "Select invoices from this date. (format yyyy-mm-dd)", required = false, multiValued = false)
+	@Option(name = _FortnoxOptions.FromDate, description = "Select invoices from this date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String fromDateStr;
 	
-	@Option(name = "--untildate", description = "Select invoices until this date. (format yyyy-mm-dd)", required = false, multiValued = false)
+	@Option(name = _FortnoxOptions.UtilDate, description = "Select invoices until this date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String untilDateStr;
 	
 	@Option(name = "--unbooked", description = "Show unbooked invoices", required = false, multiValued = false)
@@ -54,8 +52,6 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	@Completion(FortnoxTenantCompleter.class)
 	private String orgNo = "";
-
-	private Date fromDate = null, untilDate = null;
 
 	private Map<Object, Object> invoicesMap = null;
 	private List<InvoiceInterface> invoices; 
@@ -72,7 +68,7 @@ public class ListInvoices extends FortnoxCommand implements Action {
 			return null;
 		}
 
-		parseDates();
+		parseDates(fromDateStr, untilDateStr);
 		
 		invoices = new ArrayList<InvoiceInterface>();
 		
@@ -165,16 +161,6 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	}
 
 	
-	private void parseDates() throws ParseException {
-		
-		if (fromDateStr!=null) {
-			fromDate = FortnoxClient3.s_dfmt.parse(fromDateStr);
-		}
-		if (untilDateStr!=null) {
-			untilDate = FortnoxClient3.s_dfmt.parse(untilDateStr);
-		}
-		
-	}
 
 	
 }
