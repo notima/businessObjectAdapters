@@ -43,6 +43,8 @@ public class RatepayReportParser {
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+    private List<RatepayReportRow> reportLines;
+    
     public static RatepayReport createFromFile(String filename) throws IOException, Exception {
     	RatepayReportParser parser = new RatepayReportParser(filename);
     	return parser.parseRatepayFile();
@@ -67,27 +69,62 @@ public class RatepayReportParser {
     
     private List<RatepayReportRow> parseFile (InputStream inStream) throws IOException, Exception {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
-        List<RatepayReportRow> report = new ArrayList<RatepayReportRow>();
+        reportLines = new ArrayList<RatepayReportRow>();
         Iterable<CSVRecord> records = CSVFormat.INFORMIX_UNLOAD
             .withFirstRecordAsHeader()
             .withDelimiter(';')
             .withQuote('"')
             .parse(reader);
+    
+        List<RatepayReportRow> rowsToProcess = new ArrayList<RatepayReportRow>();
+        
         for (CSVRecord record : records) {
             RatepayReportRow row = parseRecord(record);
-        	RatepayReportRow existingRow = descriptorMap.get(row.getDescriptor());        	
-        	if (existingRow==null) {
-        		report.add(row);
-        		descriptorMap.put(row.getDescriptor(), row);
-        	} else {
-        		existingRow.mergeRow(row);
-        	}
+            rowsToProcess.add(row);
         }
+        
         reader.close();
         inStream.close();
-        return report;
+        
+        // First add the actual payment records
+        for (RatepayReportRow row : rowsToProcess) {
+        	addPaymentRecord(row);
+        }
+        
+        // Add fees to payment records
+        for (RatepayReportRow row : rowsToProcess) {
+            addFee(row);
+        }
+        
+        return reportLines;
     }
 
+    private void addFee(RatepayReportRow row) throws Exception {
+    	RatepayReportRow existingRow = null;
+    	if (row.getFeeType()!=RatepayReportRow.FEETYPE_PAYMENT) {
+    		existingRow = descriptorMap.get(row.getDescriptor());
+    		if (existingRow==null) {
+    			reportLines.add(row);
+    			descriptorMap.put(row.getDescriptor(), row);
+    		} else {
+    			existingRow.mergeRow(row);
+    		}
+    	}
+    }
+    
+    private void addPaymentRecord(RatepayReportRow row) throws Exception {
+    	RatepayReportRow existingRow = null;
+    	if (row.getFeeType()==RatepayReportRow.FEETYPE_PAYMENT) {
+    		existingRow = descriptorMap.get(row.getDescriptor());
+    		if (existingRow==null) {
+    			reportLines.add(row);
+    			descriptorMap.put(row.getDescriptor(), row);
+    		} else {
+    			existingRow.mergeRow(row);
+    		}
+    	}
+    }
+    
     private RatepayReportRow parseRecord(CSVRecord record) throws ParseException {
         RatepayReportRow row = new RatepayReportRow();
 
