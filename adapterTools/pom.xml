@@ -12,6 +12,14 @@
 	<name>Business Objects Adapter Tools</name>
 	<description>Contains classes to work on adapters</description>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.notima</groupId>
+			<artifactId>notima-util</artifactId>
+			<version>${notima-util.version}</version>
+		</dependency>
+	</dependencies>
+
 	<build>
 
 		<resources>

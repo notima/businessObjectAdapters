@@ -1,8 +1,12 @@
 package org.notima.businessobjects.adapter.tools;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +15,7 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(FormatterFactory.class),
 				@ProvideService(CanonicalObjectFactory.class),
 				@ProvideService(MessageSenderFactory.class),
+				@ProvideService(PaymentBatchProcessor.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -35,6 +40,14 @@ public class Activator extends BaseActivator {
 		log.info("Created MessageSenderFactory");
 		((MessageSenderFactoryImpl)messageSenderFactory).setBundleContext(bundleContext);
 		register(MessageSenderFactory.class, messageSenderFactory);
+		
+		Dictionary<String, String> props = new Hashtable<String,String>();
+		props.put("SystemName", FilePaymentBatchProcessor.SystemName);
+		
+		FilePaymentBatchProcessor paymentBatchProcessor = new FilePaymentBatchProcessor();
+		register(PaymentBatchProcessor.class, paymentBatchProcessor, props);
+		log.info("Created File Payment Batch Processor");
+		log.info("Context: " + this.bundleContext.toString());		
 		
 	}
 	
