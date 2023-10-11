@@ -52,15 +52,11 @@ public class RemoveTenant implements Action {
 				
 			}
 			
-			TenantTable tt = null;
-			
 			for (BusinessObjectFactory bf : adaptersToList) {
 				
 				sess.getConsole().println(bf.getSystemName());
 
 				bf.removeTenant(orgNo, countryCode);
-
-				tt.print(sess.getConsole());
 				
 			}
 				
