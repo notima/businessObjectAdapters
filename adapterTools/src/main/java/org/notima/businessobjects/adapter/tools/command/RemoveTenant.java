@@ -9,9 +9,6 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
-import org.notima.businessobjects.adapter.tools.table.TenantTable;
-import org.notima.generic.businessobjects.BusinessPartner;
-import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "notima", name = "remove-tenant", description = "Removes tenant for given adapter")
