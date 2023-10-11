@@ -36,6 +36,11 @@ Add new clients using the command
 	
 If there's no defaultClientSecret, that must be supplied with the clientSecret option.
 
+Check your defaults using
+
+	config:property-get -p FortnoxProperties defaultClientId
+	config:property-get -p FortnoxProperties defaultClientSecret	
+
 If you have an API-code/authorization code (one time token to get an accessToken) you add and activate the client by below command
 
 	fortnox:add-client --legacy --clientSecret REAL_SECRET orgNo authorizationCode
