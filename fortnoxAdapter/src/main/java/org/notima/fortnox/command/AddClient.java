@@ -52,7 +52,7 @@ public class AddClient implements Action {
     @Option(name = "--orgName", description = "The name of the organisation", required = false, multiValued = false)
     private String orgName;
     
-    @Option(name = "--accessToken", description = "If there's an existing access token, omit apiCode and supply the access token", required = false, multiValued = false)
+    @Option(name = "--accessToken", description = "If there's an existing access token, omit apiCode (authorization code) and supply the access token", required = false, multiValued = false)
 	private String accessToken;
 
 	@Option(name = "--refreshToken", description = "The refresh token belonging to the access token.", required = false, multiValued = false)
@@ -134,8 +134,12 @@ public class AddClient implements Action {
 		Properties props = new Properties();
 		if (authorizationCode!=null)
 			props.setProperty("apiCode", authorizationCode);
-		if (accessToken!=null)
-			props.setProperty("accessToken", accessToken);
+		if (accessToken!=null) {
+			if (!legacy)
+				props.setProperty("accessToken", accessToken);
+			else
+				props.setProperty("legacyToken", accessToken);
+		}
 		if (refreshToken!=null)
 			props.setProperty("refreshToken", refreshToken);
 		if (clientSecret!=null) {

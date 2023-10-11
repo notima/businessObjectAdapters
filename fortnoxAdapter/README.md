@@ -47,9 +47,9 @@ If you have an API-code/authorization code (one time token to get an accessToken
 
 If you already have existing clients and your Fortnox connection has access to CompanySettings you can add your clients with this command
 
-	fortnox:add-client --accessToken REAL_ACCESS_TOKEN --clientSecret REAL_SECRET
+	fortnox:add-client --legacy --accessToken REAL_ACCESS_TOKEN --clientSecret REAL_SECRET orgNo
 	
-or if you've set the defaultClientSecret
+or if you've set the defaultClientSecret and the client belongs to that secret.
 
 	fortnox:add-client --accessToken REAL_ACCESS_TOKEN
 	
