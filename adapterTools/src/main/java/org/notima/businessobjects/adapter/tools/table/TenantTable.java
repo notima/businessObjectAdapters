@@ -2,28 +2,45 @@ package org.notima.businessobjects.adapter.tools.table;
 
 import java.util.List;
 
-import org.apache.karaf.shell.support.table.Col;
-import org.apache.karaf.shell.support.table.ShellTable;
 import org.notima.generic.businessobjects.BusinessPartner;
 
-public class TenantTable extends ShellTable {
+public class TenantTable extends GenericTable {
 
+	private String adapterName = "-";
+	private List<BusinessPartner<Object>> bpList;
+	
+	
 	public TenantTable(List<BusinessPartner<Object>> bpl) {
-		
-		Col col = new Col("Tax id");
-		column(col);
-		col = new Col("Name");
-		column(col);
+
+		addColumn("Adapter");
+		addColumn("Tax id");
+		addColumn("Name");
 		
 		if (bpl==null || bpl.size()==0) {
-			emptyTableText("No content");
+			setEmptyTableText("No tenants");
 			return;
 		}
 		
-		for (BusinessPartner<Object> p : bpl) {
-			addRow().addContent(p.getTaxId(), p.getName());
+		bpList = bpl;
+		populateRows();
+		
+	}
+
+	public void setAdapterName(String adapterName) {
+		this.adapterName = adapterName;
+		populateRows();
+	}
+
+	private void populateRows() {
+		
+		if (getRows()!=null)
+			this.getRows().clear();
+		
+		for (BusinessPartner<Object> p : bpList) {
+			addRow().addContent(adapterName, p.getTaxId(), p.getName());
 		}
 		
 	}
+	
 	
 }

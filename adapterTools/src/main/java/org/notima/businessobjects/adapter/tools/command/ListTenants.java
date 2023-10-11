@@ -51,8 +51,6 @@ public class ListTenants implements Action {
 			
 			for (BusinessObjectFactory bf : adaptersToList) {
 				
-				sess.getConsole().println(bf.getSystemName());
-				
 				BusinessPartnerList<Object> bpl = 
 						bf.listTenants();
 				if (bpl!=null) {
@@ -61,8 +59,9 @@ public class ListTenants implements Action {
 				} else {
 					tt = new TenantTable(null);
 				}
+				tt.setAdapterName(bf.getSystemName());
 
-				tt.print(sess.getConsole());
+				tt.getShellTable().print(sess.getConsole());
 				
 			}
 				
