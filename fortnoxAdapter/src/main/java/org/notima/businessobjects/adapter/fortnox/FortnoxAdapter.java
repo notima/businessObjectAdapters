@@ -37,10 +37,10 @@ import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
-import org.notima.generic.businessobjects.DunningEntry;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
+import org.notima.generic.businessobjects.InvoiceOperationResult;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.PaymentTerm;
@@ -1523,6 +1523,22 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return result;
 	}
 
+	@Override
+	public InvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices, Date invoiceDate, Date dueDate,
+			boolean createBp, int createLimit, boolean updateExisting) throws Exception {
+
+		FortnoxInvoiceWriter invoiceWriter = new FortnoxInvoiceWriter(this);
+		if (createLimit>0)
+			invoiceWriter.setCreateLimit(createLimit);
+		invoiceWriter.setCreateBusinessPartner(createBp);
+		invoiceWriter.setInvoiceDate(LocalDateUtils.asLocalDate(invoiceDate));
+		invoiceWriter.setDueDate(LocalDateUtils.asLocalDate(dueDate));
+		invoiceWriter.setUpdateExisting(updateExisting);
+		
+		return invoiceWriter.writeInvoices(canonicalInvoices);		
+	}
+	
+	
 	/**
 	 * Attaches a file to a given voucher.
 	 * 

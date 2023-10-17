@@ -1,6 +1,8 @@
 package org.notima.businessobjects.adapter.tools.command;
 
 import java.lang.reflect.Field;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -17,6 +19,8 @@ import org.notima.businessobjects.adapter.tools.command.annotation.Confirmation;
  */
 public abstract class AbstractAction implements Action {
 
+	protected DateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd");	
+	
     @Reference
     protected Session sess;
 

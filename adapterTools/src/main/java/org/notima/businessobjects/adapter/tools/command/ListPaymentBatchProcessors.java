@@ -20,7 +20,6 @@ public class ListPaymentBatchProcessors implements Action {
 	@Reference 
 	Session sess;
 	
-	@SuppressWarnings("rawtypes")
 	@Override
 	public Object execute() throws Exception {
 
