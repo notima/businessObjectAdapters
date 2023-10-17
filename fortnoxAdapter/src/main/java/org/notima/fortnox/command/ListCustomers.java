@@ -33,8 +33,8 @@ public class ListCustomers extends FortnoxCommand implements Action {
 	@Option(name = "--inactive", description = "List inactive customers", required = false, multiValued = false)
 	private boolean inactive = false;
 	
-	@Option(name = "--top", description = "With given terms of payment", required = false, multiValued = false)
-	private String top;
+	@Option(name = _FortnoxOptions.PaymentTerm, description = "With given terms of payment", required = false, multiValued = false)
+	private String paymentTerm;
 	
 	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	@Completion(FortnoxTenantCompleter.class)	
@@ -55,7 +55,7 @@ public class ListCustomers extends FortnoxCommand implements Action {
 		FortnoxClient3 fc = getFortnoxClient(orgNo);
 		Customers customers = fc.getCustomers(inactive ? FortnoxClient3.FILTER_INACTIVE : FortnoxClient3.FILTER_ACTIVE);
 		
-		if (top!=null) {
+		if (paymentTerm!=null) {
 			// Looking for terms of payment demands enrich
 			enrich = true;
 		}
@@ -69,9 +69,9 @@ public class ListCustomers extends FortnoxCommand implements Action {
 				
 				if (enrich) {
 					c = fc.getCustomerByCustNo(cs.getCustomerNumber());
-					if (top!=null) {
+					if (paymentTerm!=null) {
 						termsOfPayment = c.getTermsOfPayment();
-						if (!top.equalsIgnoreCase(termsOfPayment)) {
+						if (!paymentTerm.equalsIgnoreCase(termsOfPayment)) {
 							continue;
 						}
 					}

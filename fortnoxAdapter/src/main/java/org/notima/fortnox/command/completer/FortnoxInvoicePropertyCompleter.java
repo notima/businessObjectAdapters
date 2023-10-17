@@ -16,6 +16,8 @@ public class FortnoxInvoicePropertyCompleter implements Completer {
     public static final String INVOICE_PROPERTY_FIX_COMMENT_LINES = "fixCommentLines";
 	public static final String INVOICE_PROPERTY_DUE_DATE = "dueDate";
 	public static final String INVOICE_PROPERTY_INVOICE_DATE = "invoiceDate";
+	public static final String INVOICE_PROPERTY_PAYMENTTERM = "paymentTerm";
+	public static final String INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE = "copyPaymentTerm";
 	// Refresh customer name from the customer register
 	public static final String INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE = "copyCustomerName";
 
@@ -24,6 +26,8 @@ public class FortnoxInvoicePropertyCompleter implements Completer {
     	INVOICE_PROPERTY_FIX_COMMENT_LINES,
 		INVOICE_PROPERTY_DUE_DATE,
 		INVOICE_PROPERTY_INVOICE_DATE,
+		INVOICE_PROPERTY_PAYMENTTERM,
+		INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE,
 		INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE
     };
     

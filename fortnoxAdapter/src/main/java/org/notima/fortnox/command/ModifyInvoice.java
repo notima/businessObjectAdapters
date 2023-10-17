@@ -135,6 +135,14 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 
 				break;
 
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE:
+				changePaymentTermToCustomerPaymentTerm();
+				break;
+				
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_PAYMENTTERM:
+				changePaymentTerm();
+				break;
+				
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE:
 				copyCustomerNameToInvoice();
 				break;
@@ -145,6 +153,18 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 		}
 	}
 
+	private void changePaymentTermToCustomerPaymentTerm() throws Exception {
+		
+		Customer customer = fortnoxClient.getCustomerByCustNo(invoiceToModify.getCustomerNumber());
+		newValue = customer.getTermsOfPayment();
+		changePaymentTerm();
+	}
+
+	private void changePaymentTerm() throws Exception {
+		invoiceToModify.setTermsOfPayment(newValue);
+		fortnoxClient.setInvoice(invoiceToModify);
+	}
+	
 	private void copyCustomerNameToInvoice() throws Exception {
 		
 		Customer customer = fortnoxClient.getCustomerByCustNo(invoiceToModify.getCustomerNumber());

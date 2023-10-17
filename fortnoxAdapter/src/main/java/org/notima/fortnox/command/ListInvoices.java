@@ -37,6 +37,9 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	@Option(name = "--all", description = "Show all invoices", required = false, multiValued = false)
 	private boolean all;
 	
+	@Option(name = _FortnoxOptions.PaymentTerm, description = "Filter on payment term", required = false, multiValued = false)
+	private String paymentTerm;
+	
 	@Option(name = _FortnoxOptions.FromDate, description = "Select invoices from this date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String fromDateStr;
 	
@@ -57,7 +60,6 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	private List<InvoiceInterface> invoices; 
 	
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public Object execute() throws Exception {
 
@@ -91,6 +93,7 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		
 		checkCancelledAndDateRange();
 		enrichIfNecessary();
+		checkPaymentTerm();
 		
 		if (invoices.size()>0) {
 
@@ -143,8 +146,9 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	
 	}
 
+	
 	private void enrichIfNecessary() throws Exception {
-		if (!enrich) return;
+		if (!enrich && paymentTerm==null) return;
 		List<InvoiceInterface> targetList = new ArrayList<InvoiceInterface>();
 		Invoice inv;
 		for (InvoiceInterface oo : invoices) {
@@ -160,7 +164,25 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		invoices = targetList;
 	}
 
-	
-
+	/**
+	 * Here we can assume all invoices are enriched.
+	 * 
+	 */
+	private void checkPaymentTerm() {
+		
+		if (paymentTerm==null) return;
+		
+		List<InvoiceInterface> targetList = new ArrayList<InvoiceInterface>();
+		Invoice inv;
+		
+		for (InvoiceInterface oo : invoices) {
+			inv = (Invoice)oo;
+			if (paymentTerm.equals(inv.getTermsOfPayment())) {
+				targetList.add(inv);
+			}
+		}
+		
+		invoices = targetList;
+	}
 	
 }
