@@ -867,7 +867,7 @@ public class FortnoxExtendedClient {
 		org.notima.generic.businessobjects.Invoice invoice = bbc.toInvoice(order);
 		
 		Customer fortnoxCustomer = persistCustomerFromCanonical(order.getBusinessPartner());
-		invoice.setBusinessPartner(FortnoxAdapter.convertToBusinessPartner(fortnoxCustomer));
+		invoice.setBusinessPartner(FortnoxConverter.convertToBusinessPartner(fortnoxCustomer));
 		if (invoiceDate!=null) {
 			invoice.setInvoiceDate(invoiceDate);
 		}

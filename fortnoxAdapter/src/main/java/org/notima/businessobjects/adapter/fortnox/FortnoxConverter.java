@@ -8,7 +8,11 @@ import java.util.List;
 
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxUtil;
+import org.notima.api.fortnox.entities3.Customer;
+import org.notima.api.fortnox.entities3.CustomerSubset;
+import org.notima.api.fortnox.entities3.DefaultDeliveryTypes;
 import org.notima.api.fortnox.entities3.InvoicePayment;
+import org.notima.api.fortnox.entities3.Supplier;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherRow;
 import org.notima.api.fortnox.entities3.WriteOff;
@@ -17,7 +21,9 @@ import org.notima.generic.businessobjects.AccountingType;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
+import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
 import org.notima.util.LocalDateUtils;
@@ -285,6 +291,93 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 
 		return FortnoxUtil.createSingleTransactionVoucher(voucherSeries, acctDate, creditAcct, debitAcct, amount, description);
 		
+	}
+
+	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convert(org.notima.api.fortnox.entities3.CustomerSubset src) {
+		
+		BusinessPartner<Customer> dst = new BusinessPartner<Customer>();
+		
+		dst.setName(src.getName());
+		dst.setIdentityNo(src.getCustomerNumber());
+		dst.setTaxId(src.getOrganisationNumber());
+		Location loc = new Location();
+		dst.setAddressOfficial(loc);
+		loc.setEmail(src.getEmail());
+		loc.setCity(src.getCity());
+		loc.setPostal(src.getZipCode());
+		loc.setPhone(src.getPhone());
+		
+		return dst;
+	}
+
+	/**
+	 * Converts a Fortnox customer to a supplier.
+	 * 
+	 * @param customer
+	 * @return A supplier record.
+	 * // TODO - Go through all fields that might / should be copied.
+	 */
+	public static Supplier convertCustomerToSupplier(Customer customer) {
+		
+		Supplier dst = new Supplier();
+		if (customer==null) return dst;
+		
+		dst.setName(customer.getName());
+		dst.setAddress1(customer.getAddress1());
+		dst.setAddress2(customer.getAddress2());
+		dst.setOrganisationNumber(customer.getOrganisationNumber());
+		dst.setCity(customer.getCity());
+		dst.setEmail(customer.getEmail());
+		dst.setCountryCode(customer.getCountryCode());
+		dst.setOurCustomerNumber(customer.getCustomerNumber());
+		dst.setPhone1(customer.getPhone1());
+		dst.setVATNumber(customer.getVATNumber());
+		dst.setZipCode(customer.getZipCode());
+		
+		return dst;
+		
+	}
+	
+	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convertToBusinessPartner(org.notima.api.fortnox.entities3.Customer src) {
+		
+		BusinessPartner<Customer> dst = new BusinessPartner<Customer>();
+		
+		dst.setName(src.getName());
+		dst.setIdentityNo(src.getCustomerNumber());
+		dst.setTaxId(src.getOrganisationNumber());
+		Location loc = new Location();
+		dst.setAddressOfficial(loc);
+		loc.setEmail(src.getEmail());
+		loc.setAddress1(src.getAddress1());
+		loc.setAddress2(src.getAddress2());
+		loc.setCity(src.getCity());
+		loc.setPostal(src.getZipCode());
+		loc.setPhone(src.getPhone1());
+		loc.setCountryCode(src.getCountryCode());
+		dst.setCompany("COMPANY".equalsIgnoreCase(src.getType()));
+	
+		// Check default delivery type
+		DefaultDeliveryTypes ddt = src.getDefaultDeliveryTypes();
+		if (ddt!=null) {
+			if ("EMAIL".equalsIgnoreCase(ddt.getInvoice())) {
+				dst.setEmailInvoice(true);
+			}
+		}
+		
+		// Delivery address if applicable
+		if (src.getDeliveryAddress1()!=null && src.getDeliveryAddress1().trim().length()>0) {
+			loc = new Location();
+			dst.setAddressOfficial(loc);
+			loc.setAddress1(src.getDeliveryAddress1());
+			loc.setAddress2(src.getDeliveryAddress2());
+			loc.setCity(src.getDeliveryCity());
+			loc.setPostal(src.getDeliveryZipCode());
+			loc.setPhone(src.getDeliveryPhone1());
+			loc.setCountryCode(src.getDeliveryCountryCode());
+		}
+		
+		
+		return dst;
 	}
 
 	/**

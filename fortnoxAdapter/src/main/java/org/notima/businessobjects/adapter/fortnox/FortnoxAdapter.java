@@ -23,7 +23,6 @@ import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
 import org.notima.api.fortnox.entities3.Customers;
-import org.notima.api.fortnox.entities3.DefaultDeliveryTypes;
 import org.notima.api.fortnox.entities3.EmailInformation;
 import org.notima.api.fortnox.entities3.FortnoxFile;
 import org.notima.api.fortnox.entities3.InvoiceRow;
@@ -421,7 +420,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public BusinessPartner<Customer> lookupBusinessPartner(String key) throws Exception {
 		Customer c = fortnoxClient.getCustomerByCustNo(key);
 		if (c==null) return null;
-		return convertToBusinessPartner(c);
+		return FortnoxConverter.convertToBusinessPartner(c);
 	}
 
 	@Override
@@ -431,7 +430,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		Customers contacts = fortnoxClient.getCustomers();
 		if (contacts!=null && contacts.getCustomerSubset()!=null) {
 			for(CustomerSubset c: contacts.getCustomerSubset()) {
-				result.add(convert(c));
+				result.add(FortnoxConverter.convert(c));
 			}
 		}
 		while(contacts.getTotalPages()>contacts.getCurrentPage()) {
@@ -440,7 +439,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			contacts = fortnoxClient.getCustomers(contacts.getCurrentPage()+1);
 			if (contacts!=null && contacts.getCustomerSubset()!=null) {
 				for(CustomerSubset c: contacts.getCustomerSubset()) {
-					result.add(convert(c));
+					result.add(FortnoxConverter.convert(c));
 				}
 			}
 			
@@ -1116,66 +1115,6 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	}
 	
-	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convertToBusinessPartner(org.notima.api.fortnox.entities3.Customer src) {
-		
-		BusinessPartner<Customer> dst = new BusinessPartner<Customer>();
-		
-		dst.setName(src.getName());
-		dst.setIdentityNo(src.getCustomerNumber());
-		dst.setTaxId(src.getOrganisationNumber());
-		Location loc = new Location();
-		dst.setAddressOfficial(loc);
-		loc.setEmail(src.getEmail());
-		loc.setAddress1(src.getAddress1());
-		loc.setAddress2(src.getAddress2());
-		loc.setCity(src.getCity());
-		loc.setPostal(src.getZipCode());
-		loc.setPhone(src.getPhone1());
-		loc.setCountryCode(src.getCountryCode());
-		dst.setCompany("COMPANY".equalsIgnoreCase(src.getType()));
-
-		// Check default delivery type
-		DefaultDeliveryTypes ddt = src.getDefaultDeliveryTypes();
-		if (ddt!=null) {
-			if ("EMAIL".equalsIgnoreCase(ddt.getInvoice())) {
-				dst.setEmailInvoice(true);
-			}
-		}
-		
-		// Delivery address if applicable
-		if (src.getDeliveryAddress1()!=null && src.getDeliveryAddress1().trim().length()>0) {
-			loc = new Location();
-			dst.setAddressOfficial(loc);
-			loc.setAddress1(src.getDeliveryAddress1());
-			loc.setAddress2(src.getDeliveryAddress2());
-			loc.setCity(src.getDeliveryCity());
-			loc.setPostal(src.getDeliveryZipCode());
-			loc.setPhone(src.getDeliveryPhone1());
-			loc.setCountryCode(src.getDeliveryCountryCode());
-		}
-		
-		
-		return dst;
-	}
-	
-	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convert(org.notima.api.fortnox.entities3.CustomerSubset src) {
-		
-		BusinessPartner<Customer> dst = new BusinessPartner<Customer>();
-		
-		dst.setName(src.getName());
-		dst.setIdentityNo(src.getCustomerNumber());
-		dst.setTaxId(src.getOrganisationNumber());
-		Location loc = new Location();
-		dst.setAddressOfficial(loc);
-		loc.setEmail(src.getEmail());
-		loc.setCity(src.getCity());
-		loc.setPostal(src.getZipCode());
-		loc.setPhone(src.getPhone());
-		
-		return dst;
-	}
-	
-
 	@Override
 	public Product<Object> lookupProductByEan(String ean) throws Exception {
 		// TODO Auto-generated method stub
