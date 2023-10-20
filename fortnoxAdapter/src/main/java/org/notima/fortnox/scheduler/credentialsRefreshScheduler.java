@@ -1,9 +1,7 @@
 package org.notima.fortnox.scheduler;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,13 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, property = {
-        Scheduler.PROPERTY_SCHEDULER_EXPRESSION + "=0 0 23 ? * MON,TUE,WED,THU,FRI,SAT,SUN *",
+        Scheduler.PROPERTY_SCHEDULER_EXPRESSION + "=0 0 5 ? * MON,TUE,WED,THU,FRI,SAT,SUN *",
         Scheduler.PROPERTY_SCHEDULER_NAME + "=" + "FortnoxCredentialsRefreshSchedule"
 } )
 public class credentialsRefreshScheduler implements Runnable {
 	private Logger log = LoggerFactory.getLogger(credentialsRefreshScheduler.class);
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     public void run() {
 	    List<BusinessObjectFactory> bofs;
         try {
@@ -83,7 +82,8 @@ public class credentialsRefreshScheduler implements Runnable {
         credentialsProvider.setCredentials(newCredentials);
     }
 
-    protected <S> List<S> getServiceReferences(Class<S> clazz) throws InvalidSyntaxException {
+    @SuppressWarnings("unchecked")
+	protected <S> List<S> getServiceReferences(Class<S> clazz) throws InvalidSyntaxException {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
 		if (bundle != null) {
 			BundleContext ctx = bundle.getBundleContext();
