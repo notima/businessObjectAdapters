@@ -163,7 +163,13 @@ public class GenericTable {
 	                if(gc.getColor() >= 0){
 	                    String coloredData = String.format("%s%s%s", ansiColors[gc.getColor()], gc.toString(), ANSI_RESET);
 	                    r.addContent(coloredData);
-	                }else{
+	                }else if(gc.hasAnsiColor()) {
+	                	String coloredData = String.format(
+	    						"%s%s\033[0m", 
+	    						gc.getAnsiColor(), 
+	    						gc.toString());
+	                	r.addContent(coloredData);
+	                } else {
 	                    r.addContent(gc);
 	                }
             	} else {
