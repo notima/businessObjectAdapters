@@ -108,6 +108,9 @@
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.apache.commons/commons-csv/${commons-csv.version}</bundle>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/infometricAdapter/${project.version}</bundle>
+        <config name="InfometricProperties">
+            infometricBaseDirectory = infometric-files
+        </config>
     </feature>
     
 	<feature name="notima-sie" description="Notima SIE Adapter" version="${project.version}" install="manual">
