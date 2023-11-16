@@ -550,7 +550,9 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		bpl.setBusinessPartner(list);
 
 		try {
-			String query = "select ad_client_id, value, name from ad_client where ad_client_id>=1000000 order by value";
+			String query = "select o.ad_org_id, o.value, o.name, oi.taxid from ad_org o "
+					+" join ad_orginfo oi on o.ad_org_id=oi.ad_org_id "
+					+ "where o.ad_client_id>=1000000 order by value";
 
 			BusinessPartner bp = null;
 			PreparedStatement ps = m_conn.prepareStatement(query);
@@ -559,6 +561,7 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 				bp = new BusinessPartner();
 				bp.setIdentityNo(Integer.toString(rs.getInt(1)));
 				bp.setName(rs.getString(3));
+				bp.setTaxId(rs.getString(4));
 				list.add(bp);
 			}
 			rs.close();

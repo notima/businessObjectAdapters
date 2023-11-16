@@ -35,6 +35,8 @@ public class TenantTable extends GenericTable {
 		
 		if (getRows()!=null)
 			this.getRows().clear();
+
+		if (bpList==null) return;
 		
 		for (BusinessPartner<Object> p : bpList) {
 			addRow().addContent(adapterName, p.getTaxId(), p.getName());
