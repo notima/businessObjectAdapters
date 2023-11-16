@@ -1,17 +1,14 @@
 package adempiereobjects.test;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.util.Properties;
 
-import javax.xml.bind.JAXB;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.notima.generic.adempiere.factory.AdempiereJdbcFactory;
-import org.notima.generic.businessobjects.DunningRun;
-import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 public class TestAdempiereJdbcFactory {
@@ -23,7 +20,7 @@ public class TestAdempiereJdbcFactory {
 	private static int			clientId;
 	private static int			orgId;
 	
-	private static BusinessObjectFactory	factory;
+	public static BusinessObjectFactory<?, ?, ?, ?, ?, ?>	factory;
 	
 	@BeforeClass
 	public static void setUp() throws Exception {
@@ -33,9 +30,9 @@ public class TestAdempiereJdbcFactory {
 		props = new Properties();
 		props.load(is);
 		
-		url = props.getProperty("url");
-		user = props.getProperty("user");
-		password = props.getProperty("password");
+		url = props.getProperty("adempiere.db.url");
+		user = props.getProperty("adempiere.db.user");
+		password = props.getProperty("adempiere.db.password");
 		clientId = 1000000;
 		orgId = 1000000;
 
@@ -48,43 +45,16 @@ public class TestAdempiereJdbcFactory {
 		
 	}
 
-	// @Test
-	public void testLookupProductByEan() {
+	@Test
+	public void testIsConnected() {
 
-		if (factory==null) return;
+		if (factory==null) fail("No connection created");
 		try {
-			//Product product = factory.lookupProductByEan("074603003287");
-			//Invoice invoice = factory.lookupInvoice("1000887");
-			DunningRun dun = factory.lookupDunningRun("1000002", null);
+			boolean connected = factory.isConnected();
+			assertTrue("Database is connected", connected);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		}
-		
-	}
-
-	@Test
-	public void testLookupInvoice() {
-		if (factory==null) return;
-		
-		try {
-			Invoice invoice = factory.lookupInvoice("8774517");
-			JAXB.marshal(invoice, System.out);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
-	
-	// @Test
-	public void testLookupCreditInvoice() {
-		if (factory==null) return;
-		
-		try {
-			Invoice invoice = factory.lookupInvoice("211120");
-			JAXB.marshal(invoice, System.out);
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		
 	}

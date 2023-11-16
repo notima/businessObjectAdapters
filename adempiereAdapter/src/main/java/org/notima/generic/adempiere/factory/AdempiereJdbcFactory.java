@@ -49,6 +49,7 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 	
 	private static Logger logger = Logger.getLogger(AdempiereJdbcFactory.class.getName());
 	
+	private DataSource	dataSource;
 	private Connection m_conn;
 	private int			adClientId;
 	private int			adOrgId;
@@ -64,7 +65,8 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 			return;
 		}
 		
-		m_conn = ((DataSource)ds).getConnection();
+		dataSource = ((DataSource)ds);
+		m_conn = dataSource.getConnection();
 		adClientId = clientId;
 		adOrgId = orgId;
 		
@@ -79,8 +81,13 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 	public AdempiereJdbcFactory(String jdbcUrl, String user, String pass, int clientId, int orgId) throws Exception {
 		Class.forName("org.postgresql.Driver");
 		m_conn = DriverManager.getConnection(jdbcUrl, user, pass);
+		dataSource = new ConnectionDataSource(m_conn);
 		adClientId = clientId;
 		adOrgId = orgId; 
+	}
+	
+	public DataSource getDataSource() {
+		return dataSource;
 	}
 	
 	public void closeDatabase() throws SQLException {
@@ -105,12 +112,12 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		closeDatabase();
 	}
 	
-	public BusinessPartner lookupBusinessPartner(String key) throws Exception {
+	public BusinessPartner<Object> lookupBusinessPartner(String key) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public List<BusinessPartner> lookupAllBusinessPartners() throws Exception {
+	public List<BusinessPartner<Object>> lookupAllBusinessPartners() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

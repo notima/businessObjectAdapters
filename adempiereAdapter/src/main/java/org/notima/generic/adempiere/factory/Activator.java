@@ -11,6 +11,7 @@ import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.MappingServiceInstanceFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(BusinessObjectFactory.class),
+				@ProvideService(MappingServiceInstanceFactory.class)
 		},
 		requires = {
 				@RequireService(value = DataSource.class, filter="(osgi.jndi.service.name=adempiere)"),
@@ -27,6 +29,8 @@ import org.slf4j.LoggerFactory;
 )
 
 public class Activator extends BaseActivator {
+	
+	public static final String SYSTEM_NAME = "Adempiere";
 	
 	private Logger log = LoggerFactory.getLogger(Activator.class);	
 	
@@ -71,7 +75,7 @@ public class Activator extends BaseActivator {
 			orgId = "1000000";
 		
 		Dictionary<String, String> props = new Hashtable<String,String>();
-		props.put("SystemName", "Adempiere");
+		props.put("SystemName", SYSTEM_NAME);
 		
 		AdempiereJdbcFactory adapter = null;
 			
@@ -86,6 +90,13 @@ public class Activator extends BaseActivator {
 	
 				log.info("Created AdempiereAdapter. ClientId {}, OrgId {}", clientId, orgId);
 				register(BusinessObjectFactory.class, adapter, props);
+				
+				IdempiereAptMapperServiceFactory mapperFactory = new IdempiereAptMapperServiceFactory();
+				mapperFactory.setDs(ds);
+				mapperFactory.setAdClientId(Integer.parseInt(clientId));
+				mapperFactory.setAdOrgId(Integer.parseInt(orgId));
+				log.info("Created Adempiere Mapper");
+				register(MappingServiceInstanceFactory.class, mapperFactory, props);
 				
 			} else {
 				

@@ -26,6 +26,12 @@
 			<artifactId>adapterTools</artifactId>
 			<version>${version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.3.8</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -35,6 +41,7 @@
 				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>log4j.xml</exclude>
+					<exclude>connection.properties</exclude>
 				</excludes>
 			</resource>
 		</resources>

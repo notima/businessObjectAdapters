@@ -15,7 +15,8 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(FormatterFactory.class),
 				@ProvideService(CanonicalObjectFactory.class),
 				@ProvideService(MessageSenderFactory.class),
-				@ProvideService(PaymentBatchProcessor.class)
+				@ProvideService(PaymentBatchProcessor.class),
+				@ProvideService(MappingServiceFactory.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -48,6 +49,11 @@ public class Activator extends BaseActivator {
 		register(PaymentBatchProcessor.class, paymentBatchProcessor, props);
 		log.info("Created File Payment Batch Processor");
 		log.info("Context: " + this.bundleContext.toString());		
+		
+		MappingServiceFactory mappingFactory = new MappingServiceFactoryImpl();
+		((MappingServiceFactoryImpl)mappingFactory).setBundleContext(bundleContext);
+		log.info("Created Mapping Factory");
+		register(MappingServiceFactory.class, mappingFactory);
 		
 	}
 	

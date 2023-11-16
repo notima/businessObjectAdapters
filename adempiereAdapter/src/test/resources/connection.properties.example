@@ -1,0 +1,4 @@
+adempiere.db.driver=org.postgresql.Driver
+adempiere.db.url=jdbc:postgresql://server/database
+adempiere.db.user=user
+adempiere.db.password=pass
