@@ -38,6 +38,7 @@ import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.ProductInfo;
 import org.notima.generic.businessobjects.Tax;
+import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 
 public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
@@ -540,7 +541,6 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 	public String getSystemName() {
 		return SYSTEMNAME;
 	}
-	
 
 	@Override
 	public BusinessPartnerList listTenants() {
@@ -550,8 +550,10 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		bpl.setBusinessPartner(list);
 
 		try {
-			String query = "select o.ad_org_id, o.value, o.name, oi.taxid from ad_org o "
+			String query = "select o.ad_org_id, o.value, o.name, oi.taxid, cc.countrycode from ad_org o "
 					+" join ad_orginfo oi on o.ad_org_id=oi.ad_org_id "
+					+" left join c_location l on oi.c_location_id = l.c_location_id "
+					+" left join c_country cc on l.c_country_id = cc.c_country_id "
 					+ "where o.ad_client_id>=1000000 order by value";
 
 			BusinessPartner bp = null;
@@ -562,6 +564,7 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 				bp.setIdentityNo(Integer.toString(rs.getInt(1)));
 				bp.setName(rs.getString(3));
 				bp.setTaxId(rs.getString(4));
+				bp.setCountryCode(rs.getString(5));
 				list.add(bp);
 			}
 			rs.close();

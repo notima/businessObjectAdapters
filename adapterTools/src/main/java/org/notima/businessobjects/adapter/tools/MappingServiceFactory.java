@@ -19,4 +19,11 @@ public interface MappingServiceFactory {
 	 */
 	public MappingServiceInstanceFactory getMappingServiceFor(String sourceSystem, String targetSystem, String typeOfObject);
 	
+	/**
+	 * 
+	 * @param sourceSystem
+	 * @return	A Mapping Service Instance Factory that support the parameters.
+	 */
+	public MappingServiceInstanceFactory getMappingServiceFor(String sourceSystem);
+	
 }

@@ -42,7 +42,15 @@ public class AddClient implements Action {
     @Option(name = "--orgName", description = "The name of the organisation", required = false, multiValued = false)
     private String orgName;
     
+    @Option(name = "--article", description = "Article code of the billing product.", required = false, multiValued = false)
+    private String productCode;
+
+    @Option(name = "--billing-text", description = "Billing text", required = false, multiValued = false)
+    private String billingText;
+    
     private InfometricAdapter fa;
+    
+    private Properties props;
     
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -68,9 +76,7 @@ public class AddClient implements Action {
 			return null;
 		}
 		
-		Properties props = new Properties();
-		if (tenantDirectory!=null)
-			props.setProperty(InfometricAdapter.PROP_TENANTDIRECTORY, tenantDirectory);
+		setPropertiesFromOptions();
 		
 		BusinessPartner<InfometricTenant> bp = fa.addTenant(orgNo, "SE", orgName, props);
 
@@ -78,6 +84,20 @@ public class AddClient implements Action {
 			sess.getConsole().println("Tenant [" + bp.getTaxId() + "] " + bp.getName() + " added.");
 		}
 		return null;
+	}
+	
+	private void setPropertiesFromOptions() {
+
+		props = new Properties();
+		if (tenantDirectory!=null)
+			props.setProperty(InfometricAdapter.PROP_TENANTDIRECTORY, tenantDirectory);
+
+		if (productCode!=null) 
+			props.setProperty(InfometricAdapter.PROP_BILLINGPRODUCT, productCode);
+			
+		if (billingText!=null)
+			props.setProperty(InfometricAdapter.PROP_INVOICELINETEXT, billingText);
+		
 	}
 	
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.InvoiceRow;
 import org.notima.api.fortnox.entities3.InvoiceRows;
@@ -17,6 +18,7 @@ import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.InvoiceOperationResult;
 import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.util.LocalDateUtils;
 
 public class FortnoxInvoiceWriter {
@@ -29,6 +31,11 @@ public class FortnoxInvoiceWriter {
 	private boolean 	updateExisting = true;
 	private boolean		createBusinessPartner = true;
 	private int			createLimit;
+	// Create an e-mail / bp number mapping
+	private Map<String, String> custMap = new TreeMap<String,String>();
+	private Map<String, BusinessPartner<?>> custMapById = new TreeMap<String, BusinessPartner<?>>();
+	private Map<TaxSubjectIdentifier, BusinessPartner<?>> custMapByTaxId = new TreeMap<TaxSubjectIdentifier, BusinessPartner<?>>();
+	
 	
 	public FortnoxInvoiceWriter(FortnoxAdapter adapter) {
 		
@@ -37,17 +44,8 @@ public class FortnoxInvoiceWriter {
 		
 	}
 	
-	public InvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices) throws Exception {
+	private void refreshCustomerMaps() throws Exception {
 		
-		initDates();
-		
-		// Set export revenue account
-		// ((FortnoxBusinessObjectFactoryV3)fortnox3).setExportRevenueAccount("3105");
-		adapter.setDefaultRevenueAccount("3011");
-		
-		// Create an e-mail / bp number mapping
-		Map<String, String> custMap = new TreeMap<String,String>();
-		Map<String, BusinessPartner<?>> custMapById = new TreeMap<String, BusinessPartner<?>>(); 
 		Location loc;
 		List<BusinessPartner<?>> bpList = getAllBusinessPartners();
 		
@@ -59,28 +57,59 @@ public class FortnoxInvoiceWriter {
 			loc = bp.getAddressShipping()!=null ? bp.getAddressShipping() : bp.getAddressOfficial();
 			custMap.put(loc.getAddress1().trim().toUpperCase(), bp.getIdentityNo());
 			custMapById.put(bp.getIdentityNo(), bp);
+			custMapByTaxId.put(new TaxSubjectIdentifier(bp), bp);
 			FortnoxAdapter.logger.info("Adding " + bp.getName() + " => " + bp.getIdentityNo());
 		}
+		
+		
+	}
+	
+	public InvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices) throws Exception {
+		
+		initDates();
+		
+		// Set export revenue account
+		// ((FortnoxBusinessObjectFactoryV3)fortnox3).setExportRevenueAccount("3105");
+		adapter.setDefaultRevenueAccount("3011");
+		
+		refreshCustomerMaps();
 		
 		int ocount = 0;
 		String custNo;
 		BusinessPartner<?> bp;
+		BusinessPartner<?> lookedUpBp;
+		Location loc;
 		// Make sure all business partners are imported
 		for (Invoice<?> canonicalInvoice : canonicalInvoices) {
+			custNo = null;
+			lookedUpBp = null;
 			
 			bp = canonicalInvoice.getBusinessPartner();
-			loc = bp.getAddressShipping()!=null ? bp.getAddressShipping() : bp.getAddressOfficial();
-			custNo = custMap.get(loc.getAddress1().trim().toUpperCase());
-			if (custNo!=null) {
-				bp.setIdentityNo(custNo);
-			} else {
-				if (!createBusinessPartner) {
-					throw new Exception("Can't find business partner " + custNo + " " + bp.getName());
+
+			if (bp.getIdentityNo()!=null && bp.getIdentityNo().trim().length()>0) {
+				lookedUpBp = custMapById.get(bp.getIdentityNo());
+			}
+			if (lookedUpBp==null)  {
+				if (bp.hasLocations()) {
+					loc = bp.getAddressShipping()!=null ? bp.getAddressShipping() : bp.getAddressOfficial();
+					custNo = custMap.get(loc.getAddress1().trim().toUpperCase());
+					if (custNo!=null) {
+						bp.setIdentityNo(custNo);
+					}
+				} else if (bp.hasTaxId()) {
+					lookedUpBp = custMapByTaxId.get(new TaxSubjectIdentifier(FortnoxUtil.convertTaxIdToFortnoxFormat(bp.getTaxId()),bp.getCountryCode()));
+					if (lookedUpBp!=null) {
+						bp.setIdentityNo(lookedUpBp.getIdentityNo());
+					}
+				} else {
+					if (!createBusinessPartner) {
+						throw new Exception("Can't find business partner " + custNo + " " + bp.getName());
+					}
+					// New customer
+					bp.setIdentityNo(custNo);
+					FortnoxAdapter.logger.info("Persisting new customer " + bp.getName());
+					adapter.persist(bp);
 				}
-				// New customer
-				bp.setIdentityNo(custNo);
-				FortnoxAdapter.logger.info("Persisting new customer " + bp.getName());
-				adapter.persist(bp);
 			}
 			ocount++;
 			

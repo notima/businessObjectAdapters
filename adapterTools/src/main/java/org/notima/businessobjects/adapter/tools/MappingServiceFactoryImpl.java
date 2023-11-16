@@ -23,6 +23,11 @@ public class MappingServiceFactoryImpl implements MappingServiceFactory {
 	public void setBundleContext(BundleContext c) {
 		ctx = c;
 	}
+
+	@Override
+	public MappingServiceInstanceFactory getMappingServiceFor(String sourceSystem) {
+		return getMappingServiceFor(sourceSystem, MappingServiceInstanceFactory.ANY_SOURCE_TARGET, null);
+	}
 	
 	@Override
 	public MappingServiceInstanceFactory getMappingServiceFor(String sourceSystem, String targetSystem,
@@ -37,7 +42,17 @@ public class MappingServiceFactoryImpl implements MappingServiceFactory {
 		Map<String, MappingServiceInstanceFactory> sourceMappers = sourceToTargetMappers.get(sourceSystem);
 		if (sourceMappers==null) return null;
 
-		MappingServiceInstanceFactory mapper = sourceMappers.get(targetSystem);
+		MappingServiceInstanceFactory mapper;
+		if (targetSystem==null || targetSystem.equals(MappingServiceInstanceFactory.ANY_SOURCE_TARGET)) {
+			targetSystem = MappingServiceInstanceFactory.ANY_SOURCE_TARGET;
+			mapper = sourceMappers.get(targetSystem);
+		} else {
+			mapper = sourceMappers.get(targetSystem);
+			if (mapper==null) {
+				mapper = sourceMappers.get(MappingServiceInstanceFactory.ANY_SOURCE_TARGET);
+			}
+		}
+		 
 		return mapper;
 		
 	}
@@ -45,7 +60,7 @@ public class MappingServiceFactoryImpl implements MappingServiceFactory {
 	
 	private void resetSourceServices(String sourceSystem) throws InvalidSyntaxException {
 
-		String filter = "SystemName=" + sourceSystem;
+		String filter = "(SystemName=" + sourceSystem + ")";
 		
 		Collection<ServiceReference<MappingServiceInstanceFactory>> mrefs = 
 				ctx.getServiceReferences(MappingServiceInstanceFactory.class, filter);

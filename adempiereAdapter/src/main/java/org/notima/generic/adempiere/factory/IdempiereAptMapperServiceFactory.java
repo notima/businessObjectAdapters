@@ -1,52 +1,22 @@
 package org.notima.generic.adempiere.factory;
 
-import java.sql.SQLException;
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
+import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.MappingService;
 import org.notima.generic.ifacebusinessobjects.MappingServiceInstanceFactory;
 
 public class IdempiereAptMapperServiceFactory implements MappingServiceInstanceFactory {
+	
+	private AdempiereJdbcFactory adapter;
 
-	private static Logger logger = Logger.getLogger(IdempiereAptMapperServiceFactory.class.getName());
-	
-	private int			adClientId;
-	private int			adOrgId;
-	
-	private DataSource ds;
+	public IdempiereAptMapperServiceFactory(AdempiereJdbcFactory adapter) {
+		this.adapter = adapter;
+		
+	}
 	
 	public int getAdClientId() {
-		return adClientId;
-	}
-
-	public void setAdClientId(int adClientId) {
-		this.adClientId = adClientId;
-	}
-
-	public int getAdOrgId() {
-		return adOrgId;
-	}
-
-	public void setAdOrgId(int adOrgId) {
-		this.adOrgId = adOrgId;
-	}
-
-	public DataSource getDs() {
-		return ds;
-	}
-
-	public void setDs(DataSource ds) throws SQLException {
-		this.ds = ds;
-		if (ds==null || !(ds instanceof DataSource)) {
-			logger.warning("No datasource supplied");
-			if (ds!=null) {
-				logger.warning("Don't know what to do with a " + ds.getClass().getCanonicalName());
-			}
-			return;
-		}
-		
+		return adapter.getADClientID();
 	}
 
 	@Override
@@ -56,12 +26,26 @@ public class IdempiereAptMapperServiceFactory implements MappingServiceInstanceF
 
 	@Override
 	public String getTargetSystemName() {
-		return "Generic";
+		return MappingServiceInstanceFactory.ANY_SOURCE_TARGET;
 	}
-
+	
 	@Override
-	public MappingService getMappingService() {
-		return new IDempiereAptMapper(ds, adClientId, adOrgId);
+	public MappingService getMappingService(TaxSubjectIdentifier tenant) throws NoSuchTenantException {
+		int adOrgId = getAdOrgIdFromTaxSubject(tenant);
+		
+		return new IDempiereAptMapper(adapter.getDataSource(), adOrgId);
 	}
 
+	private int getAdOrgIdFromTaxSubject(TaxSubjectIdentifier tenant) throws NoSuchTenantException {
+		
+		if (tenant==null) return 0;
+
+		adapter.refreshTenantMap();
+		adapter.setTenant(tenant.getTaxId(), tenant.getCountryCode());
+		BusinessPartner<?> bp = adapter.getCurrentTenant();
+		int adOrgNo = Integer.parseInt(bp.getIdentityNo());
+		return adOrgNo;
+		
+	}
+	
 }

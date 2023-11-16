@@ -58,6 +58,7 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	
 	public static final String PROP_TENANTDIRECTORY = "tenantDirectory";
 	public static final String PROP_BILLINGPRODUCT = "billingProduct";
+	public static final String PROP_INVOICELINETEXT = "invoiceLineText";
 	
 	public String baseDirectory;
 	
@@ -105,6 +106,8 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 			it.setTenantDirectory(tenantDir);
 			String billingProduct = (String)props.get(InfometricAdapter.PROP_BILLINGPRODUCT);
 			it.setProductKey(billingProduct);
+			String billingText = (String)props.get(InfometricAdapter.PROP_INVOICELINETEXT);
+			it.setInvoiceLineText(billingText);
 		}
 		newTenant.setNativeBusinessPartner(it);
 		

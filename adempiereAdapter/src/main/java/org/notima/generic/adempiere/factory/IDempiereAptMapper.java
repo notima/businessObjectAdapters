@@ -10,30 +10,31 @@ import javax.sql.DataSource;
 
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.MappingService;
 
 public class IDempiereAptMapper implements MappingService {
 
 	private DataSource ds;
-	private int 	   clientId;
 	private int		   orgId;
 	
-	public IDempiereAptMapper(DataSource ds, int clientId, int orgId) {
+	public IDempiereAptMapper(DataSource ds, int orgId) {
 		
 		this.ds = ds;
-		this.clientId = clientId;
 		this.orgId = orgId;
 		
 	}
 	
 	@Override
-	public String mapSourceToTarget(String aptNo, String typeOfObject) {
+	public TaxSubjectIdentifier mapApartmentNoToTaxSubject(String aptNo) {
 
+		//TODO Lookup country code
+		
 		String query = "select bp.taxid as taxid from xs_contract_part cp " + 
 				"join c_bpartner bp on (cp.c_bpartner_id=bp.c_bpartner_id) " + 
 				"join xs_contract c on (cp.xs_contract_id=c.xs_contract_id) " + 
 				"join xs_rentalobject ro on (c.xs_rentalobject_id=ro.xs_rentalobject_id) " + 
-				"where ro.object_key=? and c.ad_client_id=? and c_ad_org_id=? and c.isactive='Y' and cp.isactive='Y' " + 
+				"where ro.object_key=? and c.ad_org_id=? and c.isactive='Y' and cp.isactive='Y' " + 
 				"AND (c.end_date IS NULL OR c.end_date>=?) " + 
 				"AND cp.contract_role = 'B' order by cp.share desc limit 1";
 		
@@ -47,9 +48,8 @@ public class IDempiereAptMapper implements MappingService {
 			Connection conn = ds.getConnection();
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.setString(1, aptNo);
-			ps.setInt(2, clientId);
-			ps.setInt(3, orgId);
-			ps.setDate(4, untilDate);
+			ps.setInt(2, orgId);
+			ps.setDate(3, untilDate);
 			ResultSet rs = ps.executeQuery();
 			if (rs.next()) {
 				result = rs.getString(1);
@@ -62,7 +62,7 @@ public class IDempiereAptMapper implements MappingService {
 			e.printStackTrace();
 		}
 		
-		return result;
+		return new TaxSubjectIdentifier(result);
 		
 	}
 

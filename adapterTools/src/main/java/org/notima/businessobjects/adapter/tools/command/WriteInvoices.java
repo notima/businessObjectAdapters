@@ -40,6 +40,8 @@ public class WriteInvoices extends AbstractAction {
     @Option(name="--create-limit", description="Create limit.", required = false, multiValued = false)
     private Integer	createLimit;
     
+    @Option(name="--use-tax-id", description="Use tax ID to map the customer", required = false, multiValued = false)
+    private boolean useTaxId;
     
 	@Argument(index = 0, name = "adapterName", description ="The destination adapter name", required = true, multiValued = false)
 	private String adapterName = "";
@@ -64,6 +66,7 @@ public class WriteInvoices extends AbstractAction {
 		initBusinessObjectFactory();
 		parseOptions();
 		parseInvoiceFile();
+		checkUseTaxId();
 		writeInvoices();
 		
 		return null;
@@ -92,7 +95,21 @@ public class WriteInvoices extends AbstractAction {
 	
 	private void writeInvoices() throws Exception {
 		
-		adapter.writeInvoices(invoices, invoiceDate, dueDate, true, createLimit, true);
+		adapter.writeInvoices(invoices, invoiceDate, dueDate, false, createLimit, true);
+		
+	}
+	
+	private void checkUseTaxId() {
+		
+		if (useTaxId) {
+			
+			for (Invoice<?> invoice : invoices) {
+				if (invoice.getBusinessPartner().getIdentityNo()!=null && invoice.getBusinessPartner().hasTaxId()) {
+					invoice.getBusinessPartner().setIdentityNo(null);
+				}
+			}
+			
+		}
 		
 	}
 	

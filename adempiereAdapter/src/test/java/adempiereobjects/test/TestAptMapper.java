@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.notima.generic.adempiere.factory.AdempiereJdbcFactory;
 import org.notima.generic.adempiere.factory.IDempiereAptMapper;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 
 public class TestAptMapper {
 	
@@ -28,9 +29,9 @@ public class TestAptMapper {
 		boolean connected = factory.isConnected();
 		assertTrue("Database is connected", connected);
 		
-		IDempiereAptMapper aptMapper = new IDempiereAptMapper(factory.getDataSource(), factory.getADClientID(), factory.getADOrgId());
-		String customerId = aptMapper.mapSourceToTarget("A01", null);
-		System.out.println(customerId);
+		IDempiereAptMapper aptMapper = new IDempiereAptMapper(factory.getDataSource(), factory.getADOrgId());
+		TaxSubjectIdentifier customer = aptMapper.mapApartmentNoToTaxSubject("A01");
+		System.out.println(customer.getTaxId());
 		
 	}
 

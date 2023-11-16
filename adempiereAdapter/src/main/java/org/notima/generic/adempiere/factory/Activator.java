@@ -91,10 +91,8 @@ public class Activator extends BaseActivator {
 				log.info("Created AdempiereAdapter. ClientId {}, OrgId {}", clientId, orgId);
 				register(BusinessObjectFactory.class, adapter, props);
 				
-				IdempiereAptMapperServiceFactory mapperFactory = new IdempiereAptMapperServiceFactory();
-				mapperFactory.setDs(ds);
-				mapperFactory.setAdClientId(Integer.parseInt(clientId));
-				mapperFactory.setAdOrgId(Integer.parseInt(orgId));
+				IdempiereAptMapperServiceFactory mapperFactory = new IdempiereAptMapperServiceFactory(
+						new AdempiereJdbcFactory(ds, Integer.parseInt(clientId), Integer.parseInt(orgId)));
 				log.info("Created Adempiere Mapper");
 				register(MappingServiceInstanceFactory.class, mapperFactory, props);
 				
