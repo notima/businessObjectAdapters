@@ -13,6 +13,7 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
+import org.notima.api.fortnox.clients.FortnoxPropertyFile;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
@@ -42,10 +43,7 @@ public class Activator extends BaseActivator {
 	@Override
 	public void doStart() throws IOException {
 	
-		String fortnoxClientsFile = null;
-		String fortnoxCredentialsFile = null;
-		String defaultClientSecret = null;
-		String defaultClientId = null;
+		FortnoxPropertyFile fortnoxProperties = new FortnoxPropertyFile();
 		ConfigurationAdmin configurationAdmin = null;
 		
 		ServiceReference<ConfigurationAdmin> reference = bundleContext.getServiceReference(ConfigurationAdmin.class);
@@ -59,10 +57,7 @@ public class Activator extends BaseActivator {
                 if (configuration != null) {
                     Dictionary<String, Object> properties = configuration.getProperties();
                     if (properties!=null) {
-	                    fortnoxClientsFile = (String)properties.get("fortnoxClientsFile");
-						fortnoxCredentialsFile = (String)properties.get("fortnoxCredentialsFile");
-	                    defaultClientSecret = (String)properties.get("defaultClientSecret");
-	                    defaultClientId = (String)properties.get("defaultClientId");
+                    	fortnoxProperties.setFromDictionary(properties);
                     }
                 }
                 
@@ -76,32 +71,32 @@ public class Activator extends BaseActivator {
 		props.put("SystemName", "Fortnox");
 		
 		// This is only necessary if the configuration admin for some reason wan't loaded (JUnitTest situation).
-		if (fortnoxClientsFile==null) {
+		if (fortnoxProperties.getFortnoxClientsFile()==null) {
 			URL url = ClassLoader.getSystemResource("fortnoxClients.xml");
 			if (url!=null) {
-				fortnoxClientsFile = url.getFile();
+				fortnoxProperties.setFortnoxClientsFile(url.getFile());
 			} else {
 				log.warn("No fortnoxClients.xml file found to initialize the FortnoxClientManager");
 			}
 		}
 		
-		if (fortnoxClientsFile!=null) {
+		if (fortnoxProperties.getFortnoxClientsFile()!=null) {
 			
-			System.setProperty(FortnoxClient3.DFortnox4JFile, fortnoxClientsFile);
-			System.setProperty(CredentialsFile.CREDENTIALS_FILE_PROPERTY, fortnoxCredentialsFile);
+			System.setProperty(FortnoxClient3.DFortnox4JFile, fortnoxProperties.getFortnoxClientsFile());
+			System.setProperty(CredentialsFile.CREDENTIALS_FILE_PROPERTY, fortnoxProperties.getFortnoxCredentialsFile());
 			FortnoxClientManager mgr = null;
 			
 			try {
-				mgr = new FortnoxClientManager(fortnoxClientsFile);
-				mgr.setDefaultClientSecret(defaultClientSecret);
-				mgr.setDefaultClientId(defaultClientId);
+				mgr = new FortnoxClientManager(fortnoxProperties.getFortnoxClientsFile());
+				mgr.setDefaultClientSecret(fortnoxProperties.getDefaultClientSecret());
+				mgr.setDefaultClientId(fortnoxProperties.getDefaultClientId());
 			} catch (FileNotFoundException fne) {
 				
 				// Create the file
 				try {
-					FortnoxUtil.writeFortnoxClientListToFile(new FortnoxClientList(), fortnoxClientsFile);
-					log.info("Creating new empty Fortnox Clients file: " + fortnoxClientsFile);
-					mgr = new FortnoxClientManager(fortnoxClientsFile);
+					FortnoxUtil.writeFortnoxClientListToFile(new FortnoxClientList(), fortnoxProperties.getFortnoxClientsFile());
+					log.info("Creating new empty Fortnox Clients file: " + fortnoxProperties.getFortnoxClientsFile());
+					mgr = new FortnoxClientManager(fortnoxProperties.getFortnoxClientsFile());
 					
 				} catch (Exception e) {
 					e.printStackTrace();

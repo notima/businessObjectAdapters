@@ -47,7 +47,7 @@ public class FortnoxInvoiceWriter {
 	private void refreshCustomerMaps() throws Exception {
 		
 		Location loc;
-		List<BusinessPartner<?>> bpList = getAllBusinessPartners();
+		List<BusinessPartner<?>> bpList = getAllActiveBusinessPartners();
 		
 		for (BusinessPartner<?> bp : bpList) {
 			if (bp.getAddressOfficial().getAddress1()==null) {
@@ -127,12 +127,13 @@ public class FortnoxInvoiceWriter {
 		for (Invoice<?> o : canonicalInvoices) {
 			
 			is = (InvoiceSubset)invoiceMap.get(o.getOrderKey());
-			fcustomer = fortnoxClient.getCustomerByCustNo(o.getBusinessPartner().getIdentityNo());
+			fcustomer = getFortnoxCustomer(o);
 			
 			if (is==null) {
 				// Get customer as named in Fortnox
 				bp = o.getBusinessPartner();
 				bp.setName(fcustomer.getName());
+				bp.setIdentityNo(fcustomer.getCustomerNumber());
 				o.setInvoiceDate(LocalDateUtils.asDate(invoiceDate));
 				o.setDueDate(LocalDateUtils.asDate(dueDate));
 				FortnoxAdapter.logger.info("Persisting invoice for order " + o.getOrderKey());
@@ -159,6 +160,38 @@ public class FortnoxInvoiceWriter {
 		return result;
 	}
 	
+	private Customer getFortnoxCustomer(Invoice<?> invoice) throws Exception {
+		if (invoice==null) return null;
+		BusinessPartner<?> bp = invoice.getBusinessPartner();
+		BusinessPartner<?> fbp;
+		if (bp==null) return null;
+		if (bp.hasTaxId()) {
+			fbp = custMapByTaxId.get(new TaxSubjectIdentifier(FortnoxUtil.convertTaxIdToFortnoxFormat(bp.getTaxId())));
+			if (fbp==null) {
+				fbp = custMapByTaxId.get(new TaxSubjectIdentifier(bp.getTaxId()));
+			}
+		} else {
+			fbp = custMapById.get(bp.getIdentityNo());
+		}
+		return lookupFortnoxCustomerFromBusinessPartner(fbp);
+	}
+
+	private Customer lookupFortnoxCustomerFromBusinessPartner(BusinessPartner<?> fbp) throws Exception {
+		Customer fortnoxCustomer = null;
+		if (fbp==null) return null;
+		if (fbp.getNativeBusinessPartner()!=null) {
+			if (fbp.getNativeBusinessPartner() instanceof Customer) {
+				fortnoxCustomer = (Customer)fbp.getNativeBusinessPartner();
+			} else {
+				fortnoxCustomer = fortnoxClient.getCustomerByCustNo(fbp.getIdentityNo());
+			}
+		} else {
+			fortnoxCustomer = fortnoxClient.getCustomerByCustNo(fbp.getIdentityNo());
+		}
+
+		return fortnoxCustomer;
+	}
+	
 	private void initDates() {
 		
 		if (invoiceDate==null) {
@@ -173,10 +206,10 @@ public class FortnoxInvoiceWriter {
 		
 	}
 	
-	private List<BusinessPartner<?>> getAllBusinessPartners() throws Exception {
+	private List<BusinessPartner<?>> getAllActiveBusinessPartners() throws Exception {
 		
 		// Get all customers
-		List<BusinessPartner<Customer>> bpList = adapter.lookupAllBusinessPartners();
+		List<BusinessPartner<Customer>> bpList = adapter.lookupAllActiveCustomers();
 		FortnoxAdapter.logger.info(bpList.size() + " existing customers");
 		List<BusinessPartner<?>> result = new ArrayList<BusinessPartner<?>>();
 		for (BusinessPartner<Customer> bp : bpList) {

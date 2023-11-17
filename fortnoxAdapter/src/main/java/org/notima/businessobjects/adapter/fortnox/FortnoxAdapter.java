@@ -19,6 +19,7 @@ import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
+import org.notima.api.fortnox.entities3.Article;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
@@ -425,17 +426,32 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 	@Override
 	public List<BusinessPartner<Customer>> lookupAllBusinessPartners() throws Exception {
-		List<BusinessPartner<Customer>> result = new ArrayList<BusinessPartner<Customer>>();
 		
 		Customers contacts = fortnoxClient.getCustomers();
+		
+		return convertCustomerResult(contacts);
+		
+	}
+	
+	@Override
+	public List<BusinessPartner<Customer>> lookupAllActiveCustomers() throws Exception {
+		
+		Customers contacts = fortnoxClient.getCustomersActiveOnly();
+		
+		return convertCustomerResult(contacts);
+		
+	}
+	
+	private List<BusinessPartner<Customer>> convertCustomerResult(Customers contacts) throws Exception {
+		
+		List<BusinessPartner<Customer>> result = new ArrayList<BusinessPartner<Customer>>();
+		
 		if (contacts!=null && contacts.getCustomerSubset()!=null) {
 			for(CustomerSubset c: contacts.getCustomerSubset()) {
 				result.add(FortnoxConverter.convert(c));
 			}
 		}
 		while(contacts.getTotalPages()>contacts.getCurrentPage()) {
-			// Pause not to exceed call limit
-			Thread.sleep(100);
 			contacts = fortnoxClient.getCustomers(contacts.getCurrentPage()+1);
 			if (contacts!=null && contacts.getCustomerSubset()!=null) {
 				for(CustomerSubset c: contacts.getCustomerSubset()) {
@@ -446,10 +462,10 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		
 		return result;
+		
 	}
 	
-	
-	
+
 	public String getDefaultRevenueAccount() {
 		return defaultRevenueAccount;
 	}
@@ -905,6 +921,34 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	}
 
+	private String getAccountNo(InvoiceLine il) throws Exception {
+		
+		// Try to set default account number if not set
+		if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
+
+			String accountNo = null;
+			
+			// Lookup article first
+			if (il.getProductKey()!=null) {
+				Article article = fortnoxClient.getArticleByArticleNo(il.getProductKey());
+				if (article!=null) {
+					// TODO: Get account depending on type of sales
+					accountNo = article.getSalesAccount().toString();
+				}
+			}
+			
+			if (accountNo==null) { 
+				accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
+			}
+			
+			return accountNo;
+				
+		} else {
+			return il.getAccountNo();
+		}
+		
+	}
+	
 	/**
 	 * 
 	 * @param src					The invoice header (source)
@@ -928,16 +972,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			row.setDescription(".");
 		}
 		
-		// Try to set default account number if not set
-		if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
-
-			String accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
-			
-			row.setAccountNumber(accountNo);
-				
-		} else {
-			row.setAccountNumber(il.getAccountNo());
-		}
+		row.setAccountNumber(getAccountNo(il));
 		
 		if (il.getPriceActual()!=null) {
 			if (il.isPricesIncludeVAT() && !src.isShowPricesIncludingVAT()) {

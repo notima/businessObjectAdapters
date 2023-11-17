@@ -354,6 +354,8 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		loc.setPostal(src.getZipCode());
 		loc.setPhone(src.getPhone1());
 		loc.setCountryCode(src.getCountryCode());
+		
+		dst.setActive(src.getActive());
 		dst.setCompany("COMPANY".equalsIgnoreCase(src.getType()));
 	
 		// Check default delivery type
