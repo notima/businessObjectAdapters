@@ -6,11 +6,15 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
@@ -24,7 +28,10 @@ public class BillingFileToInvoiceList {
 
 	private NumberFormat nfmt;
 	private DecimalFormatSymbols nsyms;
+	private DateFormat dfmt = new SimpleDateFormat("yyMMdd");
 
+	private Date today = Calendar.getInstance().getTime();
+	
 	private InfometricAdapter adapter;
 	
 	private InfometricTenant tenant;
@@ -97,13 +104,16 @@ public class BillingFileToInvoiceList {
 		
 		List<InvoiceLine> ilines;
 		
+		String aptNo;
+		
 		for (CSVRecord r : rows) {
-			
 			if (r.size()==0) continue;
+			aptNo = r.get(0);
 			invoice = new Invoice<Object>();
 			invoice.setCurrency("SEK");
+			invoice.setOrderKey(getOrderKey(aptNo));
 			bp = new BusinessPartner<Object>();
-			bp.setIdentityNo(r.get(0));  // APT No, to be remapped
+			bp.setIdentityNo(aptNo);  // APT No, to be remapped
 			invoice.setBusinessPartner(bp);
 			ilines = new ArrayList<InvoiceLine>();
 			il = new InvoiceLine();
@@ -122,6 +132,10 @@ public class BillingFileToInvoiceList {
 		
 	}
 
+	private String getOrderKey(String prefix) {
+		return prefix + "-" + dfmt.format(today);
+	}
+	
 	private String getAbsolutePath() {
 		if (!tenant.getTenantDirectory().startsWith(File.separator)) {
 			return adapter.baseDirectory + File.separator + tenant.getTenantDirectory();
