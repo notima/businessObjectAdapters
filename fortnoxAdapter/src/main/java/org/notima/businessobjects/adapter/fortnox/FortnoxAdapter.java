@@ -930,10 +930,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			
 			// Lookup article first
 			if (il.getProductKey()!=null) {
-				Article article = fortnoxClient.getArticleByArticleNo(il.getProductKey());
-				if (article!=null) {
-					// TODO: Get account depending on type of sales
-					accountNo = article.getSalesAccount()!=null ? article.getSalesAccount().toString() : null;
+				try {
+					Article article = fortnoxClient.getArticleByArticleNo(il.getProductKey());
+					if (article!=null) {
+						// TODO: Get account depending on type of sales
+						accountNo = article.getSalesAccount()!=null ? article.getSalesAccount().toString() : null;
+					}
+				} catch (Exception ee) {
+					logger.warn("Could not lookup product " + il.getProductKey(), ee);
 				}
 			}
 			
