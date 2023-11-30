@@ -99,7 +99,9 @@
 										javax.xml.*,
 										javax.net.*,
 										javax.naming,
-										org.osgi.*
+										org.osgi.*,
+										org.xml.sax*,
+										org.w3c*
 										</Import-Package>
 						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|swish4j|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
