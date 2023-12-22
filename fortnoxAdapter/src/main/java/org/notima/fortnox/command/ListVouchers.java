@@ -78,6 +78,7 @@ public class ListVouchers extends FortnoxCommand implements Action {
 		
 		if (vouchers==null || vouchers.getVoucherSubset()==null) {
 			vouchers = filtered;
+			filtered.setTotalResources(0);
 			return;
 		}
 
@@ -93,6 +94,7 @@ public class ListVouchers extends FortnoxCommand implements Action {
 			}
 		}
 		vouchers = filtered;
+		vouchers.setTotalResources(filteredList.size());
 		
 	}
 		

@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Adapter class to communicate with Fortnox using the Business Objects format.
  * 
- * Copyright 2019 Notima System Integration AB (Sweden)
+ * Copyright 2019-2023 Notima System Integration AB (Sweden)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
