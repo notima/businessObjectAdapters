@@ -170,8 +170,10 @@ public class SveaPmtAdminConverter {
 		
 		if (s.getOrderRows()!=null) {
 			for (OrderRow r : s.getOrderRows()) {
-				ll = convert(r);
-				ol.add(ll);
+				if (!r.isCancelled()) {
+					ll = convert(r);
+					ol.add(ll);
+				}
 			}
 		}
 		dst.setLines(ol);
