@@ -13,6 +13,7 @@ public class CustomerHeaderTable extends GenericTable {
 		column("Cust #");
 		column("Org No");
 		column("Customer name");
+		column("Invoice address");
 		column("Email Invoice");
 		column("ToP");
 		
@@ -53,23 +54,55 @@ public class CustomerHeaderTable extends GenericTable {
 				is.getOrganisationNumber(),
 				is.getName(),
 				"N/A",
+				is.getEmail(),
 				"N/A" 
 				)
 				;
 		
 	}
 	
-	private void addRow(Customer invoice) {
+	private void addRow(Customer customer) {
 
 		addRow().addContent(
-				invoice.getCustomerNumber(),
-				invoice.getOrganisationNumber(),
-				invoice.getName(),
-				invoice.getEmailInvoice(),
-				invoice.getTermsOfPayment()
+				customer.getCustomerNumber(),
+				customer.getOrganisationNumber(),
+				customer.getName(),
+				getInvoiceAddress(customer),
+				customer.getEmailInvoice(),
+				customer.getTermsOfPayment()
 				)
 				;
 		
+	}
+	
+	private String getInvoiceAddress(Customer customer) {
+		if (customer==null) return "";
+		
+		StringBuffer address = new StringBuffer();
+		
+		if (customer.getAddress1()!=null && customer.getAddress1().trim().length()>0) {
+			address.append(customer.getAddress1());
+		}
+		if (customer.getAddress2()!=null && customer.getAddress2().trim().length()>0) {
+			commaToBuffer(address).append(customer.getAddress2());
+		}
+
+		if (customer.getZipCode()!=null && customer.getZipCode().trim().length()>0) {
+			commaToBuffer(address).append(customer.getZipCode());
+		}
+		
+		if (customer.getCity()!=null && customer.getCity().trim().length()>0) {
+			commaToBuffer(address).append(customer.getCity());
+		}
+		
+		return address.toString();
+	}
+
+	private StringBuffer commaToBuffer(StringBuffer buf) {
+		if (buf.length()>0) {
+			buf.append(", ");
+		}
+		return buf;
 	}
 	
 }
