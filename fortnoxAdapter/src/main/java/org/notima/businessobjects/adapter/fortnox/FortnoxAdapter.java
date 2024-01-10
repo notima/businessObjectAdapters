@@ -932,7 +932,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			if (il.getProductKey()!=null) {
 				try {
 					Article article = fortnoxClient.getArticleByArticleNo(il.getProductKey());
-					if (article!=null) {
+					if (article!=null && (article.getActive()!=null && article.getActive().booleanValue())) {
 						// TODO: Get account depending on type of sales
 						accountNo = article.getSalesAccount()!=null ? article.getSalesAccount().toString() : null;
 					}
