@@ -24,6 +24,7 @@ import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.InvoiceList;
 import org.notima.generic.businessobjects.Location;
+import org.notima.generic.ifacebusinessobjects.OrderInvoiceLineValidator;
 
 /**
  * Code to convert one or many spreadsheets into invoices.
@@ -44,6 +45,8 @@ public class ExcelToInvoices {
 	private boolean			 priceIncludesTaxGlobal = false;
 	private double			 taxPercentGlobal = 0d;
 
+	private OrderInvoiceLineValidator			invoiceLineValidator;
+	
 	public boolean isPriceIncludesTaxGlobal() {
 		return priceIncludesTaxGlobal;
 	}
@@ -58,6 +61,14 @@ public class ExcelToInvoices {
 
 	public void setTaxPercentGlobal(double taxPercentGlobal) {
 		this.taxPercentGlobal = taxPercentGlobal;
+	}
+	
+	public OrderInvoiceLineValidator getInvoiceLineValidator() {
+		return invoiceLineValidator;
+	}
+
+	public void setInvoiceLineValidator(OrderInvoiceLineValidator invoiceLineValidator) {
+		this.invoiceLineValidator = invoiceLineValidator;
 	}
 
 	/**
@@ -415,12 +426,15 @@ public class ExcelToInvoices {
 			
 		}
 
-		invoice.addInvoiceLine(il);
-		if (descriptionLines!=null && descriptionLines.length>1) {
-			for (int i=1; i<descriptionLines.length; i++) {
-				il = new InvoiceLine();
-				il.setDescription(descriptionLines[i]);
-				invoice.addInvoiceLine(il);
+		if (shouldInvoiceLineBeAdded(invoice, il)) {
+
+			invoice.addInvoiceLine(il);
+			if (descriptionLines!=null && descriptionLines.length>1) {
+				for (int i=1; i<descriptionLines.length; i++) {
+					il = new InvoiceLine();
+					il.setDescription(descriptionLines[i]);
+					invoice.addInvoiceLine(il);
+				}
 			}
 		}
 		
@@ -429,6 +443,16 @@ public class ExcelToInvoices {
 		
 	}
 	
+	private boolean shouldInvoiceLineBeAdded(Invoice invoice, InvoiceLine il) {
+		
+		if (invoiceLineValidator == null) return true;
+		
+		invoiceLineValidator.setOrderInvoice(invoice);
+		invoiceLineValidator.setLineToValidate(il);
+		
+		return invoiceLineValidator.isLineValid();
+		
+	}
 	
 	private String getCellAsString(Cell c) {
 		if (c==null) return null;
