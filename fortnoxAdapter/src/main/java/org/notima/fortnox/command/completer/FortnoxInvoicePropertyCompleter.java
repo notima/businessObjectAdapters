@@ -18,6 +18,8 @@ public class FortnoxInvoicePropertyCompleter implements Completer {
 	public static final String INVOICE_PROPERTY_INVOICE_DATE = "invoiceDate";
 	public static final String INVOICE_PROPERTY_PAYMENTTERM = "paymentTerm";
 	public static final String INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE = "copyPaymentTerm";
+	public static final String INVOICE_PROPERTY_EXTREF1 = "extref1";
+	public static final String INVOICE_PROPERTY_EXTREF2 = "extref2";
 	// Refresh customer name from the customer register
 	public static final String INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE = "copyCustomerName";
 
@@ -28,6 +30,8 @@ public class FortnoxInvoicePropertyCompleter implements Completer {
 		INVOICE_PROPERTY_INVOICE_DATE,
 		INVOICE_PROPERTY_PAYMENTTERM,
 		INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE,
+		INVOICE_PROPERTY_EXTREF1,
+		INVOICE_PROPERTY_EXTREF2,
 		INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE
     };
     

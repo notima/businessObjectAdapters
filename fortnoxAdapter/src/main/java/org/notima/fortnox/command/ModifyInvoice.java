@@ -147,6 +147,14 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 				copyCustomerNameToInvoice();
 				break;
 				
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_EXTREF1:
+				updateExtRef1();
+				break;
+				
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_EXTREF2:
+				updateExtRef2();
+				break;
+				
 			default:
 				sess.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
             	break;
@@ -162,6 +170,16 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 
 	private void changePaymentTerm() throws Exception {
 		invoiceToModify.setTermsOfPayment(newValue);
+		fortnoxClient.setInvoice(invoiceToModify);
+	}
+	
+	private void updateExtRef1() throws Exception {
+		invoiceToModify.setExternalInvoiceReference1(newValue);
+		fortnoxClient.setInvoice(invoiceToModify);
+	}
+	
+	private void updateExtRef2() throws Exception {
+		invoiceToModify.setExternalInvoiceReference2(newValue);
 		fortnoxClient.setInvoice(invoiceToModify);
 	}
 	
