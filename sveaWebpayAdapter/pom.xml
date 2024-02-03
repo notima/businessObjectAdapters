@@ -120,6 +120,13 @@
 			<version>${pmt-admin-api.version}</version>
 		</dependency>
 
+		<!--
+			If below dependency is not found, checkout and build below 
+			projects
+		
+			https://github.com/sveawebpay/webpay-common
+			https://github.com/sveawebpay/webpayadminreports 
+		-->
 		<dependency>
 			<groupId>com.svea</groupId>
 			<artifactId>webpayadmin-reports</artifactId>
