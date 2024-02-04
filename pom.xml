@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>businessObjectAdapters</artifactId>
-	<version>1.8.13</version>
+	<version>1.9.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<distributionManagement>
@@ -17,7 +17,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<notima-util.version>0.0.5</notima-util.version>
-		<businessobjects.version>0.1.23</businessobjects.version>
+		<businessobjects.version>1.0.0-SNAPSHOT</businessobjects.version>
 		<karaf.version>4.2.9</karaf.version>
 		<apache.poi.version>3.17</apache.poi.version>
 		<fortnox4j.version>2.0.1</fortnox4j.version>
@@ -47,6 +47,7 @@
 		<module>excelAdapter</module>
 		<module>jasperFonts</module>
 		<module>emailAdapter</module>
+		<module>seBankingAdapter</module>
 	</modules>
 
 	<dependencyManagement>

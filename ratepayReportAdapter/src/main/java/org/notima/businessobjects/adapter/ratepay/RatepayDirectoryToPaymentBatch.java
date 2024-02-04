@@ -189,6 +189,18 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	public List<PaymentBatch> readPaymentBatches() {
 		return readFilesInDirectory();
 	}
+
+	@Override
+	public void setDestination(String dest) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public PaymentBatch writePaymentBatch(PaymentBatch batch) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 }
