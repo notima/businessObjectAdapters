@@ -48,6 +48,7 @@
 		<module>jasperFonts</module>
 		<module>emailAdapter</module>
 		<module>seBankingAdapter</module>
+		<module>p27bankingAdapter</module>
 	</modules>
 
 	<dependencyManagement>
