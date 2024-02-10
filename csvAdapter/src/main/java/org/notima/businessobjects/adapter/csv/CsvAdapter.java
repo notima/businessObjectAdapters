@@ -1,55 +1,205 @@
 package org.notima.businessobjects.adapter.csv;
 
-import java.io.File;
-import java.io.PrintWriter;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
+import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
+import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.BusinessPartnerList;
+import org.notima.generic.businessobjects.DunningRun;
+import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.businessobjects.Order;
+import org.notima.generic.businessobjects.PaymentTerm;
+import org.notima.generic.businessobjects.PriceList;
+import org.notima.generic.businessobjects.Product;
+import org.notima.generic.businessobjects.ProductCategory;
+import org.notima.generic.businessobjects.Tax;
+import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 
-public class CsvAdapter {
+public class CsvAdapter<C,I,O,P,B,T> extends BasicBusinessObjectFactory<C, I, O, P, B, T> {
 
-	private File	outFile;
+	public static final String	SYSTEM_NAME= "Csv";
 	
-	public File getOutFile() {
-		return outFile;
-	}
-
-	public void setOutFile(File outFile) {
-		this.outFile = outFile;
-	}
-
-	public void persistOrdersToFile(List<Object[]> nativeOrders, String file) throws Exception {
-
-		StringBuffer buf = new StringBuffer();
-		
-		CSVPrinter printer = new CSVPrinter(buf, CSVFormat.EXCEL);
-		
-		// Print headers
-		printer.printRecord((Object[])CsvConverter.headers);
-		
-		for (Object[] r : nativeOrders) {
-			
-			printer.printRecord(r);
-			
-		}
-		
-		printer.close();
-		
-		if (outFile!=null) {
-			
-			if (!outFile.getAbsolutePath().toLowerCase().endsWith(".csv")) {
-				outFile = new File(outFile.getAbsolutePath() + ".csv");
-			}
-			
-			PrintWriter fp = new PrintWriter(outFile);
-			fp.append(buf.toString());
-			fp.append("\n");
-			fp.close();
-			
-		}
-		
-		
+	private CsvPropertyFile	properties;
+	
+	public CsvAdapter(CsvPropertyFile p) {
+		properties = p;
 	}
 	
+	@Override
+	public String getSystemName() {
+		return SYSTEM_NAME;
+	}
+
+	@Override
+	public BusinessPartnerList<T> listTenants() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BusinessPartner<B> lookupBusinessPartner(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<BusinessPartner<B>> lookupAllBusinessPartners() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<BusinessPartner<B>> lookupBusinessPartners(int maxCount, boolean customers, boolean suppliers)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BusinessPartner<T> lookupThisCompanyInformation() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DunningRun<?, ?> lookupDunningRun(String key, Date dueDateUntil) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public C getClient() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public I lookupNativeInvoice(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public I persistNativeInvoice(I invoice) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public O lookupNativeOrder(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public O persistNativeOrder(O order) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Invoice<I> lookupInvoice(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Order<O> lookupOrder(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Product<P> lookupProduct(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Product<P> lookupProductByEan(String ean) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Product<P>> lookupProductByName(String name) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PriceList lookupPriceForProduct(String productKey, String currency, Boolean salesPriceList)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ProductCategory> lookupProductCategory(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<Object, Object> lookupList(String listName) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Product<P> lookupRoundingProduct() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Tax lookupTax(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PaymentTerm lookupPaymentTerm(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FactoringReservation lookupFactoringReservation(String key) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<FactoringReservation> lookupFactoringReservationForOrder(String orderKey) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<FactoringReservation> lookupFactoringReservationForInvoice(String invoiceKey) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object persist(Object o) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isConnected() throws Exception {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
