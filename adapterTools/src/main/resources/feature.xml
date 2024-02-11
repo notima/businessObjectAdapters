@@ -47,6 +47,19 @@
         <bundle>mvn:org.notima.generic.businessobjects.adapter/ublAdapter/${project.version}</bundle>
 	
 	</feature>
+	
+	<feature name="notima-json" description="Notima JSON Adapter" version="${project.version}" install="manual">
+
+        <feature>notima-businessobjects</feature>	
+        <bundle>mvn:org.notima.generic.businessobjects.adapter/jsonAdapter/${project.version}</bundle>
+	
+		<config name="jsonAdapterProperties">
+			tenantFile = jsonAdapter/tenants.json
+			customerFile = jsonAdapter/customers.json
+		</config>
+	
+	</feature>
+	
 
 	<feature name="notima-email" description="Notima Email Adapter" version="${project.version}" install="manual">
 

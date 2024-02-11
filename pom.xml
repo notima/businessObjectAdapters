@@ -49,6 +49,7 @@
 		<module>emailAdapter</module>
 		<module>seBankingAdapter</module>
 		<module>p27bankingAdapter</module>
+		<module>jsonAdapter</module>
 	</modules>
 
 	<dependencyManagement>
