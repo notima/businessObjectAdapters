@@ -1,9 +1,13 @@
 package org.notima.businessobjects.adapter.json;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
+import org.notima.businessobjects.adapter.json.impl.TenantList;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
@@ -23,8 +27,25 @@ public class JsonAdapter<C,I,O,P,B,T> extends BasicBusinessObjectFactory<C, I, O
 	
 	private JsonPropertyFile	properties;
 
+	private TenantList			tenantList;
+	
 	public JsonAdapter(JsonPropertyFile p) {
 		properties = p;
+		
+		try {
+			initTenantList();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private void initTenantList() throws IOException {
+		if (properties.getTenantFile()!=null) {
+			tenantList = TenantList.createFromFile(new File(properties.getTenantFile()));
+			refreshTenantMap();
+		}
 	}
 	
 	@Override
@@ -32,10 +53,23 @@ public class JsonAdapter<C,I,O,P,B,T> extends BasicBusinessObjectFactory<C, I, O
 		return SYSTEM_NAME;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public BusinessPartnerList<T> listTenants() {
-		// TODO Auto-generated method stub
-		return null;
+		return tenantList.getTenants();
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public BusinessPartner<T> addTenant(String orgNo, String countryCode, String name, Properties props) {
+		BusinessPartner<T> result = super.addTenant(orgNo, countryCode, name, props);
+		tenantList.getTenants().getBusinessPartner().add(result);
+		try {
+			tenantList.saveToFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	@Override

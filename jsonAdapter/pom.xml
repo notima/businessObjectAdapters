@@ -6,6 +6,7 @@
     <version>1.9.0-SNAPSHOT</version>
   </parent>
   <artifactId>jsonAdapter</artifactId>
+  <packaging>bundle</packaging>
   <name>JSON Adapter</name>
   <dependencies>
   	<dependency>
@@ -13,4 +14,77 @@
   		<artifactId>businessobjects</artifactId>
   	</dependency>
   </dependencies>
+  
+  	<build>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12.1</version>
+				<configuration>
+					<includes>
+						<include>**/AllTests.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>4.2.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>org.notima.businessobjects.adapter.json.Activator</Bundle-Activator>
+						<Export-Package>org.notima.businessobjects.adapter.json*
+										</Export-Package>
+					    <Private-Package>
+        					org.apache.karaf.util.tracker,
+        					org.apache.karaf.util.tracker.annotation
+        				</Private-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+
+		</plugins>
+	</build>
+
+	<description>Adapter to convert JSON data to the common format found on
+https://github.com/notima/businessobjects</description>
+
+	<organization>
+		<name>Notima System Integration AB</name>
+		<url>https://github.com/notima</url>
+	</organization>
+	<scm>
+		<url>https://github.com/notima/businessObjectAdapters/jsonAdapter</url>
+		<connection>scm:git:git://github.com/notima/businessObjectAdapters.git</connection>
+		<developerConnection>Daniel Tamm</developerConnection>
+	</scm>
+	<issueManagement>
+  	<url>https://github.com/notima/businessObjectAdapters/issues</url>
+  	<system>Github Issues</system>
+  </issueManagement>
+  <inceptionYear>2024</inceptionYear>
+  <url>https://github.com/notima/businessObjectAdapters/jsonAdapter</url>
+  
+  	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+  
+	<developers>
+		<developer>
+			<name>Daniel Tamm</name>
+			<email>daniel@notima.se</email>
+			<organization>Notima System Integration AB</organization>
+			<organizationUrl>https://github.com/notima</organizationUrl>
+		</developer>
+	</developers>
+  
 </project>
