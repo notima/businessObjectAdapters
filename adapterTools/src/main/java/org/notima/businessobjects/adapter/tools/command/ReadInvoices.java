@@ -51,6 +51,12 @@ public class ReadInvoices extends AbstractAction {
     @Option(name="--unit-price", description="Price per unit, unless specified in source", required = false, multiValued = false)
     private Double  unitPrice;
     
+	@Option(name = "--price-includes-tax", description = "If price per unit contains tax", required = false, multiValued = false)
+	private boolean priceIncludesTax;
+
+	@Option(name = "--taxPercent", description = "Used in conjunction with --price-includes-tax", required = false, multiValued = false)
+	private double taxPercent;
+    
     @Option(name="--apartment-mapping-service", description="Apartment to customer mapping service to use", required = false, multiValued = false)
     private String  apartmentMappingService;
     
@@ -159,7 +165,7 @@ public class ReadInvoices extends AbstractAction {
 		
 		if (unitPrice!=null) {
 
-			SetSpecificPriceInvoiceLineValidator validator = new SetSpecificPriceInvoiceLineValidator(unitPrice);
+			SetSpecificPriceInvoiceLineValidator validator = new SetSpecificPriceInvoiceLineValidator(unitPrice, priceIncludesTax, priceIncludesTax, taxPercent);
 			
 			InvoiceList invoiceList = invoiceResult.getAffectedInvoices();
 			for (Invoice<?> il : invoiceList.getInvoiceList()) {
