@@ -85,11 +85,8 @@
 										org.notima.generic.ifacebusinessobjects,
 										org.notima.swish,
 										org.notima.swish.reports,
+										org.notima.util*,
 										org.slf4j,
-										org.notima.bg,
-										org.notima.bg.bgmax,
-										org.notima.bg.lb,
-										org.notima.tilisiirto,
 										com.google.gson,
 										com.google.gson.annotations,
 										javax.xml.ws,
@@ -99,11 +96,12 @@
 										javax.xml.*,
 										javax.net.*,
 										javax.naming,
-										org.osgi.*,
 										org.xml.sax*,
+										org.osgi.*,
+										org.osgi.framework.*,
 										org.w3c*
 										</Import-Package>
-						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|swish4j|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
+						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|notima-util|businessobjects|swish4j|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
