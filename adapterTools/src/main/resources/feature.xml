@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="notima-business-objects">
+<features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="notima-business-objects-${project.version}">
 
 	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}" install="manual">
 	
@@ -110,7 +110,7 @@
     
     <feature name="notima-sveawebpay" description="Notima SveaWebPay Adapter" version="${project.version}" install="manual">
     	<feature>notima-csv</feature>
-    	<bundle>mvn:org.notima.bg/bankgiro-api/1.3.7</bundle>
+    	<bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
     	<bundle>mvn:org.notima.api.webpay/pmt-admin-api/${pmt-admin-api.version}</bundle>
     	<bundle>mvn:org.notima/swish4j/${swish4j.version}</bundle>
     	<bundle>mvn:com.svea/webpayadminservice-client/${webpay-common.version}</bundle>

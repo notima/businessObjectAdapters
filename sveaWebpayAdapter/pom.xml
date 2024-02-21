@@ -71,10 +71,9 @@
 						</Export-Package>
 		        		<Private-Package>
 							org.apache.karaf.util.tracker,
-							org.apache.karaf.util.tracker.annotation
+							org.apache.karaf.util.tracker.annotation,
         				</Private-Package>
 						<Import-Package>
-										com.svea.webpayadminservice.client,
 										org.notima.api.webpay.pmtapi,
 										org.notima.api.webpay.pmtapi.entity,
 										org.notima.api.webpay.pmtapi.exception,
@@ -83,12 +82,7 @@
 										org.notima.generic.businessobjects.exception,
 										org.notima.generic.businessobjects.util,
 										org.notima.generic.ifacebusinessobjects,
-										org.notima.swish,
-										org.notima.swish.reports,
-										org.notima.util*,
 										org.slf4j,
-										com.google.gson,
-										com.google.gson.annotations,
 										javax.xml.ws,
 										javax.xml.namespace,
 			        					javax.xml.bind;version="[2.2,3)",
@@ -97,11 +91,11 @@
 										javax.net.*,
 										javax.naming,
 										org.xml.sax*,
+										org.w3c*,
 										org.osgi.*,
-										org.osgi.framework.*,
-										org.w3c*
+										org.osgi.framework.*
 										</Import-Package>
-						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|notima-util|businessobjects|swish4j|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
+						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
