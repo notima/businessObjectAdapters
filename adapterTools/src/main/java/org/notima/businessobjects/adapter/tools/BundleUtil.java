@@ -79,22 +79,34 @@ public class BundleUtil {
 	        }
 	    }	
 	
-	   
+	   /**
+	    * Only copies the file if the destination doesn't exist
+	    * 
+	    * @param bundle
+	    * @param sourcePath
+	    * @param destinationPath
+	    */
 	   private void copyFileFromBundle(Bundle bundle, String sourcePath, String destinationPath) {
 	        // Get the URL for the file within the bundle
 	        URL fileURL = bundle.getEntry(sourcePath);
 
 	        if (fileURL != null) {
 	            try {
-	                // Open an InputStream to read the file
-	                InputStream inputStream = fileURL.openStream();
 
+	            	File destinationFile = new File(destinationPath);
+	            	if (destinationFile.exists()) {
+	            		return;
+	            	}
+	            	
 	                // Create the destination directory if it does not exist
-	                File destinationDir = new File(destinationPath).getParentFile();
+	                File destinationDir = destinationFile.getParentFile();
 	                if (!destinationDir.exists()) {
 	                    destinationDir.mkdirs();
 	                }
-
+	                
+	                // Open an InputStream to read the file
+	                InputStream inputStream = fileURL.openStream();
+	                
 	                // Open an OutputStream to write the file
 	                OutputStream outputStream = new FileOutputStream(destinationPath);
 
