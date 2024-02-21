@@ -29,10 +29,14 @@ If the project is a release version, you'll only have to checkout and compile th
 
 ## Installation in Karaf (fortnox adapter)
 
-	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/LATEST/xml/features
+	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/1.9.0-SNAPSHOT/xml/features
 	
 	feature:install notima-fortnox4j
 	
+## Make a redeployable kar in Karaf
+
+	kar:create notima-business-objects-1.9.0-SNAPSHOT
+
 ## Structure
 
 The adapters contained in this repository are meant to be OSGI-plugins in a Karaf-environment. They can also be used stand-alone.
