@@ -16,7 +16,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<notima-util.version>0.0.5</notima-util.version>
+		<notima-util.version>0.0.6-SNAPSHOT</notima-util.version>
 		<businessobjects.version>1.0.0-SNAPSHOT</businessobjects.version>
 		<karaf.version>4.2.9</karaf.version>
 		<apache.poi.version>3.17</apache.poi.version>
