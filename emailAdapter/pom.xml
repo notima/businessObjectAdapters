@@ -48,6 +48,25 @@
 			<artifactId>simple-pgp-java</artifactId>
 		</dependency>
 		
+		<!-- Below dependencies are now hidden JRE-libraries, 8 and onwards -->
+		<dependency>
+		    <groupId>org.glassfish.main.javaee-api</groupId>
+		    <artifactId>javax.jms</artifactId>
+		    <version>3.1.2.2</version>
+		</dependency>		
+		
+		<dependency>
+		    <groupId>javax.jmdns</groupId>
+		    <artifactId>jmdns</artifactId>
+		    <version>3.4.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.github.livesense</groupId>
+		    <artifactId>org.liveSense.fragment.sun.security</artifactId>
+		    <version>1.0.5</version>
+		</dependency>		
+		
 	</dependencies>
 
 	<build>
@@ -60,17 +79,38 @@
 				<configuration>
 					<instructions>
 						<Bundle-Activator>org.notima.generic.pgp.Activator</Bundle-Activator>	
-						<Private-Package>
-							sun.security.util,
-							javax.jmdns,
-							org.apache.karaf.util.tracker,
-							org.apache.karaf.util.tracker.annotation,
-							org.bouncycastle*
-						</Private-Package>	
 						<Export-Package>
 							org.notima.generic.pgp.*,
 							me.sniggle.pgp.crypt.*,
+							sun.security.util
 						</Export-Package>
+						<Import-Package>
+							org.notima.generic.businessobjects,
+							org.notima.generic.businessobjects.exception,
+							org.notima.generic.businessobjects.util,
+							org.notima.generic.ifacebusinessobjects,
+							org.notima.businessobjects.adapter.tools,
+							org.notima.businessobjects.adapter.tools.table,
+							org.slf4j,
+							com.google.gson,
+							com.google.gson.annotations,
+							javax.xml.ws,
+							javax.xml.namespace,
+							javax.xml.bind;version="[2.2,3)",
+							javax.xml.bind.annotation;version="[2.2,3)",
+							javax.xml.*,
+							javax.net.*,
+							javax.naming,
+							org.apache.karaf.shell.api.action,
+							org.apache.karaf.shell.api.action.lifecycle,
+							org.apache.karaf.shell.api.console,
+							org.apache.karaf.shell.support.completers,
+							org.apache.karaf.shell.support.table,
+							org.osgi.*,*
+						</Import-Package>
+						<Embed-Dependency>*;scope=compile|runtime;
+						artifactId=!slf4j-api|slf4j-log4j12|org.apache.felix.utils|notima-util|org.apache.karaf.jaas.boot|org.apache.karaf.shell.core|org.apache.karaf.util|log4j|businessobjects|sshd-core|threeten-jaxb-core|jline|javax.persistence-api|jakarta.activation-api|jakarta.xml.bind-api</Embed-Dependency>
+						<Embed-Transitive>true</Embed-Transitive>
         				<Karaf-Commands>org.notima.generic.pgp.command*</Karaf-Commands>
 					</instructions>
 				</configuration>
