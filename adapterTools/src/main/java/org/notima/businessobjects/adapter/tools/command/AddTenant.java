@@ -25,7 +25,7 @@ public class AddTenant implements Action {
     @Argument(index = 0, name = "adapter", description = "The adapter to use", required = true, multiValued = false)
     private String systemName;
     
-    @Argument(index = 1, name = "orgNo", description = "The tenant to remove", required = true, multiValued = false)
+    @Argument(index = 1, name = "orgNo", description = "Org no of the tenant to add", required = true, multiValued = false)
     private String orgNo;
 
     @Argument(index = 2, name = "countryCode", description = "The country code", required = true, multiValued = false)
