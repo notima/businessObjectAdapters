@@ -4,37 +4,37 @@ import java.util.List;
 
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.notima.businessobjects.adapter.tools.table.BusinessPartnerTable;
-import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.businessobjects.adapter.tools.table.ProductTable;
+import org.notima.generic.businessobjects.Product;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
-@Command(scope = "notima", name = "list-business-partners", description = "Lists business partners for given adapter and tenant")
+@Command(scope = "notima", name = "list-products", description = "Lists products / services for given adapter and tenant")
 @Service
-public class ListBusinessPartners extends AdapterCommand {
+public class ListProducts extends AdapterCommand {
 	
 	@Override
 	public Object onExecute() throws Exception {
 
 		populateAdapters();
-		listBusinessPartners();
+		listProducts();
 		
 		return null;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void listBusinessPartners() throws Exception {
+	private void listProducts() throws Exception {
 
 		if (adaptersToList.size()>0) {
-			BusinessPartnerTable tt = null;
+			ProductTable tt = null;
 			
 			for (BusinessObjectFactory bf : adaptersToList) {
 				
-				List<BusinessPartner<?>> bpl = 
-						bf.lookupAllBusinessPartners();
+				List<Product<?>> bpl = 
+						bf.lookupProductByName(null);
 				if (bpl!=null) {
-					tt = new BusinessPartnerTable(bpl);
+					tt = new ProductTable(bpl);
 				} else {
-					tt = new BusinessPartnerTable(null);
+					tt = new ProductTable(null);
 				}
 
 				tt.getShellTable().print(sess.getConsole());
