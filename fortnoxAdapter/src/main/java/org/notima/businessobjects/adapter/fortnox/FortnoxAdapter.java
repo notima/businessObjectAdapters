@@ -20,6 +20,8 @@ import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.Article;
+import org.notima.api.fortnox.entities3.ArticleSubset;
+import org.notima.api.fortnox.entities3.Articles;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
@@ -1162,10 +1164,30 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 	@Override
 	public List<Product<Object>> lookupProductByName(String name) throws Exception {
-		// TODO Auto-generated method stub
+		if (name==null || name.trim().length()==0) {
+			return (convertFromArticles(fortnoxClient.getArticles()));
+		}
+		
 		return null;
 	}
 
+	
+	@SuppressWarnings("unchecked")
+	private List<Product<Object>> convertFromArticles(Articles articles) {
+		List<Product<Object>> result = new ArrayList<Product<Object>>();		
+		if (articles==null) return result;
+		
+		Product<?> product;
+		
+		for (ArticleSubset as : articles.getArticleSubset()) {
+			product = FortnoxConverter.convertToProduct(as);
+			result.add((Product<Object>) product);
+		}
+		
+		return result;
+		
+	}
+	
 	/**
 	 * 
 	 * Available lists

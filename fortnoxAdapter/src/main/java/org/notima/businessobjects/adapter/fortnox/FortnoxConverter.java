@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxUtil;
+import org.notima.api.fortnox.entities3.Article;
+import org.notima.api.fortnox.entities3.ArticleSubset;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
 import org.notima.api.fortnox.entities3.DefaultDeliveryTypes;
@@ -26,6 +28,7 @@ import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
+import org.notima.generic.businessobjects.Product;
 import org.notima.util.LocalDateUtils;
 
 /**
@@ -333,6 +336,18 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		dst.setPhone1(customer.getPhone1());
 		dst.setVATNumber(customer.getVATNumber());
 		dst.setZipCode(customer.getZipCode());
+		
+		return dst;
+		
+	}
+	
+	public static org.notima.generic.businessobjects.Product<ArticleSubset> convertToProduct(ArticleSubset src) {
+		
+		Product<ArticleSubset> dst = new Product<ArticleSubset>();
+		
+		dst.setKey(src.getArticleNumber());
+		dst.setName(src.getDescription());
+		dst.setNativeProduct(src);
 		
 		return dst;
 		
