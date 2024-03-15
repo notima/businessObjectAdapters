@@ -11,8 +11,13 @@ public class BusinessPartnerTable extends GenericTable {
 	
 	public BusinessPartnerTable(List<BusinessPartner<?>> bpl) {
 
-		addColumn("Tax id");
+		addColumn("ID");
 		addColumn("Name");
+		addColumn("Tax id");
+		addColumn("Address 1");
+		addColumn("Address 2");
+		addColumn("Postal");
+		addColumn("City");
 		
 		if (bpl==null || bpl.size()==0) {
 			setEmptyTableText("No tenants");
@@ -32,7 +37,16 @@ public class BusinessPartnerTable extends GenericTable {
 		if (bpList==null) return;
 		
 		for (BusinessPartner<?> p : bpList) {
-			addRow().addContent(p.getTaxId(), p.getName());
+			addRow().addContent(
+					p.getIdentityNo(),
+					p.getName(),
+					p.getTaxId(),
+					(p.hasLocations() ? p.getAddressOfficial().getAddress1() : ""),
+					(p.hasLocations() ? p.getAddressOfficial().getAddress2() : ""),
+					(p.hasLocations() ? p.getAddressOfficial().getPostal() : ""),
+					(p.hasLocations() ? p.getAddressOfficial().getCity() : ""),
+					(p.hasLocations() ? p.getAddressOfficial().getEmail() : "")
+					);
 		}
 		
 	}
