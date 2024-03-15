@@ -12,6 +12,8 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 @Service
 public class ListBusinessPartners extends AdapterCommand {
 	
+	
+	
 	@Override
 	public Object onExecute() throws Exception {
 
@@ -38,6 +40,10 @@ public class ListBusinessPartners extends AdapterCommand {
 				}
 
 				tt.getShellTable().print(sess.getConsole());
+				
+				printableReport = tt;
+
+				initAndRunReportFormatter();
 				
 			}
 				

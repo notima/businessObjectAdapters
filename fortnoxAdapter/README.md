@@ -53,6 +53,11 @@ or if you've set the defaultClientSecret and the client belongs to that secret.
 
 	fortnox:add-client --accessToken REAL_ACCESS_TOKEN
 	
+To show existing tokens use
+
+	fortnox:show-fortnox-support-info --show-secrets orgNo	
+
+	
 ### List clients
 
 List clients with
