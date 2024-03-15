@@ -450,17 +450,13 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (contacts!=null && contacts.getCustomerSubset()!=null) {
 			for(CustomerSubset c: contacts.getCustomerSubset()) {
-				result.add(FortnoxConverter.convert(c));
-			}
-		}
-		while(contacts.getTotalPages()>contacts.getCurrentPage()) {
-			contacts = fortnoxClient.getCustomers(contacts.getCurrentPage()+1);
-			if (contacts!=null && contacts.getCustomerSubset()!=null) {
-				for(CustomerSubset c: contacts.getCustomerSubset()) {
+				if (isEnrichDataByDefault()) {
+					Customer cust = fortnoxClient.getCustomerByCustNo(c.getCustomerNumber());
+					result.add(FortnoxConverter.convert(cust));
+				} else {
 					result.add(FortnoxConverter.convert(c));
 				}
 			}
-			
 		}
 		
 		return result;

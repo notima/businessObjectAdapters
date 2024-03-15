@@ -6,4 +6,6 @@ public class _NotimaCmdOptions {
 	
 	public static final String	OUTPUT_FILE_NAME_SHORT = "-of";
 	
+	public static final String	ENRICH = "--enrich";
+	
 }

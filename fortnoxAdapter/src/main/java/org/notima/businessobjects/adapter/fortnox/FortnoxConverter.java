@@ -312,6 +312,27 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		
 		return dst;
 	}
+	
+	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convert(org.notima.api.fortnox.entities3.Customer src) {
+		
+		BusinessPartner<Customer> dst = new BusinessPartner<Customer>();
+		
+		dst.setName(src.getName());
+		dst.setIdentityNo(src.getCustomerNumber());
+		dst.setTaxId(src.getOrganisationNumber());
+		dst.setActive(src.getActive());
+		Location loc = new Location();
+		dst.setAddressOfficial(loc);
+		loc.setEmail(src.getEmail());
+		loc.setCity(src.getCity());
+		loc.setPostal(src.getZipCode());
+		loc.setAddress1(src.getAddress1());
+		loc.setAddress2(src.getAddress2());
+		loc.setPhone(src.getPhone1());
+		
+		return dst;
+	}
+	
 
 	/**
 	 * Converts a Fortnox customer to a supplier.
