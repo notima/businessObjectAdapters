@@ -29,6 +29,8 @@ public class ListProducts extends AdapterCommand {
 			
 			for (BusinessObjectFactory bf : adaptersToList) {
 				
+				bf.setTenant(orgNo, countryCode);
+				
 				List<Product<?>> bpl = 
 						bf.lookupProductByName(null);
 				if (bpl!=null) {

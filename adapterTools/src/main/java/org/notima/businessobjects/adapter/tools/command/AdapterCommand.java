@@ -31,6 +31,9 @@ public abstract class AdapterCommand extends AbstractAction {
     
     @Option(name = _NotimaCmdOptions.FORMAT_SHORT, description="The format of file to be output", required = false, multiValued = false)
     private String format;
+    
+    @Option(name = "--country-code", description="Country code if it needs to be specified", required = false, multiValued = false)
+    protected String countryCode;
 	
     @Argument(index = 0, name = "adapter", description = "The adapter to use", required = true, multiValued = false)
     protected String systemName;

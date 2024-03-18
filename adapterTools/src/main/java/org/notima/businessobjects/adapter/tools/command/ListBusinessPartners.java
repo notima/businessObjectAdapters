@@ -37,6 +37,8 @@ public class ListBusinessPartners extends AdapterCommand {
 			
 			for (BusinessObjectFactory bf : adaptersToList) {
 
+				bf.setTenant(orgNo, countryCode);
+				
 				bf.setEnrichDataByDefault(enrich);
 				
 				List<BusinessPartner<?>> bpl = showInactive ?
