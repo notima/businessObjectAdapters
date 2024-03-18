@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -12,6 +13,10 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
+import org.notima.businessobjects.adapter.tools.FormatterFactory;
+import org.notima.businessobjects.adapter.tools.ReportFormatter;
+import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.businessobjects.adapter.tools.table.ProfitLossTable;
 import org.notima.generic.businessobjects.AccountingPeriod;
 import org.notima.generic.businessobjects.BusinessPartner;
@@ -23,6 +28,13 @@ import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
 @Service
 public class ShowPLReport implements Action {
 	
+	@Reference
+	protected FormatterFactory	formatterFactory;
+	
+	protected ReportFormatter<GenericTable> reportFormatter;
+	
+    protected GenericTable printableReport;
+	
 	public static DateFormat	s_dfmt = new SimpleDateFormat("yyyy-MM-dd");	
 	
 	@Reference
@@ -30,6 +42,12 @@ public class ShowPLReport implements Action {
 	
 	@Reference
 	private Session sess;
+	
+    @Option(name = _NotimaCmdOptions.OUTPUT_FILE_NAME_SHORT, description="Output to file name", required = false, multiValued = false)
+    private String	outFile;
+    
+    @Option(name = _NotimaCmdOptions.FORMAT_SHORT, description="The format of file to be output", required = false, multiValued = false)
+    private String format;
 	
 	@Option(name = "--fromdate", description = "Limit from this date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String fromDateStr;
@@ -81,9 +99,35 @@ public class ShowPLReport implements Action {
 		
 		ProfitLossReport report = arp.getProfitLossReport(bp, ap, null, null);
 		ProfitLossTable plt = new ProfitLossTable(report);
-		plt.print(sess.getConsole());
+		plt.getShellTable().print(sess.getConsole());
+		
+		printableReport = plt;
+		initAndRunReportFormatter();
 		
 		return null;
 	}
+
+	@SuppressWarnings("unchecked")
+	protected void initAndRunReportFormatter() throws Exception {
+
+		if (format!=null && printableReport!=null) {
+			
+			// Try to find a report formatter
+			reportFormatter = (ReportFormatter<GenericTable>) formatterFactory.getReportFormatter(GenericTable.class, format);
+			
+			if (reportFormatter!=null) {
+				Properties props = new Properties();
+				props.setProperty(BasicReportFormatter.OUTPUT_FILENAME, outFile);
+				
+				String of = reportFormatter.formatReport((GenericTable)printableReport, format, props);
+				sess.getConsole().println("Output file to: " + of);
+			} else {
+				sess.getConsole().println("Can't find formatter for " + format);
+			}
+			
+		}
+		
+	}
+	
 	
 }

@@ -3,13 +3,11 @@ package org.notima.businessobjects.adapter.tools.table;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import org.apache.karaf.shell.support.table.Col;
-import org.apache.karaf.shell.support.table.ShellTable;
 import org.notima.generic.businessobjects.AccountStatementLine;
 import org.notima.generic.businessobjects.AccountStatementLines;
 import org.notima.util.NumberUtils;
 
-public class AccountStatementTable extends ShellTable {
+public class AccountStatementTable extends GenericTable {
 
 	public static final String ANSI_GREEN = "\u001B[32m";
 	public static final String ANSI_YELLOW = "\u001B[33m";
@@ -19,21 +17,17 @@ public class AccountStatementTable extends ShellTable {
 	
 	public AccountStatementTable(AccountStatementLines alines) {
 		
-		Col col = new Col("AcctNo");
-		column(col);
-		col = new Col("Voucher");
-		column(col);
-		col = new Col("DateAcct");
-		column(col);
-		col = new Col("Description");
-		column(col);
-		col = new Col("Amount").alignRight();
-		column(col);
-		col = new Col("Balance").alignRight();
-		column(col);
+		addColumn("AcctNo");
+		addColumn("Voucher");
+		addColumn("DateAcct");
+		addColumn("Description");
+		GenericColumn col = new GenericColumn("Amount").alignRight();
+		addColumn(col);
+		col = new GenericColumn("Balance").alignRight();
+		addColumn(col);
 		
 		if (alines==null) {
-			emptyTableText("No content");
+			setEmptyTableText("No content");
 			return;
 		}
 		

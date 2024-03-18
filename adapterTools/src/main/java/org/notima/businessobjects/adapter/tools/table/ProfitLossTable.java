@@ -4,27 +4,23 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import org.apache.karaf.shell.support.table.Col;
-import org.apache.karaf.shell.support.table.ShellTable;
 import org.notima.generic.businessobjects.ProfitLossColumn;
 import org.notima.generic.businessobjects.ProfitLossLine;
 import org.notima.generic.businessobjects.ProfitLossReport;
 
-public class ProfitLossTable extends ShellTable {
+public class ProfitLossTable extends GenericTable {
 	
 	private NumberFormat nfmt = new DecimalFormat("#,##0.00");	
 	
 	public ProfitLossTable(ProfitLossReport plr) {
 		
-		Col col = new Col("AcctNo");
-		column(col);
-		col = new Col("Description");
-		column(col);
-		col = new Col("Amount").alignRight();
-		column(col);
+		addColumn("AcctNo");
+		addColumn("Description");
+		GenericColumn col = new GenericColumn("Amount").alignRight();
+		addColumn(col);
 		
 		if (plr==null || plr.getLines()==null || plr.getLines().size()==0) {
-			emptyTableText("No content");
+			setEmptyTableText("No content");
 			return;
 		}
 
