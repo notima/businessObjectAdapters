@@ -48,6 +48,9 @@ public class ShowInvoice extends FortnoxCommand implements Action {
 		
 		iht.getShellTable().print(sess.getConsole());
 		ilt.print(sess.getConsole());
+		if (invoice.getComments()!=null && invoice.getComments().trim().length()>0) {
+			sess.getConsole().println("Comments: " + invoice.getComments());
+		}
 		
 		return null;
 	}
