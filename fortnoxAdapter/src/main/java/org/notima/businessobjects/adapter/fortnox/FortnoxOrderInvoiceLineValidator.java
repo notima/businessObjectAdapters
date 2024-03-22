@@ -7,6 +7,7 @@ import java.util.List;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.businessobjects.exception.TaxRatesNotAvailableException;
 import org.notima.generic.ifacebusinessobjects.OrderInvoice;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 import org.notima.generic.ifacebusinessobjects.OrderInvoiceLineValidator;
@@ -37,7 +38,7 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 		if (orderInvoice!=null) {
 			try {
 				validTaxRates = taxRateProvider.getValidTaxRates(tsi, LocalDateUtils.asLocalDate(oi.getDocumentDate()));
-			} catch (NoSuchTenantException nste) {
+			} catch (NoSuchTenantException | TaxRatesNotAvailableException nste) {
 				nste.printStackTrace();
 			}
 		}

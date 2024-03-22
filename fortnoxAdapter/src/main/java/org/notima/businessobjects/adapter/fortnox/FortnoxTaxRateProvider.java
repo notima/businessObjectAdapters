@@ -7,6 +7,7 @@ import java.util.List;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.businessobjects.exception.TaxRatesNotAvailableException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 import org.osgi.framework.BundleActivator;
@@ -56,7 +57,7 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
 	}
 	
 	@Override
-	public List<Tax> getValidTaxRates(TaxSubjectIdentifier tsi, LocalDate taxDate) throws NoSuchTenantException {
+	public List<Tax> getValidTaxRates(TaxSubjectIdentifier tsi, LocalDate taxDate) throws NoSuchTenantException, TaxRatesNotAvailableException {
 
 		FortnoxTaxRateFetcher ftrf = new FortnoxTaxRateFetcher((FortnoxAdapter)bofService, tsi);
 		
@@ -66,9 +67,14 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
 	}
 
 	@Override
-	public List<Tax> getValidTaxRates(TaxSubjectIdentifier tsi, String tradingCountry, LocalDate taxDate) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Tax> getValidTaxRates(TaxSubjectIdentifier tsi, String tradingCountry, LocalDate taxDate) throws NoSuchTenantException, TaxRatesNotAvailableException {
+		
+		FortnoxTaxRateFetcher ftrf = new FortnoxTaxRateFetcher((FortnoxAdapter)bofService, tsi);
+		
+		List<Tax> validTaxes = ftrf.getValidTaxes(taxDate);
+		
+		return validTaxes;
+		
 	}
 
 }

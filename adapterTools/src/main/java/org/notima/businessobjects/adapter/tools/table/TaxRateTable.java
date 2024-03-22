@@ -9,6 +9,7 @@ public class TaxRateTable extends GenericTable {
 	public TaxRateTable(List<Tax> bpl) {
 		
 		addColumn("Tax id");
+		addColumn("Country");
 		addColumn("Rate");
 		
 		if (bpl==null || bpl.size()==0) {
@@ -17,7 +18,10 @@ public class TaxRateTable extends GenericTable {
 		}
 		
 		for (Tax p : bpl) {
-			addRow().addContent(p.getKey(), p.getRate());
+			addRow().addContent(
+					p.getKey(),
+					p.getCountryCode(),
+					p.getRate());
 		}
 		
 	}
