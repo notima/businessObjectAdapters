@@ -26,6 +26,7 @@ public class ClientTable extends ShellTable {
 		if(showCredentialsInfo) {
 			column("Credentials type");
 			column("Expiry");
+			column("Count").alignRight();
 		}
 		
 	}
@@ -52,9 +53,11 @@ public class ClientTable extends ShellTable {
 		if(showCredentialsInfo) {
 			String credentialsType = "";
 			String credentialsExpiry = "";
+			int	countCredentials = 0;
 			
 			try {
-				FortnoxCredentials credentials = new FileCredentialsProvider(bp.getTaxId()).getCredentials();
+				FileCredentialsProvider fcp = new FileCredentialsProvider(bp.getTaxId());
+				FortnoxCredentials credentials = fcp.getCredentials();
 				if(credentials != null) {
 					if(credentials.hasLegacyToken()) {
 						credentialsType = "Legacy";
@@ -70,6 +73,7 @@ public class ClientTable extends ShellTable {
 							dateFormat.format(expiryDate),
 							Duration.between(Instant.now(), expiryInstant).toDays()
 						);
+						countCredentials = fcp.getAllCredentials().size();
 					}
 				}
 			} catch (Exception e) {
@@ -80,7 +84,8 @@ public class ClientTable extends ShellTable {
 					bp.getTaxId(),
 					bp.getName(),
 					credentialsType,
-					credentialsExpiry
+					credentialsExpiry,
+					countCredentials
 				);
 		} else {
 
