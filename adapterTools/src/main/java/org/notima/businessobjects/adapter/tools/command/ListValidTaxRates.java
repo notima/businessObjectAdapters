@@ -14,6 +14,7 @@ import org.notima.businessobjects.adapter.tools.table.TaxRateTable;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.businessobjects.exception.TaxRatesNotAvailableException;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 
 @Command(scope = "notima", name = "list-valid-tax-rates", description = "List valid tax rates for a specific tenant")
@@ -60,7 +61,7 @@ public class ListValidTaxRates implements Action {
 	}
 	
 	
-	private void getValidRates() throws NoSuchTenantException {
+	private void getValidRates() throws NoSuchTenantException, TaxRatesNotAvailableException {
 		
 		validTaxRates = trp.getValidTaxRates(tsi, null); 
 		
