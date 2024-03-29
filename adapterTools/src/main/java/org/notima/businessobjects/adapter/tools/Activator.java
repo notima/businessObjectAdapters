@@ -6,7 +6,10 @@ import java.util.Hashtable;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.generic.businessobjects.tax.BasicTaxRateProviderFI;
+import org.notima.generic.businessobjects.tax.BasicTaxRateProviderSE;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
+import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +19,8 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(CanonicalObjectFactory.class),
 				@ProvideService(MessageSenderFactory.class),
 				@ProvideService(PaymentBatchProcessor.class),
-				@ProvideService(MappingServiceFactory.class)
+				@ProvideService(MappingServiceFactory.class),
+				@ProvideService(TaxRateProvider.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -54,6 +58,24 @@ public class Activator extends BaseActivator {
 		((MappingServiceFactoryImpl)mappingFactory).setBundleContext(bundleContext);
 		log.info("Created Mapping Factory");
 		register(MappingServiceFactory.class, mappingFactory);
+		
+		TaxRateProvider trp = new BasicTaxRateProviderSE();
+		props.put("SystemName", trp.getSystemName());
+		register(TaxRateProvider.class, trp, props);
+		try {
+			log.info("Registered Basic SE Tax Rate Provider");
+		} catch (Exception e) {
+			log.error("Not able to start Basic SE Tax Rate Provider");
+		}
+		
+		trp = new BasicTaxRateProviderFI();
+		props.put("SystemName", trp.getSystemName());
+		register(TaxRateProvider.class, trp, props);
+		try {
+			log.info("Registered Basic FI Tax Rate Provider");
+		} catch (Exception e) {
+			log.error("Not able to start Basic FI Tax Rate Provider");
+		}
 		
 	}
 	

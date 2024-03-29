@@ -49,6 +49,11 @@ public class ListValidTaxRates implements Action {
 		
 		TaxRateTable table = new TaxRateTable(validTaxRates);
 		table.getShellTable().print(sess.getConsole());
+		if (trp.getTaxDomicile()!=null) {
+			sess.getConsole().println("Valid for tax domicile: " + trp.getTaxDomicile());
+		} else {
+			sess.getConsole().println("No tax domicile specified");
+		}
 		
 		return null;
 	}
