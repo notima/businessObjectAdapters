@@ -35,6 +35,9 @@ public class ListValidTaxRates implements Action {
 	@Argument(index = 1, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
 	private String orgNo = "";
 	
+	@Argument(index = 2, name = "taxDomicile", description = "Tax domicile", required = false, multiValued = false)
+	private String taxDomicile;
+	
     @Option(name = "-co", aliases = { "--country-code" }, description = "Country code for the orgNo", required = false, multiValued = false)
     private String countryCode;
 	
@@ -69,8 +72,12 @@ public class ListValidTaxRates implements Action {
 	
 	
 	private void getValidRates() throws NoSuchTenantException, TaxRatesNotAvailableException {
-		
-		validTaxRates = trp.getValidTaxRates(tsi, null); 
+
+		if (taxDomicile==null) {
+			validTaxRates = trp.getValidTaxRates(tsi, null);
+		} else {
+			validTaxRates = trp.getValidTaxRates(tsi, taxDomicile, null);
+		}
 		
 	}
 	
