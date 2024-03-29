@@ -3,6 +3,8 @@ package org.notima.businessobjects.adapter.fortnox;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
@@ -19,6 +21,8 @@ import org.slf4j.LoggerFactory;
 public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider {
 
 	private Logger log = LoggerFactory.getLogger(FortnoxTaxRateProvider.class);	
+	
+	private Set<String> domiciles = new TreeSet<String>();
 	
 	@SuppressWarnings("rawtypes")
     private ServiceReference<BusinessObjectFactory> serviceReference;
@@ -40,6 +44,8 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
         if (bofService == null) {
         	log.warn("No Fortnox Business Object Adapter found.");
         }
+        domiciles.add("SE");
+        domiciles.add("FI");
     }
 
     @Override
@@ -57,9 +63,9 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
 	}
 
 	@Override
-	public String getTaxDomicile() {
+	public Set<String> getTaxDomiciles() {
 		// Sweden
-		return "SE";
+		return domiciles;
 	}
 	
 	
@@ -74,11 +80,11 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
 	}
 
 	@Override
-	public List<Tax> getValidTaxRates(TaxSubjectIdentifier tsi, String tradingCountry, LocalDate taxDate) throws NoSuchTenantException, TaxRatesNotAvailableException {
+	public List<Tax> getValidTaxRates(TaxSubjectIdentifier tsi, String taxDomicile, LocalDate taxDate) throws NoSuchTenantException, TaxRatesNotAvailableException {
 		
 		FortnoxTaxRateFetcher ftrf = new FortnoxTaxRateFetcher((FortnoxAdapter)bofService, tsi);
 		
-		List<Tax> validTaxes = ftrf.getValidTaxes(taxDate);
+		List<Tax> validTaxes = ftrf.getValidTaxes(taxDate, taxDomicile);
 		
 		return validTaxes;
 		

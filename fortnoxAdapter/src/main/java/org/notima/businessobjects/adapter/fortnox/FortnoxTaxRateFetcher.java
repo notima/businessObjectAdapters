@@ -61,7 +61,7 @@ public class FortnoxTaxRateFetcher {
 		
 	}
 	
-	public List<Tax> getValidTaxes(LocalDate taxDate, String targetCountry) throws TaxRatesNotAvailableException {
+	public List<Tax> getValidTaxes(LocalDate taxDate, String taxDomicile) throws TaxRatesNotAvailableException {
 
 		// TODO: Extend this to actually query Fortnox.
 		// Currently we make a simple method.
@@ -69,15 +69,15 @@ public class FortnoxTaxRateFetcher {
 		
 		Set<String> countries = null;
 		
-		if (targetCountry==null) {
-			countries = taxRateMapByCountry.keySet();
+		if (taxDomicile==null) {
+			taxDomicile = tsi.getCountryCode()!=null ? tsi.getCountryCode() : DEFAULT_COUNTRY_CODE;
+		}
+		
+		if (taxRateMapByCountry.get(taxDomicile)!=null) {
+			countries = new TreeSet<String>();
+			countries.add(taxDomicile);
 		} else {
-			if (taxRateMapByCountry.get(targetCountry)!=null) {
-				countries = new TreeSet<String>();
-				countries.add(targetCountry);
-			} else {
-				throw new TaxRatesNotAvailableException(targetCountry);
-			}
+			throw new TaxRatesNotAvailableException(taxDomicile);
 		}
 
 		for (String tc : countries) {

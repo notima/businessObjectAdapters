@@ -16,6 +16,8 @@ import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.businessobjects.exception.TaxRatesNotAvailableException;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
+import org.notima.util.ListUtil;
+import org.notima.util.SetUtil;
 
 @Command(scope = "notima", name = "list-valid-tax-rates", description = "List valid tax rates for a specific tenant")
 @Service
@@ -49,8 +51,8 @@ public class ListValidTaxRates implements Action {
 		
 		TaxRateTable table = new TaxRateTable(validTaxRates);
 		table.getShellTable().print(sess.getConsole());
-		if (trp.getTaxDomicile()!=null) {
-			sess.getConsole().println("Valid for tax domicile: " + trp.getTaxDomicile());
+		if (trp.getTaxDomiciles()!=null) {
+			sess.getConsole().println("Valid for tax domicile(s): " +  SetUtil.setToCommaSeparatedString(trp.getTaxDomiciles()));
 		} else {
 			sess.getConsole().println("No tax domicile specified");
 		}
