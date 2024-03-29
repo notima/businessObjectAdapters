@@ -55,6 +55,13 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
 	public String getSystemName() {
 		return FortnoxAdapter.SYSTEMNAME;
 	}
+
+	@Override
+	public String getTaxDomicile() {
+		// Sweden
+		return "SE";
+	}
+	
 	
 	@Override
 	public List<Tax> getValidTaxRates(TaxSubjectIdentifier tsi, LocalDate taxDate) throws NoSuchTenantException, TaxRatesNotAvailableException {
@@ -76,5 +83,6 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
 		return validTaxes;
 		
 	}
+
 
 }
