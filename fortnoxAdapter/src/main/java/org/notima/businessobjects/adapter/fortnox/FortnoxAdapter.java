@@ -888,6 +888,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		dst.setExternalInvoiceReference1(src.getExternalReference1());
 		
+		// Accounting dimensions
+		if (src.getProject()!=null && src.getProject().trim().length()>0) {
+			dst.setProject(src.getProject());
+		}
+		if (src.getCostCenter()!=null && src.getCostCenter().trim().length()>0) {
+			dst.setCostCenter(src.getCostCenter());
+		}
+		
 		// Add invoice row
 		InvoiceRows rows;
 		rows = new org.notima.api.fortnox.entities3.InvoiceRows();
@@ -973,8 +981,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			// Empty description if missing
 			row.setDescription(".");
 		}
-		
 		row.setAccountNumber(getAccountNo(il));
+		if (il.getProject()!=null && il.getProject().trim().length()>0) 
+			row.setProject(il.getProject());
+		if (il.getCostCenter()!=null && il.getCostCenter().trim().length()>0)
+			row.setCostCenter(il.getCostCenter());
 		
 		if (il.getPriceActual()!=null) {
 			if (il.isPricesIncludeVAT() && !src.isShowPricesIncludingVAT()) {
