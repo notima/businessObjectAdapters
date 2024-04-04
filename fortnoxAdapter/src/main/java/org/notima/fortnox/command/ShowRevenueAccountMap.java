@@ -12,6 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.FinancialYearSubset;
+import org.notima.api.fortnox.entities3.VatInfo;
 import org.notima.fortnox.command.table.RevenueAccountMapTable;
 
 @Command(scope = "fortnox", name = "show-revenue-account-map", description = "Show revenue account map for given client.")
@@ -29,7 +30,7 @@ public class ShowRevenueAccountMap extends FortnoxCommand implements Action {
 
 	private FinancialYearSubset fy;
 	
-	private Map<String, Integer> revenueAccountMap;
+	private Map<String, VatInfo> revenueAccountMap;
 	
 	@Override
 	public Object execute() throws Exception {

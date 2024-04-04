@@ -35,6 +35,7 @@ import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
 import org.notima.api.fortnox.entities3.Supplier;
+import org.notima.api.fortnox.entities3.VatInfo;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherFileConnection;
 import org.notima.generic.businessobjects.AccountingVoucher;
@@ -121,7 +122,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 	private Date	currentDate = null;
 	
-	private Map<String,Integer> revenueAccountMap = null;
+	private Map<String,VatInfo> revenueAccountMap = null;
 	private Map<String, PreDefinedAccountSubset> preDefinedAccountMap = null;
 
 	protected static Logger	logger = LoggerFactory.getLogger(FortnoxAdapter.class);
@@ -369,7 +370,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		if (revenueAccountMap==null)
 			revenueAccountMap = fortnoxClient.getRevenueAccountMap(currentDate);
 		
-		Integer account = revenueAccountMap.get(type);
+		VatInfo vatInfo = revenueAccountMap.get(type);
+		Integer account = vatInfo.getDefaultRevenueAccount();
 		
 		if (account==null) return null;
 		if (account == 0) return null;

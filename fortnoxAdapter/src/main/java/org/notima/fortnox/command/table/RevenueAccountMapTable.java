@@ -2,6 +2,7 @@ package org.notima.fortnox.command.table;
 
 import java.util.Map;
 
+import org.notima.api.fortnox.entities3.VatInfo;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
 public class RevenueAccountMapTable extends GenericTable {
@@ -9,11 +10,15 @@ public class RevenueAccountMapTable extends GenericTable {
 	public void initColumns() {
 		
 		column("VAT Code");
-		column("Account");
+		column("Rev. acct");
+		column("Tax due");
+		column("Tax claim");
+		column("Rate %");
+		column("Domicile");
 		
 	}
 	
-	public RevenueAccountMapTable(Map<String, Integer> accountMap) {
+	public RevenueAccountMapTable(Map<String, VatInfo> accountMap) {
 		initColumns();
 
 		if (accountMap==null || accountMap.isEmpty()) {
@@ -26,11 +31,15 @@ public class RevenueAccountMapTable extends GenericTable {
 		}
 	}
 	
-	private void addRow(String vatCode, Integer acctNo) {
+	private void addRow(String vatCode, VatInfo vatInfo) {
 
 		addRow().addContent(
 				vatCode,
-				acctNo
+				vatInfo.getDefaultRevenueAccount(),
+				vatInfo.getDefaultVatDueAccount(),
+				vatInfo.getDefaultVatClaimAccount(),
+				vatInfo.getVatRate(),
+				vatInfo.getTaxDomicile()
 				)
 				;
 		
