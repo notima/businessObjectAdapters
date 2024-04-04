@@ -11,6 +11,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
@@ -109,7 +110,7 @@ public class AddClient implements Action {
 				credentials.setClientSecret(clientSecret);
 				credentialsProvider.setCredentials(credentials);
 				
-				fc3.setKeyProvider(credentialsProvider);
+				fc3 = new FortnoxClient3(credentialsProvider);
 				try { 
 					cs = fc3.getCompanySetting();
 					if (cs!=null) {
@@ -117,7 +118,7 @@ public class AddClient implements Action {
 						orgName = cs.getName();
 					}
 				} catch (FortnoxException fe) {
-					if (FortnoxClient3.ERROR_NOT_AUTH_FOR_SCOPE.equals(fe.getErrorInformation().getCode())) {
+					if (FortnoxConstants.ERROR_NOT_AUTH_FOR_SCOPE.equals(fe.getErrorInformation().getCode())) {
 						sess.getConsole().println("Can't fetch company information from Fortnox.");
 					} else {
 						sess.getConsole().println(fe.toString()); 

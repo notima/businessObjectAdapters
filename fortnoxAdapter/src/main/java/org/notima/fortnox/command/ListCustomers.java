@@ -12,6 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.CustomerSubset;
 import org.notima.api.fortnox.entities3.Customers;
@@ -53,7 +54,7 @@ public class ListCustomers extends FortnoxCommand implements Action {
 		
 			
 		FortnoxClient3 fc = getFortnoxClient(orgNo);
-		Customers customers = fc.getCustomers(inactive ? FortnoxClient3.FILTER_INACTIVE : FortnoxClient3.FILTER_ACTIVE);
+		Customers customers = fc.getCustomers(inactive ? FortnoxConstants.FILTER_INACTIVE : FortnoxConstants.FILTER_ACTIVE);
 		
 		if (paymentTerm!=null) {
 			// Looking for terms of payment demands enrich

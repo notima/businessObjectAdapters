@@ -10,6 +10,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
@@ -82,7 +83,7 @@ public class Activator extends BaseActivator {
 		
 		if (fortnoxProperties.getFortnoxClientsFile()!=null) {
 			
-			System.setProperty(FortnoxClient3.DFortnox4JFile, fortnoxProperties.getFortnoxClientsFile());
+			System.setProperty(FortnoxConstants.DFortnox4JFile, fortnoxProperties.getFortnoxClientsFile());
 			System.setProperty(CredentialsFile.CREDENTIALS_FILE_PROPERTY, fortnoxProperties.getFortnoxCredentialsFile());
 			FortnoxClientManager mgr = null;
 			

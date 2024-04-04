@@ -12,6 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.entities3.FortnoxFile;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherFileConnection;
@@ -61,7 +62,7 @@ public class AttachFileToVoucher extends FortnoxCommand implements Action {
 
 		Voucher v = fc.getVoucher(yId, series, voucherNo);
 		
-		FortnoxFile ff = fc.uploadFile(fileName, FortnoxClient3.INBOX_VOUCHERS);
+		FortnoxFile ff = fc.uploadFile(fileName, FortnoxConstants.INBOX_VOUCHERS);
 		
 		VoucherFileConnection vfc = fc.setVoucherFileConnection(
 				ff.getId(), 

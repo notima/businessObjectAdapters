@@ -9,6 +9,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
@@ -196,7 +197,7 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 		Invoices invoices = null;
 
 		try{
-			invoices = fortnoxClient.getInvoices(FortnoxClient3.FILTER_UNBOOKED);
+			invoices = fortnoxClient.getInvoices(FortnoxConstants.FILTER_UNBOOKED);
 		}catch (Exception e1){
 			e1.printStackTrace();
 		}

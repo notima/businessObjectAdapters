@@ -10,6 +10,7 @@ import javax.xml.bind.JAXBContext;
 
 import org.junit.Test;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.DunningRun;
@@ -61,7 +62,7 @@ public class TestFortnoxAdapterMethods extends FortnoxAdapterTestBase {
 			}
 			
 		} catch (FortnoxException fe) {
-			if (fe.getErrorInformation()!=null && fe.getErrorInformation().getCode().equals(FortnoxClient3.ERROR_CANT_FIND_INVOICE)) {
+			if (fe.getErrorInformation()!=null && fe.getErrorInformation().getCode().equals(FortnoxConstants.ERROR_CANT_FIND_INVOICE)) {
 				log.info(fe.toString());
 			} else {
 				log.warn(fe.toString());

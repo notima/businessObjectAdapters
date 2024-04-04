@@ -5,6 +5,7 @@ import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import java.util.List;
 
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.businessobjects.exception.TaxRatesNotAvailableException;
@@ -117,7 +118,7 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 			theLine.setPriceActual(totalPriceIncVAT / (1 + (newRate / 100.0)));
 			theLine.setTaxPercent(newRate);
 		}
-		theLine.calculateLineTotalIncTax(FortnoxClient3.DEFAULT_ROUNDING_PRECISION);
+		theLine.calculateLineTotalIncTax(FortnoxConstants.DEFAULT_ROUNDING_PRECISION);
 
 		validationMessage += ". Adjusted to tax rate: " + newRate;
 		

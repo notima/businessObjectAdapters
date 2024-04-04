@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.FortnoxInvoiceException;
@@ -782,21 +783,21 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		if (taxKey!=null) {
 			if ("MP1".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP1);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP1);
 			} else if ("MP2".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP2);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP2);
 			} else if ("MP3".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP3);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP3);
 			} else if ("MP0".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP0);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP0);
 			} else if ("FTEU".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EU_SERVICE);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EU_SERVICE);
 			} else if ("VTEU".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EU);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EU);
 			} else if ("E".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EXPORT);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT);
 			} else if ("ES".equals(taxKey)) {
-					accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_EXPORT_SERVICE);
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT_SERVICE);
 			}
 		}
 
@@ -804,13 +805,13 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 			// TODO: Make tax percentage check dynamic (and depend on current date)
 			if (taxPercent==0)
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_NO_VAT);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_NO_VAT);
 			else if (taxPercent==6) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP3);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP3);
 			} else if (taxPercent==12) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP2);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP2);
 			} else if (taxPercent==25) {
-				accountNo = getRevenueAccount(FortnoxClient3.ACCT_SALES_MP1);
+				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP1);
 			}
 		}
 		
@@ -1251,7 +1252,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Invoice subset - unposted
 		if (LIST_UNPOSTED.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered(FortnoxClient3.FILTER_UNBOOKED);
+			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNBOOKED);
 			
 			return result;
 		}
@@ -1259,14 +1260,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Invoice subset - unpaid overdue
 		if (LIST_UNPAIDOVERDUE.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered(FortnoxClient3.FILTER_UNPAID_OVERDUE);
+			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNPAID_OVERDUE);
 			
 			return result;
 		}
 		
 		if (LIST_UNPAID.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered(FortnoxClient3.FILTER_UNPAID);
+			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNPAID);
 			
 			return result;
 			
@@ -1569,7 +1570,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public String attachFileToVoucher(AccountingVoucher voucher, String fileName) throws Exception {
 		
-		FortnoxFile ff = fortnoxClient.uploadFile(fileName, FortnoxClient3.INBOX_VOUCHERS);
+		FortnoxFile ff = fortnoxClient.uploadFile(fileName, FortnoxConstants.INBOX_VOUCHERS);
 		VoucherFileConnection vfc =  fortnoxClient.setVoucherFileConnection(ff.getId(), voucher.getVoucherNo(), voucher.getVoucherSeries(), LocalDateUtils.asDate(voucher.getAcctDate()));
 
 		return vfc.getFileId();

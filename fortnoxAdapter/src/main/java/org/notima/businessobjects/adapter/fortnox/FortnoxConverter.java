@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.Article;
 import org.notima.api.fortnox.entities3.ArticleSubset;
@@ -68,20 +69,20 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 				acctNo = fa.getOutVatAccount(taxKey);
 				break;
 			case AccountingType.CLAIM_VAT:
-				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_INVAT);
+				acctNo = fa.getPredefinedAccount(FortnoxConstants.ACCT_INVAT);
 				break;
 			case AccountingType.ROUNDING:
-				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_ROUNDING);
+				acctNo = fa.getPredefinedAccount(FortnoxConstants.ACCT_ROUNDING);
 				break;
 			case AccountingType.OTHER_EXPENSES_SALES:
 				// TODO: Below must be configurable
 				acctNo = "6590";
 				break;
 			case AccountingType.INTEREST_INCOME:
-				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_INTEREST);
+				acctNo = fa.getPredefinedAccount(FortnoxConstants.ACCT_INTEREST);
 				break;
 			case AccountingType.LIQUID_ASSET_CASH:
-				acctNo = fa.getPredefinedAccount(FortnoxClient3.ACCT_CASHBYCARD);
+				acctNo = fa.getPredefinedAccount(FortnoxConstants.ACCT_CASHBYCARD);
 		}
 
 		return acctNo;
@@ -183,20 +184,20 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		}
 		
 		if (vatRate>16) {
-			return FortnoxClient3.VAT_MP1;
+			return FortnoxConstants.VAT_MP1;
 		}
 		if (vatRate>10) {
-			return FortnoxClient3.VAT_MP2;
+			return FortnoxConstants.VAT_MP2;
 		}
 		if (vatRate>5) {
-			return FortnoxClient3.VAT_MP3;
+			return FortnoxConstants.VAT_MP3;
 		}
 		
 		if (vatRate==0) {
-			return FortnoxClient3.VAT_MP0;
+			return FortnoxConstants.VAT_MP0;
 		}
 		
-		return FortnoxClient3.VAT_MP0;
+		return FortnoxConstants.VAT_MP0;
 		
 	}
 	
