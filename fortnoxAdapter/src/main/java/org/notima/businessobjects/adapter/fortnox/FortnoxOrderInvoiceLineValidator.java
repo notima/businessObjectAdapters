@@ -144,6 +144,22 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 		
 		return closestTaxRate;
 	}
+	
+	public String getTaxDomicile() {
+		return taxDomicile;
+	}
+
+	public void setTaxDomicile(String taxDomicile) {
+		this.taxDomicile = taxDomicile;
+	}
+
+	public TaxRateProvider getTaxRateProvider() {
+		return taxRateProvider;
+	}
+
+	public void setTaxRateProvider(TaxRateProvider taxRateProvider) {
+		this.taxRateProvider = taxRateProvider;
+	}
 
 	public boolean isAdjustToClosestTaxRate() {
 		return adjustToClosestTaxRate;
