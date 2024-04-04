@@ -39,19 +39,19 @@ public class CsvAdapter<C,I,O,P,B,T> extends BasicBusinessObjectFactory<C, I, O,
 	}
 
 	@Override
-	public BusinessPartner<B> lookupBusinessPartner(String key) throws Exception {
+	public BusinessPartner<?> lookupBusinessPartner(String key) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<BusinessPartner<B>> lookupAllBusinessPartners() throws Exception {
+	public List<BusinessPartner<?>> lookupAllBusinessPartners() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<BusinessPartner<B>> lookupBusinessPartners(int maxCount, boolean customers, boolean suppliers)
+	public List<BusinessPartner<?>> lookupBusinessPartners(int maxCount, boolean customers, boolean suppliers)
 			throws Exception {
 		// TODO Auto-generated method stub
 		return null;

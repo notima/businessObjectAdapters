@@ -578,5 +578,6 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		
 		return bpl;
 	}
+
 	
 }

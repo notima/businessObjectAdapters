@@ -33,6 +33,7 @@ import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
+import org.notima.api.fortnox.entities3.Supplier;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherFileConnection;
 import org.notima.generic.businessobjects.AccountingVoucher;
@@ -420,18 +421,28 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * 
 	 */
 	@Override
-	public BusinessPartner<Customer> lookupBusinessPartner(String key) throws Exception {
+	public BusinessPartner<?> lookupBusinessPartner(String key) throws Exception {
 		Customer c = fortnoxClient.getCustomerByCustNo(key);
-		if (c==null) return null;
+		if (c==null) {
+			// Try supplier
+			Supplier s = fortnoxClient.getSupplierBySupplierNo(key);
+			if (s!=null) {
+				return FortnoxConverter.convertToBusinessPartnerFromSupplier(s);
+			}
+			return null;
+		}
 		return FortnoxConverter.convertToBusinessPartner(c);
 	}
 
 	@Override
-	public List<BusinessPartner<Customer>> lookupAllBusinessPartners() throws Exception {
+	public List<BusinessPartner<?>> lookupAllBusinessPartners() throws Exception {
 		
 		Customers contacts = fortnoxClient.getCustomers();
 		
-		return convertCustomerResult(contacts);
+		List<BusinessPartner<?>> resultList = new ArrayList<BusinessPartner<?>>();
+		resultList.addAll(convertCustomerResult(contacts));
+		
+		return resultList;
 		
 	}
 	
@@ -1399,7 +1410,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	}
 
 	@Override
-	public List<BusinessPartner<Customer>> lookupBusinessPartners(int maxCount,
+	public List<BusinessPartner<?>> lookupBusinessPartners(int maxCount,
 			boolean customers, boolean suppliers) throws Exception {
 		// TODO Auto-generated method stub
 		return null;

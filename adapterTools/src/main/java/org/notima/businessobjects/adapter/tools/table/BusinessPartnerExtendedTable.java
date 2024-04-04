@@ -4,12 +4,12 @@ import java.util.List;
 
 import org.notima.generic.businessobjects.BusinessPartner;
 
-public class BusinessPartnerTable extends GenericTable {
+public class BusinessPartnerExtendedTable extends GenericTable {
 
 	private List<BusinessPartner<?>> bpList;
 	
 	
-	public BusinessPartnerTable(List<BusinessPartner<?>> bpl) {
+	public BusinessPartnerExtendedTable(List<BusinessPartner<?>> bpl) {
 
 		addColumn("ID");
 		addColumn("Name");
@@ -18,7 +18,8 @@ public class BusinessPartnerTable extends GenericTable {
 		addColumn("Address 2");
 		addColumn("Postal");
 		addColumn("City");
-		addColumn("Email");
+		addColumn("E-mail");
+		addColumn("Comment");
 		
 		if (bpl==null || bpl.size()==0) {
 			setEmptyTableText("No tenants");
@@ -46,7 +47,8 @@ public class BusinessPartnerTable extends GenericTable {
 					(p.hasLocations() ? p.getAddressOfficial().getAddress2() : ""),
 					(p.hasLocations() ? p.getAddressOfficial().getPostal() : ""),
 					(p.hasLocations() ? p.getAddressOfficial().getCity() : ""),
-					(p.hasLocations() ? p.getAddressOfficial().getEmail() : "")
+					(p.hasLocations() ? p.getAddressOfficial().getEmail() : ""),
+					p.getComments()!=null ? p.getComments() : ""
 					);
 		}
 		

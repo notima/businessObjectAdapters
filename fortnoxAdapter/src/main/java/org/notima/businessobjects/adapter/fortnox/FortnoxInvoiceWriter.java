@@ -212,11 +212,11 @@ public class FortnoxInvoiceWriter {
 		List<BusinessPartner<Customer>> bpList = adapter.lookupAllActiveCustomers();
 		FortnoxAdapter.logger.info(bpList.size() + " existing customers");
 		List<BusinessPartner<?>> result = new ArrayList<BusinessPartner<?>>();
-		for (BusinessPartner<Customer> bp : bpList) {
+		for (BusinessPartner<?> bp : bpList) {
 			bp = adapter.lookupBusinessPartner(bp.getIdentityNo());
-			if (bp.getNativeBusinessPartner()!=null && 
-					(bp.getNativeBusinessPartner().getCurrency()==null || bp.getNativeBusinessPartner().getCurrency().trim().length()==0)) {
-				throw new Exception("No default currency set on customer " + bp.getNativeBusinessPartner().getCustomerNumber());
+			if (bp.getNativeBusinessPartner()!=null && bp.getNativeBusinessPartner() instanceof Customer &&  
+					(((Customer)bp.getNativeBusinessPartner()).getCurrency()==null || ((Customer)bp.getNativeBusinessPartner()).getCurrency().trim().length()==0)) {
+				throw new Exception("No default currency set on customer " + bp.getIdentityNo());
 			}
 			result.add(bp);
 		}

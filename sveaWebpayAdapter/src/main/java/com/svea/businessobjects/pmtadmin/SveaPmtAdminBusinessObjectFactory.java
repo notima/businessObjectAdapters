@@ -91,14 +91,14 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public BusinessPartner<Object> lookupBusinessPartner(String key)
+	public BusinessPartner<?> lookupBusinessPartner(String key)
 			throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public List<BusinessPartner<Object>> lookupAllBusinessPartners()
+	public List<BusinessPartner<?>> lookupAllBusinessPartners()
 			throws Exception {
 		// TODO Auto-generated method stub
 		return null;
@@ -242,7 +242,7 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 	}
 
 	@Override
-	public List<BusinessPartner<Object>> lookupBusinessPartners(int maxCount,
+	public List<BusinessPartner<?>> lookupBusinessPartners(int maxCount,
 			boolean customers, boolean suppliers) throws Exception {
 		// TODO Auto-generated method stub
 		return null;

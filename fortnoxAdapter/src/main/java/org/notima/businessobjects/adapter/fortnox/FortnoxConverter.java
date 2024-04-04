@@ -329,6 +329,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		loc.setAddress1(src.getAddress1());
 		loc.setAddress2(src.getAddress2());
 		loc.setPhone(src.getPhone1());
+		dst.setComments(src.getComments());
 		
 		return dst;
 	}
@@ -357,6 +358,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		dst.setPhone1(customer.getPhone1());
 		dst.setVATNumber(customer.getVATNumber());
 		dst.setZipCode(customer.getZipCode());
+		dst.setComments(customer.getComments());
 		
 		return dst;
 		
@@ -373,6 +375,31 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		return dst;
 		
 	}
+
+	public static org.notima.generic.businessobjects.BusinessPartner<Supplier> convertToBusinessPartnerFromSupplier(org.notima.api.fortnox.entities3.Supplier src) {
+		
+		BusinessPartner<Supplier> dst = new BusinessPartner<Supplier>();
+		
+		dst.setName(src.getName());
+		dst.setIdentityNo(src.getSupplierNumber());
+		dst.setTaxId(src.getOrganisationNumber());
+		Location loc = new Location();
+		dst.setAddressOfficial(loc);
+		loc.setEmail(src.getEmail());
+		loc.setAddress1(src.getAddress1());
+		loc.setAddress2(src.getAddress2());
+		loc.setCity(src.getCity());
+		loc.setPostal(src.getZipCode());
+		loc.setPhone(src.getPhone1());
+		loc.setCountryCode(src.getCountryCode());
+		
+		dst.setActive(src.getActive());
+		dst.setComments(src.getComments());
+		dst.setNativeBusinessPartner(src);
+		
+		return dst;
+	}
+	
 	
 	public static org.notima.generic.businessobjects.BusinessPartner<Customer> convertToBusinessPartner(org.notima.api.fortnox.entities3.Customer src) {
 		
@@ -393,6 +420,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		
 		dst.setActive(src.getActive());
 		dst.setCompany("COMPANY".equalsIgnoreCase(src.getType()));
+		dst.setComments(src.getComments());
 	
 		// Check default delivery type
 		DefaultDeliveryTypes ddt = src.getDefaultDeliveryTypes();
