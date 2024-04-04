@@ -23,12 +23,32 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 	private TaxSubjectIdentifier tsi;
 	private List<Tax>		    validTaxRates;
 	private String				validationMessage;
+	private String				taxDomicile;
 	private boolean				adjustToClosestTaxRate = false;
 	
+	/**
+	 * 
+	 * @param documentSender		The owner of the document. Normally the sender of a customer invoice (i.e.).
+	 * @param trp					Tax rate provider.
+	 */
 	public FortnoxOrderInvoiceLineValidator(TaxSubjectIdentifier documentSender, TaxRateProvider trp) {
 		
 		tsi = documentSender;
 		taxRateProvider = trp;
+		
+	}
+
+	/**
+	 * 
+	 * @param documentSender
+	 * @param trp
+	 * @param taxDomicile		If a specific tax domicile should be used with the tax rate provider.
+	 */
+	public FortnoxOrderInvoiceLineValidator(TaxSubjectIdentifier documentSender, TaxRateProvider trp, String taxDomicile) {
+		
+		tsi = documentSender;
+		taxRateProvider = trp;
+		this.taxDomicile = taxDomicile;
 		
 	}
 
@@ -37,7 +57,12 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 		orderInvoice = oi;
 		if (orderInvoice!=null) {
 			try {
-				validTaxRates = taxRateProvider.getValidTaxRates(tsi, LocalDateUtils.asLocalDate(oi.getDocumentDate()));
+				
+				if (taxDomicile!=null)
+					validTaxRates = taxRateProvider.getValidTaxRates(tsi, taxDomicile, LocalDateUtils.asLocalDate(oi.getDocumentDate()));
+				else
+					validTaxRates = taxRateProvider.getValidTaxRates(tsi, LocalDateUtils.asLocalDate(oi.getDocumentDate()));
+				
 			} catch (NoSuchTenantException | TaxRatesNotAvailableException nste) {
 				nste.printStackTrace();
 			}
