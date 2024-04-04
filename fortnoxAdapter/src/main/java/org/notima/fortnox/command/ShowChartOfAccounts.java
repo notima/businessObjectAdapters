@@ -36,6 +36,9 @@ public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 	@Option(name = "--only-with-balances", description = "Include only accounts with balances (implicits --balances)", required = false, multiValued = false)
 	private boolean onlyWithBalances;
 	
+	@Option(name = "--only-with-vatcodes", description = "Include only accounts with VAT-codes (implicits --include-pl-accounts)", required = false, multiValued = false)
+	private boolean onlyWithVatCodes;
+	
 	@Option(name = "--yearId", description = "Show COA for specific yearId", required = false, multiValued = false)
 	private Integer yearId;
 	
@@ -70,6 +73,10 @@ public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 		
 		Account acct;
 		String acctNo;
+
+		if (onlyWithVatCodes) {
+			includePlAccounts = true;
+		}
 		
 		List<Object> acctList = new ArrayList<Object>();
 		for (AccountSubset as : accts.getAccountSubset()) {
@@ -78,6 +85,13 @@ public class ShowChartOfAccounts extends FortnoxCommand implements Action {
 			if (!includePlAccounts) {
 				// Skip revenue accounts
 				if (!AccountClass.isBalanceClass(barp.getAccountClass(acctNo))) {
+					continue;
+				}
+			}
+
+			if (onlyWithVatCodes) {
+				// Skip accounts without VAT-code
+				if (as.getVATCode()==null || as.getVATCode().trim().length()==0) {
 					continue;
 				}
 			}
