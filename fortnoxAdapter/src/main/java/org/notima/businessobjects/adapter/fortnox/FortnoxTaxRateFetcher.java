@@ -41,6 +41,7 @@ public class FortnoxTaxRateFetcher {
 	private FortnoxAdapter bof;
 	private FortnoxClient3 fc3;
 	private TaxSubjectIdentifier tsi;
+	private TaxRatesFI 	taxRatesFi = new TaxRatesFI();
 	private List<Tax> lastValidRates;
 	
 	public FortnoxTaxRateFetcher(FortnoxAdapter bof, TaxSubjectIdentifier tsi) throws NoSuchTenantException {
@@ -60,9 +61,13 @@ public class FortnoxTaxRateFetcher {
 		taxRateMapByCountry.put("FI", taxRates_FI);
 		
 	}
-	
+
 	public List<Tax> getValidTaxes(LocalDate taxDate, String taxDomicile) throws TaxRatesNotAvailableException {
 
+		if ("FI".equals(taxDomicile)) {
+			return taxRatesFi.getTaxRates();
+		}
+		
 		// TODO: Extend this to actually query Fortnox.
 		// Currently we make a simple method.
 		lastValidRates.clear();

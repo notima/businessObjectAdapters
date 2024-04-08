@@ -2,6 +2,7 @@ package org.notima.businessobjects.adapter.fortnox;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,7 +55,9 @@ import org.notima.generic.businessobjects.PriceList;
 import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.businessobjects.tax.TaxTool;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 import org.notima.util.EmailUtils;
 import org.notima.util.LocalDateUtils;
@@ -125,6 +128,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	private Map<String,VatInfo> revenueAccountMap = null;
 	private Map<String, PreDefinedAccountSubset> preDefinedAccountMap = null;
 
+	private FortnoxTaxRateFetcher	taxRateFetcher;
+	
 	protected static Logger	logger = LoggerFactory.getLogger(FortnoxAdapter.class);
 	
 	/**
@@ -774,47 +779,66 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * E
 	 * ES
 	 * 
+	 * TODO: Convert this function to use ForthoxTaxRateFetcher.
+	 * 
 	 * @param taxKey		
 	 * @param taxPercent
+	 * @param taxDomicile	What tax domicile we're dealing with. If not set, SE is assumed.
 	 * @return				A revenue account for given taxKey and/or taxPercent.
 	 * @throws Exception
 	 */
-	public String getRevenueAcctNo(String taxKey, Double taxPercent) throws Exception {
+	public String getRevenueAcctNo(String taxKey, Double taxPercent, String taxDomicile) throws Exception {
 		
 		String accountNo = null;
-		
-		if (taxKey!=null) {
-			if ("MP1".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP1);
-			} else if ("MP2".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP2);
-			} else if ("MP3".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP3);
-			} else if ("MP0".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP0);
-			} else if ("FTEU".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EU_SERVICE);
-			} else if ("VTEU".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EU);
-			} else if ("E".equals(taxKey)) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT);
-			} else if ("ES".equals(taxKey)) {
-					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT_SERVICE);
-			}
+		if (taxDomicile==null || taxDomicile.trim().length()==0) {
+			taxDomicile = FortnoxConstants.DEFAULT_TAX_DOMICILE;
 		}
 
-		if (accountNo == null && taxPercent!=null) {
-
-			// TODO: Make tax percentage check dynamic (and depend on current date)
-			if (taxPercent==0)
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_NO_VAT);
-			else if (taxPercent==6) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP3);
-			} else if (taxPercent==12) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP2);
-			} else if (taxPercent==25) {
-				accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP1);
+		if ("SE".equals(taxDomicile)) {
+		
+			if (taxKey!=null) {
+				if ("MP1".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP1);
+				} else if ("MP2".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP2);
+				} else if ("MP3".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP3);
+				} else if ("MP0".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP0);
+				} else if ("FTEU".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EU_SERVICE);
+				} else if ("VTEU".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EU);
+				} else if ("E".equals(taxKey)) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT);
+				} else if ("ES".equals(taxKey)) {
+						accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT_SERVICE);
+				}
 			}
+	
+			if (accountNo == null && taxPercent!=null) {
+	
+				// TODO: Make tax percentage check dynamic (and depend on current date)
+				if (taxPercent==0)
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_NO_VAT);
+				else if (taxPercent==6) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP3);
+				} else if (taxPercent==12) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP2);
+				} else if (taxPercent==25) {
+					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_MP1);
+				}
+			}
+
+		} else { 
+
+			FortnoxTaxRateFetcher ftrf = new FortnoxTaxRateFetcher((FortnoxAdapter)this, new TaxSubjectIdentifier(getCurrentTenant().getTaxId()));
+			// TODO: Use document date
+			List<Tax> validTaxes = ftrf.getValidTaxes(LocalDate.now(), taxDomicile);
+
+			Tax tax = TaxTool.getFirstMatchOnRate(taxPercent, validTaxes);
+			accountNo = tax.getDefaultRevenueAccount().getAccountNo();
+			
 		}
 		
 		if (accountNo == null) {
@@ -941,7 +965,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	}
 
-	private String getAccountNo(InvoiceLine il) throws Exception {
+	private String getAccountNo(Invoice<?> invoice, InvoiceLine il) throws Exception {
 		
 		// Try to set default account number if not set
 		if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
@@ -962,7 +986,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 			
 			if (accountNo==null) { 
-				accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent());
+				accountNo = getRevenueAcctNo(il.getTaxKey(), il.getTaxPercent(), invoice.getTaxDomicile());
 			}
 			
 			return accountNo;
@@ -995,7 +1019,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			// Empty description if missing
 			row.setDescription(".");
 		}
-		row.setAccountNumber(getAccountNo(il));
+		row.setAccountNumber(getAccountNo(src, il));
 		if (il.getProject()!=null && il.getProject().trim().length()>0) 
 			row.setProject(il.getProject());
 		if (il.getCostCenter()!=null && il.getCostCenter().trim().length()>0)

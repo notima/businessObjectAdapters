@@ -63,7 +63,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		
 		switch (accountingType) {
 			case AccountingType.REVENUE:
-				acctNo = fa.getRevenueAcctNo(taxKey, null);
+				acctNo = fa.getRevenueAcctNo(taxKey, null, null);
 				break;
 			case AccountingType.LIABILITY_VAT:
 				acctNo = fa.getOutVatAccount(taxKey);

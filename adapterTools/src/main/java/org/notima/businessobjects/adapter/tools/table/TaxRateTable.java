@@ -11,6 +11,8 @@ public class TaxRateTable extends GenericTable {
 		addColumn("Tax id");
 		addColumn("Country");
 		addColumn("Rate");
+		addColumn("Rev acct");
+		addColumn("Tax due acct");
 		
 		if (bpl==null || bpl.size()==0) {
 			setEmptyTableText("No content");
@@ -21,7 +23,10 @@ public class TaxRateTable extends GenericTable {
 			addRow().addContent(
 					p.getKey(),
 					p.getCountryCode(),
-					p.getRate());
+					p.getRate(),
+					p.getDefaultRevenueAccount(),
+					p.getTaxDebtAccount()
+					);
 		}
 		
 	}
