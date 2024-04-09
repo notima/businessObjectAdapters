@@ -50,7 +50,9 @@ public class FortnoxTaxRateFetcher {
 		
 		this.bof = bof;
 		this.tsi = tsi;
-		this.bof.setTenant(this.tsi.getTaxId(), this.tsi.getCountryCode());
+		if (bof.getCurrentTenant()==null || !tsi.getTaxId().equals(bof.getCurrentTenant().getTaxId())) {
+			this.bof.setTenant(this.tsi.getTaxId(), this.tsi.getCountryCode());
+		}
 		fc3 = bof.getClient();
 		lastValidRates = new ArrayList<Tax>();
 	}
