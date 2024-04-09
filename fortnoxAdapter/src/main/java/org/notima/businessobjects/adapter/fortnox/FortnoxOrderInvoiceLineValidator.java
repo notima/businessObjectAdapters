@@ -4,7 +4,6 @@ import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 
 import java.util.List;
 
-import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
@@ -17,7 +16,7 @@ import org.notima.util.LocalDateUtils;
 
 public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidator {
 
-	private TaxRateProvider taxRateProvider;
+	private TaxRateProvider 	taxRateProvider;
 	
 	private OrderInvoice 		orderInvoice;
 	private OrderInvoiceLine	theLine;
@@ -30,7 +29,7 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 	/**
 	 * 
 	 * @param documentSender		The owner of the document. Normally the sender of a customer invoice (i.e.).
-	 * @param trp					Tax rate provider.
+	 * @param trp					Tax rate provider.  
 	 */
 	public FortnoxOrderInvoiceLineValidator(TaxSubjectIdentifier documentSender, TaxRateProvider trp) {
 		
@@ -39,23 +38,10 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 		
 	}
 
-	/**
-	 * 
-	 * @param documentSender
-	 * @param trp
-	 * @param taxDomicile		If a specific tax domicile should be used with the tax rate provider.
-	 */
-	public FortnoxOrderInvoiceLineValidator(TaxSubjectIdentifier documentSender, TaxRateProvider trp, String taxDomicile) {
-		
-		tsi = documentSender;
-		taxRateProvider = trp;
-		this.taxDomicile = taxDomicile;
-		
-	}
-
 	@Override
 	public void setOrderInvoice(OrderInvoice oi) {
 		orderInvoice = oi;
+		taxDomicile = orderInvoice.getTaxDomicile();
 		if (orderInvoice!=null) {
 			try {
 				
@@ -148,10 +134,6 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 	
 	public String getTaxDomicile() {
 		return taxDomicile;
-	}
-
-	public void setTaxDomicile(String taxDomicile) {
-		this.taxDomicile = taxDomicile;
 	}
 
 	public TaxRateProvider getTaxRateProvider() {
