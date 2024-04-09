@@ -971,9 +971,10 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
 
 			String accountNo = null;
+			String taxDomicile = (invoice.getTaxDomicile()==null || invoice.getTaxDomicile().trim().length()==0) ? FortnoxConstants.DEFAULT_TAX_DOMICILE : invoice.getTaxDomicile();
 			
-			// Lookup article first
-			if (il.getProductKey()!=null) {
+			// Lookup article first. Only use article mapping for default tax domicile
+			if (FortnoxConstants.DEFAULT_TAX_DOMICILE.equals(taxDomicile) && il.getProductKey()!=null) {
 				try {
 					Article article = fortnoxClient.getArticleByArticleNo(il.getProductKey());
 					if (article!=null && (article.getActive()!=null && article.getActive().booleanValue())) {
