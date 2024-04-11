@@ -941,17 +941,22 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		List<InvoiceRow> rowList = new ArrayList<InvoiceRow>();
 		rows.setInvoiceRow(rowList);
 		
+		double totalRounding = 0.0;
+		
 		for (InvoiceLine il : src.getLines()) {
 			
 			if ("öresavrundning".equals(il.getName())) {
-				dst.setRoundOff(il.getPriceActual());
+				totalRounding += il.getPriceActual();
 				continue;
 			}
 
 			addCanonicalInvoiceLineToFortnoxInvoiceRow(src, il, rowList);
 			
 		}
-
+		
+		if (totalRounding!=0) {
+			dst.setRoundOff(totalRounding);
+		}
 		
 		if (src.isShowPricesIncludingVAT()) {
 			dst.setVATIncluded(Boolean.valueOf(true));
@@ -965,6 +970,18 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	}
 
+	/**
+	 * Returns an accounting number for the given invoice and invoice line. If the accountNo is already set 
+	 * on the invoice line, no lookup is done.
+	 * 
+	 * If there is no accountNo on the invoice line, this method tries to determine the account number to use.
+	 * 
+	 * @param invoice
+	 * @param il
+	 * @return
+	 * @throws Exception
+	 * @see {@link #getRevenueAcctNo(String, Double, String)}
+	 */
 	private String getAccountNo(Invoice<?> invoice, InvoiceLine il) throws Exception {
 		
 		// Try to set default account number if not set
@@ -1020,7 +1037,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			// Empty description if missing
 			row.setDescription(".");
 		}
+		// Set the accounting number
 		row.setAccountNumber(getAccountNo(src, il));
+		
 		if (il.getProject()!=null && il.getProject().trim().length()>0) 
 			row.setProject(il.getProject());
 		if (il.getCostCenter()!=null && il.getCostCenter().trim().length()>0)
