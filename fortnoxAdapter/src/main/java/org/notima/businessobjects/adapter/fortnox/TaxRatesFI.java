@@ -30,6 +30,11 @@ public class TaxRatesFI {
 		t.setTaxDebtAccount(new AccountElement("2992"));
 		taxRates.add(t);
 		
+		t = new Tax("0", countryCode, 0, null, null, null);		
+		t.setDefaultRevenueAccount(new AccountElement("3055"));
+		t.setTaxDebtAccount(new AccountElement("3055"));
+		taxRates.add(t);
+
 	}
 	
 	public List<Tax> getTaxRates() {
