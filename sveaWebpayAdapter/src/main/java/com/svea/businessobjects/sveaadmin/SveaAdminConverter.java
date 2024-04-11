@@ -66,8 +66,9 @@ public class SveaAdminConverter {
 		
 		try {
 			
-			// TODO: Change rounding precision if currency is other than SEK.
-			double roundedGrandTotal = FeeDetail.roundFee(i.getGrandTotal(), 0);
+			// TODO: Have a better lookup function for rounding
+			int precision = "EUR".equals(i.getCurrency()) ? 1 : 0;
+			double roundedGrandTotal = FeeDetail.roundFee(i.getGrandTotal(), precision);
 			if (d.getPaidAmt() == -roundedGrandTotal) {
 				
 				// We have a credited order in full
