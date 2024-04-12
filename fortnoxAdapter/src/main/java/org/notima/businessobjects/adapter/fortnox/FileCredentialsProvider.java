@@ -9,6 +9,9 @@ import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated  Use org.notima.api.fortnox.oauth2.FileCredentialsProvider
+ */
 public class FileCredentialsProvider extends FortnoxCredentialsProvider {
 	
 

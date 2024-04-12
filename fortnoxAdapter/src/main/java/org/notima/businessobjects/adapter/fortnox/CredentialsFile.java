@@ -18,6 +18,9 @@ import com.google.gson.JsonIOException;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 
+/**
+ * @deprecated  Use org.notima.api.fortnox.oauth2.CredentialsFile
+ */
 public class CredentialsFile {
 
     public static final Type KEYS_TYPE = new TypeToken<List<FortnoxCredentials>>() {}.getType();
