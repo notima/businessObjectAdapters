@@ -100,6 +100,7 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 
 		if (showSecrets) {
 			sess.getConsole().println("** Legacy Access Token: " + credentials.getLegacyToken());
+			sess.getConsole().println("** Client secret: " + credentials.getClientSecret());
 		}
 		
 	}
