@@ -55,7 +55,11 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 			return null;
 		}
 
-		printCompanySettings();
+		try {
+			printCompanySettings();
+		} catch (Exception e) {
+			sess.getConsole().println("Could not get company settings: " + e.getMessage());
+		}
 
 		printTokens();
 		

@@ -19,6 +19,7 @@ import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
+import org.notima.generic.businessobjects.tools.InvoiceListMerger;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "notima", name = "write-invoices", description = "Reads invoices from an XML-file and writes them to the destination adapter")
@@ -39,6 +40,9 @@ public class WriteInvoices extends AbstractAction {
 
     @Option(name="--create-limit", description="Create limit.", required = false, multiValued = false)
     private Integer	createLimit;
+
+    @Option(name="--merge-on-customer", description="Merge invoices if there are many on the same customer", required = false, multiValued = false)
+    private boolean mergeOnBp;
     
     @Option(name="--use-tax-id", description="Use tax ID to map the customer", required = false, multiValued = false)
     private boolean useTaxId;
@@ -67,6 +71,7 @@ public class WriteInvoices extends AbstractAction {
 		parseOptions();
 		parseInvoiceFile();
 		checkUseTaxId();
+		mergeIfThatsAnOption();
 		writeInvoices();
 		
 		return null;
@@ -79,6 +84,14 @@ public class WriteInvoices extends AbstractAction {
 		
 	}
 
+	private void mergeIfThatsAnOption() {
+		if (mergeOnBp) {
+			InvoiceListMerger merger = new InvoiceListMerger(invoiceList);
+			merger.mergeListByBusinessPartner();
+			invoiceList = merger.getList();
+		}
+	}
+	
 	private void parseOptions() throws ParseException {
 		
 		if (invoiceDateStr!=null) {
