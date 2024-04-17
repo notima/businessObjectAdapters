@@ -41,6 +41,16 @@ Check your defaults using
 	config:property-get -p FortnoxProperties defaultClientId
 	config:property-get -p FortnoxProperties defaultClientSecret	
 
+#### OAuth2 authentication
+
+With OAuth2 authentication you'll first need an authorization code. See [Fortnox4J CLI Guide](https://github.com/notima/fortnox4j) on how to get one.
+
+	fortnox:add-client orgNo authorizationCode
+
+#### Legacy authentication tokens
+
+Legacy authentication tokens were used before the OAuth2 authentication scheme. There are still legacy tokens being used.
+
 If you have an API-code/authorization code (one time token to get an accessToken) you add and activate the client by below command
 
 	fortnox:add-client --legacy --clientSecret REAL_SECRET orgNo authorizationCode
