@@ -47,6 +47,18 @@ With OAuth2 authentication you'll first need an authorization code. See [Fortnox
 
 	fortnox:add-client orgNo authorizationCode
 
+If you have added the client and the credentials doesn't work, you can update the credentials that you get from the [Fortnox4J CLI Guide](https://github.com/notima/fortnox4j) using this command:
+
+	fortnox:update-fortnox-credential nnnnnn-nnnn 'accessToken' 'refreshToken'
+
+To see the status of the all the credentials for clients use this command
+
+	fortnox:list-fortnox-clients --credentials
+
+To show the credentials for a specific client
+
+	fortnox:list-fortnox-credentials orgNo
+
 #### Legacy authentication tokens
 
 Legacy authentication tokens were used before the OAuth2 authentication scheme. There are still legacy tokens being used.
