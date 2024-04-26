@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.fortnox;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+
+import javax.xml.bind.JAXB;
 
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
@@ -619,13 +622,21 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 		org.notima.api.fortnox.entities3.Invoice dst = convertToFortnoxInvoice(invoice);
 	
-		dst = fortnoxClient.setInvoice(dst);
-		if (dst==null) {
-			throw new Exception("Invoice not saved: " + invoice.getDocumentKey());
+		if (debugOn) {
+			StringWriter stringWriter = new StringWriter();
+			JAXB.marshal(dst, stringWriter);
+			writeToDebugFile("invoice.xml", stringWriter.getBuffer());
+			invoice.setDocumentKey("DEBUG");
+			invoice.setInvoiceKey("DEBUG");
+		} else {
+			dst = fortnoxClient.setInvoice(dst);
+			if (dst==null) {
+				throw new Exception("Invoice not saved: " + invoice.getDocumentKey());
+			}
+			// Set document number
+			invoice.setDocumentKey(dst.getDocumentNumber());
+			invoice.setInvoiceKey(dst.getDocumentNumber());
 		}
-		// Set document number
-		invoice.setDocumentKey(dst.getDocumentNumber());
-		invoice.setInvoiceKey(dst.getDocumentNumber());
 		invoice.setNativeInvoice(dst);
 		
 		return invoice;
