@@ -28,7 +28,7 @@
 
 		<!-- Belongs to sveaWebpayAdapter but must be here to be accessible to feature.xml -->		
 		<pmt-admin-api.version>2.1.3-SNAPSHOT</pmt-admin-api.version>
-		<webpayadminreports.version>0.0.6</webpayadminreports.version>
+		<webpayadminreports.version>0.0.8-SNAPSHOT</webpayadminreports.version>
 		<webpay-common.version>0.0.8-SNAPSHOT</webpay-common.version>
 		
 	</properties>
