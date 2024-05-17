@@ -51,5 +51,6 @@ The currently available properties to modify are
 * copyPaymentTerm - Copies payment term from customer to invoice.
 * extref1
 * extref2
-* comment
+* commentToCustomer
+* internalComment
 * copyCustomerName - Copies customer name from customer to invoice.

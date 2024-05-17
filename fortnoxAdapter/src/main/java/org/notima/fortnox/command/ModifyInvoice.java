@@ -93,7 +93,7 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
     		return name;
     	} catch (FortnoxScopeException fse) {
     	}
-    	return "";
+    	return null;
     }
     
 	private void modifyPropertySingle() throws Exception {
@@ -166,8 +166,12 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 				updateExtRef2();
 				break;
 				
-			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_COMMENT:
-				updateComment();
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_INTERNAL_COMMENT:
+				updateInternalComment();
+				break;
+				
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_COMMENT_TO_CUSTOMER:
+				updateCommentToCustomer();
 				break;
 				
 			default:
@@ -198,8 +202,13 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 		fortnoxClient.setInvoice(invoiceToModify);
 	}
 	
-	private void updateComment() throws Exception {
+	private void updateInternalComment() throws Exception {
 		invoiceToModify.setComments(newValue);
+		fortnoxClient.setInvoice(invoiceToModify);
+	}
+	
+	private void updateCommentToCustomer() throws Exception {
+		invoiceToModify.setRemarks(newValue);
 		fortnoxClient.setInvoice(invoiceToModify);
 	}
 	

@@ -20,7 +20,8 @@ public class FortnoxInvoicePropertyCompleter implements Completer {
 	public static final String INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE = "copyPaymentTerm";
 	public static final String INVOICE_PROPERTY_EXTREF1 = "extref1";
 	public static final String INVOICE_PROPERTY_EXTREF2 = "extref2";
-	public static final String INVOICE_PROPERTY_COMMENT = "comment";
+	public static final String INVOICE_PROPERTY_INTERNAL_COMMENT = "internalComment";
+	public static final String INVOICE_PROPERTY_COMMENT_TO_CUSTOMER = "commentToCustomer";
 	// Refresh customer name from the customer register
 	public static final String INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE = "copyCustomerName";
 
@@ -33,7 +34,8 @@ public class FortnoxInvoicePropertyCompleter implements Completer {
 		INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE,
 		INVOICE_PROPERTY_EXTREF1,
 		INVOICE_PROPERTY_EXTREF2,
-		INVOICE_PROPERTY_COMMENT,
+		INVOICE_PROPERTY_INTERNAL_COMMENT,
+		INVOICE_PROPERTY_COMMENT_TO_CUSTOMER,
 		INVOICE_PROPERTY_COPY_CUSTOMER_NAME_TO_INVOICE
     };
     
