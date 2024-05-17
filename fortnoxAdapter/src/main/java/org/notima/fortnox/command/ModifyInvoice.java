@@ -156,6 +156,10 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 				updateExtRef2();
 				break;
 				
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_COMMENT:
+				updateComment();
+				break;
+				
 			default:
 				sess.getConsole().println(String.format("%s is not a modifiable property", propertyToModify));
             	break;
@@ -181,6 +185,11 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 	
 	private void updateExtRef2() throws Exception {
 		invoiceToModify.setExternalInvoiceReference2(newValue);
+		fortnoxClient.setInvoice(invoiceToModify);
+	}
+	
+	private void updateComment() throws Exception {
+		invoiceToModify.setComments(newValue);
 		fortnoxClient.setInvoice(invoiceToModify);
 	}
 	
