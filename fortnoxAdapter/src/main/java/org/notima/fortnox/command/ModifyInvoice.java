@@ -10,6 +10,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxConstants;
+import org.notima.api.fortnox.FortnoxScopeException;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
@@ -72,9 +73,9 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
             return null;
         }
 
-        String clientName = fortnoxClient.getCompanySetting().getName();
+        String clientName = getClientName();
 		
-		String reply = noConfirm ? "y" : sess.readLine("Do you want to modify invoice " + invoiceNo + " " + invoiceToModify.getCustomerName() + " for client " + clientName + "? (y/n) ", null);
+		String reply = noConfirm ? "y" : sess.readLine("Do you want to modify invoice " + invoiceNo + " " + invoiceToModify.getCustomerName() + (clientName!=null ? " for client " + clientName : "") + "? (y/n) ", null);
 		if (!reply.equalsIgnoreCase("y")) {
 			sess.getConsole().println("Modification cancelled.");
 			return null;
@@ -86,6 +87,15 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 
     }
 
+    private String getClientName() throws Exception {
+    	try {
+    		String name = fortnoxClient.getCompanySetting().getName();
+    		return name;
+    	} catch (FortnoxScopeException fse) {
+    	}
+    	return "";
+    }
+    
 	private void modifyPropertySingle() throws Exception {
 
         switch (propertyToModify){
