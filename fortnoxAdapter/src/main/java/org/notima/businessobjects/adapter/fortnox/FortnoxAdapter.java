@@ -379,7 +379,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			revenueAccountMap = fortnoxClient.getRevenueAccountMap(currentDate);
 		
 		VatInfo vatInfo = revenueAccountMap.get(type);
-		Integer account = vatInfo.getDefaultRevenueAccount();
+		Integer account = vatInfo!=null ? vatInfo.getDefaultRevenueAccount() : null;
 		
 		if (account==null) return null;
 		if (account == 0) return null;
