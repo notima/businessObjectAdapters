@@ -102,6 +102,11 @@
         <bundle>mvn:org.notima.generic.businessobjects.adapter/ratepayAdapter/${project.version}</bundle>
     </feature>
     
+    <feature name="notima-adyen" description="Notima Adyen Adapter" version="" install="manual">
+        <feature>notima-excel</feature>
+        <bundle>mvn:org.notima.generic.businessobjects.adapter/adyenAdapter/${project.version}</bundle>
+    </feature>
+    
     <feature name="notima-csv" description="Notima CSV Adapter" version="" install="manual">
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.apache.commons/commons-csv/${commons-csv.version}</bundle>

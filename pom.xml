@@ -50,6 +50,7 @@
 		<module>seBankingAdapter</module>
 		<module>p27bankingAdapter</module>
 		<module>jsonAdapter</module>
+		<module>adyenAdapter</module>
 	</modules>
 
 	<dependencyManagement>
