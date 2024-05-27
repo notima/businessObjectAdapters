@@ -1,17 +1,16 @@
 package org.notima.businessobjects.adapter.adyen;
 
-import java.util.Date;
 import java.util.List;
 
-import org.notima.generic.businessobjects.Payment;
-import org.notima.generic.businessobjects.PaymentBatch;
-import org.notima.generic.businessobjects.PaymentWriteOff;
-import org.notima.generic.businessobjects.PayoutLine;
-import org.notima.generic.businessobjects.TransactionReference;
-import org.notima.generic.ifacebusinessobjects.PaymentReportRow;
 import org.notima.adyen.AdyenFee;
 import org.notima.adyen.AdyenReport;
 import org.notima.adyen.AdyenReportRow;
+import org.notima.generic.businessobjects.Payment;
+import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentWriteOff;
+import org.notima.generic.businessobjects.PayoutFee;
+import org.notima.generic.businessobjects.TransactionReference;
+import org.notima.generic.ifacebusinessobjects.PaymentReportRow;
 import org.notima.util.LocalDateUtils;
 
 /**
@@ -45,52 +44,10 @@ public class AdyenToPaymentBatch {
 		if (rows==null) return;
 		batch = new PaymentBatch();
 		processRows();
-
-		summarizeFees();
-		createPayouts();
+		processPayoutFees();
 		
 	}
 	
-	private void createPayouts() {
-		List<PaymentReportRow> rows = report.getPayoutRows();
-		for (PaymentReportRow r : rows) {
-			if (r.isPayout()) {
-				addPayout(r);
-			}
-		}
-	}
-	
-	private void addPayout(PaymentReportRow r) {
-		if (r instanceof AdyenReportRow) {
-			AdyenReportRow rr = (AdyenReportRow)r;
-			PayoutLine pol = new PayoutLine();
-			pol.setCurrency(rr.getNetCurrency());
-			pol.setPaidOut(-rr.getAmount());
-			pol.setAcctDate(LocalDateUtils.asLocalDate(rr.getCreationDate()));
-			batch.addPayoutLine(pol);
-		}
-	}
-	
-	private void summarizeFees() {
-		List<PaymentReportRow> feeRows = report.getFeeRows();
-		for (PaymentReportRow r : feeRows) {
-			if (r.isFee()) {
-				addFeeAsPayout(r);
-			}
-		}
-	}
-	
-	private void addFeeAsPayout(PaymentReportRow r) {
-		if (r instanceof AdyenReportRow) {
-			AdyenReportRow rr = (AdyenReportRow)r;
-			PayoutLine pol = new PayoutLine();
-			pol.setCurrency(rr.getNetCurrency());
-			pol.setFeeAmount(-rr.getAmount());
-			pol.setDescription(rr.getModificationReference());
-			pol.setAcctDate(LocalDateUtils.asLocalDate(rr.getCreationDate()));
-			batch.addPayoutLine(pol);
-		}
-	}
 	
 	private void processRows() {
 		
@@ -99,6 +56,15 @@ public class AdyenToPaymentBatch {
 		}
 		
 	}
+	
+	private void processPayoutFees() {
+		
+		for (PayoutFee f : report.getFeeRows()) {
+			batch.addPayoutFee(f);
+		}
+		
+	}
+	
 	
 	private void processRow(AdyenReportRow row) {
 		
@@ -135,8 +101,6 @@ public class AdyenToPaymentBatch {
 				addFeeToPayment(dst, fee);
 			}
 		}
-		
-		dst.calculateAmountDeductingWriteOffsFromOriginalAmount();
 		
 		return dst;
 		

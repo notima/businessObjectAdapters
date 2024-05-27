@@ -3,6 +3,7 @@ package org.notima.adyen;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.notima.generic.businessobjects.PayoutFee;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentReportGeneric;
 import org.notima.generic.ifacebusinessobjects.PaymentReportRow;
@@ -18,7 +19,7 @@ public class AdyenReport implements PaymentReportGeneric {
 	
 	private List<PaymentReportRow>	reportRows;
 	private List<PaymentReportRow>	payoutRows;
-	private List<PaymentReportRow>	feeRows;
+	private List<PayoutFee>	feeRows;
 	
 	public String getFullPath() {
 		return fullPath;
@@ -69,10 +70,10 @@ public class AdyenReport implements PaymentReportGeneric {
 		this.payoutRows = payoutRows;
 	}
 	
-	public List<PaymentReportRow> getFeeRows() {
+	public List<PayoutFee> getFeeRows() {
 		return feeRows;
 	}
-	public void setFeeRows(List<PaymentReportRow> feeRows) {
+	public void setFeeRows(List<PayoutFee> feeRows) {
 		this.feeRows = feeRows;
 	}
 	

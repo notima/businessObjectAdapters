@@ -19,6 +19,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.notima.generic.businessobjects.PayoutFee;
 import org.notima.generic.ifacebusinessobjects.PaymentReportRow;
 import org.notima.util.LocalDateUtils;
 
@@ -42,7 +43,7 @@ public class AdyenReportParser {
 
     private List<AdyenReportRow> reportLines;
     private List<PaymentReportRow> payoutLines;
-    private List<PaymentReportRow> feeLines;
+    private List<PayoutFee> feeLines;
     private List<PaymentReportRow> reportRows;
     private Map<String, List<AdyenReportRow>> pspReferenceMap;
     
@@ -72,7 +73,7 @@ public class AdyenReportParser {
     	report = new AdyenReport();
 		reportLines = new ArrayList<AdyenReportRow>();
 		payoutLines = new ArrayList<PaymentReportRow>();
-		feeLines = new ArrayList<PaymentReportRow>();
+		feeLines = new ArrayList<PayoutFee>();
 		pspReferenceMap = new TreeMap<String, List<AdyenReportRow>>();
     	reportRows = new ArrayList<PaymentReportRow>();
     	report.setReportRows(reportRows);
@@ -110,7 +111,7 @@ public class AdyenReportParser {
     	
     	reportLines.add(reportRow);
     	if (reportRow.isFee()) {
-    		feeLines.add(reportRow);
+    		addFeeLine(reportRow);
     	}
     	if (reportRow.isPayout()) {
     		addPayoutLine(reportRow);
@@ -121,13 +122,20 @@ public class AdyenReportParser {
     	
     }
 
+    private void addFeeLine(AdyenReportRow reportRow) {
+    	PayoutFee payoutFee = new PayoutFee();
+    	payoutFee.setAmount(-reportRow.getAmount());
+    	payoutFee.setDescription(reportRow.getModificationReference());
+    	payoutFee.setCurrency(reportRow.getNetCurrency());
+    	feeLines.add(payoutFee);
+    }
+    
     /**
-     * Adds a payout line and sets settlement date
+     * Sets settlement date from payout
      * 
      * @param reportRow
      */
     private void addPayoutLine(AdyenReportRow reportRow) {
-		payoutLines.add(reportRow);
 		if (reportRow.getCreationDate()!=null) {
 			report.setSettlementDate(LocalDateUtils.asLocalDate(reportRow.getCreationDate()));
 		}
