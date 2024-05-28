@@ -37,6 +37,7 @@
         <feature>notima-common</feature>
 		<bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
 		<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
+		<bundle>wrap:mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
 		<bundle>mvn:org.notima.generic/businessobjects/${businessobjects.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
 	</feature>
