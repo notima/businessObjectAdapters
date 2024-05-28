@@ -219,7 +219,7 @@ public class AdyenReportRow implements PaymentReportRow {
 
 
 	public Double getCommission() {
-		return commission;
+		return commission!=null ? commission : Double.valueOf(0);
 	}
 
 
@@ -229,7 +229,7 @@ public class AdyenReportRow implements PaymentReportRow {
 
 
 	public Double getMarkup() {
-		return markup;
+		return markup!=null ? markup : Double.valueOf(0);
 	}
 
 
@@ -239,7 +239,7 @@ public class AdyenReportRow implements PaymentReportRow {
 
 
 	public Double getSchemeFees() {
-		return schemeFees;
+		return schemeFees!=null ? schemeFees : Double.valueOf(0);
 	}
 
 
@@ -249,7 +249,7 @@ public class AdyenReportRow implements PaymentReportRow {
 
 
 	public Double getInterchange() {
-		return interchange;
+		return interchange!=null ? interchange : Double.valueOf(0);
 	}
 
 

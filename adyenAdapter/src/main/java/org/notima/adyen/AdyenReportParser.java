@@ -165,7 +165,7 @@ public class AdyenReportParser {
 			cell = row.getCell(i);
 			
 			if (cell==null) {
-				return null;
+				continue;
 			}
 			
 			switch(i) {
