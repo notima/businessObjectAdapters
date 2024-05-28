@@ -138,6 +138,7 @@ public class AdyenReportParser {
     private void addPayoutLine(AdyenReportRow reportRow) {
 		if (reportRow.getCreationDate()!=null) {
 			report.setSettlementDate(LocalDateUtils.asLocalDate(reportRow.getCreationDate()));
+			report.setCurrency(reportRow.getNetCurrency());
 		}
     }
     
