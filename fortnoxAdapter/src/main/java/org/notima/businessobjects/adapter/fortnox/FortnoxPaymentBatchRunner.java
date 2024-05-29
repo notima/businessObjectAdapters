@@ -110,9 +110,12 @@ public class FortnoxPaymentBatchRunner {
 		
 		if (processOptions.isFeesPerPayment()) {
 			// Clear fees here
-			payout.setFeeAmount(0.0);
-			payout.setTaxAmount(0.0);
+			payout.setTotalFeeAmount(0.0);
+			payout.setTotalFeeTaxAmount(0.0);
 		}
+		
+		// If there are non specific fees (not tied to any specific payments), add these not
+		payout.addPayoutFeesToFeeTotal();
 		
 		AccountingVoucher av = AccountingVoucher.buildVoucherFromPayoutLine(payout);
 		av.remapAccountType(AccountingType.LIQUID_ASSET_AR, modeOfPaymentAccount);

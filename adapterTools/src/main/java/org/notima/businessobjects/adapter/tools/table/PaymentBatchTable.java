@@ -103,8 +103,8 @@ public class PaymentBatchTable extends GenericTable {
 					totalPaidAmount += payout.getPaidByCustomer();
 					totalRec += payout.getPaidOut();
 				}
-				totalFees += payout.getFeeAmount();
-				totalVat += payout.getTaxAmount();
+				totalFees += payout.getTotalFeeAmount();
+				totalVat += payout.getTotalFeeTaxAmount();
 				totalCount += payout.getTrxCount();
 	
 				row = new GenericRow();
@@ -112,8 +112,8 @@ public class PaymentBatchTable extends GenericTable {
 				row.addContent(
 					payout.getTrxCount(),
 					(payout.isIncludedInOtherPayout() ? "(":"") + nfmt.format(payout.getPaidByCustomer()) + (payout.isIncludedInOtherPayout() ? ")":""),
-					nfmt.format(payout.getFeeAmount()),
-					nfmt.format(payout.getTaxAmount()),
+					nfmt.format(payout.getTotalFeeAmount()),
+					nfmt.format(payout.getTotalFeeTaxAmount()),
 					nfmt.format(payout.getPaidOut()),
 					payout.getCurrency()
 					);
