@@ -24,6 +24,7 @@ import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
+import org.notima.api.fortnox.clients.FortnoxPropertyFile;
 import org.notima.api.fortnox.entities3.Article;
 import org.notima.api.fortnox.entities3.ArticleSubset;
 import org.notima.api.fortnox.entities3.Articles;
@@ -117,6 +118,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	private FortnoxClientInfo			currentFortnoxTenant = null;
 	private FortnoxCredentialsProvider	currentFortnoxCredentials = null;
+	private FortnoxPropertyFile			fortnoxPropertyFile = null;
 	private String						currentOrgNo = null;
 	
 	private FortnoxClientManager clientManager;
@@ -237,8 +239,15 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public void setClientManager(FortnoxClientManager clientManager) {
 		this.clientManager = clientManager;
 	}
-
 	
+	public FortnoxPropertyFile getFortnoxPropertyFile() {
+		return fortnoxPropertyFile;
+	}
+
+	public void setFortnoxPropertyFile(FortnoxPropertyFile fortnoxPropertyFile) {
+		this.fortnoxPropertyFile = fortnoxPropertyFile;
+	}
+
 	/**
 	 * Removes a tenant from a given business object factory.
 	 * 
