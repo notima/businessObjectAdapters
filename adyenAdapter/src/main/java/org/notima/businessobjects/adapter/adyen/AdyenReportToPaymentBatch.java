@@ -19,15 +19,15 @@ import org.notima.util.LocalDateUtils;
  * @author Daniel Tamm
  *
  */
-public class AdyenToPaymentBatch {
+public class AdyenReportToPaymentBatch {
 
 	private List<PaymentReportRow> rows;
 	private PaymentBatch batch;
 	private AdyenReport	report;
 	
-	public static AdyenToPaymentBatch buildFromReport(AdyenReport report) {
+	public static AdyenReportToPaymentBatch buildFromReport(AdyenReport report) {
 		
-		AdyenToPaymentBatch adyenPaymentBatch = new AdyenToPaymentBatch();
+		AdyenReportToPaymentBatch adyenPaymentBatch = new AdyenReportToPaymentBatch();
 		adyenPaymentBatch.rows = report.getReportRows();
 		adyenPaymentBatch.report = report; 
 		adyenPaymentBatch.build();
@@ -64,7 +64,6 @@ public class AdyenToPaymentBatch {
 		}
 		
 	}
-	
 	
 	private void processRow(AdyenReportRow row) {
 		

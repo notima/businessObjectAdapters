@@ -16,6 +16,7 @@ public class AdyenReport implements PaymentReportGeneric {
 	private String					shopName;
 	private TaxSubjectIdentifier 	taxSubject;
 	private String					currency;
+	private double					totalAmount = 0;
 	
 	private List<PaymentReportRow>	reportRows;
 	private List<PaymentReportRow>	payoutRows;
@@ -76,7 +77,18 @@ public class AdyenReport implements PaymentReportGeneric {
 	public void setFeeRows(List<PayoutFee> feeRows) {
 		this.feeRows = feeRows;
 	}
+	public double getTotalAmount() {
+		return totalAmount;
+	}
 	
+	/**
+	 * Adds amount to total amount
+	 * 
+	 * @param payout
+	 */
+	public void addToTotalAmount(double payout) {
+		totalAmount += payout;
+	}
 	
 	
 }

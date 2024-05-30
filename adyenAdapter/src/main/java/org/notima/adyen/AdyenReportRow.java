@@ -14,6 +14,7 @@ public class AdyenReportRow implements PaymentReportRow {
 	public static final String	SETTLED_TYPE = "Settled";
 	public static final String	FEE_TYPE = "Fee";
 	public static final String	PAYOUT_TYPE = "MerchantPayout";
+	public static final String  DEPOSIT_CORRECTION = "DepositCorrection";
 	
 	  // Initialize the static set using a static block
     public static final Set<String> TYPES;
@@ -150,7 +151,11 @@ public class AdyenReportRow implements PaymentReportRow {
 		return grossCurrency;
 	}
 
-
+	@Override
+	public String getCurrency() {
+		return (getNetCurrency());
+	}
+	
 	public void setGrossCurrency(String grossCurrency) {
 		this.grossCurrency = grossCurrency;
 	}
@@ -158,7 +163,7 @@ public class AdyenReportRow implements PaymentReportRow {
 	public Double getOriginalAmount() {
 		return getGrossCredit() - getGrossDebit(); 
 	}
-
+	
 	public Double getGrossDebit() {
 		return grossDebit!=null ? grossDebit : Double.valueOf(0);
 	}
@@ -377,6 +382,11 @@ public class AdyenReportRow implements PaymentReportRow {
 		return hasPaymentReference() && SETTLED_TYPE.equals(lineType);
 	}
 
+	@Override
+	public boolean isDepositAdjustment() {
+		return DEPOSIT_CORRECTION.equals(lineType);
+	}
+	
 	@Override
 	public boolean isFee() {
 		return FEE_TYPE.equals(lineType);

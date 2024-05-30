@@ -30,7 +30,7 @@ public class AdyenAdapter implements PaymentFactory {
 		} else {
 			// TODO: Probably obsolete code
 	        AdyenReport report = AdyenReportParser.createFromFile(source);
-	        AdyenToPaymentBatch converter = AdyenToPaymentBatch.buildFromReport(report);
+	        AdyenReportToPaymentBatch converter = AdyenReportToPaymentBatch.buildFromReport(report);
 			return converter.getPaymentBatch();
 		}
 	}

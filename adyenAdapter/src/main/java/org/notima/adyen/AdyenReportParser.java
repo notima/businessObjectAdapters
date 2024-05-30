@@ -110,7 +110,7 @@ public class AdyenReportParser {
     private void addReportRow(AdyenReportRow reportRow) {
     	
     	reportLines.add(reportRow);
-    	if (reportRow.isFee()) {
+    	if (reportRow.isFee() || reportRow.isDepositAdjustment()) {
     		addFeeLine(reportRow);
     	}
     	if (reportRow.isPayout()) {
@@ -124,9 +124,14 @@ public class AdyenReportParser {
 
     private void addFeeLine(AdyenReportRow reportRow) {
     	PayoutFee payoutFee = new PayoutFee();
-    	payoutFee.setAmount(-reportRow.getAmount());
     	payoutFee.setDescription(reportRow.getModificationReference());
     	payoutFee.setCurrency(reportRow.getNetCurrency());
+    	if (reportRow.isDepositAdjustment()) {
+    		payoutFee.setDepositAdjustment(true);
+    		payoutFee.setAmount(-reportRow.getAmount());
+    	} else {
+        	payoutFee.setFeeAmount(-reportRow.getAmount());
+    	}
     	feeLines.add(payoutFee);
     }
     
@@ -139,6 +144,7 @@ public class AdyenReportParser {
 		if (reportRow.getCreationDate()!=null) {
 			report.setSettlementDate(LocalDateUtils.asLocalDate(reportRow.getCreationDate()));
 			report.setCurrency(reportRow.getNetCurrency());
+			report.addToTotalAmount(reportRow.getAmount());
 		}
     }
     
@@ -173,7 +179,7 @@ public class AdyenReportParser {
 			
 			
 			case 0:	
-				il.setMerchantReference(getCellAsString(cell));
+				il.setCompanyAccount(getCellAsString(cell));
 				break;
 				
 			case 1:
