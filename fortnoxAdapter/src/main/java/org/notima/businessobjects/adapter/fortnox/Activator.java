@@ -109,6 +109,7 @@ public class Activator extends BaseActivator {
 			
 			FortnoxAdapter fapt = new FortnoxAdapter();
 			fapt.setClientManager(mgr);
+			fapt.setFortnoxPropertyFile(fortnoxProperties);
 			
 			log.info("Created FortnoxProvisioner from file " + mgr.getClientsFile());
 			register(BusinessObjectFactory.class, fapt, props);
