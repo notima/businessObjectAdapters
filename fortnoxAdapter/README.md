@@ -6,6 +6,9 @@ Adapter to deal with Fortnox
 	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/LATEST/xml/features
 	
 	feature:install notima-fortnox4j
+	feature:install notima-fortnox4j
+	
+For some reason it needs to be installed twice.
 	
 ## Configuration
 
