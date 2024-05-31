@@ -8,6 +8,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -16,7 +17,8 @@ import org.slf4j.LoggerFactory;
 
 @Services(
 		provides = {
-				@ProvideService(BusinessObjectFactory.class)
+				@ProvideService(BusinessObjectFactory.class),
+				@ProvideService(PaymentBatchChannelFactory.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -29,6 +31,8 @@ public class Activator extends BaseActivator {
 	private ServiceReference<ConfigurationAdmin> reference;
 	private Configuration configuration;
 	private JsonPropertyFile jsonProperties;
+
+	private Dictionary<String, String> props = new Hashtable<String,String>();
 	
 	@Override
 	protected void doStop() {
@@ -39,6 +43,7 @@ public class Activator extends BaseActivator {
 	public void doStart() throws IOException {
 		initConfiguration();
 		createAndRegisterAdapter();
+		createAndRegisterPaymentBatchChannelFactory();
 	}
 	
 	private void createAndRegisterAdapter() {
@@ -46,14 +51,24 @@ public class Activator extends BaseActivator {
 		@SuppressWarnings("rawtypes")
 		JsonAdapter<?,?,?,?,?,?> adapter = new JsonAdapter(jsonProperties);
 		
-		Dictionary<String, String> props = new Hashtable<String,String>();
-		props.put("SystemName", JsonAdapter.SYSTEM_NAME);
 		register(BusinessObjectFactory.class, adapter, props);
 		log.info("Registered adapter for " + JsonAdapter.SYSTEM_NAME);
 		
 	}
 	
+	private void createAndRegisterPaymentBatchChannelFactory() {
+
+		JsonPaymentBatchChannelFactory paymentBatchChannelFactory = new JsonPaymentBatchChannelFactory();
+		register(PaymentBatchChannelFactory.class, paymentBatchChannelFactory, props);
+		log.info("Registered PaymentBatchChannelFactory adapter for " + JsonAdapter.SYSTEM_NAME);
+		
+		
+	}
+	
 	private void initConfiguration() throws IOException {
+		
+		props.put("SystemName", JsonAdapter.SYSTEM_NAME);
+		
 		jsonProperties = new JsonPropertyFile();
 		reference = bundleContext.getServiceReference(ConfigurationAdmin.class);
 		if (reference!=null) {

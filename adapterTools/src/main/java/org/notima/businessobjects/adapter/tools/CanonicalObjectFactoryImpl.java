@@ -9,6 +9,7 @@ import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
@@ -34,6 +35,8 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, PaymentBatchProcessor> paymentBatchProcessors = new TreeMap<String, PaymentBatchProcessor>();
 	
 	private Map<String, TaxRateProvider> taxRateProviders = new TreeMap<String, TaxRateProvider>();
+	
+	private Map<String, PaymentBatchChannelFactory> paymentBatchChannelFactories = new TreeMap<String, PaymentBatchChannelFactory>();
 	
 	private BundleContext ctx;
 
@@ -114,6 +117,31 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
+	
+	/**
+	 * Resets the services by re-reading the service references for PaymentFactories
+	 * 
+	 * @throws InvalidSyntaxException
+	 */
+	public void resetPaymentBatchChannelFactories() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		
+		Collection<ServiceReference<PaymentBatchChannelFactory>> references = ctx.getServiceReferences(PaymentBatchChannelFactory.class, null);		
+
+		paymentFactories.clear();
+		
+		if (references!=null) {
+			PaymentBatchChannelFactory srv;
+			for (ServiceReference<PaymentBatchChannelFactory> sr : references) {
+				srv = ctx.getService(sr);
+				paymentBatchChannelFactories.put(srv.getSystemName(), srv);
+			}
+		}
+
+	}
+	
 
 	/**
 	 * Resets the services by re-reading the service references for PaymentBatchProcessors
@@ -376,6 +404,20 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public PaymentBatchChannelFactory lookupFirstPaymentBatchChannelFactory() {
+		try {
+			resetPaymentBatchChannelFactories();
+			if (!paymentBatchChannelFactories.isEmpty()) {
+				return paymentBatchChannelFactories.get(paymentBatchChannelFactories.keySet().iterator().next());
+			}
+		} catch (InvalidSyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	

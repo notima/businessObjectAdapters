@@ -7,6 +7,7 @@ import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
@@ -38,6 +39,8 @@ public interface CanonicalObjectFactory {
 	public Collection<TaxRateProvider> listTaxRateProviders();
 	
 	public Invoice<?> lookupCustomerInvoice(String adapterName, String orgNo, String countryCode, String invoiceNo) throws NoSuchTenantException;
+	
+	public PaymentBatchChannelFactory lookupFirstPaymentBatchChannelFactory();
 	
 	/**
 	 * Converts a canonical invoice to a given adapter format.
