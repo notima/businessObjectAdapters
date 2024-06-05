@@ -4,7 +4,7 @@
 	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}" install="manual">
 	
 		<bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
-        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.12</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.15</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.5.13</bundle>
         <bundle>wrap:mvn:org.apache.httpcomponents/httpmime/4.5.13</bundle>
         <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
@@ -85,7 +85,6 @@
         <feature>scheduler</feature>
         <feature>notima-businessobjects</feature>
         <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
-        <bundle>mvn:com.diffplug.osgi/com.diffplug.osgi.extension.com.sun.net.httpserver/0.0.0</bundle>
         <bundle>mvn:org.notima.api/fortnox4j/${fortnox4j.version}</bundle>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
 
