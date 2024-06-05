@@ -46,6 +46,10 @@ Check your defaults using
 
 #### OAuth2 authentication
 
+OAuth2 clients can now be added using
+
+	fortnox:add-oauth-client [options] [orgNo]
+
 With OAuth2 authentication you'll first need an authorization code. See [Fortnox4J CLI Guide](https://github.com/notima/fortnox4j) on how to get one.
 
 	fortnox:add-client orgNo authorizationCode
