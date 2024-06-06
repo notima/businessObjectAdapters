@@ -8,6 +8,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
@@ -32,6 +33,9 @@ public class ListAdapters implements Action {
 	@Reference
 	private List<TaxRateProvider> trps;
 	
+	@Reference
+	private List<PaymentBatchChannelFactory> pbcs;
+	
 	@Override
 	public Object execute() throws Exception {
 	
@@ -42,6 +46,8 @@ public class ListAdapters implements Action {
 		listPaymentBatchProcessors();
 		
 		listTaxRateProviders();
+		
+		listPaymentBatchChannelFactories();
 		
 		return null;
 	}
@@ -108,6 +114,23 @@ public class ListAdapters implements Action {
 				
 			}
 		}
+		
+	}
+	
+	
+	private void listPaymentBatchChannelFactories() {
+		
+		if (pbcs==null) {
+			System.out.println("No Payment Batch Channel factories registered");
+		} else {
+			System.out.println("Payment Batch Channel factories");
+			for (PaymentBatchChannelFactory pbcf : pbcs) {
+				
+				sess.getConsole().println(pbcf.getSystemName());
+				
+			}
+		}
+
 		
 	}
 	

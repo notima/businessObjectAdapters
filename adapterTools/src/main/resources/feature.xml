@@ -57,6 +57,7 @@
 		<config name="jsonAdapterProperties">
 			tenantFile = jsonAdapter/tenants.json
 			customerFile = jsonAdapter/customers.json
+			paymentBatchChannelFile = jsonAdapter/paymentBatchChannels.json			
 		</config>
 	
 	</feature>
