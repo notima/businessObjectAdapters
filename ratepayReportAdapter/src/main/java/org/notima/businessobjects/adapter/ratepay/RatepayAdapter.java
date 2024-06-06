@@ -1,6 +1,8 @@
 package org.notima.businessobjects.adapter.ratepay;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
@@ -16,8 +18,10 @@ public class RatepayAdapter implements PaymentFactory {
 	public static Logger log = LoggerFactory.getLogger(RatepayAdapter.class);	
 	
 	@Override
-	public PaymentBatch readPaymentBatchFromSource(String source) throws Exception {
+	public List<PaymentBatch> readPaymentBatchesFromSource(String source) throws Exception {
 
+		List<PaymentBatch> batchList = new ArrayList<PaymentBatch>();
+		
 		// Check to see if source is a file
 		File sourceFile = new File(source);
 		File sourceDir = null;
@@ -25,13 +29,21 @@ public class RatepayAdapter implements PaymentFactory {
 			sourceDir = sourceFile.getParentFile();
 			String filenameonly = sourceFile.getName();
 			RatepayDirectoryToPaymentBatch directoryReader = new RatepayDirectoryToPaymentBatch(sourceDir.getCanonicalPath());
-			PaymentBatch result = directoryReader.createPaymentBatchFromFile(filenameonly);
-			return result;
+			if (!sourceFile.isDirectory()) {
+				PaymentBatch result = directoryReader.createPaymentBatchFromFile(filenameonly);
+				batchList.add(result);
+			} else {
+				batchList = directoryReader.readFilesInDirectory();
+			}
+			return batchList;
+			
 		} else {
 			// TODO: Probably obsolete code
 	        RatepayReport report = RatepayReportParser.createFromFile(source);
 	        RatepayToPaymentBatch converter = RatepayToPaymentBatch.buildFromReport(report);
-			return converter.getPaymentBatch();
+	        PaymentBatch pb = converter.getPaymentBatch(); 
+	        batchList.add(pb);
+			return batchList;
 		}
 	}
 

@@ -6,12 +6,10 @@ import java.util.Properties;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
-import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
@@ -20,12 +18,14 @@ import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 
-@Command(scope = "notima", name = "process-payment-batch", description = "Processes a payment batch")
+@Command(scope = "notima", name = "process-payment-channel", description = "Processes a payment channel")
 @Service
-public class ProcessPaymentBatch implements Action {
+public class ProcessPaymentChannel implements Action {
 	
 	@Reference
 	private FormatterFactory	formatterFactory;
@@ -56,30 +56,35 @@ public class ProcessPaymentBatch implements Action {
     
     @Option(name="-format", description="The format of match result file to be output", required = false, multiValued = false)
     private String format;
+
+	@Argument(index = 0, name = "channelId", description ="The payment channel to run", required = true, multiValued = false)
+	private String channelId = "";
     
-	@Argument(index = 0, name = "paymentBatchProcessor", description ="The payment processor to send to", required = true, multiValued = false)
-	private String paymentBatchProcessorStr = "";
-
-	@Argument(index = 1, name = "paymentFactory", description ="The payment destination adapter name", required = true, multiValued = false)
-	private String paymentFactoryStr = "";
-	
-	@Argument(index = 2, name = "paymentSource", description ="The payment source (normally a file)", required = true, multiValued = false)
-	@Completion(FileCompleter.class)
 	private String paymentSource;
-
 	
 	private PaymentBatchTable paymentBatchTable;
 	private ReportFormatter<GenericTable> rf;
-
-	PaymentFactory paymentFactory;
-	PaymentBatchProcessor paymentProcessor;
-	PaymentBatchProcessOptions processOptions;
 	
-	@Override
-	public Object execute() throws Exception {
+	private PaymentBatchChannelFactory channelFactory;
+	private PaymentBatchChannel channel;
+	private PaymentFactory		sourcePaymentFactory;
+	private PaymentBatchProcessor destinationPaymentProcessor;
+	private PaymentBatchProcessOptions processOptions;
+
+	private void initParameters() throws Exception {
+
+		channelFactory = cof.lookupFirstPaymentBatchChannelFactory();
+		if (channelFactory==null) throw new Exception("No channel factories defined.");
 		
-		paymentFactory = cof.lookupPaymentFactory(paymentFactoryStr);
-		paymentProcessor = cof.lookupPaymentBatchProcessor(paymentBatchProcessorStr);
+		channel = channelFactory.findChannelWithId(channelId);
+		if (channel==null) throw new Exception("No channel with ID [" + channelId + "] found.");
+
+		sourcePaymentFactory = cof.lookupPaymentFactory(channel.getSourceSystem());
+		destinationPaymentProcessor = cof.lookupPaymentBatchProcessor(channel.getDestinationSystem());
+
+		if (channel.getOptions()==null || channel.getOptions().getSourceDirectory()==null) throw new Exception("Source directory not defined");
+		
+		paymentSource = channel.getOptions().getSourceDirectory();
 		
 		processOptions = new PaymentBatchProcessOptions();
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
@@ -89,7 +94,14 @@ public class ProcessPaymentBatch implements Action {
 			processOptions.setDryRun(true);
 		}
 		
-		List<PaymentBatch> batches = paymentFactory.readPaymentBatchesFromSource(paymentSource); 
+	}
+	
+	@Override
+	public Object execute() throws Exception {
+		
+		initParameters();
+		
+		List<PaymentBatch> batches = sourcePaymentFactory.readPaymentBatchesFromSource(paymentSource); 
 		
 		for (PaymentBatch pb : batches) {
 			processAndPrint(pb);
@@ -101,14 +113,15 @@ public class ProcessPaymentBatch implements Action {
 	private void processAndPrint(PaymentBatch pb) throws Exception {
 
 		if (matchOnly) {
-			paymentProcessor.lookupInvoiceReferences(pb);
+			destinationPaymentProcessor.lookupInvoiceReferences(pb);
 		} else {
-			paymentProcessor.processPaymentBatch(pb, processOptions);
+			destinationPaymentProcessor.processPaymentBatch(pb, processOptions);
 		}
 		
 		formatReport(pb);
 		
 	}
+	
 	
 	private void constructOutFile(PaymentBatch pb) {
 		if (format!=null && outFile==null && rf!=null) {

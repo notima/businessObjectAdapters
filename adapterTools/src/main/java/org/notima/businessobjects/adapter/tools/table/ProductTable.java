@@ -2,7 +2,6 @@ package org.notima.businessobjects.adapter.tools.table;
 
 import java.util.List;
 
-import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Product;
 
 public class ProductTable extends GenericTable {

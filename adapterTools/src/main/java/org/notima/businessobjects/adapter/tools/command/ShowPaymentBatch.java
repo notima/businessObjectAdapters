@@ -1,5 +1,8 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.text.ParseException;
+import java.util.List;
+
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -12,6 +15,8 @@ import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.exception.CurrencyMismatchException;
+import org.notima.generic.businessobjects.exception.DateMismatchException;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 
 @Command(scope = "notima", name = "show-payment-batch", description = "Shows a payment batch")
@@ -34,17 +39,28 @@ public class ShowPaymentBatch implements Action {
     @Option(name = "-d", aliases = { "--detailed" }, description = "Show a more detailed view", required = false, multiValued = false)
     private boolean detailed;
 
+    private List<PaymentBatch> batches;
+    
 	@Override
 	public Object execute() throws Exception {
 		
 		PaymentFactory paymentFactory = cof.lookupPaymentFactory(paymentFactoryStr);
-		PaymentBatch pb = paymentFactory.readPaymentBatchFromSource(paymentSource);
+		batches = paymentFactory.readPaymentBatchesFromSource(paymentSource);
 		
-		PaymentBatchTable paymentBatchTable = new PaymentBatchTable(pb, detailed);
-		paymentBatchTable.getShellTable().print(sess.getConsole());
+		printBatchTables();
 		
 		return null;
 	}
+	
+	private void printBatchTables() throws ParseException, DateMismatchException, CurrencyMismatchException {
+
+		for (PaymentBatch pb : batches) {
+			PaymentBatchTable paymentBatchTable = new PaymentBatchTable(pb, detailed);
+			paymentBatchTable.getShellTable().print(sess.getConsole());
+		}
+		
+	}
+	
 	
 
 }

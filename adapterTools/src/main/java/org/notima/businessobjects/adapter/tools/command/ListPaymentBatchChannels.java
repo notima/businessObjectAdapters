@@ -9,6 +9,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
+import org.notima.businessobjects.adapter.tools.table.PaymentBatchChannelTable;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
@@ -48,10 +49,9 @@ public class ListPaymentBatchChannels implements Action {
 		factory = cof.lookupFirstPaymentBatchChannelFactory();
 
 		List<PaymentBatchChannel> result = factory.listChannelsForTenant(tenant);
-		for (PaymentBatchChannel pbc : result) {
-			sess.getConsole().println(pbc.getChannelId());
-		}
-
+		
+		PaymentBatchChannelTable table = new PaymentBatchChannelTable(result);
+		table.getShellTable().print(sess.getConsole());
 		
 	}
 	
