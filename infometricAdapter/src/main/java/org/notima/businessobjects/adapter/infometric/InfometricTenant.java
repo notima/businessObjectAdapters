@@ -3,24 +3,31 @@ package org.notima.businessobjects.adapter.infometric;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.util.json.JsonUtil;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 public class InfometricTenant {
 
 	public static String			INFOMETRIC_PROPERTY_FILE = "infometric.properties";
+	public static String			INFOMETRIC_JSON_FILE = "infometric.json";
 	
 	private TaxSubjectIdentifier 	taxIdentifier;
 	
 	private String orgNo;
 	private String countryCode;
 	private String name;
-	private String	productKey;
-	private String	invoiceLineText;
 	private File   directoryFile;
+	private File   propertyFile;
+	private InfometricTenantSettings 	tenantSettings = new InfometricTenantSettings();
 	
 	private String tenantDirectory;
 
@@ -37,6 +44,7 @@ public class InfometricTenant {
 		orgNo = bp.getTaxId();
 		countryCode = bp.getCountryCode();
 		name = bp.getName();
+		taxIdentifier = TaxSubjectIdentifier.createBusinessTaxSubject(orgNo, countryCode, name);
 	}
 	
 	public String getOrgNo() {
@@ -67,8 +75,10 @@ public class InfometricTenant {
 		return tenantDirectory;
 	}
 
-	public void setTenantDirectory(String tenantDirectory) {
+	public void setTenantDirectory(String tenantDirectory) throws FileNotFoundException {
 		this.tenantDirectory = tenantDirectory;
+		checkDirectoryValid();
+		checkForTaxIdentifierAndCurrency();
 	}
 	
 	public TaxSubjectIdentifier getTaxIdentifier() {
@@ -78,21 +88,23 @@ public class InfometricTenant {
 	public void setTaxIdentifier(TaxSubjectIdentifier taxIdentifier) {
 		this.taxIdentifier = taxIdentifier;
 	}
-
-	public String getProductKey() {
-		return productKey;
+	
+	public String getDefaultProductKey() {
+		return tenantSettings.getDefaultProductMapping().getDestinationProductId();
 	}
 
-	public void setProductKey(String productKey) {
-		this.productKey = productKey;
+	/**
+	 * Default mapping of infometrics ELM article.
+	 * 
+	 * @param productKey
+	 * @param description
+	 */
+	public void setDefaultMapping(String productKey, String description) {
+		tenantSettings.addProductMapping(InfometricTenantSettings.DEFAULT_PRODUCT, productKey, description);
 	}
 
-	public String getInvoiceLineText() {
-		return invoiceLineText;
-	}
-
-	public void setInvoiceLineText(String invoiceLineText) {
-		this.invoiceLineText = invoiceLineText;
+	public String getDefaultInvoiceLineText() {
+		return tenantSettings.getDefaultProductMapping().getDestinationName();
 	}
 
 	private void checkDirectoryValid() throws FileNotFoundException {
@@ -101,6 +113,7 @@ public class InfometricTenant {
 			throw new FileNotFoundException(tenantDirectory);
 		}
 		directoryFile = f;
+		propertyFile = new File(tenantDirectory + File.separator + INFOMETRIC_PROPERTY_FILE);
 	}
 	
 	/**
@@ -108,31 +121,87 @@ public class InfometricTenant {
 	 */
 	private void checkForTaxIdentifierAndCurrency() {
 
-		File f = new File(tenantDirectory + File.separator + INFOMETRIC_PROPERTY_FILE);
-		if (f.exists() && f.canRead()) {
-			readInfometricPropertyFile(f);
+		
+		if (propertyFile.exists() && propertyFile.canRead()) {
+			readInfometricPropertyFile();
+		}
+		try {
+			readInfometricTenantSettings();
+		} catch (Exception ee) {
+			
 		}
 		
 	}
 	
-	private void readInfometricPropertyFile(File f) {
+	public void savePropertyFile() {
+		saveInfometricPropertyFile();
+		saveInfometricTenantSettings();
+	}
+	
+	private void saveInfometricTenantSettings() {
 		
-		Properties props = new Properties();
+		File f = new File(directoryFile.getAbsolutePath() + File.separator + INFOMETRIC_JSON_FILE);
+		Gson gson = JsonUtil.buildGson();
 		try {
-			props.load(new FileReader(f));
-			
-			String taxId = props.getProperty("taxId");
-			String countryCode = props.getProperty("countryCode");
-			taxIdentifier = new TaxSubjectIdentifier(taxId, countryCode);
-			productKey = props.getProperty("productKey");
-			invoiceLineText = props.getProperty("invoiceLineText");
+			FileWriter fw = new FileWriter(f);
+			gson.toJson(tenantSettings, fw);
+			fw.flush();
+			fw.close();
+		} catch (JsonIOException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 	}
 
+	private void readInfometricTenantSettings() {
+		
+		File f = new File(directoryFile.getAbsolutePath() + File.separator + INFOMETRIC_JSON_FILE);
+		Gson gson = JsonUtil.buildGson();
+		try {
+			tenantSettings = gson.fromJson(new FileReader(f), InfometricTenantSettings.class);
+		} catch (JsonSyntaxException e) {
+			e.printStackTrace();
+		} catch (JsonIOException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		
+	}
 	
+	private void readInfometricPropertyFile() {
+		
+		Properties props = new Properties();
+		try {
+			props.load(new FileReader(propertyFile));
+			
+			String taxId = props.getProperty("taxId");
+			String countryCode = props.getProperty("countryCode");
+			taxIdentifier = new TaxSubjectIdentifier(taxId, countryCode);
+			readInfometricTenantSettings();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	// The saveInfometricPropertyFile method
+    private void saveInfometricPropertyFile() {
+        Properties props = new Properties();
+        try {
+            if (taxIdentifier != null) {
+                props.setProperty("taxId", taxIdentifier.getTaxId());
+                props.setProperty("countryCode", taxIdentifier.getCountryCode());
+            }
+
+            props.store(new FileWriter(propertyFile), "Infometric Properties");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 	
 	
 }

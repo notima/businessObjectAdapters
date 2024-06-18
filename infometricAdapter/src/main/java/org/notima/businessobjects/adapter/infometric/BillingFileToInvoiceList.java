@@ -61,7 +61,7 @@ public class BillingFileToInvoiceList {
 		byte[] fileBytes = Files.readAllBytes(Paths.get(file));
 		String contents = new String(fileBytes, "UTF-8");
 		
-		InvoiceList list = splitBillingFile(tenant.getProductKey(), price, tenant.getInvoiceLineText(), contents);
+		InvoiceList list = splitBillingFile(tenant.getDefaultProductKey(), price, tenant.getDefaultInvoiceLineText(), contents);
 		
 		return list;
 		

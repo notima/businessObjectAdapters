@@ -1,5 +1,7 @@
 package org.notima.businessobjects.adapter.infometric;
 
+import java.io.File;
+
 /**
  * 
  * Copyright 2020 Notima System Integration AB (Sweden)
@@ -99,19 +101,32 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	public BusinessPartner<InfometricTenant> addTenant(String orgNo, String countryCode, String name,
 			Properties props) {
 		
-		BusinessPartner<InfometricTenant> newTenant = super.addTenant(orgNo, countryCode, name, props);
-		InfometricTenant it = new InfometricTenant(newTenant);
-		if (props!=null) {
-			String tenantDir = (String)props.get(InfometricAdapter.PROP_TENANTDIRECTORY);
-			it.setTenantDirectory(tenantDir);
-			String billingProduct = (String)props.get(InfometricAdapter.PROP_BILLINGPRODUCT);
-			it.setProductKey(billingProduct);
-			String billingText = (String)props.get(InfometricAdapter.PROP_INVOICELINETEXT);
-			it.setInvoiceLineText(billingText);
-		}
-		newTenant.setNativeBusinessPartner(it);
+		try {
 		
-		return newTenant;
+			BusinessPartner<InfometricTenant> newTenant = super.addTenant(orgNo, countryCode, name, props);
+			InfometricTenant it = new InfometricTenant(newTenant);
+			if (props!=null) {
+				String tenantDir = (String)props.get(InfometricAdapter.PROP_TENANTDIRECTORY);
+				if (tenantDir!=null && !tenantDir.startsWith(File.separator)) {
+					// prepend basedir
+					tenantDir = baseDirectory + File.separator + tenantDir;
+				}
+				it.setTenantDirectory(tenantDir);
+				if (props.get(InfometricAdapter.PROP_BILLINGPRODUCT)!=null) {
+					String billingProduct = (String)props.get(InfometricAdapter.PROP_BILLINGPRODUCT);
+					String billingText = (String)props.get(InfometricAdapter.PROP_INVOICELINETEXT);
+					it.setDefaultMapping(billingProduct, billingText);
+				}
+			}
+			it.savePropertyFile();
+			newTenant.setNativeBusinessPartner(it);
+			return newTenant;
+			
+		} catch (Exception ee) {
+			ee.printStackTrace();
+		}
+		return null;
+		
 	}
 
 	@Override
