@@ -21,15 +21,16 @@ The default client secret can be viewed and/or configured with below commands
    		org.apache.karaf.features.configKey = FortnoxProperties
 ```
 
-Set the default client secret
+Set the default client ID and secret
 
-	config:property-set -p FortnoxProperties defaultClientSecret THE_SECRET
+	config:property-set -p FortnoxProperties defaultClientId THE_ID
+ 	config:property-set -p FortnoxProperties defaultClientSecret THE_SECRET
 
 Restart the Fortnox adapter when the secret has been set
 
 	bundle:restart [bundle_id]
 	
-You can find out the bundle id with the ``list`` command.
+You can find out the bundle id with the ``list`` command. The bundle is named "Fortnox Business Objects Adapter".
 
 ### Adding clients
 
