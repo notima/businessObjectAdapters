@@ -55,7 +55,7 @@ public class TestInfometricAdapter {
 		String content = new String ( Files.readAllBytes( Paths.get(csvTestFile.toURI())));
 		
 		BillingFileToInvoiceList filesToInvoice = new BillingFileToInvoiceList(adapter, tenant);
-		InvoiceList result = filesToInvoice.splitBillingFile("105", 1.50, "Testresource", content);
+		InvoiceList result = filesToInvoice.splitBillingFile(tenant.getTenantSettings(), 1.50, content);
 		
 		log.info("{} invoices created.", result.getInvoiceList().size());
 		

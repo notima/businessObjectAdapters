@@ -23,6 +23,7 @@ import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.InvoiceList;
+import org.notima.generic.ifacebusinessobjects.ProductMapping;
 
 public class BillingFileToInvoiceList {
 
@@ -61,7 +62,7 @@ public class BillingFileToInvoiceList {
 		byte[] fileBytes = Files.readAllBytes(Paths.get(file));
 		String contents = new String(fileBytes, "UTF-8");
 		
-		InvoiceList list = splitBillingFile(tenant.getDefaultProductKey(), price, tenant.getDefaultInvoiceLineText(), contents);
+		InvoiceList list = splitBillingFile(tenant.getTenantSettings() ,price, contents);
 		
 		return list;
 		
@@ -72,18 +73,16 @@ public class BillingFileToInvoiceList {
 	/**
 	 * Converts a CSV (semicolon separated) file to a list of OrderInvoice
 	 * 
-	 * @param productKey			The product key to use for the billing line
+	 * @param settings				Infometric tenant settings
 	 * @param price					The price per unit
-	 * @param invoiceLineText		The text to describe the product. Dates are appended to this line.
 	 * @param fileContent			The actual file to be parsed.
 	 * @return						A list.
 	 * @throws IOException 			If something goes wrong.
 	 * @throws ParseException       If the numbers can't be parsed.
 	 */
 	public InvoiceList splitBillingFile(
-								String productKey, 
+								InfometricTenantSettings settings, 
 								double price, 
-								String invoiceLineText, 
 								String fileContent) throws IOException, ParseException        {
 		
 		nsyms = new DecimalFormatSymbols();
@@ -105,6 +104,7 @@ public class BillingFileToInvoiceList {
 		List<InvoiceLine> ilines;
 		
 		String aptNo;
+		ProductMapping pm;
 		
 		for (CSVRecord r : rows) {
 			if (r.size()==0) continue;
@@ -117,11 +117,12 @@ public class BillingFileToInvoiceList {
 			invoice.setBusinessPartner(bp);
 			ilines = new ArrayList<InvoiceLine>();
 			il = new InvoiceLine();
-			il.setProductKey(productKey);		// Product key
+			pm = settings.getProductMapping(r.get(3));
+			il.setProductKey(pm.getDestinationProductId());		// Product key
 			il.setUOM(r.get(10));				// kWh
 			il.setQtyEntered(nfmt.parse(r.get(6)).doubleValue());
 			il.setPriceActual(price!=0.0 ? price : nfmt.parse(r.get(9)).doubleValue());
-			il.setName(invoiceLineText + " " + r.get(1) + " - " + r.get(2));
+			il.setName(pm.getDestinationName() + " " + r.get(1) + " - " + r.get(2));
 			ilines.add(il);
 			invoice.setLines(ilines);
 			result.add(invoice);
@@ -131,7 +132,7 @@ public class BillingFileToInvoiceList {
 		return list;
 		
 	}
-
+	
 	private String getOrderKey(String prefix) {
 		return prefix + "-" + dfmt.format(today);
 	}

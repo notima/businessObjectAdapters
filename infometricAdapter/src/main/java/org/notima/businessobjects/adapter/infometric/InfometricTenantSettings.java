@@ -26,5 +26,13 @@ public class InfometricTenantSettings {
 		return productMapping.get(DEFAULT_PRODUCT);
 	}
 	
+	public ProductMapping getProductMapping(String productId) {
+		ProductMapping p = productMapping.get(productId);
+		if (p==null) {
+			return getDefaultProductMapping();
+		} else {
+			return p;
+		}
+	}
 	
 }

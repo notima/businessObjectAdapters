@@ -133,6 +133,10 @@ public class InfometricTenant {
 		
 	}
 	
+	public InfometricTenantSettings getTenantSettings() {
+		return tenantSettings;
+	}
+
 	public void savePropertyFile() {
 		saveInfometricPropertyFile();
 		saveInfometricTenantSettings();
