@@ -18,7 +18,7 @@ import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
-import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;

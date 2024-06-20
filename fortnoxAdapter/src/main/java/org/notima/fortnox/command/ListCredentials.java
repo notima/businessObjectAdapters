@@ -15,7 +15,7 @@ import org.notima.api.fortnox.FortnoxAuthenticationException;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
-import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.CredentialTable;
 

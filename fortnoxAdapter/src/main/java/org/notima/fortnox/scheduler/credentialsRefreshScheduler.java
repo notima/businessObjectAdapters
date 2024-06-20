@@ -9,7 +9,7 @@ import org.apache.karaf.scheduler.Scheduler;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.oauth2.FortnoxOAuth2Client;
-import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;

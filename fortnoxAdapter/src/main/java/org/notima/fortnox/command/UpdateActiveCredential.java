@@ -12,7 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
-import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 
 @Command(scope = "fortnox", name = "update-fortnox-credential", description = "Update active credential manually")

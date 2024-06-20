@@ -9,6 +9,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.Fortnox4jCLI;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.businessobjects.adapter.tools.FactorySelector;
@@ -116,7 +117,7 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     	sess.getConsole().println(message);
     }
 
-    private void createClient() {
+    private void createClient() throws Exception {
     	
     	creator = new Fortnox4jCLI();
     	creator.setClientId(clientId);
@@ -130,6 +131,13 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     	}
     	
     	creator.determineCommandToRun();
+    	
+    	while (creator.isServerRunning()) {
+    		Thread.sleep(1000);
+    	}
+    	
+    	FortnoxClientInfo fc = creator.updateFortnoxClientInfo();
+    	sess.getConsole().println(fc.getOrgName() + " created.");
     	
     	
     }

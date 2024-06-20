@@ -8,7 +8,7 @@ import java.util.Date;
 
 import org.apache.karaf.shell.support.table.ShellTable;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
-import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
 

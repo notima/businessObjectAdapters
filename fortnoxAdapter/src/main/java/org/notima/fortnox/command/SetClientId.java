@@ -8,7 +8,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
-import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.businessobjects.adapter.fortnox.exception.InsufficientOrWrongInputException;
 
 @Command(scope = "fortnox", name = "set-fortnox-clientId", description = "Set client id")

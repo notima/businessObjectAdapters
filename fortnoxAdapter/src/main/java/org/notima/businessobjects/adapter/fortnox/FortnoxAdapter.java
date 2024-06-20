@@ -21,6 +21,7 @@ import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.FortnoxInvoiceException;
 import org.notima.api.fortnox.FortnoxScopeException;
 import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;

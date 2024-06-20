@@ -3,8 +3,8 @@ package org.notima.businessobjects.adapter.fortnox.junit;
 import org.junit.Before;
 import org.junit.Test;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
-import org.notima.businessobjects.adapter.fortnox.CredentialsFile;
-import org.notima.businessobjects.adapter.fortnox.FileCredentialsProvider;
+import org.notima.api.fortnox.oauth2.CredentialsFile;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 
 public class TestFileCredentialsProvider {
 	
