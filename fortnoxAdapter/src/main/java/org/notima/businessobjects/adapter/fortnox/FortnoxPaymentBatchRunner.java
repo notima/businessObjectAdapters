@@ -35,6 +35,7 @@ public class FortnoxPaymentBatchRunner {
 	private PaymentBatch			paymentBatch;
 	private String					modeOfPayment;
 	private String					modeOfPaymentAccount;
+	private String					modeOfPrepayment;
 	private String					feeGlAccount;
 	private String					intransitAccount;
 	private String					voucherSeries;
@@ -168,6 +169,14 @@ public class FortnoxPaymentBatchRunner {
 		
 	}
 	
+	/**
+	 * Pays the invoice using the attributes for modeOfPayment* and modeOfPrepayment*.
+	 * 
+	 * @param inv
+	 * @param payment
+	 * @return		A payment process result.
+	 * @throws Exception
+	 */
 	public PaymentProcessResult payInvoice(Invoice inv, Payment<?> payment) throws Exception {
 
 		if (inv==null || payment==null) {
@@ -184,6 +193,8 @@ public class FortnoxPaymentBatchRunner {
 		try {
 			invoicePayment = extendedClient.payCustomerInvoice(
 					modeOfPayment, 
+					modeOfPrepayment,
+					voucherSeries,
 					inv, 
 					bookkeepPayment, 
 					processOptions.isFeesPerPayment(), 

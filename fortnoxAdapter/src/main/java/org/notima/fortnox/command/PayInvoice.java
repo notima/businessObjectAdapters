@@ -53,6 +53,12 @@ public class PayInvoice extends FortnoxCommand implements Action {
 	@Argument(index = 2, name = "modeOfPayment", description ="The mode of payment", required = true, multiValued = false)
 	private String modeOfPayment;
 	
+	@Argument(index = 3, name = "modeOfPrePayment", description ="The mode of pre payment (if payment is done before invoice date)", required = false, multiValued = false)
+	private String modeOfPrePayment;
+	
+	@Argument(index = 4, name = "voucherSeries", description ="Voucher series to use (if payment is done before invoice date)", required = false, multiValued = false)
+	private String voucherSeries;
+	
 	private FortnoxClient3 fc;
 	private FortnoxExtendedClient fec;
 	
@@ -157,6 +163,8 @@ public class PayInvoice extends FortnoxCommand implements Action {
 		try {
 			pmt = fec.payCustomerInvoice(
 					mp.getCode(),
+					modeOfPrePayment,
+					voucherSeries,
 					invoice,
 					!noBookkeepPayment, 
 					false, 
