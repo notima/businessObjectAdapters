@@ -347,25 +347,31 @@ public class FortnoxPaymentBatchRunner {
 		if (paymentAccount==null || paymentAccount.trim().length()==0) {
 			throw new UnableToDetermineModeOfPaymentException("No general ledger payment account defined for bank account");
 		}
-
-		modeOfPayment = mapAccountNoToModeOfPayment(paymentAccount);
+		
+		ModeOfPaymentSubset mps = mapAccountNoToModeOfPayment(paymentAccount); 
+		modeOfPayment = mps.getCode();
+		modeOfPaymentAccount = mps.getAccountNumber();
+		
+		String unmatchedPaymentAccount = paymentBatch.getGeneralLedgerUnknownTrxAccount();
+		if (unmatchedPaymentAccount!=null) {
+			modeOfPrepayment = mapAccountNoToModeOfPayment(unmatchedPaymentAccount).getCode();
+		}
 		
 	}
 	
 	
-	private String	mapAccountNoToModeOfPayment(String paymentAccount) throws Exception {
+	private ModeOfPaymentSubset	mapAccountNoToModeOfPayment(String paymentAccount) throws Exception {
 
 		FortnoxClient3 fortnoxClient = extendedClient.getCurrentFortnoxClient();
 		ModesOfPayments modesOfPayments = fortnoxClient.getModesOfPayments();
 		if (modesOfPayments==null) return null;
 		List<ModeOfPaymentSubset> subsets = modesOfPayments.getModeOfPaymentSubset();
 		
-		String result = null;
+		ModeOfPaymentSubset result = null;
 		
 		for (ModeOfPaymentSubset subset : subsets) {
 			if (paymentAccount.equals(subset.getAccountNumber())) {
-				result = subset.getCode();
-				modeOfPaymentAccount = subset.getAccountNumber();
+				result = subset;
 				break;
 			}
 		}

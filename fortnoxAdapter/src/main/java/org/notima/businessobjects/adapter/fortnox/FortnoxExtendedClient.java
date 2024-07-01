@@ -695,11 +695,12 @@ public class FortnoxExtendedClient {
 				ModeOfPaymentSubset mp = bof.getClient().getModeOfPayment(modeOfPayment);
 				prepaymentVoucher.addVoucherLines(BigDecimal.valueOf(payment.getAmount()), mp.getAccountNumber(), pre.getAccountNumber());
 				prepaymentVoucher.setSourceCurrency(payment.getCurrency());
-				prepaymentVoucher.setDescription(payment.getPayerName() + " : " + payment.getClientOrderNo() + " : " + payment.getMatchedInvoiceNo());
+				prepaymentVoucher.setDescription("Prepayment " + payment.getPayerName() + " (" + payment.getMatchedInvoiceNo() + ") : " + payment.getClientOrderNo());
 				
-			} else {
-				payment.setPaymentDate(invoiceDate);
 			}
+			
+			payment.setPaymentDate(invoiceDate);
+
 		}
 		
 		pmt = includeWriteOffs ? FortnoxConverter.toFortnoxPayment(payment) : FortnoxConverter.toFortnoxPaymentWithoutWriteOffs(payment);
