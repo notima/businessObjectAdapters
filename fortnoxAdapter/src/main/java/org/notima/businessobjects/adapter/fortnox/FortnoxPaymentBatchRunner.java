@@ -162,11 +162,25 @@ public class FortnoxPaymentBatchRunner {
 		inv = getInvoiceToPayAndUpdatePayment(payment);
 		if (inv!=null) {
 			paymentResult = payInvoice(inv, payment);
+		} else if (processOptions.isNonMatchedAsPrepayments()) { 
+			paymentResult = createUnmatchedPrepayment(payment);
 		} else {
 			paymentResult = new PaymentProcessResult(PaymentProcessResult.ResultCode.NOT_PROCESSED);
 		}
 		getPaymentBatchProcessResult().addPaymentProcessResult(paymentResult);
 		
+	}
+	
+	/**
+	 * Creates an unmatched payment.
+	 * 
+	 * @param payment
+	 * @return
+	 */
+	private PaymentProcessResult createUnmatchedPrepayment(Payment<?> payment) {
+		// TODO: Implement unmatched payment
+		PaymentProcessResult result = new PaymentProcessResult(PaymentProcessResult.ResultCode.NOT_PROCESSED);
+		return result;
 	}
 	
 	/**
