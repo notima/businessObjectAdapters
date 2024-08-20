@@ -41,6 +41,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Bundle-Activator>org.notima.businessobjects.adapter.csv.Activator</Bundle-Activator>
 						<Export-Package>org.notima.businessobjects.adapter.csv.*
 										</Export-Package>
 		        		<Private-Package>

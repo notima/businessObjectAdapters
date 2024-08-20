@@ -5,6 +5,7 @@ import java.util.Properties;
 
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
@@ -35,6 +36,8 @@ public interface CanonicalObjectFactory {
 	public Collection<PaymentBatchProcessor> listPaymentBatchProcessors();
 	
 	public TaxRateProvider lookupTaxRateProvider(String systemName);
+	
+	public AccountingVoucherConverter<?> lookupAccountingVoucherConverter(String systemName);
 	
 	public Collection<TaxRateProvider> listTaxRateProviders();
 	

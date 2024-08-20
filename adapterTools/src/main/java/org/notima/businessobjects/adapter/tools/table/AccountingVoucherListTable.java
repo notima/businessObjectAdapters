@@ -4,8 +4,6 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 
-import org.notima.businessobjects.adapter.tools.table.GenericColumn;
-import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 
@@ -53,7 +51,7 @@ public class AccountingVoucherListTable extends GenericTable {
 
 		// Add a first row
 		addRow().addContent(
-				(vv.getVoucherSeries() + " " + vv.getVoucherNo()),
+				(getVoucherSeriesAndVoucherNo(vv)),
 				"",
 				vv.getDescription(),
 				vv.getCostCenter()!=null && vv.getCostCenter().trim().length()>0 ? ("Cst " + vv.getCostCenter()) : "",
@@ -65,7 +63,7 @@ public class AccountingVoucherListTable extends GenericTable {
 			addRow().addContent(
 					vv.getAcctDate(),
 					vr.getAcctNo(),
-					vr.getAcctName() + " " + vr.getDescription(),
+					getAcctNameAndDescription(vr),
 					formatNumbers ? nfmt.format(vr.getDebitAmount()) : vr.getDebitAmount(),
 					formatNumbers ? nfmt.format(vr.getCreditAmount()) : vr.getCreditAmount(),
 					vr.isDeleted()!=null && vr.isDeleted().booleanValue() ? "*" : ""
@@ -99,5 +97,30 @@ public class AccountingVoucherListTable extends GenericTable {
 				"");
 	}
 	
+	private String getAcctNameAndDescription(AccountingVoucherLine vr) {
+		StringBuffer result = new StringBuffer();
+		if (vr.getAcctName()!=null && vr.getAcctName().trim().length()>0) {
+			result.append(vr.getAcctName());
+		}
+		if (vr.getDescription()!=null && vr.getDescription().trim().length()>0) {
+			if (result.length()>0) result.append(" ");
+			result.append(vr.getDescription());
+		}
+		return result.toString();
+	}
+	
+	private String getVoucherSeriesAndVoucherNo(AccountingVoucher vv) {
+		
+		StringBuffer result = new StringBuffer();
+		if (vv.getVoucherSeries()!=null && vv.getVoucherSeries().trim().length()>0) {
+			result.append(vv.getVoucherSeries());
+		}
+		if (vv.getVoucherNo()!=null && vv.getVoucherNo().trim().length()>0) {
+			if (result.length()>0) result.append(" ");
+			result.append(vv.getVoucherNo());
+		}
+		
+		return result.toString();
+	}
 	
 }

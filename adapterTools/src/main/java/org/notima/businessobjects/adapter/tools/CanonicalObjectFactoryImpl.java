@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
@@ -30,6 +31,8 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	@SuppressWarnings("rawtypes")
 	private Map<String, BusinessObjectConverter> converters = new TreeMap<String, BusinessObjectConverter>();
 
+	private Map<String, AccountingVoucherConverter<?>> accountingVoucherConverters = new TreeMap<String, AccountingVoucherConverter<?>>();
+	
 	private Map<String, PaymentFactory> paymentFactories = new TreeMap<String, PaymentFactory>();
 	
 	private Map<String, PaymentBatchProcessor> paymentBatchProcessors = new TreeMap<String, PaymentBatchProcessor>();
@@ -93,6 +96,32 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
+	
+	/**
+	 * Resets the accounting voucher converters
+	 * 
+	 * @throws InvalidSyntaxException
+	 */
+	@SuppressWarnings("rawtypes")
+	public void resetAccountingVoucherConverters() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		
+		Collection<ServiceReference<AccountingVoucherConverter>> references = ctx.getServiceReferences(AccountingVoucherConverter.class, null);		
+
+		accountingVoucherConverters.clear();
+		
+		if (references!=null) {
+			AccountingVoucherConverter srv;
+			for (ServiceReference<AccountingVoucherConverter> sr : references) {
+				srv = ctx.getService(sr);
+				accountingVoucherConverters.put(srv.getSystemName(), srv);
+			}
+		}
+
+	}
+	
 	
 	/**
 	 * Resets the services by re-reading the service references for PaymentFactories
@@ -297,6 +326,31 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		
 	}
 
+	@Override
+	public AccountingVoucherConverter<?> lookupAccountingVoucherConverter(String adapterName) {
+		
+		try {
+			resetAccountingVoucherConverters();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+		
+		AccountingVoucherConverter<?> cv = null;
+		
+		if (adapterName==null) {
+			return null;
+		} else {
+			cv = accountingVoucherConverters.get(adapterName);
+		}
+		if (cv==null)
+			log.warn("Accounting converter {} not found.", adapterName);
+		
+		return cv;
+		
+	}
+	
 	public PaymentFactory lookupPaymentFactory(String systemName) {
 		
 		try {
@@ -419,6 +473,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		return null;
 	}
+
 	
 	
 }

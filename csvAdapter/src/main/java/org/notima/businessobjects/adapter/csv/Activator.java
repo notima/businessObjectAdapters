@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -16,7 +17,8 @@ import org.slf4j.LoggerFactory;
 
 @Services(
 		provides = {
-				@ProvideService(BusinessObjectFactory.class)
+				@ProvideService(BusinessObjectFactory.class),
+				@ProvideService(AccountingVoucherConverter.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -50,6 +52,10 @@ public class Activator extends BaseActivator {
 		props.put("SystemName", CsvAdapter.SYSTEM_NAME);
 		register(BusinessObjectFactory.class, adapter, props);
 		log.info("Registered adapter for " + CsvAdapter.SYSTEM_NAME);
+		
+		AccountingVoucherConverter<String> voucherConverter = new CsvToVouchers();
+		register(AccountingVoucherConverter.class, voucherConverter, props);
+		log.info("Registered accounting voucher converter for " + CsvAdapter.SYSTEM_NAME);
 		
 	}
 	
