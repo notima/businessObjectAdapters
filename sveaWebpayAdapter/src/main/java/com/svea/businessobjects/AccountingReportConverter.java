@@ -7,6 +7,7 @@ import java.util.List;
 import org.notima.generic.businessobjects.AccountingType;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.util.Translator;
+import org.notima.generic.ifacebusinessobjects.LanguageTranslator;
 
 import com.svea.webpay.common.reconciliation.AccountingReport;
 import com.svea.webpay.common.reconciliation.AccountingVoucher;
@@ -69,6 +70,7 @@ public class AccountingReportConverter {
 		if (ar==null || ar.getVouchers()==null) return result;
 		
 		org.notima.generic.businessobjects.AccountingVoucher dst;
+		LanguageTranslator tr = new Translator();
 
 		AccountingVoucherLine avl = null;
 		List<AccountingVoucher> srcList = ar.getVouchers();
@@ -76,7 +78,7 @@ public class AccountingReportConverter {
 			dst = new org.notima.generic.businessobjects.AccountingVoucher();
 			dst.setPrecision(DEFAULT_PRECISION);
 			dst.setDescription("Svea Webpay " +  
-					src.getPaymentTypeReference() + " " + Translator.getTranslation(src.getPaymentType(), lang));
+					src.getPaymentTypeReference() + " " + tr.getTranslation(src.getPaymentType(), lang));
 			
 			dst.setCostCenter(src.getCostCenter());
 			dst.setProjectCode(src.getProjectCode());
