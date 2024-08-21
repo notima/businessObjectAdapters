@@ -46,6 +46,7 @@ public class Activator extends BaseActivator {
                     emailSender.setEmailUser((String)properties.get("emailUser"));
                     emailSender.setEmailPass((String)properties.get("emailPass"));
                     emailSender.setEmailPort((String)properties.get("emailPort"));
+                    emailSender.setEmailName((String)properties.get("emailName"));
                     try{
                         emailSender.setSenderPublicKey(new File((String)properties.get("senderPublicKey")));
                         emailSender.setSenderPrivateKey(new File((String)properties.get("senderPrivateKey")));

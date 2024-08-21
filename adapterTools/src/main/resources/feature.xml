@@ -73,6 +73,7 @@
             emailHost=
             emailUser=
             emailPass=
+            emailName=Unconfigured e-mail adapter
             emailPort=25
             senderPrivateKey=
             senderPublicKey=

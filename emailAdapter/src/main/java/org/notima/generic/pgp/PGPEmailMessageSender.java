@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
@@ -31,6 +32,7 @@ public class PGPEmailMessageSender implements MessageSender {
     private String emailUser;
     private String emailPass;
     private String emailPort = "25";
+    private String emailName;
     private File senderPublicKey;
     private File senderPrivateKey;
     private String senderPrivateKeyPassword;
@@ -53,8 +55,17 @@ public class PGPEmailMessageSender implements MessageSender {
         MimeMultipart emailContent = new MimeMultipart();
         MimeMessage mimeMessage = new MimeMessage(getMailSession());  
         MimeBodyPart messageBodyPart = new MimeBodyPart();
+        InternetAddress fromAddr;
         try {
-            mimeMessage.setFrom(new InternetAddress(emailUser));
+        	fromAddr = new InternetAddress(emailUser);
+        	if (emailName!=null && emailName.trim().length()>0) {
+	        	try {
+					fromAddr.setPersonal(emailName);
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+        	}
+            mimeMessage.setFrom(fromAddr);
             mimeMessage.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(message.getRecipient().getEmail()));
             mimeMessage.setSubject(message.getSubject(), "utf-8");
             messageBodyPart.setContent(processBody(message, keyManager), message.getContentType());
@@ -289,8 +300,16 @@ public class PGPEmailMessageSender implements MessageSender {
     public void setEmailUser(String emailUser) {
         this.emailUser = emailUser;
     }
+    
+    public String getEmailName() {
+		return emailName;
+	}
 
-    public String getEmailPass() {
+	public void setEmailName(String emailName) {
+		this.emailName = emailName;
+	}
+
+	public String getEmailPass() {
         return emailPass;
     }
 
