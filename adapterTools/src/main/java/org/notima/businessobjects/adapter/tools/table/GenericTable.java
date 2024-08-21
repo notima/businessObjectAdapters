@@ -6,6 +6,8 @@ import java.util.List;
 import org.apache.karaf.shell.support.table.Col;
 import org.apache.karaf.shell.support.table.Row;
 import org.apache.karaf.shell.support.table.ShellTable;
+import org.notima.generic.businessobjects.util.Translator;
+import org.notima.generic.ifacebusinessobjects.LanguageTranslator;
 
 
 public class GenericTable {
@@ -48,13 +50,28 @@ public class GenericTable {
     private List<GenericRow> rows = new ArrayList<GenericRow>();
 
     private String emptyTableText;
+    
+    private LanguageTranslator translator;
+    private String			   lang;
 
+    protected String translate(String text) {
+    	if (translator!=null && lang!=null) {
+    		return translator.getTranslation(text, lang);
+    	} else {
+    		return text;
+    	}
+    }
+    
+    protected String translateAndCapitalizeFirstLetter(String text) {
+    	return Translator.capitalizeFirstLetter(translate(text));
+    }
+    
     public void addColumn(String header){
-        addColumn(new GenericColumn(header));
+        addColumn(new GenericColumn(translate(header)));
     }
 
     public void addColumn(String header, String alignment){
-        addColumn(new GenericColumn(header, alignment));
+        addColumn(new GenericColumn(translate(header), alignment));
     }
 
     public void addColumn(GenericColumn column){
@@ -62,7 +79,7 @@ public class GenericTable {
     }
 
     public GenericColumn column(String header) {
-    	GenericColumn res = new GenericColumn(header);
+    	GenericColumn res = new GenericColumn(translate(header));
     	addColumn(res);
     	return res;
     }
@@ -134,10 +151,26 @@ public class GenericTable {
     }
 
     public void setEmptyTableText(String emptyTableText) {
-        this.emptyTableText = emptyTableText;
+        this.emptyTableText = translate(emptyTableText);
     }
     
-    /**
+    public LanguageTranslator getTranslator() {
+		return translator;
+	}
+
+	public void setTranslator(LanguageTranslator translator) {
+		this.translator = translator;
+	}
+
+	public String getLang() {
+		return lang;
+	}
+
+	public void setLang(String lang) {
+		this.lang = lang;
+	}
+
+	/**
      * Create a shell table from the provided table data.
      * @return
      */
