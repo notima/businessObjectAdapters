@@ -172,7 +172,7 @@ public class GenericTable {
 
 	/**
      * Create a shell table from the provided table data.
-     * @return
+     * @return	A shell table.
      */
     public ShellTable getShellTable(){
         ShellTable shellTable = new ShellTable();
@@ -219,7 +219,7 @@ public class GenericTable {
     
     /**
      * Create a HTML table from the provided data
-     * @return
+     * @return	A HTML table.
      */
     public HtmlTable getHtmlTable(){
         HtmlTable htmlTable = new HtmlTable();
