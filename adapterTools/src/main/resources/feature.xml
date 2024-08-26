@@ -40,7 +40,23 @@
 		<bundle>wrap:mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
 		<bundle>mvn:org.notima.generic/businessobjects/${businessobjects.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
+		<feature>notima-persistence</feature>		
+		
 	</feature>
+
+	<feature name="notima-persistence" description="Notima Persistence components" version="${project.version}" install="manual">
+
+		<config name="org.ops4j.datasource-adapterTools">
+            osgi.jdbc.driver.name=H2
+            databaseName= database/adapterTools;create=true
+            dataSourceName=adapterTools
+        </config>
+        
+ 		<capability>
+            osgi.service;objectClass=javax.sql.DataSource;effective:=active;osgi.jndi.service.name=adapterTools
+        </capability>        
+
+	</feature> 
 
 	<feature name="notima-ubl" description="Notima UBL Adapter" version="${project.version}" install="manual">
 
