@@ -6,9 +6,11 @@ import java.util.List;
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
 import org.notima.businessobjects.adapter.tools.table.TenantTable;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
@@ -26,6 +28,7 @@ public class ListTenants implements Action {
 	private List<BusinessObjectFactory> bofs;
 	
     @Argument(index = 0, name = "adapter", description = "The adapter to use", required = false, multiValued = false)
+    @Completion(AdapterCompleter.class)
     private String systemName;
 	
 	@SuppressWarnings("rawtypes")
