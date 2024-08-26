@@ -15,6 +15,7 @@ public class PaymentBatchChannelTable extends GenericTable {
 		addColumn("Tenant");
 		addColumn("Destination");
 		addColumn("Source");
+		addColumn("Description");
 		addColumn("Source dir");
 		
 		if (bpl==null || bpl.size()==0) {
@@ -40,6 +41,7 @@ public class PaymentBatchChannelTable extends GenericTable {
 					p.getTenant().toString(), 
 					p.getDestinationSystem(),
 					p.getSourceSystem(),
+					p.getChannelDescription(),
 					(p.getOptions()!=null ? p.getOptions().getSourceDirectory() : "")
 					);
 		}

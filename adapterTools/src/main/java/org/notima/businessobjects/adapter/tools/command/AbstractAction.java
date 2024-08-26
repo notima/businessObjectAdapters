@@ -86,7 +86,7 @@ public abstract class AbstractAction implements Action {
 
     /**
      * Custom behaviour of the subclass.
-     * @return
+     * @return	The result of the execution.
      * @throws Exception
      */
     protected abstract Object onExecute() throws Exception;
