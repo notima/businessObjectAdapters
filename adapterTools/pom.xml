@@ -25,6 +25,14 @@
 			<artifactId>notima-util</artifactId>
 			<version>${notima-util.version}</version>
 		</dependency>
+	
+	    <!-- For java doc -->
+		<dependency>
+		    <groupId>javax.enterprise</groupId>
+		    <artifactId>cdi-api</artifactId>
+		    <version>1.2</version>
+		    <scope>provided</scope>
+		</dependency>	
 		
        <!-- Hibernate ORM -->
         <dependency>
