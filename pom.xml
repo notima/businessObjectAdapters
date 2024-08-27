@@ -51,6 +51,7 @@
 		<module>p27bankingAdapter</module>
 		<module>jsonAdapter</module>
 		<module>adyenAdapter</module>
+		<module>adapterPersistence</module>
 	</modules>
 
 	<dependencyManagement>

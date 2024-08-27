@@ -100,7 +100,7 @@ public abstract class Task {
 	
 	/**
 	 * Implement in derived classes to provide instructions to be performed by the task
-	 * @return
+	 * @return	The result
 	 * @throws Exception
 	 */
 	protected abstract Object onExecute() throws Exception;

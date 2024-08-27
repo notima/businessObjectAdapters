@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
+import org.notima.businessobjects.adapter.tools.db.entities.TaskLockImpl;
 import org.notima.businessobjects.adapter.tools.task.TaskLock;
 import org.notima.businessobjects.adapter.tools.task.TaskLockManager;
 
@@ -23,7 +24,7 @@ public class TaskLockManagerImpl implements TaskLockManager {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     @Override
     public long lock(String id) {
-        TaskLock lock = new TaskLock();
+        TaskLock lock = new TaskLockImpl();
         lock.setTaskId(id);
 		em.persist(lock);
         return lock.getLockId();
@@ -32,7 +33,7 @@ public class TaskLockManagerImpl implements TaskLockManager {
     @Transactional(Transactional.TxType.REQUIRES_NEW)
     @Override
     public long lock(String id, String metaData) {
-        TaskLock lock = new TaskLock();
+        TaskLock lock = new TaskLockImpl();
         lock.setTaskId(id);
         lock.setMetaData(metaData);
 		em.persist(lock);

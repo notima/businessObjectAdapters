@@ -3,7 +3,7 @@
              version="2.2">
     <persistence-unit name="adapterTools" transaction-type="JTA">
         <jta-data-source>osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=adapterTools)</jta-data-source>
-        <class>org.notima.businessobjects.adapter.tools.task.TaskLock</class>
+        <class>org.notima.businessobjects.adapter.tools.db.entities.TaskLockImpl</class>
         <properties>
             <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>

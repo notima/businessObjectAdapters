@@ -1,17 +1,14 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.notima.generic.businessobjects.adapter</groupId>
-		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.9.0-SNAPSHOT</version>
-	</parent>
-	<artifactId>adapterTools</artifactId>
-	<packaging>bundle</packaging>
-	<name>Business Objects Adapter Tools</name>
-	<description>Contains classes to work on adapters</description>
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.notima.generic.businessobjects.adapter</groupId>
+    <artifactId>businessObjectAdapters</artifactId>
+    <version>1.9.0-SNAPSHOT</version>
+  </parent>
+  <artifactId>adapterPersistence</artifactId>
+  <packaging>bundle</packaging>
+  <name>Business Objects Persistence</name>
+  
    <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <hibernate.version>5.4.32.Final</hibernate.version> <!-- Version compatible with Java 8 -->
@@ -20,10 +17,14 @@
     </properties>
 
 	<dependencies>
+		
 		<dependency>
-			<groupId>org.notima</groupId>
-			<artifactId>notima-util</artifactId>
-			<version>${notima-util.version}</version>
+			<groupId>
+				org.notima.generic.businessobjects.adapter
+			</groupId>
+			<artifactId>adapterTools</artifactId>
+			<version>${project.version}</version>
+			<type>bundle</type>
 		</dependency>
 	
 	    <!-- For java doc -->
@@ -90,56 +91,24 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.0.0</version>
-				<executions>
-					<execution>
-						<id>attach-artifacts</id>
-						<phase>package</phase>
-						<goals>
-							<goal>attach-artifact</goal>
-						</goals>
-						<configuration>
-							<artifacts>
-								<artifact>
-									<file>${project.build.directory}/classes/feature.xml</file>
-									<type>xml</type>
-									<classifier>features</classifier>
-								</artifact>
-							</artifacts>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
 				<version>4.2.0</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>org.notima.businessobjects.adapter.tools.Activator</Bundle-Activator>					
-						<Export-Package>org.notima.businessobjects.adapter.tools.*,
-										org.notima.businessobjects.adapter.tools.table*,
-										org.notima.businessobjects.adapter.tools.task*,
-										org.notima.businessobjects.adapter.tools.command*,
-										org.notima.businessobjects.adapter.tools.command.annotation*,
-										org.notima.businessobjects.adapter.tools.command.annotation.processor*
+						<Bundle-Activator>org.notima.businessobjects.adapter.tools.db.Activator</Bundle-Activator>					
+						<Export-Package>org.notima.businessobjects.adapter.tools.db*
 						</Export-Package>
 		        		<Private-Package>
         					org.apache.karaf.util.tracker,
         					org.apache.karaf.util.tracker.annotation
         				</Private-Package>
-        				<Karaf-Commands>org.notima.businessobjects.adapter.tools.command*</Karaf-Commands>
-        				<Import-Package>
-        					javax.xml.bind;version="[2.2,3)",*
-        				</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
 
 		</plugins>
-	</build>
+	</build>  
+  
 </project>
