@@ -22,6 +22,33 @@ Copy tenant information from one adapter to another
 	
 
 	
+## Payment batches
+
+Payment batches are a concept for reconciling payments. A payment batch here is a canonical format to represent a collection of payments with associated fees and payment transfer.
+
+### Payment factory
+
+A payment factory is a producer of payment batches. It takes the proprietary format of the factory implementation and formats it in a format readable by a payment batch processor.
+
+The currently available payment processors can be listed using
+
+	list-adapters
+	
+To use a payment factory one could use this command
+
+	show-payment-batch [adapter] [source]
+	
+The format of the source is defined by the specific adapter used. Use the option --raw to see the actual payment batch in json.
+
+### Payment batch processor
+
+A payment batch processor is a consumer of payment batches. That means that it's responsible for applying the information in the payment batch to a target system and tenant.
+
+List all payment batch processors
+
+	list-payment-batch-processors
+	
+
 ## Payment channels
 
 Payment channels are a way of defining payments to be processed.

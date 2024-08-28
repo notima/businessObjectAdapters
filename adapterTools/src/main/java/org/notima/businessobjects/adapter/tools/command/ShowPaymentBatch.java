@@ -18,6 +18,9 @@ import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.exception.CurrencyMismatchException;
 import org.notima.generic.businessobjects.exception.DateMismatchException;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
+import org.notima.util.json.JsonUtil;
+
+import com.google.gson.Gson;
 
 @Command(scope = "notima", name = "show-payment-batch", description = "Shows a payment batch")
 @Service
@@ -38,18 +41,29 @@ public class ShowPaymentBatch implements Action {
 	
     @Option(name = "-d", aliases = { "--detailed" }, description = "Show a more detailed view", required = false, multiValued = false)
     private boolean detailed;
+    
+    @Option(name = "--raw", description = "Print raw output as well", required = false, multiValued = false)
+    private boolean raw;
 
     private List<PaymentBatch> batches;
+    
+    private Gson gson;
     
 	@Override
 	public Object execute() throws Exception {
 		
 		PaymentFactory paymentFactory = cof.lookupPaymentFactory(paymentFactoryStr);
 		batches = paymentFactory.readPaymentBatchesFromSource(paymentSource);
-		
+
+		initJsonUtil();
 		printBatchTables();
 		
 		return null;
+	}
+
+	private void initJsonUtil() {
+		if (raw)
+			gson = JsonUtil.buildGson();
 	}
 	
 	private void printBatchTables() throws ParseException, DateMismatchException, CurrencyMismatchException {
@@ -57,10 +71,15 @@ public class ShowPaymentBatch implements Action {
 		for (PaymentBatch pb : batches) {
 			PaymentBatchTable paymentBatchTable = new PaymentBatchTable(pb, detailed);
 			paymentBatchTable.getShellTable().print(sess.getConsole());
+			
+			if (raw) {
+				gson.toJson(pb, sess.getConsole());
+			}
+			
 		}
 		
+		
+		
 	}
-	
-	
 
 }
