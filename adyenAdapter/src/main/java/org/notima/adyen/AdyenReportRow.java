@@ -412,7 +412,7 @@ public class AdyenReportRow implements PaymentReportRow {
 			addFee(new AdyenFee(AdyenFee.MARKUP, getMarkup(), "Markup"));
 		}
 		if (getSchemeFees()!=0) {
-			addFee(new AdyenFee(AdyenFee.SCHEME, getInterchange(), "Scheme fees"));
+			addFee(new AdyenFee(AdyenFee.SCHEME, getSchemeFees(), "Scheme fees"));
 		}
 		if (getInterchange()!=0) {
 			addFee(new AdyenFee(AdyenFee.INTERCHANGE, getInterchange(), "Interchange"));
