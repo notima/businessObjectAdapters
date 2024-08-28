@@ -532,6 +532,27 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		
 	}
 	
+	
+	/**
+	 * Used to update the canonical payment object after an InvoicePayment has been persisted.
+	 * 
+	 * @param src		The Fortnox invoice payment
+	 * @param dst		The canonical payment object
+	 * @return			The updated canonical payment object
+	 * @throws Exception
+	 */
+	public static Payment<?> updatePaymentFromInvoicePayment(InvoicePayment src, Payment<?> dst) throws Exception {
+		
+		if (src==null) return dst;
+
+		if (!src.isDefaultAccountingCurrency()) {
+			dst.setAcctAmount(src.getAmount());
+		}
+		
+		return dst;
+		
+	}
+	
 	/**
 	 * Creates a Fortnox Write off
 	 * 

@@ -48,6 +48,16 @@ List all payment batch processors
 
 	list-payment-batch-processors
 	
+## Processing payments
+
+Processing of payments involves both reading a payment batch from a payment factory and sending it to a payment batch processor.
+
+One way of doing this is to use the command process-payment-batch
+
+	process-payment-batch --options [destination] [paymentFactoryAdapter] [srcForPaymentFactoryAdapter]
+	
+- The destination system specifies to which payment batch processor the batch should be sent.
+- The combined payment factory adapter and source creates a payment batch. The batch itself contains information about which tenant in the destination adapter they payments should be sent to.
 
 ## Payment channels
 

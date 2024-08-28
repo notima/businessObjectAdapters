@@ -219,7 +219,9 @@ public class FortnoxPaymentBatchRunner {
 		}
 		
 		if (invoicePayment!=null && invoicePayment.getNumber()!=null && invoicePayment.getNumber()>0) {
-			return new PaymentProcessResult(ResultCode.OK);
+			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.OK);
+			ppr.setResultingPayment(FortnoxConverter.updatePaymentFromInvoicePayment(invoicePayment, payment));
+			return ppr;
 		} else {
 			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.FAILED);
 			if (paymentException!=null) {
