@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.jline.utils.Log;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxConstants;
 import org.notima.api.fortnox.entities3.AccountSubset;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.entities3.Invoice;
@@ -36,6 +37,7 @@ public class FortnoxPaymentBatchRunner {
 	private String					modeOfPayment;
 	private String					modeOfPaymentAccount;
 	private String					modeOfPrepayment;
+	private String					modeOfPrepaymentAccount;
 	private String					feeGlAccount;
 	private String					intransitAccount;
 	private String					voucherSeries;
@@ -167,6 +169,9 @@ public class FortnoxPaymentBatchRunner {
 		} else {
 			paymentResult = new PaymentProcessResult(PaymentProcessResult.ResultCode.NOT_PROCESSED);
 		}
+		if (paymentResult.getException()!=null) {
+			Log.error(paymentResult.getException().getMessage());
+		}
 		getPaymentBatchProcessResult().addPaymentProcessResult(paymentResult);
 		
 	}
@@ -176,10 +181,28 @@ public class FortnoxPaymentBatchRunner {
 	 * 
 	 * @param payment
 	 * @return
+	 * @throws Exception 
 	 */
-	private PaymentProcessResult createUnmatchedPrepayment(Payment<?> payment) {
-		// TODO: Implement unmatched payment
-		PaymentProcessResult result = new PaymentProcessResult(PaymentProcessResult.ResultCode.NOT_PROCESSED);
+	private PaymentProcessResult createUnmatchedPrepayment(Payment<?> payment) throws Exception {
+		
+		AccountingVoucher av = AccountingVoucher.buildVoucherFromPayment(payment, 
+				!processOptions.isAccountFeesOnly()  // Ignore write-offs.
+				);
+		
+		av.remapAccountType(AccountingType.LIQUID_ASSET_AR, modeOfPrepaymentAccount);
+		av.remapAccountType(AccountingType.OTHER_EXPENSES_SALES, feeGlAccount);
+		av.remapAccountType(AccountingType.LIQUID_ASSET_CASH, modeOfPaymentAccount);
+		av.balanceWithLine(AccountingType.ROUNDING);
+		
+		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
+		
+		if (!dryRun) {
+			extendedClient.accountFortnoxVoucher(fortnoxVoucher, payment.getCurrency(), FortnoxConstants.GET_RATE_FROM_FORTNOX);
+		} else {
+			Log.info("Would have accounted voucher: " + fortnoxVoucher.toString());
+		}
+		
+		PaymentProcessResult result = new PaymentProcessResult(PaymentProcessResult.ResultCode.OK_WITH_WARNING);
 		return result;
 	}
 	
@@ -219,7 +242,9 @@ public class FortnoxPaymentBatchRunner {
 		}
 		
 		if (invoicePayment!=null && invoicePayment.getNumber()!=null && invoicePayment.getNumber()>0) {
-			return new PaymentProcessResult(ResultCode.OK);
+			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.OK);
+			ppr.setResultingPayment(FortnoxConverter.updatePaymentFromInvoicePayment(invoicePayment, payment));
+			return ppr;
 		} else {
 			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.FAILED);
 			if (paymentException!=null) {
@@ -369,6 +394,7 @@ public class FortnoxPaymentBatchRunner {
 		String unmatchedPaymentAccount = paymentBatch.getGeneralLedgerUnknownTrxAccount();
 		if (unmatchedPaymentAccount!=null) {
 			modeOfPrepayment = mapAccountNoToModeOfPayment(unmatchedPaymentAccount).getCode();
+			modeOfPrepaymentAccount = unmatchedPaymentAccount;
 		}
 		
 	}

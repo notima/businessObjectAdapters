@@ -40,6 +40,8 @@ Add new clients using the command
 	
 If there's no defaultClientSecret, that must be supplied with the clientSecret option.
 
+Example on how to add a legacy client is further down.
+
 Check your defaults using
 
 	config:property-get -p FortnoxProperties defaultClientId

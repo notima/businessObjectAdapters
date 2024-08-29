@@ -678,31 +678,6 @@ public class FortnoxExtendedClient {
 			return pmt;
 		}
 		
-		// Check invoice date. Set payment date to invoice date if payment
-		// has a date earlier than the invoice.
-		// If this behavior is unwanted, correct the accounting before calling payCustomerInvoice.
-		
-		AccountingVoucher prepaymentVoucher = null;
-		
-		Date invoiceDate = FortnoxClient3.s_dfmt.parse(invoice.getInvoiceDate()); 
-		if (invoiceDate.after(payment.getPaymentDate())) {
-			if (modeOfPrepayment!=null) {
-					
-				prepaymentVoucher = new AccountingVoucher();
-				prepaymentVoucher.setAcctDate(LocalDateUtils.asLocalDate(payment.getPaymentDate()));
-				prepaymentVoucher.setVoucherSeries(voucherSeries);
-				ModeOfPaymentSubset pre = bof.getClient().getModeOfPayment(modeOfPrepayment);
-				ModeOfPaymentSubset mp = bof.getClient().getModeOfPayment(modeOfPayment);
-				prepaymentVoucher.addVoucherLines(BigDecimal.valueOf(payment.getAmount()), mp.getAccountNumber(), pre.getAccountNumber());
-				prepaymentVoucher.setSourceCurrency(payment.getCurrency());
-				prepaymentVoucher.setDescription("Prepayment " + payment.getPayerName() + " (" + payment.getMatchedInvoiceNo() + ") : " + payment.getClientOrderNo());
-				
-			}
-			
-			payment.setPaymentDate(invoiceDate);
-
-		}
-		
 		pmt = includeWriteOffs ? FortnoxConverter.toFortnoxPayment(payment) : FortnoxConverter.toFortnoxPaymentWithoutWriteOffs(payment);
 		
 		// Round off if necessary (not EUR)
@@ -735,14 +710,6 @@ public class FortnoxExtendedClient {
 			}
 		}
 		
-		// Set mode of payment if set
-		if (modeOfPayment!=null) {
-			if (prepaymentVoucher!=null && modeOfPrepayment!=null)
-				pmt.setModeOfPayment(modeOfPrepayment);
-			else
-				pmt.setModeOfPayment(modeOfPayment);
-		}
-		
 		if (!invoice.isBooked()) {
 			if (!dryRun) {
 				log.debug("Bookkeeping invoice # " + pmt.getInvoiceNumber());
@@ -772,14 +739,40 @@ public class FortnoxExtendedClient {
 		// Clear currency field
 		pmt.setCurrency(null);
 
-		if (!dryRun) {
-			
-			if (prepaymentVoucher!=null && bookkeepPayment) {
-				log.debug("Accounting pre-payment voucher for " + pmt.getInvoiceNumber());
-				FortnoxConverter conv = new FortnoxConverter();
-				Voucher voucher = conv.mapFromBusinessObjectVoucher(bof, voucherSeries, prepaymentVoucher);
-				accountFortnoxVoucher(voucher, prepaymentVoucher.getSourceCurrency(), pmt.getCurrencyRate());
+		// Check invoice date. Set payment date to invoice date if payment
+		// has a date earlier than the invoice.
+		// If this behavior is unwanted, correct the accounting before calling payCustomerInvoice.
+		
+		AccountingVoucher prepaymentVoucher = null;
+		
+		Date invoiceDate = FortnoxClient3.s_dfmt.parse(invoice.getInvoiceDate()); 
+		if (invoiceDate.after(payment.getPaymentDate())) {
+			if (modeOfPrepayment!=null) {
+					
+				prepaymentVoucher = new AccountingVoucher();
+				prepaymentVoucher.setAcctDate(LocalDateUtils.asLocalDate(payment.getPaymentDate()));
+				prepaymentVoucher.setVoucherSeries(voucherSeries);
+				ModeOfPaymentSubset pre = bof.getClient().getModeOfPayment(modeOfPrepayment);
+				ModeOfPaymentSubset mp = bof.getClient().getModeOfPayment(modeOfPayment);
+				prepaymentVoucher.addVoucherLines(BigDecimal.valueOf(payment.getOriginalAmount()), mp.getAccountNumber(), pre.getAccountNumber());
+				prepaymentVoucher.setSourceCurrency(payment.getCurrency());
+				prepaymentVoucher.setDescription("Pmt pre-invoice date " + payment.getPayerName() + " (" + payment.getMatchedInvoiceNo() + ") : " + payment.getClientOrderNo());
+				
 			}
+			
+			pmt.setPaymentDate(FortnoxClient3.s_dfmt.format(invoiceDate));
+
+		}
+
+		// Set mode of payment if set
+		if (modeOfPayment!=null) {
+			if (prepaymentVoucher!=null && modeOfPrepayment!=null)
+				pmt.setModeOfPayment(modeOfPrepayment);
+			else
+				pmt.setModeOfPayment(modeOfPayment);
+		}
+		
+		if (!dryRun) {
 			
 			pmt = bof.getClient().setCustomerPayment(pmt);
 			log.debug("Paying invoice # " + pmt.getInvoiceNumber());
@@ -787,6 +780,13 @@ public class FortnoxExtendedClient {
 			// Book the payment directly if account and mode of payment is set.
 			if (bookkeepPayment && pmt!=null && pmt.getModeOfPayment()!=null && pmt.getModeOfPaymentAccount()!=null && pmt.getModeOfPaymentAccount()>0) {
 				bof.getClient().performAction(true, "invoicepayment", Integer.toString(pmt.getNumber()), FortnoxConstants.ACTION_INVOICE_BOOKKEEP);
+			}
+			
+			if (prepaymentVoucher!=null && bookkeepPayment) {
+				log.debug("Accounting pre-payment voucher for " + pmt.getInvoiceNumber());
+				FortnoxConverter conv = new FortnoxConverter();
+				Voucher voucher = conv.mapFromBusinessObjectVoucher(bof, voucherSeries, prepaymentVoucher);
+				accountFortnoxVoucher(voucher, prepaymentVoucher.getSourceCurrency(), pmt.getCurrencyRate());
 			}
 			
 		} else {
@@ -818,7 +818,7 @@ public class FortnoxExtendedClient {
 		if (srcCurrency!=null && !srcCurrency.equalsIgnoreCase(FortnoxConstants.DEFAULT_ACCOUNTING_CURRENCY)) {
 			
 			Currency currency;
-			if (rate==0) {
+			if (rate==FortnoxConstants.GET_RATE_FROM_FORTNOX) {
 				currency = getCurrency(srcCurrency);
 			} else {
 				currency = new Currency(srcCurrency);
