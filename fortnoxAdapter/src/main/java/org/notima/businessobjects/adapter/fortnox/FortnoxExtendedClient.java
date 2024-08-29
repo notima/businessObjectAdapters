@@ -818,7 +818,7 @@ public class FortnoxExtendedClient {
 		if (srcCurrency!=null && !srcCurrency.equalsIgnoreCase(FortnoxConstants.DEFAULT_ACCOUNTING_CURRENCY)) {
 			
 			Currency currency;
-			if (rate==0) {
+			if (rate==FortnoxConstants.GET_RATE_FROM_FORTNOX) {
 				currency = getCurrency(srcCurrency);
 			} else {
 				currency = new Currency(srcCurrency);

@@ -39,6 +39,9 @@ public class ProcessPaymentBatch implements Action {
     @Option(name = "--match-only", description = "Run only a match session.", required = false, multiValued = false)
     private boolean matchOnly;
     
+    @Option(name = "--non-matched-as-prepayments", description = "Account non matched as prepayments.", required = false, multiValued = false)
+    private boolean nonMatchedAsPrepayments;
+    
     @Option(name = "--draft-payments", description = "Only creates drafts of the payments, if supported by the destination adapter", required = false, multiValued = false)
     private boolean	draftPayments;
     
@@ -85,6 +88,7 @@ public class ProcessPaymentBatch implements Action {
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
 		processOptions.setFeesPerPayment(feesPerPayment);
 		processOptions.setAccountPayoutOnly(accountPayoutOnly);
+		processOptions.setNonMatchedAsPrepayments(nonMatchedAsPrepayments);
 		if (dryRun) {
 			processOptions.setDryRun(true);
 		}
