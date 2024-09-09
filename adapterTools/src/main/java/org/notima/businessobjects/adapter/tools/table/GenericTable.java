@@ -67,11 +67,11 @@ public class GenericTable {
     }
     
     public void addColumn(String header){
-        addColumn(new GenericColumn(translate(header)));
+        addColumn(new GenericColumn(translateAndCapitalizeFirstLetter(header)));
     }
 
     public void addColumn(String header, String alignment){
-        addColumn(new GenericColumn(translate(header), alignment));
+        addColumn(new GenericColumn(translateAndCapitalizeFirstLetter(header), alignment));
     }
 
     public void addColumn(GenericColumn column){

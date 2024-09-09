@@ -26,15 +26,15 @@
 				<excludes>
 					<exclude>*</exclude>
 				</excludes>
-				<includes>
-					<include>ratepay-example.properties</include>
-				</includes>
 			</resource>
 			<resource>
 				<directory>src/test/resources/reports</directory>
 				<excludes>
 					<exclude>*</exclude>
 				</excludes>
+				<includes>
+					<include>adyen-example.properties</include>
+				</includes>
 			</resource>
 		</resources>
 
