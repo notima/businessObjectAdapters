@@ -36,6 +36,9 @@ public class ListInvoices extends FortnoxCommand implements Action {
 
 	@Option(name = "--all", description = "Show all invoices", required = false, multiValued = false)
 	private boolean all;
+
+	@Option(name = "--include-addresses", description = "Shows addresses on invoices (must be combined with enrich)", required = false, multiValued = false)
+	private boolean includeAddress;
 	
 	@Option(name = _FortnoxOptions.PaymentTerm, description = "Filter on payment term", required = false, multiValued = false)
 	private String paymentTerm;
@@ -97,7 +100,7 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		
 		if (invoices.size()>0) {
 
-			InvoiceHeaderTable iht = new InvoiceHeaderTable(invoices);
+			InvoiceHeaderTable iht = new InvoiceHeaderTable(invoices, includeAddress);
 			iht.getShellTable().print(sess.getConsole());
 			
 			sess.getConsole().println("\n" + invoices.size() + " invoice(s).");
