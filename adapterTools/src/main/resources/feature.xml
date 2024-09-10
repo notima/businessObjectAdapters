@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="notima-business-objects-${project.version}">
 
+	 <!-- Include the Camel repository for a specific version -->
+    <repository>mvn:org.apache.camel.karaf/apache-camel/2.25.3/xml/features</repository>
+
 	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}" install="manual">
-	
+	    <feature>camel-jaxb</feature>
 		<bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.15</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/4.5.13</bundle>
@@ -37,7 +40,6 @@
         <feature>notima-common</feature>
 		<bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
 		<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
-		<bundle>wrap:mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
 		<bundle>mvn:org.notima.generic/businessobjects/${businessobjects.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
 		

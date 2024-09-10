@@ -492,6 +492,7 @@ public class ExcelToInvoices {
 	 * 
 	 * @param fileName		The excel file to parse
 	 * @param additional	The additional sheets (or files) to include sheet 0 (first sheet, is always included), so start from 1.
+	 * 						If nothing additional is specified, all sheets except the last is included (that's assumed to be a summary).
 	 * @return				A list of invoices
 	 */
 	public InvoiceList createInvoiceListFromFile(String fileName, List<String> additional) throws Exception {
@@ -507,19 +508,23 @@ public class ExcelToInvoices {
 		}
 		
 		List<Invoice<?>> invoices = parseExcelList(fileName);
-
+		Map<String,Invoice> invoiceMap = new TreeMap<String,Invoice>();
+		for (Invoice invoice : invoices) {
+			invoiceMap.put(invoice.getBusinessPartner().getIdentityNo(), invoice);
+		}
+		
+		// See if additional billing lines should be added
 		if (additional!=null && additional.size()>0) {
-			// See if additional billing lines should be added
-			Map<String,Invoice> invoiceMap = new TreeMap<String,Invoice>();
-			
-			for (Invoice invoice : invoices) {
-				invoiceMap.put(invoice.getBusinessPartner().getIdentityNo(), invoice);
-			}
 			
 			for (String sn : additional) {
-			
 				parseAdditionalBilling(invoiceMap, sn);
-				
+			}
+			
+		} else {
+			List<String> sheetNumbers = getAssumedSheetNumbers();
+			
+			for (String sn : sheetNumbers) {
+				parseAdditionalBilling(invoiceMap, sn);
 			}
 			
 		}
@@ -532,6 +537,19 @@ public class ExcelToInvoices {
 		}
 
 		return invoiceList;
+	}
+	
+	private List<String> getAssumedSheetNumbers() {
+		
+		List<String> result = new ArrayList<String>();
+		if (lastWorkbook != null) {
+			int numberOfSheets = lastWorkbook.getNumberOfSheets();
+			for (int i = 1; i < (numberOfSheets-1); i++) {
+				result.add(Integer.toString(i));
+			}
+		}
+		
+		return result;
 	}
 	
 	public static void main(String[] args) {
