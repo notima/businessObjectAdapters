@@ -52,6 +52,7 @@ import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.InvoiceOperationResult;
+import org.notima.generic.businessobjects.InvoiceWriterOptions;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.PaymentTerm;
@@ -1610,16 +1611,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	}
 
 	@Override
-	public InvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices, Date invoiceDate, Date dueDate,
-			boolean createBp, int createLimit, boolean updateExisting) throws Exception {
+	public InvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices, InvoiceWriterOptions opts) throws Exception {
 
-		FortnoxInvoiceWriter invoiceWriter = new FortnoxInvoiceWriter(this);
-		if (createLimit>0)
-			invoiceWriter.setCreateLimit(createLimit);
-		invoiceWriter.setCreateBusinessPartner(createBp);
-		invoiceWriter.setInvoiceDate(LocalDateUtils.asLocalDate(invoiceDate));
-		invoiceWriter.setDueDate(LocalDateUtils.asLocalDate(dueDate));
-		invoiceWriter.setUpdateExisting(updateExisting);
+		FortnoxInvoiceWriter invoiceWriter = new FortnoxInvoiceWriter(this, opts);
 		
 		return invoiceWriter.writeInvoices(canonicalInvoices);		
 	}
