@@ -97,6 +97,8 @@ public class WriteInvoices extends AbstractAction {
 			InvoiceListMerger merger = new InvoiceListMerger(invoiceList);
 			merger.mergeListByBusinessPartner();
 			invoiceList = merger.getList();
+			invoices.clear();
+			invoices.addAll(invoiceList.getInvoiceList());
 		}
 	}
 	
