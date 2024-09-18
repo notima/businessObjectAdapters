@@ -3,44 +3,25 @@ package org.notima.generic.pgp;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Properties;
 
 import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 
-import org.notima.businessobjects.adapter.tools.MessageSender;
 import org.notima.businessobjects.adapter.tools.exception.MessageSenderException;
 import org.notima.generic.businessobjects.Message;
-import org.notima.generic.businessobjects.PublicKey;
+import org.notima.generic.businessobjects.exception.KeyNotFoundException;
 import org.notima.generic.ifacebusinessobjects.KeyManager;
 
 import me.sniggle.pgp.crypt.PGPMessageEncryptor;
 import me.sniggle.pgp.crypt.PGPMessageSigner;
 
-public class PGPEmailMessageSender implements MessageSender {
-    private String emailHost;
-    private String emailUser;
-    private String emailPass;
-    private String emailPort = "25";
-    private String emailName;
-    private File senderPublicKey;
-    private File senderPrivateKey;
-    private String senderPrivateKeyPassword;
-
-    @Override
-    public String getType() {
-        return "email";
-    }
+public class PGPEmailMessageSender extends EmailMessageSender {
 
     /**
      * Send the email to the recipient
@@ -52,25 +33,24 @@ public class PGPEmailMessageSender implements MessageSender {
      * If set to true, The public sender key will be sent as an attachment.
      */
     public void send(Message message, KeyManager keyManager, boolean attachSenderPublicKey) throws MessageSenderException {
+    	this.keyManager = keyManager;
         MimeMultipart emailContent = new MimeMultipart();
-        MimeMessage mimeMessage = new MimeMessage(getMailSession());  
         MimeBodyPart messageBodyPart = new MimeBodyPart();
-        InternetAddress fromAddr;
         try {
-        	fromAddr = new InternetAddress(emailUser);
-        	if (emailName!=null && emailName.trim().length()>0) {
-	        	try {
-					fromAddr.setPersonal(emailName);
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
+        	initMessageToSend(message);
+        	
+        	if (!message.isEncrypted() && !message.isSigned()) {
+        		messageBodyPart.setContent(message.getBody(), message.getContentType());
+                emailContent.addBodyPart(messageBodyPart);
+
+        	} else if (message.isEncrypted() && !message.isSigned()){
+        		messageBodyPart.setContent(encryptMessageBody(message), message.getContentType());
+                emailContent.addBodyPart(messageBodyPart);
+
+        	} else if (message.isSigned() && !message.isEncrypted()) {
+        		emailContent = signMessageBody(message);
         	}
-            mimeMessage.setFrom(fromAddr);
-            mimeMessage.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(message.getRecipient().getEmail()));
-            mimeMessage.setSubject(message.getSubject(), "utf-8");
-            messageBodyPart.setContent(processBody(message, keyManager), message.getContentType());
-            emailContent.addBodyPart(messageBodyPart);
-            mimeMessage.setContent(emailContent);
+            theMessageToSend.setContent(emailContent);
 
             if(attachSenderPublicKey){
                 attachSenderPublicKey(emailContent);
@@ -82,60 +62,12 @@ public class PGPEmailMessageSender implements MessageSender {
                 }
             }
 
-            Transport.send(mimeMessage); 
+            Transport.send(theMessageToSend); 
         } catch (MessagingException e) {
             throw new MessageSenderException("Failed to send email message", e);
         }
     }
 
-    /**
-     * encrypt or sign or both
-     * @param message
-     * @return
-     * @throws MessageSenderException
-     * @throws KeyNotFoundException
-     */
-    private String processBody(Message message, KeyManager keyManager) throws MessageSenderException {
-        String processedBody = message.getBody();
-        if(message.isEncrypted() && message.getRecipientPublicKey() == null){
-            PublicKey key = keyManager.get(message.getRecipient().getEmail());
-            File keyFile = new File (key.getKeyFileLocation());
-            message.setRecipientPublicKey(keyFile);
-        }
-
-        if(message.isEncrypted() && message.isSigned()){
-            processedBody = encryptAndSignMessageBody(message);
-        }
-        else if(message.isEncrypted()){
-            processedBody = encryptMessageBody(message);
-        }
-        else if(message.isSigned()){
-            processedBody = signMessageBody(message);
-        }
-        return processedBody;
-    }
-
-    private Session getMailSession(){
-        Properties properties = new Properties();
-
-        if (emailHost==null) {
-        	throw new NullPointerException("Missing property emailHost");
-        }
-        if (emailUser==null) {
-        	throw new NullPointerException("Missing property emailUser");
-        }
-        
-        properties.setProperty("mail.smtp.host", emailHost); 
-        properties.setProperty("mail.smtp.port", emailPort == null ? "25" : emailPort); 
-        
-        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {  
-            protected PasswordAuthentication getPasswordAuthentication() {  
-                   return new PasswordAuthentication(emailUser, emailPass);
-            }  
-        });
-
-        return session;
-    }
 
     /**
      * Encrypt a message using provided recipient public key
@@ -166,22 +98,39 @@ public class PGPEmailMessageSender implements MessageSender {
      * @param message
      * @return
      * @throws MessageSenderException
+     * @throws MessagingException 
      * @throws KeyNotFoundException
      */
-    private String signMessageBody(Message message) throws MessageSenderException {
-        PGPMessageSigner signer = new PGPMessageSigner();
+    private MimeMultipart signMessageBody(Message message) throws MessageSenderException, MessagingException {
 
-        ByteArrayInputStream bodyIS = new ByteArrayInputStream(message.getBody().getBytes());
-        ByteArrayOutputStream bodyOS = new ByteArrayOutputStream();
+        MimeBodyPart theActualMessage = new MimeBodyPart();
+        theActualMessage.setText(message.getBody());
+
+        PGPMessageSigner signer = new PGPMessageSigner();
+        
+        ByteArrayInputStream messageIn = new ByteArrayInputStream(message.getBody().getBytes());
+        ByteArrayOutputStream signedMessageOut = new ByteArrayOutputStream();
 
         signer.signMessage(
             getSenderPrivateKeyInputStream(), 
             message.getRecipient().getEmail(),
             senderPrivateKeyPassword, 
-            bodyIS, 
-            bodyOS);
+            messageIn, 
+            signedMessageOut);
+        
+        MimeBodyPart signedPart = new MimeBodyPart();
+        DataSource ds = new ByteArrayDataSource(signedMessageOut.toByteArray(), "application/pgp-signature");
+        signedPart.setDataHandler(new DataHandler(ds));
+        signedPart.setHeader("Content-Type", "application/pgp-signature; name=\"signature.asc\"");
+        signedPart.setHeader("Content-Disposition", "inline; filename=\"signature.asc\"");
 
-        return bodyOS.toString();
+        // Create a Multipart to hold the message parts
+        MimeMultipart multipart = new MimeMultipart();
+        multipart.setSubType("signed; protocol=\"application/pgp-signature\"; micalg=php-sha256");
+        multipart.addBodyPart(theActualMessage);
+        multipart.addBodyPart(signedPart);
+        
+        return multipart;
     }
 
     /**
@@ -242,110 +191,5 @@ public class PGPEmailMessageSender implements MessageSender {
         }
     }
 
-    /**
-     * Get an input stream from the senders private key file.
-     * The file location is retrieved from the key manager
-     * unless it has been overridden.
-     * @return
-     * @throws MessageSenderException
-     * @throws KeyNotFoundException
-     * @throws Exception
-     */
-    private FileInputStream getSenderPrivateKeyInputStream() throws MessageSenderException {
-        File privateKeyFile = senderPrivateKey;
-        MessageSenderException exception = new MessageSenderException("The email can not be signed because no private key has been provided.");
-        try {
-            if(privateKeyFile == null)
-                throw exception;
-            return new FileInputStream(privateKeyFile);
-        } catch (FileNotFoundException e) {
-            exception.initCause(e);
-            throw exception;
-        }
-    }
 
-    /**
-     * Get an input stream from the recipeints public key file.
-     * The file location is retrieved from the key manager
-     * unless it has been overridden.
-     * @return
-     * @throws MessageSenderException
-     * @throws KeyNotFoundException
-     */
-    private FileInputStream getRecipientPublicKeyInputStream(Message message) throws MessageSenderException {
-        File keyFile = message.getRecipientPublicKey();
-        MessageSenderException exception = new MessageSenderException("The email can not be encrypted because no public key has been provided");
-        try {
-            if(keyFile == null)
-                throw exception;
-            return new FileInputStream(message.getRecipientPublicKey());
-        } catch (FileNotFoundException e) {
-            exception.initCause(e);
-            throw exception;
-        }
-    }
-
-    public String getEmailHost() {
-        return emailHost;
-    }
-
-    public void setEmailHost(String emailHost) {
-        this.emailHost = emailHost;
-    }
-
-    public String getEmailUser() {
-        return emailUser;
-    }
-
-    public void setEmailUser(String emailUser) {
-        this.emailUser = emailUser;
-    }
-    
-    public String getEmailName() {
-		return emailName;
-	}
-
-	public void setEmailName(String emailName) {
-		this.emailName = emailName;
-	}
-
-	public String getEmailPass() {
-        return emailPass;
-    }
-
-    public void setEmailPass(String emailPass) {
-        this.emailPass = emailPass;
-    }
-
-    public String getEmailPort() {
-        return emailPort;
-    }
-
-    public void setEmailPort(String emailPort) {
-        this.emailPort = emailPort;
-    }
-
-    public File getSenderPublicKey() {
-        return senderPublicKey;
-    }
-
-    public void setSenderPublicKey(File senderPublicKey) {
-        this.senderPublicKey = senderPublicKey;
-    }
-
-    public File getSenderPrivateKey() {
-        return senderPrivateKey;
-    }
-
-    public void setSenderPrivateKey(File senderPrivateKey) {
-        this.senderPrivateKey = senderPrivateKey;
-    }
-
-    public String getSenderPrivateKeyPassword() {
-        return senderPrivateKeyPassword;
-    }
-
-    public void setSenderPrivateKeyPassword(String senderPrivateKeyPassword) {
-        this.senderPrivateKeyPassword = senderPrivateKeyPassword;
-    }
 }

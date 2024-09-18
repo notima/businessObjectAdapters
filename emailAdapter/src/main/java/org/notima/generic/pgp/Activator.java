@@ -30,7 +30,11 @@ public class Activator extends BaseActivator {
 
 	@Override
 	public void doStart() throws IOException {
-        PGPEmailMessageSender emailSender = new PGPEmailMessageSender();
+		// For Bouncy Castle
+//		  Security.addProvider(new BouncyCastleProvider());
+//        EmailMessageSender emailSender = new BCPGPEmailMessageSender();
+		
+        EmailMessageSender emailSender = new PGPEmailMessageSender();
         ConfigurationAdmin configurationAdmin = null;
 		ServiceReference<ConfigurationAdmin> reference = bundleContext.getServiceReference(ConfigurationAdmin.class);
         if (reference != null) {
