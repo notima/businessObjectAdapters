@@ -19,8 +19,10 @@ import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
+import org.notima.generic.businessobjects.InvoiceWriterOptions;
 import org.notima.generic.businessobjects.tools.InvoiceListMerger;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.util.LocalDateUtils;
 
 @Command(scope = "notima", name = "write-invoices", description = "Reads invoices from an XML-file and writes them to the destination adapter")
 @Service
@@ -46,6 +48,9 @@ public class WriteInvoices extends AbstractAction {
     
     @Option(name="--use-tax-id", description="Use tax ID to map the customer", required = false, multiValued = false)
     private boolean useTaxId;
+
+    @Option(name="--map-on-address-first", description="Use address first to map the customer", required = false, multiValued = false)
+    private boolean mapOnAddressFirst;
     
 	@Argument(index = 0, name = "adapterName", description ="The destination adapter name", required = true, multiValued = false)
 	private String adapterName = "";
@@ -63,6 +68,8 @@ public class WriteInvoices extends AbstractAction {
 	
 	private Date	invoiceDate;
 	private Date	dueDate;
+	
+	private InvoiceWriterOptions	writerOptions = new InvoiceWriterOptions();
 	
 	@Override
 	protected Object onExecute() throws Exception {
@@ -86,9 +93,12 @@ public class WriteInvoices extends AbstractAction {
 
 	private void mergeIfThatsAnOption() {
 		if (mergeOnBp) {
+			writerOptions.setMergeOnBusinessPartner(mergeOnBp);
 			InvoiceListMerger merger = new InvoiceListMerger(invoiceList);
 			merger.mergeListByBusinessPartner();
 			invoiceList = merger.getList();
+			invoices.clear();
+			invoices.addAll(invoiceList.getInvoiceList());
 		}
 	}
 	
@@ -96,19 +106,24 @@ public class WriteInvoices extends AbstractAction {
 		
 		if (invoiceDateStr!=null) {
 			invoiceDate = dfmt.parse(invoiceDateStr);
+			writerOptions.setInvoiceDate(LocalDateUtils.asLocalDate(invoiceDate));
 		}
 		if (dueDateStr!=null) {
 			dueDate = dfmt.parse(dueDateStr);
+			writerOptions.setDueDate(LocalDateUtils.asLocalDate(dueDate));
 		}
 		
 		if (createLimit==null) createLimit = 0;
+		writerOptions.setCreateLimit(createLimit);
+		writerOptions.setMapOnTaxId(useTaxId);
+		writerOptions.setMapOnAddressFirst(mapOnAddressFirst);
 		
 	}
 	
 	
 	private void writeInvoices() throws Exception {
 		
-		adapter.writeInvoices(invoices, invoiceDate, dueDate, false, createLimit, true);
+		adapter.writeInvoices(invoices, writerOptions);
 		
 	}
 	

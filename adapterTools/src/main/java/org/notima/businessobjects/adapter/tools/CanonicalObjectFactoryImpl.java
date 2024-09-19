@@ -14,6 +14,7 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
+import org.notima.generic.ifacebusinessobjects.TimeRecordServiceFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -34,6 +35,8 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, AccountingVoucherConverter<?>> accountingVoucherConverters = new TreeMap<String, AccountingVoucherConverter<?>>();
 	
 	private Map<String, PaymentFactory> paymentFactories = new TreeMap<String, PaymentFactory>();
+	
+	private Map<String, TimeRecordServiceFactory> timeRecordServiceFactories = new TreeMap<String, TimeRecordServiceFactory>();
 	
 	private Map<String, PaymentBatchProcessor> paymentBatchProcessors = new TreeMap<String, PaymentBatchProcessor>();
 	
@@ -148,6 +151,31 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	}
 	
 	/**
+	 * Resets the services by re-reading the service references for TimeRecordServices
+	 * 
+	 * @throws InvalidSyntaxException
+	 */
+	public void resetTimeRecordServices() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		
+		Collection<ServiceReference<TimeRecordServiceFactory>> references = ctx.getServiceReferences(TimeRecordServiceFactory.class, null);		
+
+		timeRecordServiceFactories.clear();
+		
+		if (references!=null) {
+			TimeRecordServiceFactory srv;
+			for (ServiceReference<TimeRecordServiceFactory> sr : references) {
+				srv = ctx.getService(sr);
+				timeRecordServiceFactories.put(srv.getSystemName(), srv);
+			}
+		}
+
+	}
+	
+	
+	/**
 	 * Resets the services by re-reading the service references for PaymentFactories
 	 * 
 	 * @throws InvalidSyntaxException
@@ -237,6 +265,20 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			return null;
 		}
 	}
+	
+	public Collection<TimeRecordServiceFactory> listTimeRecordServices() {
+		
+		try {
+			resetTimeRecordServices();
+			return timeRecordServiceFactories.values();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
+	
+	
 	
 	/**
 	 * Looks up an adapter with given name.

@@ -1,6 +1,5 @@
 package org.notima.businessobjects.adapter.fortnox;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.InvoiceOperationResult;
+import org.notima.generic.businessobjects.InvoiceWriterOptions;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.util.LocalDateUtils;
@@ -26,20 +26,19 @@ public class FortnoxInvoiceWriter {
 	private FortnoxAdapter	adapter;
 	private FortnoxClient3 fortnoxClient;
 	private InvoiceOperationResult result = new InvoiceOperationResult();
-	private LocalDate	invoiceDate;
-	private LocalDate	dueDate;
-	private boolean 	updateExisting = true;
-	private boolean		createBusinessPartner = true;
-	private int			createLimit;
+	
+	private InvoiceWriterOptions	options;
+	
 	// Create an e-mail / bp number mapping
 	private Map<String, String> custMap = new TreeMap<String,String>();
 	private Map<String, BusinessPartner<?>> custMapById = new TreeMap<String, BusinessPartner<?>>();
 	private Map<TaxSubjectIdentifier, BusinessPartner<?>> custMapByTaxId = new TreeMap<TaxSubjectIdentifier, BusinessPartner<?>>();
 	
 	
-	public FortnoxInvoiceWriter(FortnoxAdapter adapter) {
+	public FortnoxInvoiceWriter(FortnoxAdapter adapter, InvoiceWriterOptions opts) {
 		
 		this.adapter = adapter;
+		options = opts;
 		fortnoxClient = adapter.getClient();
 		
 	}
@@ -102,7 +101,7 @@ public class FortnoxInvoiceWriter {
 						bp.setIdentityNo(lookedUpBp.getIdentityNo());
 					}
 				} else {
-					if (!createBusinessPartner) {
+					if (!options.isCreateBusinessPartner()) {
 						throw new Exception("Can't find business partner " + custNo + " " + bp.getName());
 					}
 					// New customer
@@ -134,8 +133,8 @@ public class FortnoxInvoiceWriter {
 				bp = o.getBusinessPartner();
 				bp.setName(fcustomer.getName());
 				bp.setIdentityNo(fcustomer.getCustomerNumber());
-				o.setInvoiceDate(LocalDateUtils.asDate(invoiceDate));
-				o.setDueDate(LocalDateUtils.asDate(dueDate));
+				o.setInvoiceDate(LocalDateUtils.asDate(options.getInvoiceDate()));
+				o.setDueDate(LocalDateUtils.asDate(options.getDueDate()));
 				FortnoxAdapter.logger.info("Persisting invoice for order " + o.getOrderKey());
 				adapter.persist(o);
 				result.incrementCreated();
@@ -150,8 +149,8 @@ public class FortnoxInvoiceWriter {
 					 result.incrementUpdated();
 				 }
 			}
-			if (createLimit>0 && ocount>=createLimit) {
-				FortnoxAdapter.logger.info("Create limit " + createLimit + " reached.");
+			if (options.getCreateLimit()>0 && ocount>=options.getCreateLimit()) {
+				FortnoxAdapter.logger.info("Create limit " + options.getCreateLimit() + " reached.");
 				break;
 			}
 
@@ -194,14 +193,14 @@ public class FortnoxInvoiceWriter {
 	
 	private void initDates() {
 		
-		if (invoiceDate==null) {
-			invoiceDate = LocalDateUtils.asLocalDate(Calendar.getInstance().getTime());
+		if (options.getInvoiceDate()==null) {
+			options.setInvoiceDate(LocalDateUtils.asLocalDate(Calendar.getInstance().getTime()));
 		}
 		
-		if (dueDate==null) {
+		if (options.getDueDate()==null) {
 			Calendar cal = Calendar.getInstance();
 			cal.add(Calendar.DATE, 10);
-			dueDate = LocalDateUtils.asLocalDate(cal.getTime());
+			options.setDueDate(LocalDateUtils.asLocalDate(cal.getTime()));
 		}
 		
 	}
@@ -289,46 +288,6 @@ public class FortnoxInvoiceWriter {
 			}
 		}
 		return result;
-	}
-	
-	public LocalDate getInvoiceDate() {
-		return invoiceDate;
-	}
-
-	public void setInvoiceDate(LocalDate invoiceDate) {
-		this.invoiceDate = invoiceDate;
-	}
-
-	public LocalDate getDueDate() {
-		return dueDate;
-	}
-
-	public void setDueDate(LocalDate dueDate) {
-		this.dueDate = dueDate;
-	}
-
-	public boolean isUpdateExisting() {
-		return updateExisting;
-	}
-
-	public void setUpdateExisting(boolean updateExisting) {
-		this.updateExisting = updateExisting;
-	}
-
-	public boolean isCreateBusinessPartner() {
-		return createBusinessPartner;
-	}
-
-	public void setCreateBusinessPartner(boolean createBusinessPartner) {
-		this.createBusinessPartner = createBusinessPartner;
-	}
-
-	public int getCreateLimit() {
-		return createLimit;
-	}
-
-	public void setCreateLimit(int createLimit) {
-		this.createLimit = createLimit;
 	}
 
 	public InvoiceOperationResult getResult() {

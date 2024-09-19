@@ -52,6 +52,7 @@
 		<module>jsonAdapter</module>
 		<module>adyenAdapter</module>
 		<module>adapterPersistence</module>
+		<module>time4uAdapter</module>
 	</modules>
 
 	<dependencyManagement>

@@ -13,7 +13,8 @@ import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
 public class InvoiceHeaderTable extends GenericTable {
 
-	private NumberFormat nfmt = new DecimalFormat("#,##0.00");	
+	private NumberFormat nfmt = new DecimalFormat("#,##0.00");
+	private boolean includeAddress = false;
 	
 	class InvoiceComparator implements Comparator<InvoiceInterface> {
 		
@@ -53,9 +54,11 @@ public class InvoiceHeaderTable extends GenericTable {
 		
 	}
 	
-	public InvoiceHeaderTable(List<InvoiceInterface> invoices) {
-		initColumns();
+	public InvoiceHeaderTable(List<InvoiceInterface> invoices, boolean includeAddress) {
 
+		this.includeAddress = includeAddress;
+		initColumns();
+		
 		Collections.sort(invoices, new InvoiceComparator());
 		
 		Invoice ii;
@@ -76,9 +79,11 @@ public class InvoiceHeaderTable extends GenericTable {
 		
 	}
 	
-	public InvoiceHeaderTable(Invoice invoice) {
-		
+	public InvoiceHeaderTable(Invoice invoice, boolean includeAddress) {
+
+		this.includeAddress = includeAddress;
 		initColumns();
+		
 		addRow(invoice);
 
 	}
@@ -112,7 +117,7 @@ public class InvoiceHeaderTable extends GenericTable {
 				invoice.getInvoiceDate(),
 				invoice.getDocumentNumber() + (invoice.isCancelled() ? " **" : ""),
 				invoice.getCustomerNumber(),
-				invoice.getCustomerName(),
+				getCustomerName(invoice),
 				invoice.getOrderReference(),
 				invoice.getYourOrderNumber(),
 				invoice.getOurReference(),
@@ -127,6 +132,21 @@ public class InvoiceHeaderTable extends GenericTable {
 				invoice.getWarehouseReady()
 				)
 				;
+		
+	}
+	
+	private String getCustomerName(Invoice invoice) {
+		
+		if (!includeAddress) {
+			return invoice.getCustomerName();
+		} else {
+			StringBuffer buf = new StringBuffer();
+			buf.append(invoice.getCustomerName());
+			if (invoice.getAddress1()!=null && invoice.getAddress1().trim().length()>0) {
+				buf.append("\n" + invoice.getAddress1());
+			}
+			return buf.toString();
+		}
 		
 	}
 	
