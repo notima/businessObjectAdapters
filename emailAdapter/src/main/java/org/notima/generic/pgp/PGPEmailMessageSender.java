@@ -180,16 +180,23 @@ public class PGPEmailMessageSender extends EmailMessageSender {
      * @return
      * @throws MessageSenderException
      * @throws MessagingException 
+     * @throws IOException 
      * @throws KeyNotFoundException
      */
-    private MimeMultipart signMessageBody(Message message) throws MessageSenderException, MessagingException {
+    private MimeMultipart signMessageBody(Message message) throws MessageSenderException, MessagingException, IOException {
 
         MimeBodyPart theActualMessage = new MimeBodyPart();
         theActualMessage.setContent(message.getBody(), message.getContentType());
 
+        MimeMultipart outerMultipart = new MimeMultipart("mixed");
+        outerMultipart.addBodyPart(theActualMessage);
+        theMessageToSend.setContent(outerMultipart);
+        
         PGPMessageSigner signer = new PGPMessageSigner();
         
-        ByteArrayInputStream messageIn = new ByteArrayInputStream(message.getBody().getBytes());
+        ByteArrayOutputStream messageToSign = new ByteArrayOutputStream();
+        outerMultipart.writeTo(messageToSign);
+        ByteArrayInputStream messageIn = new ByteArrayInputStream(messageToSign.toByteArray());
         ByteArrayOutputStream signedMessageOut = new ByteArrayOutputStream();
 
         signer.signMessage(
