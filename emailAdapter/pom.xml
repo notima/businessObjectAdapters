@@ -48,6 +48,7 @@
 			<artifactId>simple-pgp-java</artifactId>
 		</dependency>
 		
+		<!-- Below two are only needed for BCPGPEmailMessageSender -->
 		<dependency>
 		    <groupId>org.bouncycastle</groupId>
 		    <artifactId>bcpg-jdk15on</artifactId>

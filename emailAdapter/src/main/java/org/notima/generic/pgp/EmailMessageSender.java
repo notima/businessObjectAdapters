@@ -29,6 +29,7 @@ public abstract class EmailMessageSender implements MessageSender {
     protected File senderPublicKey;
     protected File senderPrivateKey;
     protected String senderPrivateKeyPassword;
+    protected boolean attachPublicKey;
     
     protected MimeMessage theMessageToSend;
     
@@ -144,7 +145,6 @@ public abstract class EmailMessageSender implements MessageSender {
             throw exception;
         }
     }
-    
     
 	public String getEmailHost() {
 		return emailHost;
