@@ -95,8 +95,10 @@ public abstract class EmailMessageSender implements MessageSender {
         if (keyManager!=null) {
             if(message.getRecipientPublicKey() == null){
                 PublicKey key = keyManager.get(message.getRecipient().getEmail());
-                File keyFile = new File (key.getKeyFileLocation());
-                message.setRecipientPublicKey(keyFile);
+                if (key!=null) {
+                	File keyFile = new File (key.getKeyFileLocation());
+                	message.setRecipientPublicKey(keyFile);
+                }
             }
         }
     	

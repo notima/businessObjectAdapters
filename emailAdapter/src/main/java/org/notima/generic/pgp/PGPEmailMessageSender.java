@@ -10,7 +10,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
+import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Transport;
 import javax.mail.internet.MimeBodyPart;
@@ -52,17 +56,18 @@ public class PGPEmailMessageSender extends EmailMessageSender {
         	if (!message.isEncrypted() && !message.isSigned()) {
         		messageBodyPart.setContent(message.getBody(), message.getContentType());
                 emailContent.addBodyPart(messageBodyPart);
+                theMessageToSend.setContent(emailContent);
+
 
         	} else if (message.isEncrypted() && !message.isSigned()){
         		messageBodyPart.setContent(encryptMessageBody(message), message.getContentType());
                 emailContent.addBodyPart(messageBodyPart);
-
+                theMessageToSend.setContent(emailContent);
+                
         	} else if (message.isSigned() && !message.isEncrypted()) {
-        		emailContent = signMessageBody(message);
         		
-                if(attachSenderPublicKey){
-                    attachSenderPublicKey(emailContent);
-                }
+        		MimeMultipart contentToSign = prepareForSigning(message, theMessageToSend);
+        		emailContent = signMessage(theMessageToSend, contentToSign);
         		
         	} else if (message.isSigned() && message.isEncrypted()) {
         		
@@ -85,9 +90,9 @@ public class PGPEmailMessageSender extends EmailMessageSender {
             	encryptedMultipart.addBodyPart(controlPart);
             	encryptedMultipart.addBodyPart(encryptedPart);
             	emailContent = encryptedMultipart;
+                theMessageToSend.setContent(emailContent);
         		
         	}
-            theMessageToSend.setContent(emailContent);
 
             if(message.getAttachemnts() != null){
                 for(File attachment : message.getAttachemnts()){
@@ -147,6 +152,85 @@ public class PGPEmailMessageSender extends EmailMessageSender {
     	
     }
     
+    private MimeMultipart signMessage(MimeMessage mimeMessage, MimeMultipart contentToAddsignatureTo) throws IOException, MessagingException, MessageSenderException {
+    	
+    	ByteArrayOutputStream mimeMessageBytes = new ByteArrayOutputStream();
+    	Enumeration<Header> headers = mimeMessage.getAllHeaders();
+    	List<Header> headerList = new ArrayList<Header>();
+    	for (Header h = headers.nextElement() ; headers.hasMoreElements() ; ) {
+    		headerList.add(h);
+    	}
+    	
+    	mimeMessage.writeTo(mimeMessageBytes);
+    	ByteArrayOutputStream cleansedMessage = removeLinesBeforeContentType(mimeMessageBytes);
+    	
+    	// String withProtectedHeaders = addProtectedHeaders(mimeMessage, cleansedMessage.toString());
+    	
+    	String signature = signContent(mimeMessageBytes.toString());
+    	
+        MimeBodyPart signedPart = new MimeBodyPart();
+        DataSource ds = new ByteArrayDataSource(signature.getBytes(), "application/pgp-signature");
+        signedPart.setDataHandler(new DataHandler(ds));
+        signedPart.setHeader("Content-Type", "application/pgp-signature; name=\"signature.asc\"");
+        signedPart.setHeader("Content-Disposition", "inline; filename=\"signature.asc\"");
+
+        contentToAddsignatureTo.addBodyPart(signedPart);
+        
+    	return contentToAddsignatureTo;
+    	
+    }
+    
+    private String getProtectedHeaders(MimeMessage mimeMessage) throws MessagingException {
+
+    	String boundary = "----protectedHeaders";
+    	
+    	// Create a string to insert
+    	String result = "Content-Type: multipart/mixed; boundary=\"" + boundary + "\"; protected-headers=\"v1\"\n";
+    	result += getProtectedHeadersAsString(mimeMessage);
+    	
+    	result += "\n" + boundary + "\n\n";
+    	return result;
+    }
+    
+    private String getProtectedHeadersAsString(MimeMessage mimeMessage) throws MessagingException {
+
+    	String result = "From: " + mimeMessage.getHeader("From", null) + "\n";
+    	result += "To: " + mimeMessage.getHeader("To", null) + "\n";
+    	result += "Subject: " + mimeMessage.getHeader("Subject", null) + "\n\n";
+    	
+    	return result;
+    	
+    }
+    
+    private String addProtectedHeaders(MimeMessage mimeMessage, String content) throws MessagingException {
+    	
+    	return insertBeforeSecondContentType(content, getProtectedHeaders(mimeMessage));
+    	
+    }
+    
+    public static String insertBeforeSecondContentType(String input, String stringToInsert) {
+        String searchStr = "Content-Type";
+        int firstIndex = input.indexOf(searchStr);
+
+        // Check if the first occurrence exists
+        if (firstIndex == -1) {
+            return input; // No "Content-Type" found
+        }
+
+        // Find the second occurrence of "Content-Type"
+        int secondIndex = input.indexOf(searchStr, firstIndex + searchStr.length());
+        
+        // Check if the second occurrence exists
+        if (secondIndex == -1) {
+            return input; // Only one "Content-Type" found, no insertion needed
+        }
+
+        // Insert the new string before the second "Content-Type"
+        StringBuilder result = new StringBuilder(input);
+        result.insert(secondIndex, stringToInsert);
+
+        return result.toString();
+    }
     
     /**
      * Encrypt a message using provided recipient public key
@@ -172,6 +256,39 @@ public class PGPEmailMessageSender extends EmailMessageSender {
         return bodyOS.toString();
     }
     
+    private MimeMultipart prepareForSigning(Message message, MimeMessage mimeMessage) throws MessagingException {
+
+        // Create a Multipart to hold the message parts
+        MimeMultipart multipartForSigning = new MimeMultipart();
+        multipartForSigning.setSubType("signed; protocol=\"application/pgp-signature\"; micalg=pgp-sha1");
+        // multipartForSigning.setPreamble(getProtectedHeadersAsString(mimeMessage));
+
+        MimeBodyPart theActualMessage = new MimeBodyPart();
+        theActualMessage.setContent(message.getBody(), message.getContentType());
+        
+        multipartForSigning.addBodyPart(theActualMessage);
+        mimeMessage.setContent(multipartForSigning);
+        
+        return multipartForSigning;
+    	
+    }
+    
+    private String signContent(String contentToSign) throws MessageSenderException {
+    	
+        ByteArrayInputStream messageIn = new ByteArrayInputStream(contentToSign.getBytes());
+        ByteArrayOutputStream signedMessageOut = new ByteArrayOutputStream();
+
+        PGPMessageSigner signer = new PGPMessageSigner();
+        
+        signer.signMessage(
+            getSenderPrivateKeyInputStream(), 
+            getEmailUser(),
+            senderPrivateKeyPassword, 
+            messageIn, 
+            signedMessageOut);
+    	
+        return signedMessageOut.toString();
+    }
     
     /**
      * Sign a message using provided sender private key
@@ -201,7 +318,7 @@ public class PGPEmailMessageSender extends EmailMessageSender {
 
         signer.signMessage(
             getSenderPrivateKeyInputStream(), 
-            message.getRecipient().getEmail(),
+            getEmailUser(),
             senderPrivateKeyPassword, 
             messageIn, 
             signedMessageOut);
