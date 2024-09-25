@@ -54,6 +54,8 @@ public class GenericTable {
     private LanguageTranslator translator;
     private String			   lang;
 
+    private String				description;
+    
     protected String translate(String text) {
     	if (translator!=null && lang!=null) {
     		return translator.getTranslation(text, lang);
@@ -217,7 +219,19 @@ public class GenericTable {
         return shellTable;
     }
     
-    /**
+    public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getTranslatedDescription() {
+		return translate(description);
+	}
+	
+	/**
      * Create a HTML table from the provided data
      * @return	A HTML table.
      */
