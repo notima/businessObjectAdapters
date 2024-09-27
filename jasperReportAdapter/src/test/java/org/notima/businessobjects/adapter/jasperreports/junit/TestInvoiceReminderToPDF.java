@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Properties;
 
-import javax.xml.bind.JAXB;
+import jakarta.xml.bind.JAXB;
 
 import org.junit.Before;
 import org.junit.Test;

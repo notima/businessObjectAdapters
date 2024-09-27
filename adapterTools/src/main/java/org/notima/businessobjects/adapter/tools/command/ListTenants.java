@@ -54,6 +54,7 @@ public class ListTenants implements Action {
 			
 			for (BusinessObjectFactory bf : adaptersToList) {
 				
+				@SuppressWarnings("unchecked")
 				BusinessPartnerList<Object> bpl = 
 						bf.listTenants();
 				if (bpl!=null) {

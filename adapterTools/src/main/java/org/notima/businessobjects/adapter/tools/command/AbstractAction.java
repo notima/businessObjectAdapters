@@ -41,7 +41,7 @@ public abstract class AbstractAction implements Action {
                 Confirmation annotation = field.getAnnotation(Confirmation.class);
                 Class<?> confirmationClass = field.getAnnotation(Confirmation.class).type();
                 org.notima.businessobjects.adapter.tools.command.annotation.processor.ConfirmationProcessor confirmation = 
-                        (org.notima.businessobjects.adapter.tools.command.annotation.processor.ConfirmationProcessor) confirmationClass.newInstance();
+                        (org.notima.businessobjects.adapter.tools.command.annotation.processor.ConfirmationProcessor) confirmationClass.getDeclaredConstructor().newInstance();
                 sess.getConsole().println(confirmation.getConfirmationMessage(field.getName(), field.get(this), annotation.messageFormat()));
                 hasConfiramtion = true;
             }
@@ -59,16 +59,19 @@ public abstract class AbstractAction implements Action {
      * @throws Exception
      */
     protected void updateMacros() throws Exception{
-        for(Field field  : this.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Argument.class)) {
-                field.setAccessible(true);
-                if(field.isAccessible()) {
-                    sess.put(((Argument)field.getAnnotation(Argument.class)).name(), field.get(this));
-                } else {
-                    throw new Exception(field.getName() + " is inaccessible");
-                }
-            }
-        }
+    	for (Field field : this.getClass().getDeclaredFields()) {
+    	    if (field.isAnnotationPresent(Argument.class)) {
+    	    	try {
+   	                field.setAccessible(true);
+    	            // Retrieve the value safely after making it accessible
+    	            sess.put(((Argument) field.getAnnotation(Argument.class)).name(), field.get(this));
+    	        } catch (IllegalAccessException e) {
+    	            throw new Exception(field.getName() + " is inaccessible", e);
+    	        } catch (SecurityException e) {
+    	            throw new Exception("Security exception while accessing field: " + field.getName(), e);
+    	        }
+    	    }
+    	}
     }
 
     /**

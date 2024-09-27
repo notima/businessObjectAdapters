@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.notima.generic.businessobjects.adapter</groupId>
     <artifactId>businessObjectAdapters</artifactId>
-    <version>1.9.0</version>
+    <version>1.9.1-SNAPSHOT</version>
   </parent>
   <artifactId>infometricAdapter</artifactId>
   <packaging>bundle</packaging>
@@ -26,13 +26,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.1</version>
+				<version>3.0.0-M5</version>
 			</plugin>
 			
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
-				<version>4.2.0</version>
+				<version>5.1.8</version>
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>

@@ -3,7 +3,7 @@ package org.notima.businessobjects.adapter.jasperreports.cmd;
 import java.io.File;
 import java.util.Properties;
 
-import javax.xml.bind.JAXB;
+import jakarta.xml.bind.JAXB;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;

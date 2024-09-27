@@ -44,7 +44,8 @@ public abstract class AdapterCommand extends AbstractAction {
     @SuppressWarnings("rawtypes")
 	protected List<BusinessObjectFactory> adaptersToList;
     
-    protected void populateAdapters() {
+    @SuppressWarnings("rawtypes")
+	protected void populateAdapters() {
     	
 		adaptersToList = new ArrayList<BusinessObjectFactory>();
 		if (bofs!=null) {

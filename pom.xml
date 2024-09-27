@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>businessObjectAdapters</artifactId>
-	<version>1.9.0</version>
+	<version>1.9.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<distributionManagement>
@@ -16,20 +16,21 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<notima-util.version>0.0.6</notima-util.version>
-		<businessobjects.version>1.0.0</businessobjects.version>
-		<karaf.version>4.2.9</karaf.version>
+		<karaf.version>4.4.6</karaf.version>
+		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 		<apache.poi.version>3.17</apache.poi.version>
+		<notima-util.version>0.0.7</notima-util.version>
+		<businessobjects.version>1.0.1-SNAPSHOT</businessobjects.version>
 		<fortnox4j.version>2.0.2</fortnox4j.version>
-		<gson.version>2.8.9</gson.version>
+		<gson.version>2.11.0</gson.version>
 		<siefilelib.version>1.0.5</siefilelib.version>
 		<commons-csv.version>1.6</commons-csv.version>
 		<swish4j.version>0.0.4</swish4j.version>
 
 		<!-- Belongs to sveaWebpayAdapter but must be here to be accessible to feature.xml -->		
-		<pmt-admin-api.version>2.1.3</pmt-admin-api.version>
-		<webpayadminreports.version>0.0.8</webpayadminreports.version>
-		<webpay-common.version>0.0.8</webpay-common.version>
+		<pmt-admin-api.version>2.2.0-SNAPSHOT</pmt-admin-api.version>
+		<webpayadminreports.version>0.0.9-SNAPSHOT</webpayadminreports.version>
+		<webpay-common.version>0.0.9-SNAPSHOT</webpay-common.version>
 		
 	</properties>
 
@@ -77,25 +78,6 @@
 
 	<dependencies>
 
-		<!-- Overrides of libraries included further down -->
-		<dependency>
-		    <groupId>ch.qos.reload4j</groupId>
-    		<artifactId>reload4j</artifactId>
-    		<version>1.2.24</version>
-		</dependency>
-		<!-- End of overrides -->
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.36</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.7.36</version>
-		</dependency>
-
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.core</artifactId>
@@ -128,9 +110,16 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.1</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.10.1</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.junit.vintage</groupId>
+			<artifactId>junit-vintage-engine</artifactId>
+			<version>5.10.1</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -142,17 +131,17 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.1</version>
+				<version>3.10.1</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>21</source>
+					<target>21</target>
 				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.7</version>
+				<version>1.6.13</version>
 				<extensions>true</extensions>
 				<configuration>
 					<serverId>ossrh</serverId>
@@ -167,7 +156,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
-				<version>2.2.1</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -181,7 +170,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.3.2</version>
+				<version>3.5.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -195,7 +184,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.12.1</version>
+				<version>3.0.0-M5</version>
 				<configuration>
 					<includes>
 						<include>**/AllTests.java</include>
@@ -206,11 +195,11 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>3.0.1</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
-						<phase>verify</phase>
+						<phase>deploy</phase>
 						<goals>
 							<goal>sign</goal>
 						</goals>
@@ -225,7 +214,7 @@
 https://github.com/notima/businessobjects</description>
 
 	<organization>
-		<name>Notima System Integration AB</name>
+		<name>Ekonomibolaget Notima AB</name>
 		<url>https://github.com/notima</url>
 	</organization>
 	<scm>
@@ -252,7 +241,7 @@ https://github.com/notima/businessobjects</description>
 		<developer>
 			<name>Daniel Tamm</name>
 			<email>daniel@notima.se</email>
-			<organization>Notima System Integration AB</organization>
+			<organization>Ekonomibolaget Notima AB</organization>
 			<organizationUrl>https://github.com/notima</organizationUrl>
 		</developer>
 	</developers>

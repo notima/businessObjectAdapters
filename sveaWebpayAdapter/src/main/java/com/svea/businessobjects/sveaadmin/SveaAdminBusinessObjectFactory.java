@@ -39,17 +39,17 @@ import com.svea.webpayadminservice.client.ArrayOfOrderListItem;
 import com.svea.webpayadminservice.client.ArrayOfOrderStatus;
 import com.svea.webpayadminservice.client.ArrayOflong;
 import com.svea.webpayadminservice.client.CreateOrderRequest;
-import com.svea.webpayadminservice.client.CreateOrderResponse;
+import com.svea.webpayadminservice.client.CreateOrderResponse2;
 import com.svea.webpayadminservice.client.CreatePaymentPlanDetails;
 import com.svea.webpayadminservice.client.DeliverOrderInformation;
 import com.svea.webpayadminservice.client.DeliveryRequest;
 import com.svea.webpayadminservice.client.DeliveryResponse;
 import com.svea.webpayadminservice.client.GetInvoiceInformation;
 import com.svea.webpayadminservice.client.GetInvoicesRequest;
-import com.svea.webpayadminservice.client.GetInvoicesResponse;
+import com.svea.webpayadminservice.client.GetInvoicesResponse2;
 import com.svea.webpayadminservice.client.GetOrderInformation;
 import com.svea.webpayadminservice.client.GetOrdersRequest;
-import com.svea.webpayadminservice.client.GetOrdersResponse;
+import com.svea.webpayadminservice.client.GetOrdersResponse2;
 import com.svea.webpayadminservice.client.IAdminService;
 import com.svea.webpayadminservice.client.OrderDeliveryStatus;
 import com.svea.webpayadminservice.client.OrderListItem;
@@ -57,7 +57,7 @@ import com.svea.webpayadminservice.client.OrderStatus;
 import com.svea.webpayadminservice.client.OrderType;
 import com.svea.webpayadminservice.client.SearchOrderFilter;
 import com.svea.webpayadminservice.client.SearchOrdersRequest;
-import com.svea.webpayadminservice.client.SearchOrdersResponse;
+import com.svea.webpayadminservice.client.SearchOrdersResponse2;
 import com.svea.webpayadminservice.client.TextMatchType;
 
 
@@ -101,9 +101,9 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		includeCancelledRows = ic!=null ? Boolean.parseBoolean(ic) : false; 
 	}
 	
-	public CreateOrderResponse createOrder(CreateOrderRequest request) {
+	public CreateOrderResponse2 createOrder(CreateOrderRequest request) {
 		
-		CreateOrderResponse response = adminServicePort.createOrder(request);
+		CreateOrderResponse2 response = adminServicePort.createOrder(request);
 		return response;
 		
 	}
@@ -136,6 +136,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public CreateOrderRequest toSveaCreateOrderRequest(OrderInvoice orderInvoice, CreatePaymentPlanDetails cpp) throws Exception {
 		
 		CreateOrderRequest dst;
@@ -200,6 +201,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		return null;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public DunningRun lookupDunningRun(String key, Date dueDateUntil) throws Exception {
 		// TODO Auto-generated method stub
@@ -253,7 +255,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		
 		oi.setClientId(Long.parseLong(webpayAdminBase.getCredentials().getAccountNo()));
 		
-		GetInvoicesResponse response = client.getInvoices(req);
+		GetInvoicesResponse2 response = client.getInvoices(req);
 		if (response.getErrorMessage()!=null) {
 			throw new Exception(response.toString());
 		}
@@ -301,7 +303,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		oi.setClientId(Long.parseLong(webpayAdminBase.getCredentials().getAccountNo()));
 		oi.setOrderType(ot);
 		
-		GetOrdersResponse response = client.getOrders(req);
+		GetOrdersResponse2 response = client.getOrders(req);
 		if (response.getErrorMessage()!=null) {
 			throw new Exception("Order " + key + " : " + response.getErrorMessage());
 		}
@@ -357,7 +359,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		sof.setTextMatchType(TextMatchType.CLIENT_ORDER_NUMBER);
 		sof.setTextMatch(clientOrderId);
 		
-		SearchOrdersResponse response = client.searchOrders(req);
+		SearchOrdersResponse2 response = client.searchOrders(req);
 		
 		Order<com.svea.webpayadminservice.client.Order> order = null;
 		
@@ -459,13 +461,14 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public FactoringReservation reserveForFactoring(Order order,
 			BusinessPartner factoringCompany) throws Exception {
 
 		
 		CreateOrderRequest req = toSveaCreateOrderRequest(order, null);
-		CreateOrderResponse result = createOrder(req);
+		CreateOrderResponse2 result = createOrder(req);
 		
 		FactoringReservation fr = new BasicFactoringReservation();
 		
@@ -485,6 +488,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		return fr;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public FactoringReservation reserveForFactoring(Invoice invoice,
 			BusinessPartner factoringCompany) throws Exception {
@@ -496,6 +500,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public FactoringReservation cancelReservation(Order order,
 			FactoringReservation reservation) throws Exception {
@@ -503,6 +508,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public double getPossibleFactoringAmount(BusinessPartner customer,
 			Currency currency, BusinessPartner factoringCompany)
@@ -511,6 +517,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		return 0;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public FactoringReply sendToFactoring(BusinessPartner factoringCompany,
 			Invoice invoice) throws Exception {
@@ -518,6 +525,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void afterSendToFactoring(BusinessPartner factoringCompany,
 			Invoice invoice, FactoringReply reply) throws Exception {
@@ -525,6 +533,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public AbstractAddress makeAddressFromLocation(BusinessPartner customer,
 			Person user, Location location) throws Exception {
@@ -538,6 +547,7 @@ public class SveaAdminBusinessObjectFactory extends BasicBusinessObjectFactory<I
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public FactoringReply returnToFactoring(BusinessPartner factoringCompany,
 			Invoice invoice) throws Exception {

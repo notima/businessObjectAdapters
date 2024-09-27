@@ -104,6 +104,7 @@ public class SveaPmtAdminBusinessObjectFactory extends BasicBusinessObjectFactor
 		return null;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public DunningRun lookupDunningRun(String key, Date dueDateUntil) throws Exception {
 		// TODO Auto-generated method stub

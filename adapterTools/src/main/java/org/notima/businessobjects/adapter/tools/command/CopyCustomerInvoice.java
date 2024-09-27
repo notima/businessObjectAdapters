@@ -14,7 +14,6 @@ import org.notima.businessobjects.adapter.tools.command.completer.AdapterComplet
 import org.notima.businessobjects.adapter.tools.exception.AdapterNotFoundException;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
-import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = "notima", name = "copy-customer-invoice", description = "Copy a customer invoices from one adapter to another")
