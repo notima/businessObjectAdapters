@@ -2,21 +2,23 @@
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.6.0" name="notima-business-objects-${project.version}">
 
 	 <!-- Include the Camel repository for a specific version -->
-    <repository>mvn:org.apache.camel.karaf/apache-camel/2.25.3/xml/features</repository>
+    <repository>mvn:org.apache.camel.karaf/apache-camel/3.21.4/xml/features</repository>
 
 	<feature name="notima-common" description="Notima Common Dependencies" version="${project.version}" install="manual">
-	    <feature>camel-jaxb</feature>
+	    <!-- <feature version="3.21.4">camel-jaxb</feature> -->
 		<bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
         <bundle>mvn:commons-configuration/commons-configuration/1.10</bundle>
-    	<bundle>wrap:mvn:commons-collections/commons-collections/LATEST</bundle>
-    	<bundle>mvn:commons-codec/commons-codec/LATEST</bundle>
+    	<bundle>wrap:mvn:commons-collections/commons-collections/3.2.2</bundle>
+    	<bundle>mvn:commons-codec/commons-codec/1.17.1</bundle>
     	<bundle>mvn:commons-beanutils/commons-beanutils/1.9.4</bundle>
     	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
+    	<bundle>mvn:jakarta.activation/jakarta.activation-api/2.1.3</bundle>
+		<bundle>mvn:jakarta.persistence/jakarta.persistence-api/3.2.0</bundle>
+		<bundle>mvn:jakarta.xml.bind/jakarta.xml.bind-api/3.0.1</bundle>
 		
 		<!-- JDK >=9 bundles -->
 		<!-- 
-		<bundle>mvn:com.sun.activation/javax.activation/1.2.0</bundle>
 		<bundle>mvn:javax.xml.soap/javax.xml.soap-api/1.4.0</bundle>
 		<bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
 		<bundle>mvn:javax.xml.ws/jaxws-api/2.3.1</bundle>
@@ -24,10 +26,16 @@
 		<bundle>mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
 		 -->
 		
-<!--         <bundle>mvn:com.sun.xml.bind/jaxb-core/2.3.0.1</bundle>
+<!--   
         <bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
-        <bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle> -->
+        -->
 	
+	</feature>
+
+	<feature name="notima-ws" description="Notima WebServices Components" version="${project.version}" install="manual">
+		<bundle>mvn:jakarta.jws/jakarta.jws-api/3.0.0</bundle>
+		<bundle>mvn:jakarta.xml.soap/jakarta.xml.soap-api/2.0.1</bundle>
+		<bundle>mvn:jakarta.xml.ws/jakarta.xml.ws-api/3.0.1</bundle>
 	</feature>
 
 	<feature name="notima-businessobjects" description="Notima Business Objects" version="${project.version}" install="manual">
@@ -36,7 +44,6 @@
          -->
         <feature>notima-common</feature>
 		<bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
-		<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
 		<bundle>mvn:org.notima.generic/businessobjects/${businessobjects.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
 		
@@ -149,6 +156,7 @@
     
     <feature name="notima-sveawebpay" description="Notima SveaWebPay Adapter" version="${project.version}" install="manual">
     	<feature>notima-csv</feature>
+    	<feature>notima-ws</feature>
     	<bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
     	<bundle>mvn:org.notima.api.webpay/pmt-admin-api/${pmt-admin-api.version}</bundle>
     	<bundle>mvn:org.notima/swish4j/${swish4j.version}</bundle>

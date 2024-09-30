@@ -109,10 +109,8 @@ public abstract class EmailMessageSender implements MessageSender {
      * Get an input stream from the senders private key file.
      * The file location is retrieved from the key manager
      * unless it has been overridden.
-     * @return
+     * @return	A FileInputStream
      * @throws MessageSenderException
-     * @throws KeyNotFoundException
-     * @throws Exception
      */
     protected FileInputStream getSenderPrivateKeyInputStream() throws MessageSenderException {
         File privateKeyFile = senderPrivateKey;
@@ -133,7 +131,6 @@ public abstract class EmailMessageSender implements MessageSender {
      * unless it has been overridden.
      * @return
      * @throws MessageSenderException
-     * @throws KeyNotFoundException
      */
     protected FileInputStream getRecipientPublicKeyInputStream(Message message) throws MessageSenderException {
         File keyFile = message.getRecipientPublicKey();

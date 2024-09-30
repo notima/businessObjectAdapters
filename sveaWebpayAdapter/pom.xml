@@ -74,20 +74,7 @@
 										org.notima.generic.businessobjects.exception,
 										org.notima.generic.businessobjects.util,
 										org.notima.generic.ifacebusinessobjects,
-										org.slf4j,
-										com.google.gson,
- 										com.google.gson.annotations,
-										javax.xml.ws,
-										javax.xml.namespace,
-			        					javax.xml.bind;version="[2.2,3)",
-			        					javax.xml.bind.annotation;version="[2.2,3)",
-										javax.xml.*,
-										javax.net.*,
-										javax.naming,
-										org.xml.sax*,
-										org.w3c*,
-										org.osgi.*,
-										org.osgi.framework.*
+										*
 										</Import-Package>
 						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|gson|okhttp|okio</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
