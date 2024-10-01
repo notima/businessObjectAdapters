@@ -43,17 +43,6 @@
 					<instructions>
 						<Bundle-Activator>com.svea.businessobjects.Activator</Bundle-Activator>					
 						<Export-Package>
-							com.svea.webpay.common.auth,
-							com.svea.webpay.common.conv,
-							com.svea.webpay.common.reconciliation,
-							com.svea.webpay.common.reconciliation2,
-							com.svea.webpay.common.reconciliation.conv,
-							com.svea.webpayadmin,
-							com.svea.webpayadmin.report,
-							com.svea.webpay.paymentgw,
-							com.svea.webpay.paymentgw.entity,
-							com.svea.webpay.paymentgw.util,
-							com.svea.webpay.paymentgw.xmladapter,
 							com.svea.businessobjects,
 							com.svea.businessobjects.pmtadmin,
 							com.svea.businessobjects.sveaadmin,
@@ -65,19 +54,8 @@
 							org.apache.karaf.util.tracker.annotation,
         				</Private-Package>
 						<Import-Package>
-										com.svea.webpayadminservice.client,
-										org.notima.api.webpay.pmtapi,
-										org.notima.api.webpay.pmtapi.entity,
-										org.notima.api.webpay.pmtapi.exception,
-										org.notima.factoring,
-										org.notima.generic.businessobjects,
-										org.notima.generic.businessobjects.exception,
-										org.notima.generic.businessobjects.util,
-										org.notima.generic.ifacebusinessobjects,
-										*
-										</Import-Package>
-						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|log4j|businessobjects|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|gson|okhttp|okio</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
+							jakarta.xml.bind;version="[3.0,5)",*
+						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>

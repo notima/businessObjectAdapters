@@ -104,7 +104,7 @@
         				</Private-Package>
         				<Karaf-Commands>org.notima.businessobjects.adapter.tools.command*</Karaf-Commands>
         				<Import-Package>
-        					jakarta.xml.bind;version="[3.0,4.1)",*
+        					*
         				</Import-Package>
 					</instructions>
 				</configuration>
