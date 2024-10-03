@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.9.0</version>
+		<version>1.9.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>excelAdapter</artifactId>
 	<packaging>bundle</packaging>
@@ -67,46 +67,46 @@
 				<configuration>
 					<instructions>
 						<Bundle-Activator>org.notima.businessobjects.adapter.excel.Activator</Bundle-Activator>
-						<Export-Package>org.notima.businessobjects.adapter.excel*,
-							org.apache.poi*
+						<Export-Package>org.notima.businessobjects.adapter.excel*
 						</Export-Package>
 						<Private-Package>
 							org.apache.karaf.util.tracker,
 							org.apache.karaf.util.tracker.annotation
 						</Private-Package>
 						<Karaf-Commands>org.notima.businessobjects.adapter.excel.command*</Karaf-Commands>
-						<Import-Package>
-										org.notima.generic.businessobjects,
-										org.notima.generic.businessobjects.exception,
-										org.notima.generic.businessobjects.util,
-										org.notima.generic.ifacebusinessobjects,
-										org.notima.businessobjects.adapter.tools,
-										org.notima.businessobjects.adapter.tools.table,
-										org.slf4j,
-										com.google.gson,
-										com.google.gson.annotations,
-										javax.xml.ws,
-										javax.xml.namespace,
-			        					javax.xml.bind;version="[2.2,3)",
-			        					javax.xml.bind.annotation;version="[2.2,3)",
-										javax.xml.*,
-										javax.net.*,
-										org.xml.sax*,
-										org.w3c.dom,
-										javax.naming,
-										org.apache.karaf.shell.api.action,
-										org.apache.karaf.shell.api.action.lifecycle,
-										org.apache.karaf.shell.api.console,
-										org.apache.karaf.shell.support.completers,
-										org.apache.karaf.shell.support.table,
-										org.osgi.*
-						</Import-Package>
-						<Embed-Dependency>poi;scope=compile|runtime,
-										  poi-ooxml;scope=compile|runtime,
-										  poi-ooxml-schemas;scope=compile|runtime,
-										  xmlbeans;scope=compile|runtime,
+						<Import-Package>!com.sun*,
+							!junit*,
+							!org.apache.tools.ant*,
+							!org.apache.crimson.jaxp,
+							!org.apache.xml.resolver*,
+							org.notima.generic.businessobjects,
+							org.notima.generic.businessobjects.exception,
+							org.notima.generic.businessobjects.util,
+							org.notima.generic.ifacebusinessobjects,
+							org.notima.businessobjects.adapter.tools,
+							org.notima.businessobjects.adapter.tools.table,
+							javax.net.*,
+							org.xml.sax*,
+							org.w3c.dom,
+							javax.naming,
+							org.apache.karaf.shell.api.action,
+							org.apache.karaf.shell.api.action.lifecycle,
+							org.apache.karaf.shell.api.console,
+							org.apache.karaf.shell.support.completers,
+							org.apache.karaf.shell.support.table,
+							org.apache.poi*,
+							org.apache.poi.hssf*,
+							org.apache.commons.math3*,
+							org.osgi.framework*,
+							org.slf4j*,
+        					javax.xml.bind;version="[2.2,3)",
+        					javax.xml.bind.annotation;version="[2.2,3)"
+							</Import-Package>
+						<Embed-Dependency>xmlbeans;scope=compile|runtime,
 										  commons-codec;scope=compile|runtime,
-										  commons-collections4;scope=compile|runtime
+										  commons-collections4;scope=compile|runtime,
+										  curvesapi;scope=compile|runtime,
+										  tools;scope=compile|runtime
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>

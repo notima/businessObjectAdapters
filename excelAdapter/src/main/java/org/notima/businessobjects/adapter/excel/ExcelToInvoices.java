@@ -13,6 +13,7 @@ import javax.xml.bind.JAXB;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
@@ -456,15 +457,15 @@ public class ExcelToInvoices {
 	
 	private String getCellAsString(Cell c) {
 		if (c==null) return null;
-		if (c.getCellType()==Cell.CELL_TYPE_FORMULA) {
+		if (c.getCellType()==CellType.FORMULA) {
 			CellValue cellValue = evaluator.evaluate(c);
-			if (cellValue.getCellType()==Cell.CELL_TYPE_NUMERIC) {
+			if (cellValue.getCellType()==CellType.NUMERIC) {
 				return Integer.toString((int)cellValue.getNumberValue());
 			} else {
 				return cellValue.getStringValue();
 			}
 		}
-		return (c.getCellType()==Cell.CELL_TYPE_NUMERIC 
+		return (c.getCellType()==CellType.NUMERIC 
 				? Integer.toString((int)c.getNumericCellValue()) : c.getStringCellValue());
 	}
 	
