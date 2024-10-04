@@ -85,7 +85,6 @@
 										org.slf4j,
 										com.google.gson,
 										com.google.gson.annotations,
-										javax.xml.ws,
 										javax.xml.namespace,
 			        					javax.xml.bind;version="[2.2,3)",
 			        					javax.xml.bind.annotation;version="[2.2,3)",
