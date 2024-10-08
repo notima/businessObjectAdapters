@@ -1,13 +1,14 @@
 package org.notima.businessobjects.adapter.tools.command;
 
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import jakarta.xml.bind.JAXB;
+import javax.xml.bind.JAXB;
 
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
@@ -23,6 +24,7 @@ import org.notima.generic.businessobjects.InvoiceWriterOptions;
 import org.notima.generic.businessobjects.tools.InvoiceListMerger;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.util.LocalDateUtils;
+import org.notima.util.json.JsonUtil;
 
 @Command(scope = "notima", name = "write-invoices", description = "Reads invoices from an XML-file and writes them to the destination adapter")
 @Service
@@ -142,7 +144,29 @@ public class WriteInvoices extends AbstractAction {
 	}
 	
 	
+	
+	
 	private void parseInvoiceFile() throws IOException {
+
+		if (invoiceFile.toLowerCase().endsWith("xml")) {
+			parseInvoiceXMLFile();
+		}
+		if (invoiceFile.toLowerCase().endsWith("json")) {
+			parseInvoiceJsonFile();
+		}
+		
+	}
+	
+	private void parseInvoiceJsonFile() throws IOException {
+		
+		FileReader fis = new FileReader(invoiceFile);
+		invoiceList = JsonUtil.buildGson().fromJson(fis, InvoiceList.class);
+		fis.close();
+		invoices = invoiceList.getInvoiceList();
+		
+	}
+	
+	private void parseInvoiceXMLFile() throws IOException {
 		
 		FileInputStream fis = new FileInputStream(invoiceFile);
 		invoiceList = JAXB.unmarshal(fis, InvoiceList.class);

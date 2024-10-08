@@ -96,7 +96,7 @@
         				</Private-Package>
 						<Karaf-Commands>org.notima.fortnox.command*</Karaf-Commands>        				
         				<Import-Package>
-        					jakarta.xml.bind;version="[3.0,4.1)",*
+        					javax.xml.bind,*
         				</Import-Package>
 					</instructions>
 				</configuration>

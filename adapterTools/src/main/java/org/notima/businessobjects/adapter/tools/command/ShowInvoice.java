@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import jakarta.xml.bind.JAXB;
+import javax.xml.bind.JAXB;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
