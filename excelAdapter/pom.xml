@@ -92,6 +92,8 @@
 										javax.net.*,
 										org.xml.sax*,
 										org.w3c.dom,
+										jakarta.xml*,
+										org.notima.util*,
 										javax.naming,
 										org.apache.karaf.shell.api.action,
 										org.apache.karaf.shell.api.action.lifecycle,

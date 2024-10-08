@@ -1,11 +1,11 @@
 # businessObjectAdapters
 Contains adapters to different ERP / invoice / order sources / destinations
 
-This code suite is developed and tested on JDK 8.
+This code suite is developed and tested on JDK 21. Older versions <= 1.9 support JDK 8.
 
-	sudo apt install openjdk-8-jdk
+	sudo apt install openjdk-21-jdk
 
-and [Apache Karaf 4.2.11](https://karaf.apache.org/archives.html).
+and [Apache Karaf 4.4.6](https://karaf.apache.org/archives.html).
 
 ## Prerequisites
 
@@ -29,13 +29,13 @@ If the project is a release version, you'll only have to checkout and compile th
 
 ## Installation in Karaf (fortnox adapter)
 
-	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/1.9.0-SNAPSHOT/xml/features
+	repo-add mvn:org.notima.generic.businessobjects.adapter/adapterTools/1.10.0-SNAPSHOT/xml/features
 	
 	feature:install notima-fortnox4j
 	
 ## Make a redeployable kar in Karaf
 
-	kar:create notima-business-objects-1.9.0-SNAPSHOT
+	kar:create notima-business-objects-1.10.0-SNAPSHOT
 
 ## Structure
 
