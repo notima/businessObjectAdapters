@@ -16,6 +16,7 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
+			<version>${apache.poi.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -27,24 +28,6 @@
 			<artifactId>poi-ooxml-schemas</artifactId>
 			<version>${apache.poi.version}</version>
 		</dependency>
-
-		<!-- Dependencies to include transiently -->		
-		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans</artifactId>
-			<version>2.6.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<version>4.1</version>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.10</version>
-		</dependency>		
-						
 		<dependency>
 			<groupId>
 				org.notima.generic.businessobjects.adapter
@@ -67,47 +50,48 @@
 				<configuration>
 					<instructions>
 						<Bundle-Activator>org.notima.businessobjects.adapter.excel.Activator</Bundle-Activator>
-						<Export-Package>org.notima.businessobjects.adapter.excel*
+						<Export-Package>org.notima.businessobjects.adapter.excel*,
+							org.apache.poi*;-split-package:=merge-last
 						</Export-Package>
 						<Private-Package>
-							org.apache.karaf.util.tracker,
-							org.apache.karaf.util.tracker.annotation
+							javax.xml.stream, 
+							org.apache.xmlbeans,
+							org.apache.xmlbeans.xml.stream,
+							org.openxmlformats.schemas.officeDocument.x2006.customProperties,
+							org.openxmlformats.schemas.officeDocument.x2006.extendedProperties,
+							org.apache.karaf.util.tracker;-split-package:=merge-last,
+							org.apache.karaf.util.tracker.annotation;-split-package:=merge-last
 						</Private-Package>
 						<Karaf-Commands>org.notima.businessobjects.adapter.excel.command*</Karaf-Commands>
-						<Import-Package>!com.sun*,
-							!junit*,
-							!org.apache.tools.ant*,
-							!org.apache.crimson.jaxp,
-							!org.apache.xml.resolver*,
-							org.notima.generic.businessobjects,
-							org.notima.generic.businessobjects.exception,
-							org.notima.generic.businessobjects.util,
-							org.notima.generic.ifacebusinessobjects,
-							org.notima.businessobjects.adapter.tools,
-							org.notima.businessobjects.adapter.tools.table,
-							javax.net.*,
-							org.xml.sax*,
-							org.w3c.dom,
-							javax.naming,
-							org.apache.karaf.shell.api.action,
-							org.apache.karaf.shell.api.action.lifecycle,
-							org.apache.karaf.shell.api.console,
-							org.apache.karaf.shell.support.completers,
-							org.apache.karaf.shell.support.table,
-							org.apache.poi*,
-							org.apache.poi.hssf*,
-							org.apache.commons.math3*,
-							org.osgi.framework*,
-							org.slf4j*,
-        					javax.xml.bind;version="[2.2,3)",
-        					javax.xml.bind.annotation;version="[2.2,3)"
-							</Import-Package>
-						<Embed-Dependency>xmlbeans;scope=compile|runtime,
-										  commons-codec;scope=compile|runtime,
-										  commons-collections4;scope=compile|runtime,
-										  curvesapi;scope=compile|runtime,
-										  tools;scope=compile|runtime
-						</Embed-Dependency>
+						<Import-Package>
+										org.notima.generic.businessobjects,
+										org.notima.generic.businessobjects.exception,
+										org.notima.generic.businessobjects.util,
+										org.notima.generic.ifacebusinessobjects,
+										org.notima.businessobjects.adapter.tools,
+										org.notima.businessobjects.adapter.tools.table,
+										org.slf4j,
+										com.google.gson,
+										com.google.gson.annotations,
+										javax.xml.ws,
+										javax.xml.namespace,
+			        					javax.xml.bind;version="[2.2,3)",
+			        					javax.xml.bind.annotation;version="[2.2,3)"
+			        					javax.xml.bind.annotation.adapters;version="[2.2,3)",
+										javax.xml.*,
+										javax.net.*,
+										javax.naming,
+										org.xml.sax*,
+										org.w3c.dom*,
+										org.apache.karaf.shell.api.action,
+										org.apache.karaf.shell.api.action.lifecycle,
+										org.apache.karaf.shell.api.console,
+										org.apache.karaf.shell.support.completers,
+										org.apache.karaf.shell.support.table,
+										org.osgi.*
+						</Import-Package>
+						<Embed-Dependency>*;scope=compile|runtime;artifactId=!slf4j-api|slf4j-log4j12|util|core|adapterTools|log4j|businessobjects|bankgiro-api|webpayadminservice-client|pmt-admin-api|retrofit|converter-scalars|okhttp|okio|gson</Embed-Dependency>
+						<_split-package>first</_split-package>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>
@@ -117,14 +101,4 @@
 		</plugins>
 	</build>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.apache.poi</groupId>
-				<artifactId>poi</artifactId>
-				<version>${apache.poi.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-	
 </project>

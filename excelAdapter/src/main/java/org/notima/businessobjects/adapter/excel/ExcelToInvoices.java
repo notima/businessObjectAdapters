@@ -457,15 +457,15 @@ public class ExcelToInvoices {
 	
 	private String getCellAsString(Cell c) {
 		if (c==null) return null;
-		if (c.getCellType()==CellType.FORMULA) {
+		if (c.getCellType()==Cell.CELL_TYPE_FORMULA) {
 			CellValue cellValue = evaluator.evaluate(c);
-			if (cellValue.getCellType()==CellType.NUMERIC) {
+			if (cellValue.getCellType()==Cell.CELL_TYPE_NUMERIC) {
 				return Integer.toString((int)cellValue.getNumberValue());
 			} else {
 				return cellValue.getStringValue();
 			}
 		}
-		return (c.getCellType()==CellType.NUMERIC 
+		return (c.getCellType()==Cell.CELL_TYPE_NUMERIC 
 				? Integer.toString((int)c.getNumericCellValue()) : c.getStringCellValue());
 	}
 	
