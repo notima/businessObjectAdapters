@@ -5,7 +5,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.xml.bind.JAXB;
+import javax.xml.bind.JAXB;
 
 import org.notima.api.webpay.pmtapi.PmtApiUtil;
 import org.notima.api.webpay.pmtapi.entity.Credit;
