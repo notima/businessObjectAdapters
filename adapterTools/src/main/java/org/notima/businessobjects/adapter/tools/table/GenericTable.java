@@ -251,10 +251,15 @@ public class GenericTable {
 		}
 
 		GenericCell gc;
+		int cellNo;
 		for (GenericRow row : rows) {
             List<Object> htmlRow = new ArrayList<Object>();
-
+            cellNo = 0;
             for(Object cell : row.getContent()){
+            	cellNo++;
+            	if (cellNo>columns.size()) {
+            		continue;
+            	}
                 String cellData = cell == null ? "" : cell.toString();
                 if (cell instanceof GenericCell) {
                 	gc = (GenericCell)cell;
