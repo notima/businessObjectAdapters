@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -20,6 +21,11 @@ import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
+import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
+import org.notima.businessobjects.adapter.tools.FormatterFactory;
+import org.notima.businessobjects.adapter.tools.ReportFormatter;
+import org.notima.businessobjects.adapter.tools.command._NotimaCmdOptions;
+import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.InvoiceHeaderTable;
 
@@ -29,6 +35,17 @@ public class ListInvoices extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;
+	
+	@Reference
+	private FormatterFactory	formatterFactory;
+	
+	private ReportFormatter<GenericTable> reportFormatter;
+	
+    @Option(name = _NotimaCmdOptions.OUTPUT_FILE_NAME_SHORT, description="Output to file name", required = false, multiValued = false)
+    private String	outFile;
+    
+    @Option(name = _NotimaCmdOptions.FORMAT_SHORT, description="The format of file to be output", required = false, multiValued = false)
+    private String format;
 	
 	@Option(name = "-e", aliases = {
 	"--enrich" }, description = "Read the complete invoice, not just the subset", required = false, multiValued = false)
@@ -61,6 +78,8 @@ public class ListInvoices extends FortnoxCommand implements Action {
 
 	private Map<Object, Object> invoicesMap = null;
 	private List<InvoiceInterface> invoices; 
+	
+	private GenericTable printableReport;
 	
 	
 	@Override
@@ -100,12 +119,14 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		
 		if (invoices.size()>0) {
 
-			InvoiceHeaderTable iht = new InvoiceHeaderTable(invoices, includeAddress);
-			iht.getShellTable().print(sess.getConsole());
+			printableReport = new InvoiceHeaderTable(invoices, includeAddress);
+			printableReport.getShellTable().print(sess.getConsole());
 			
 			sess.getConsole().println("\n" + invoices.size() + " invoice(s).");
 			
 		}
+
+		initAndRunReportFormatter();
 		
 		return null;
 	}
@@ -186,6 +207,28 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		}
 		
 		invoices = targetList;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void initAndRunReportFormatter() throws Exception {
+
+		if (format!=null) {
+			
+			// Try to find a report formatter
+			reportFormatter = (ReportFormatter<GenericTable>) formatterFactory.getReportFormatter(GenericTable.class, format);
+			
+			if (reportFormatter!=null) {
+				Properties props = new Properties();
+				props.setProperty(BasicReportFormatter.OUTPUT_FILENAME, outFile);
+				
+				String of = reportFormatter.formatReport((GenericTable)printableReport, format, props);
+				sess.getConsole().println("Output file to: " + of);
+			} else {
+				sess.getConsole().println("Can't find formatter for " + format);
+			}
+			
+		}
+		
 	}
 	
 }
