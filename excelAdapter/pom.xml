@@ -100,7 +100,8 @@
 										org.apache.karaf.shell.api.console,
 										org.apache.karaf.shell.support.completers,
 										org.apache.karaf.shell.support.table,
-										org.osgi.*;version="[1.8,2)"
+										org.osgi.service.cm,
+										org.osgi.framework;version="[1.8,2)"
 						</Import-Package>
 						<Embed-Dependency>poi;scope=compile|runtime,
 										  poi-ooxml;scope=compile|runtime,
