@@ -72,7 +72,7 @@
         					org.apache.karaf.util.tracker.annotation
         				</Private-Package>
         				<Import-Package>
-        					jakarta.xml.bind;version="[3.0,4.1)",*
+        					javax.xml.bind,*
         				</Import-Package>
 					</instructions>
 				</configuration>
