@@ -17,6 +17,7 @@ public class PaymentBatchChannelTable extends GenericTable {
 		addColumn("Source");
 		addColumn("Description");
 		addColumn("Source dir");
+		addColumn("R. until");
 		
 		if (bpl==null || bpl.size()==0) {
 			setEmptyTableText("No channels");
@@ -42,11 +43,20 @@ public class PaymentBatchChannelTable extends GenericTable {
 					p.getDestinationSystem(),
 					p.getSourceSystem(),
 					p.getChannelDescription(),
-					(p.getOptions()!=null ? p.getOptions().getSourceDirectory() : "")
+					(p.getOptions()!=null ? p.getOptions().getSourceDirectory() : ""),
+					getReconciledUntilString(p)
 					);
 		}
 		
 	}
-	
+
+	private String getReconciledUntilString(PaymentBatchChannel p) {
+		
+		if (p.getStatus()!=null && p.getStatus().getReconciledUntil()!=null) {
+			return p.getStatus().getReconciledUntil().toString();
+		}
+		
+		return "";
+	}
 	
 }
