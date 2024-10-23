@@ -19,7 +19,7 @@
 		<karaf.version>4.4.6</karaf.version>
 		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 		<apache.poi.version>3.17</apache.poi.version>
-		<notima-util.version>0.0.7</notima-util.version>
+		<notima-util.version>1.0.1-SNAPSHOT</notima-util.version>
 		<businessobjects.version>1.0.1-SNAPSHOT</businessobjects.version>
 		<fortnox4j.version>2.0.3-SNAPSHOT</fortnox4j.version>
 		<gson.version>2.11.0</gson.version>

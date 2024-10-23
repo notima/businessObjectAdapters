@@ -140,6 +140,8 @@
         <feature>scr</feature>
         <feature>scheduler</feature>
         <feature>notima-businessobjects</feature>
+        <!-- Notima util for backwards compatibility -->
+        <bundle>mvn:org.notima/notima-util/0.0.7</bundle>
         <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
         <bundle>mvn:org.notima.api/fortnox4j/${fortnox4j.version}</bundle>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
