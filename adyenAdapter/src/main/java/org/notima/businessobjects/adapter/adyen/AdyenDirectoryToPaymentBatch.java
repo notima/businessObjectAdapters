@@ -1,23 +1,16 @@
 package org.notima.businessobjects.adapter.adyen;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
-import org.jline.utils.Log;
-import org.notima.generic.businessobjects.BankAccountDetail;
-import org.notima.generic.businessobjects.Payment.PaymentType;
-import org.notima.generic.businessobjects.PaymentBatch;
-import org.notima.generic.businessobjects.TaxSubjectIdentifier;
-import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.adyen.AdyenReport;
 import org.notima.adyen.AdyenReportParser;
 import org.notima.businessobjects.adapter.paymentbatch.DirectoryPaymentBatchFactory;
+import org.notima.generic.businessobjects.BankAccountDetail;
+import org.notima.generic.businessobjects.Payment.PaymentType;
+import org.notima.generic.businessobjects.PaymentBatch;
 
 /**
  * Class that takes a directory as argument, scans it for files and converts to payment batches.
