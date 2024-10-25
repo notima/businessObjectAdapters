@@ -17,7 +17,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<notima-util.version>0.0.7-SNAPSHOT</notima-util.version>
-		<businessobjects.version>1.0.0</businessobjects.version>
+		<businessobjects.version>1.0.1-SNAPSHOT</businessobjects.version>
 		<karaf.version>4.2.9</karaf.version>
 		<apache.poi.version>3.17</apache.poi.version>
 		<fortnox4j.version>2.0.2</fortnox4j.version>
