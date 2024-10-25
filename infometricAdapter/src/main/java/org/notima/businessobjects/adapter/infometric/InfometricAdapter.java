@@ -33,7 +33,7 @@ import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
-import org.notima.generic.businessobjects.InvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.PaymentTerm;
 import org.notima.generic.businessobjects.PriceList;
@@ -75,7 +75,7 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	}
 	
 	@Override
-	public InvoiceOperationResult readInvoices(Date fromDate, Date untilDate, int readLimit) throws Exception {
+	public OrderInvoiceOperationResult readInvoices(Date fromDate, Date untilDate, int readLimit) throws Exception {
 		
 		InfometricTenant it = this.getCurrentTenant()!=null ? this.getCurrentTenant().getNativeBusinessPartner() : null;
 		if (it==null) {
@@ -84,7 +84,7 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 		}
 
 		BillingFileToInvoiceList bft = new BillingFileToInvoiceList(this, it);
-		InvoiceOperationResult result = new InvoiceOperationResult();
+		OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
 		InvoiceList ilist = bft.readAllFiles(1.0);
 		result.setSuccessful(true);
 		result.setAffectedInvoices(ilist);

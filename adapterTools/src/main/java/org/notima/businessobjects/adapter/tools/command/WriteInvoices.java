@@ -19,7 +19,7 @@ import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
-import org.notima.generic.businessobjects.InvoiceWriterOptions;
+import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
 import org.notima.generic.businessobjects.tools.InvoiceListMerger;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.util.LocalDateUtils;
@@ -69,7 +69,7 @@ public class WriteInvoices extends AbstractAction {
 	private Date	invoiceDate;
 	private Date	dueDate;
 	
-	private InvoiceWriterOptions	writerOptions = new InvoiceWriterOptions();
+	private OrderInvoiceWriterOptions	writerOptions = new OrderInvoiceWriterOptions();
 	
 	@Override
 	protected Object onExecute() throws Exception {

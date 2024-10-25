@@ -12,7 +12,7 @@ import org.notima.businessobjects.adapter.infometric.BillingFileToInvoiceList;
 import org.notima.businessobjects.adapter.infometric.InfometricAdapter;
 import org.notima.businessobjects.adapter.infometric.InfometricTenant;
 import org.notima.generic.businessobjects.InvoiceList;
-import org.notima.generic.businessobjects.InvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.slf4j.Logger;
 
@@ -65,7 +65,7 @@ public class TestInfometricAdapter {
 	@Test
 	public void testReadAllFiles() throws Exception {
 
-		InvoiceOperationResult result = adapter.readInvoices(null, null, 1);
+		OrderInvoiceOperationResult result = adapter.readInvoices(null, null, 1);
 		
 		log.info("{} invoices created.", result.getAffectedInvoices().getInvoiceList().size());
 		
