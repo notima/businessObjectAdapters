@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.9.1-SNAPSHOT</version>
+		<version>1.10.0-SNAPSHOT</version>
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
@@ -120,7 +120,8 @@
 							org.apache.karaf.shell.api.console,
 							org.apache.karaf.shell.support.completers,
 							org.apache.karaf.shell.support.table,
-							org.osgi.*,*
+							org.osgi.*;version="[1.8,2)",
+							*
 						</Import-Package>
 						<Embed-Dependency>*;scope=compile|runtime;
 						artifactId=!slf4j-api|slf4j-log4j12|org.apache.felix.utils|notima-util|org.apache.karaf.jaas.boot|org.apache.karaf.shell.core|org.apache.karaf.util|log4j|businessobjects|sshd-core|threeten-jaxb-core|jline|javax.persistence-api|jakarta.activation-api|jakarta.xml.bind-api</Embed-Dependency>

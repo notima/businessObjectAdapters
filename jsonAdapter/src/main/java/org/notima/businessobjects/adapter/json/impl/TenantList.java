@@ -39,7 +39,12 @@ public class TenantList {
 	}
 
 	public void saveToFile() throws IOException {
+		
+		// Create parent directories if they don't exist
+	    tenantFile.getParentFile().mkdirs();
+	    
 		FileWriter fw = new FileWriter(tenantFile);
+		
 		gson.toJson(tenants, fw);
 		fw.close();
 	}

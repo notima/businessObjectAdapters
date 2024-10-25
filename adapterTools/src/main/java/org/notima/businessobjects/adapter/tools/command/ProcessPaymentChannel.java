@@ -22,6 +22,7 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
+import org.notima.util.LocalDateUtils;
 
 @Command(scope = "notima", name = "process-payment-channel", description = "Processes a payment channel")
 @Service
@@ -116,6 +117,11 @@ public class ProcessPaymentChannel implements Action {
 			destinationPaymentProcessor.lookupInvoiceReferences(pb);
 		} else {
 			destinationPaymentProcessor.processPaymentBatch(pb, processOptions);
+			if (!dryRun) {
+				// Update processed date
+				channel.setReconciledUntil(LocalDateUtils.asLocalDate(pb.getFirstPaymentDate()));
+				channelFactory.persistChannel(channel);
+			}
 		}
 		
 		formatReport(pb);

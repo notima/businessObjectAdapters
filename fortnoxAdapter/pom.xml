@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.9.1-SNAPSHOT</version>
+		<version>1.10.0-SNAPSHOT</version>
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
@@ -96,7 +96,7 @@
         				</Private-Package>
 						<Karaf-Commands>org.notima.fortnox.command*</Karaf-Commands>        				
         				<Import-Package>
-        					jakarta.xml.bind;version="[3.0,4.1)",*
+        					javax.xml.bind,*
         				</Import-Package>
 					</instructions>
 				</configuration>

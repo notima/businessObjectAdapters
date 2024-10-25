@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.9.1-SNAPSHOT</version>
+		<version>1.10.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>excelAdapter</artifactId>
 	<packaging>bundle</packaging>
@@ -85,7 +85,6 @@
 										org.slf4j,
 										com.google.gson,
 										com.google.gson.annotations,
-										javax.xml.ws,
 										javax.xml.namespace,
 			        					javax.xml.bind;version="[2.2,3)",
 			        					javax.xml.bind.annotation;version="[2.2,3)",
@@ -93,13 +92,16 @@
 										javax.net.*,
 										org.xml.sax*,
 										org.w3c.dom,
+										jakarta.xml*,
+										org.notima.util*,
 										javax.naming,
 										org.apache.karaf.shell.api.action,
 										org.apache.karaf.shell.api.action.lifecycle,
 										org.apache.karaf.shell.api.console,
 										org.apache.karaf.shell.support.completers,
 										org.apache.karaf.shell.support.table,
-										org.osgi.*
+										org.osgi.service.cm,
+										org.osgi.framework;version="[1.8,2)"
 						</Import-Package>
 						<Embed-Dependency>poi;scope=compile|runtime,
 										  poi-ooxml;scope=compile|runtime,
