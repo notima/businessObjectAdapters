@@ -18,7 +18,7 @@ import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.MappingServiceFactory;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
-import org.notima.generic.businessobjects.InvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.businessobjects.util.SetSpecificPriceInvoiceLineValidator;
@@ -71,7 +71,7 @@ public class ReadInvoices extends AbstractAction {
 	private String invoiceFile = "";
 	
 	private BusinessObjectFactory<?,?,?,?,?,?> adapter;
-	private InvoiceOperationResult invoiceResult;
+	private OrderInvoiceOperationResult invoiceResult;
 	
 	private MappingService mappingService = null;
 	

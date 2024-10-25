@@ -7,25 +7,27 @@ import java.util.Map;
 
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.Customer;
-import org.notima.api.fortnox.entities3.InvoiceRow;
-import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
+import org.notima.api.fortnox.entities3.OrderRow;
+import org.notima.api.fortnox.entities3.OrderRows;
 import org.notima.generic.businessobjects.BusinessPartner;
-import org.notima.generic.businessobjects.Invoice;
-import org.notima.generic.businessobjects.InvoiceLine;
+import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
-import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.OrderLine;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.util.LocalDateUtils;
 
-public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
+public class FortnoxOrderWriter extends FortnoxObjectWriter {
 
 	private OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
 	
 	private OrderInvoiceWriterOptions	options;
 	
-	public FortnoxInvoiceWriter(FortnoxAdapter adapter, OrderInvoiceWriterOptions opts) {
+	
+	
+	public FortnoxOrderWriter(FortnoxAdapter adapter, OrderInvoiceWriterOptions opts) {
 		
 		this.adapter = adapter;
 		options = opts;
@@ -33,7 +35,8 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 		
 	}
 	
-	public OrderInvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices) throws Exception {
+	
+	public OrderInvoiceOperationResult writeOrders(List<Order<?>> canonicalOrders) throws Exception {
 		
 		initDates();
 		
@@ -49,7 +52,7 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 		BusinessPartner<?> lookedUpBp;
 		Location loc;
 		// Make sure all business partners are imported
-		for (Invoice<?> canonicalInvoice : canonicalInvoices) {
+		for (Order<?> canonicalInvoice : canonicalOrders) {
 			custNo = null;
 			lookedUpBp = null;
 			
@@ -89,11 +92,11 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 		
 		ocount = 0;
 		InvoiceSubset is = null;
-		org.notima.api.fortnox.entities3.Invoice finvoice = null;
+		org.notima.api.fortnox.entities3.Order finvoice = null;
 		
 		Customer fcustomer = null;
 		
-		for (Invoice<?> o : canonicalInvoices) {
+		for (Order<?> o : canonicalOrders) {
 			
 			is = (InvoiceSubset)invoiceMap.get(o.getOrderKey());
 			fcustomer = getFortnoxCustomer(o);
@@ -103,19 +106,18 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 				bp = o.getBusinessPartner();
 				bp.setName(fcustomer.getName());
 				bp.setIdentityNo(fcustomer.getCustomerNumber());
-				o.setInvoiceDate(LocalDateUtils.asDate(options.getInvoiceDate()));
-				o.setDueDate(LocalDateUtils.asDate(options.getDueDate()));
-				FortnoxAdapter.logger.info("Persisting invoice for order " + o.getOrderKey());
+				o.setDateOrdered(LocalDateUtils.asDate(options.getInvoiceDate()));
+				FortnoxAdapter.logger.info("Persisting order " + o.getOrderKey());
 				adapter.persist(o);
 				result.incrementCreated();
 				
 				ocount++;
 			} else {
 				// Update existing
-				 finvoice = adapter.getClient().getInvoice(is.getDocumentNumber());
-				 if (updateInvoice(o, finvoice)) {
-					 adapter.persistNativeInvoice(finvoice);
-					 FortnoxAdapter.logger.info("Updated invoice " + finvoice.getDocumentNumber());
+				 finvoice = adapter.getClient().getOrder(is.getDocumentNumber());
+				 if (updateOrder(o, finvoice)) {
+					 adapter.persistNativeOrder(finvoice);
+					 FortnoxAdapter.logger.info("Updated order " + finvoice.getDocumentNumber());
 					 result.incrementUpdated();
 				 }
 			}
@@ -129,11 +131,10 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 		return result;
 	}
 	
-	
 	private void initDates() {
 		
-		if (options.getInvoiceDate()==null) {
-			options.setInvoiceDate(LocalDateUtils.asLocalDate(Calendar.getInstance().getTime()));
+		if (options.getOrderDate()==null) {
+			options.setOrderDate(LocalDateUtils.asLocalDate(Calendar.getInstance().getTime()));
 		}
 		
 		if (options.getDueDate()==null) {
@@ -143,7 +144,6 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 		}
 		
 	}
-	
 
 	/**
 	 * Only updates prices on existing invoices
@@ -152,19 +152,19 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 	 * @param dst
 	 * @return	true if anything was updated.
 	 */
-	private boolean updateInvoice(Invoice<?> src, org.notima.api.fortnox.entities3.Invoice dst) {
+	private boolean updateOrder(Order<?> src, org.notima.api.fortnox.entities3.Order dst) {
 
 		boolean result = false;
-		List<InvoiceLine> srcLines = src.getLines();
-		InvoiceRows ir = dst.getInvoiceRows();
-		List<InvoiceRow> dstLines = ir.getInvoiceRow();
+		List<OrderLine> srcLines = src.getLines();
+		OrderRows ir = dst.getOrderRows();
+		List<OrderRow> dstLines = ir.getOrderRow();
 		if (dstLines==null) {
-			dstLines = new ArrayList<InvoiceRow>();
-			ir.setInvoiceRow(dstLines);
+			dstLines = new ArrayList<OrderRow>();
+			ir.setOrderRow(dstLines);
 		}
 		
-		InvoiceRow dstLine;
-		for (InvoiceLine srcLine : srcLines) {
+		OrderRow dstLine;
+		for (OrderLine srcLine : srcLines) {
 			
 			dstLine = getCorrespondingRow(srcLine, dstLines);
 			if (dstLine!=null && srcLine.getPriceActual()!=dstLine.getPrice()) {
@@ -175,7 +175,7 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 			if (dstLine==null) {
 				// Create a new line
 				try {
-					adapter.addCanonicalInvoiceLineToFortnoxInvoiceRow(src, srcLine, dstLines);
+					adapter.addCanonicalOrderLineToFortnoxOrderRow(src, srcLine, dstLines);
 				} catch (Exception ee) {
 					ee.printStackTrace();
 				}
@@ -183,7 +183,7 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 			
 		}
 		if (result) {
-			dst.setTotal(null); // Don't update total
+			dst.setTotal(0D); // Don't update total
 		}
 		return result;
 		
@@ -195,12 +195,12 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 	 * @param srcLine
 	 * @return
 	 */
-	private InvoiceRow getCorrespondingRow(InvoiceLine srcLine, List<InvoiceRow> rows) {
+	private OrderRow getCorrespondingRow(OrderLine srcLine, List<OrderRow> rows) {
 
 		if (rows==null || srcLine==null)
 			return null;
-		InvoiceRow result = null;
-		for (InvoiceRow r : rows) {
+		OrderRow result = null;
+		for (OrderRow r : rows) {
 			if (srcLine.getProductKey()==null || srcLine.getDescription()==null) 
 				continue;
 			if (srcLine.getProductKey().equals(r.getArticleNumber()) && srcLine.getDescription().equals(r.getDescription())) {

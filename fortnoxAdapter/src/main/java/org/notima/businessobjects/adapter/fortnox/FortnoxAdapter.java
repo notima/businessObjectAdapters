@@ -39,6 +39,7 @@ import org.notima.api.fortnox.entities3.InvoiceRow;
 import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.Invoices;
+import org.notima.api.fortnox.entities3.OrderRow;
 import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
 import org.notima.api.fortnox.entities3.Supplier;
 import org.notima.api.fortnox.entities3.VatInfo;
@@ -51,8 +52,9 @@ import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
-import org.notima.generic.businessobjects.InvoiceOperationResult;
-import org.notima.generic.businessobjects.InvoiceWriterOptions;
+import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
+import org.notima.generic.businessobjects.OrderLine;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.PaymentTerm;
@@ -65,6 +67,8 @@ import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.businessobjects.tax.TaxTool;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
+import org.notima.generic.ifacebusinessobjects.OrderInvoice;
+import org.notima.generic.ifacebusinessobjects.OrderInvoiceLine;
 import org.notima.util.EmailUtils;
 import org.notima.util.LocalDateUtils;
 import org.osgi.framework.Bundle;
@@ -1004,7 +1008,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @throws Exception
 	 * @see {@link #getRevenueAcctNo(String, Double, String)}
 	 */
-	private String getAccountNo(Invoice<?> invoice, InvoiceLine il) throws Exception {
+	private String getAccountNo(OrderInvoice invoice, OrderInvoiceLine il) throws Exception {
 		
 		// Try to set default account number if not set
 		if (il.getAccountNo()==null || il.getAccountNo().trim().length()==0) {
@@ -1083,6 +1087,54 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		fortnoxDstRowList.add(row);
 		
 	}
+	
+	/**
+	 * 
+	 * @param src					The invoice header (source)
+	 * @param il					The invoice line to be added
+	 * @param fortnoxDstRowList		Initialized Fortnox invoice lines.
+	 * @throws Exception
+	 */
+	public void addCanonicalOrderLineToFortnoxOrderRow(
+			org.notima.generic.businessobjects.Order<?> src, 
+			OrderLine il, 
+			List<OrderRow> fortnoxDstRowList) throws Exception {
+		
+		OrderRow row;
+
+		row = new OrderRow();
+		row.setArticleNumber(il.getProductKey());
+		row.setDescription(il.getName()!=null ? il.getName() : il.getDescription());
+		row.setDeliveredQuantity((double)il.getQtyEntered());
+		if (row.getDescription()==null || row.getDescription().trim().length()==0) {
+			// Empty description if missing
+			row.setDescription(".");
+		}
+		// Set the accounting number
+		row.setAccountNumber(getAccountNo(src, il));
+		
+		if (il.getProject()!=null && il.getProject().trim().length()>0) 
+			row.setProject(il.getProject());
+		if (il.getCostCenter()!=null && il.getCostCenter().trim().length()>0)
+			row.setCostCenter(il.getCostCenter());
+		
+		if (il.getPriceActual()!=null) {
+			if (il.isPricesIncludeVAT() && !src.isShowPricesIncludingVAT()) {
+				row.setPrice((double)il.getPriceActual()-(il.getTaxAmount()/il.getQtyEntered()));
+				row.setPrice((Math.round(row.getPrice()*100)/100.0));
+			}
+			else
+				row.setPrice((double)il.getPriceActual());
+			row.setVAT((double)il.getTaxPercent());
+		} else {
+			row.setPrice(null);
+			row.setVAT(null);
+		}
+		row.setUnit(il.getUOM());
+		fortnoxDstRowList.add(row);
+		
+	}
+	
 	
 	/**
 	 * Converts from a Fortnox Invoice to a generic business object that can be used when 
@@ -1611,7 +1663,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	}
 
 	@Override
-	public InvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices, InvoiceWriterOptions opts) throws Exception {
+	public OrderInvoiceOperationResult writeInvoices(List<Invoice<?>> canonicalInvoices, OrderInvoiceWriterOptions opts) throws Exception {
 
 		FortnoxInvoiceWriter invoiceWriter = new FortnoxInvoiceWriter(this, opts);
 		
