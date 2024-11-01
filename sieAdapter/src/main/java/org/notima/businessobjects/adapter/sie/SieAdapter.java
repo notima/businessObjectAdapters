@@ -70,8 +70,10 @@ Object> {
 		
 		VerRec vr;
 		
+		SieConverter sieConverter = new SieConverter(sie4file);
+		
 		for (AccountingVoucher v : vouchers) {
-			vr = SieConverter.convert(v);
+			vr = sieConverter.convert(v);
 			sie4file.addVerRecord(vr);
 		}
 		sie4file.writeToFile();
