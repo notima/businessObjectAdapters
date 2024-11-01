@@ -22,7 +22,7 @@
 		<apache.poi.version>3.17</apache.poi.version>
 		<fortnox4j.version>2.0.2</fortnox4j.version>
 		<gson.version>2.8.9</gson.version>
-		<siefilelib.version>1.0.5</siefilelib.version>
+		<siefilelib.version>1.0.6-SNAPSHOT</siefilelib.version>
 		<commons-csv.version>1.6</commons-csv.version>
 		<swish4j.version>0.0.4</swish4j.version>
 
