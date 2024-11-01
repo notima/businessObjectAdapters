@@ -86,8 +86,6 @@ public class AccountingReportConverter {
 			dst.setAcctDate(src.getAcctDate());
 			dst.setSourceCurrency(src.getCurrency());
 			
-			result.add(dst);
-
 			if (src.getRevenues()!=null) {
 				for (RevenueLine rl : src.getRevenues()) {
 					
@@ -173,6 +171,11 @@ public class AccountingReportConverter {
 			} else {
 				// Purge voucher (round to precision, remove zero lines and round the rest)
 				dst.purge();
+			}
+
+			// Check for lines, don't add if no lines where created.
+			if (dst.hasLines()) {
+				result.add(dst);
 			}
 			
 		}
