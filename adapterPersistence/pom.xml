@@ -98,9 +98,14 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
-						<Bundle-Activator>org.notima.businessobjects.adapter.tools.db.Activator</Bundle-Activator>					
+						<Bundle-Activator>org.notima.businessobjects.adapter.tools.db.Activator</Bundle-Activator>	
 						<Export-Package>org.notima.businessobjects.adapter.tools.db*
 						</Export-Package>
+						<Import-Package>
+							org.notima.businessobjects.adapter.tools.task,
+							org.osgi.framework,
+							*
+						</Import-Package>				
 		        		<Private-Package>
         					org.apache.karaf.util.tracker,
         					org.apache.karaf.util.tracker.annotation
