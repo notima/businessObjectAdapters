@@ -54,11 +54,20 @@
 		<module>adyenAdapter</module>
 		<module>adapterPersistence</module>
 		<module>time4uAdapter</module>
+		<module>adapterRs</module>
 	</modules>
 
 	<dependencyManagement>
 	
 		<dependencies>
+		
+	      <dependency>
+          	<groupId>org.apache.karaf</groupId>
+          	<artifactId>apache-karaf</artifactId>
+          	<version>${karaf.version}</version>
+              <scope>import</scope>
+              <type>pom</type>
+          </dependency>	
 		
 			<dependency>
 				<groupId>org.notima.generic</groupId>
