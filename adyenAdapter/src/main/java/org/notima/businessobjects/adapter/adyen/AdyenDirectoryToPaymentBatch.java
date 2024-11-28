@@ -3,6 +3,7 @@ package org.notima.businessobjects.adapter.adyen;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.notima.adyen.AdyenReport;
@@ -65,6 +66,7 @@ public class AdyenDirectoryToPaymentBatch extends DirectoryPaymentBatchFactory {
 					return true;
 				return false;
 			}});
+		Arrays.sort(files);
 		return files;
 	}
 	

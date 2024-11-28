@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -109,6 +110,7 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 					return true;
 				return false;
 			}});
+		Arrays.sort(files);
 		return files;
 	}
 	
