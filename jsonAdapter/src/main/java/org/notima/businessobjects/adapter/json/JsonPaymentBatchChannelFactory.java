@@ -5,26 +5,19 @@ import java.io.IOException;
 import java.util.List;
 
 import org.notima.businessobjects.adapter.json.impl.PaymentBatchChannelListImpl;
+import org.notima.businessobjects.adapter.paymentbatch.BasicPaymentBatchChannelFactory;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
-import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.util.IDGenerator;
 
-public class JsonPaymentBatchChannelFactory implements PaymentBatchChannelFactory {
+public class JsonPaymentBatchChannelFactory extends BasicPaymentBatchChannelFactory {
 
-	private PaymentBatchChannelListImpl channelList;
-	
 	public JsonPaymentBatchChannelFactory(String pathToJsonFile) throws IOException {
 		
 		channelList = PaymentBatchChannelListImpl.createFromFile(new File(pathToJsonFile));
 		
 	}
 	
-	@Override
-	public List<PaymentBatchChannel> listChannelsForTenant(TaxSubjectIdentifier tenant) {
-		return channelList.listChannelsForTenant(tenant);
-	}
-
 	@Override
 	public List<PaymentBatchChannel> listChannelsWithSourceSystem(String systemName) {
 		// TODO Auto-generated method stub
@@ -56,7 +49,7 @@ public class JsonPaymentBatchChannelFactory implements PaymentBatchChannelFactor
 		}
 		
 		// Save to underlying file system.
-		channelList.writeToFile();
+		((PaymentBatchChannelListImpl)channelList).writeToFile();
 		
 		return pbc;
 	}

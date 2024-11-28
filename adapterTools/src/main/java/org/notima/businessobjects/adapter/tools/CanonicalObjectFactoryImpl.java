@@ -11,6 +11,7 @@ import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
@@ -35,6 +36,8 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, AccountingVoucherConverter<?>> accountingVoucherConverters = new TreeMap<String, AccountingVoucherConverter<?>>();
 	
 	private Map<String, PaymentFactory> paymentFactories = new TreeMap<String, PaymentFactory>();
+
+	private Map<String, PaymentBatchFactory> paymentBatchFactories = new TreeMap<String, PaymentBatchFactory>();
 	
 	private Map<String, TimeRecordServiceFactory> timeRecordServiceFactories = new TreeMap<String, TimeRecordServiceFactory>();
 	
@@ -149,6 +152,31 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
+	
+	/**
+	 * Resets the services by re-reading the service references for PaymentFactories
+	 * 
+	 * @throws InvalidSyntaxException
+	 */
+	public void resetPaymentBatchFactories() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+		
+		Collection<ServiceReference<PaymentBatchFactory>> references = ctx.getServiceReferences(PaymentBatchFactory.class, null);		
+
+		paymentBatchFactories.clear();
+		
+		if (references!=null) {
+			PaymentBatchFactory srv;
+			for (ServiceReference<PaymentBatchFactory> sr : references) {
+				srv = ctx.getService(sr);
+				paymentBatchFactories.put(srv.getSystemName(), srv);
+			}
+		}
+
+	}
+	
 	
 	/**
 	 * Resets the services by re-reading the service references for TimeRecordServices
@@ -417,6 +445,31 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		
 	}
 	
+	public PaymentBatchFactory lookupPaymentBatchFactory(String systemName) {
+		
+		try {
+			resetPaymentBatchFactories();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+		
+		PaymentBatchFactory pp = null;
+		
+		if (systemName==null) {
+			return null;
+		} else {
+			pp = paymentBatchFactories.get(systemName);
+		}
+		if (pp==null)
+			log.warn("Payment Batch Factory {} not found.", systemName);
+		
+		return pp;
+		
+	}
+	
+	
 	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName) {
 		
 		try {
@@ -502,6 +555,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 	}
 
+	
 	@Override
 	public PaymentBatchChannelFactory lookupFirstPaymentBatchChannelFactory() {
 		try {

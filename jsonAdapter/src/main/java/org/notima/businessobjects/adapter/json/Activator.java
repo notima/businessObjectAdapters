@@ -59,7 +59,7 @@ public class Activator extends BaseActivator {
 	private void createAndRegisterPaymentBatchChannelFactory() {
 
 		try {
-			JsonPaymentBatchChannelFactory paymentBatchChannelFactory = new JsonPaymentBatchChannelFactory(jsonProperties.getPaymentBatchChannelFile());
+			PaymentBatchChannelFactory paymentBatchChannelFactory = new JsonPaymentBatchChannelFactory(jsonProperties.getPaymentBatchChannelFile());
 			register(PaymentBatchChannelFactory.class, paymentBatchChannelFactory, props);
 			log.info("Registered PaymentBatchChannelFactory adapter for " + JsonAdapter.SYSTEM_NAME);
 		} catch (Exception ee) {

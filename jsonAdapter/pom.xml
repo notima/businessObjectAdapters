@@ -13,6 +13,11 @@
   		<groupId>org.notima.generic</groupId>
   		<artifactId>businessobjects</artifactId>
   	</dependency>
+  	<dependency>
+  		<groupId>org.notima.generic.businessobjects.adapter</groupId>
+  		<artifactId>adapterTools</artifactId>
+  		<version>${version}</version>
+  	</dependency>
   </dependencies>
   
   	<build>

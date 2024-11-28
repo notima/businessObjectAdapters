@@ -43,13 +43,27 @@ public class PaymentBatchChannelTable extends GenericTable {
 					p.getDestinationSystem(),
 					p.getSourceSystem(),
 					p.getChannelDescription(),
-					(p.getOptions()!=null ? p.getOptions().getSourceDirectory() : ""),
+					getSourceDirectory(p),
 					getReconciledUntilString(p)
 					);
 		}
 		
 	}
 
+	private String getSourceDirectory(PaymentBatchChannel p) {
+		StringBuffer str = new StringBuffer();
+		if (p.getOptions()!=null && p.getOptions().getSourceDirectory()!=null) {
+			str.append(p.getOptions().getSourceDirectory());
+		}
+		if (p.getUnprocessedEntries()!=null && p.getUnprocessedEntries().size()>0) {
+			if (str.length()>0) {
+				str.append(" ");
+			}
+			str.append("(" + p.getUnprocessedEntries().size() + ")");
+		}
+		return str.toString();
+	}
+	
 	private String getReconciledUntilString(PaymentBatchChannel p) {
 		
 		if (p.getStatus()!=null && p.getStatus().getReconciledUntil()!=null) {
