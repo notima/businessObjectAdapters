@@ -13,8 +13,8 @@ public class PaymentBatchChannelTable extends GenericTable {
 
 		addColumn("ChannelID");
 		addColumn("Tenant");
-		addColumn("Destination");
 		addColumn("Source");
+		addColumn("Destination");
 		addColumn("Description");
 		addColumn("Source dir");
 		addColumn("R. until");
@@ -40,8 +40,8 @@ public class PaymentBatchChannelTable extends GenericTable {
 			addRow().addContent(
 					p.getChannelId(), 
 					p.getTenant().toString(), 
-					p.getDestinationSystem(),
 					p.getSourceSystem(),
+					p.getDestinationSystem(),
 					p.getChannelDescription(),
 					getSourceDirectory(p),
 					getReconciledUntilString(p)

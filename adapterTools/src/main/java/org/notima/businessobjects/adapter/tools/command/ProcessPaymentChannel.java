@@ -43,6 +43,9 @@ public class ProcessPaymentChannel implements Action {
     @Option(name = "--draft-payments", description = "Only creates drafts of the payments, if supported by the destination adapter", required = false, multiValued = false)
     private boolean	draftPayments;
     
+    @Option(name = "--non-matched-as-prepayments", description = "Account non matched as prepayments.", required = false, multiValued = false)
+    private boolean nonMatchedAsPrepayments;
+    
     @Option(name = "-d", aliases = { "--dry-run" }, description = "Let's you know what would be done, but doesn't do it", required = false, multiValued = false)
     private boolean dryRun;
     
@@ -88,6 +91,7 @@ public class ProcessPaymentChannel implements Action {
 		paymentSource = channel.getOptions().getSourceDirectory();
 		
 		processOptions = new PaymentBatchProcessOptions();
+		processOptions.setNonMatchedAsPrepayments(nonMatchedAsPrepayments);
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
 		processOptions.setFeesPerPayment(feesPerPayment);
 		processOptions.setAccountPayoutOnly(accountPayoutOnly);
@@ -120,6 +124,7 @@ public class ProcessPaymentChannel implements Action {
 			if (!dryRun) {
 				// Update processed date
 				channel.setReconciledUntil(LocalDateUtils.asLocalDate(pb.getFirstPaymentDate()));
+				channel.setLastProcessedBatch(pb.getSource());
 				channelFactory.persistChannel(channel);
 			}
 		}
