@@ -41,10 +41,10 @@ public class InvoiceHeaderTable extends GenericTable {
 		column("Customer name");
 		column("Order #");
 		column("Your Order #");
-		column("Our reference");
+		column("Our ref");
 		column("ExtRef1");
 		column("ExtRef2");
-		column("Your reference");
+		column("Your ref");
 		column("Grand total").alignRight();
 		column("Open amt").alignRight();
 		column("Curr");
