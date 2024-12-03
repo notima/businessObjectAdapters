@@ -44,6 +44,7 @@ public class InvoiceHeaderTable extends GenericTable {
 		column("Our reference");
 		column("ExtRef1");
 		column("ExtRef2");
+		column("Your reference");
 		column("Grand total").alignRight();
 		column("Open amt").alignRight();
 		column("Curr");
@@ -100,6 +101,7 @@ public class InvoiceHeaderTable extends GenericTable {
 				"N/A",
 				is.getExternalInvoiceReference1(),
 				is.getExternalInvoiceReference2(),
+				"N/A",
 				nfmt.format(is.getTotal()),
 				nfmt.format(is.getBalance()),
 				is.getCurrency(),
@@ -123,6 +125,7 @@ public class InvoiceHeaderTable extends GenericTable {
 				invoice.getOurReference(),
 				invoice.getExternalInvoiceReference1(),
 				invoice.getExternalInvoiceReference2(),
+				invoice.getYourReference(),
 				nfmt.format(invoice.getTotal()),
 				nfmt.format(invoice.getBalance()),
 				invoice.getCurrency(),
