@@ -9,9 +9,10 @@
     	<bundle>mvn:commons-codec/commons-codec/1.17.1</bundle>
     	<bundle>mvn:commons-beanutils/commons-beanutils/1.9.4</bundle>
     	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
+    	<feature>activation</feature>
     	<!-- 
     	<bundle>mvn:javax.activation/javax.activation-api/1.2.0</bundle>
-    	-->
+    	 -->
 		<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
 		<bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
 		<bundle>mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
@@ -43,9 +44,17 @@
 		<!-- Legacy -->
 		<bundle>mvn:javax.xml.soap/javax.xml.soap-api/1.4.0</bundle>
 		<bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
+		<bundle>mvn:javax.xml.ws/jaxws-api/2.2.11</bundle>
+		<!-- 
+		<bundle>mvn:javax.jws/javax.jws-api/1.1</bundle>
+		 -->
+		
+		<!-- JDK >=9 -->
+		<!-- 
 		<bundle>mvn:javax.xml.ws/jaxws-api/2.3.1</bundle>
 		<bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
 		<bundle>mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
+		-->
 		
 	</feature>
 
@@ -136,7 +145,7 @@
         <feature>scheduler</feature>
         <feature>notima-businessobjects</feature>
         <!-- Notima util for backwards compatibility -->
-        <bundle>mvn:org.notima/notima-util/0.0.7</bundle>
+        <bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
         <bundle>mvn:org.notima/piggyback-tools/0.0.2</bundle>
         <bundle>mvn:org.notima.api/fortnox4j/${fortnox4j.version}</bundle>
         <bundle>mvn:org.notima.generic.businessobjects.adapter/fortnoxAdapter/${project.version}</bundle>
