@@ -1025,7 +1025,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 						accountNo = article.getSalesAccount()!=null ? article.getSalesAccount().toString() : null;
 					}
 				} catch (Exception ee) {
-					logger.warn("Could not lookup product " + il.getProductKey(), ee);
+					logger.warn("Could not lookup product " + il.getProductKey());
 				}
 			}
 			
