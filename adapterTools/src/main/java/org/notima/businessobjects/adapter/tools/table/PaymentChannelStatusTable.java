@@ -1,13 +1,17 @@
 package org.notima.businessobjects.adapter.tools.table;
 
+import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 
 public class PaymentChannelStatusTable extends GenericTable {
 
 	private PaymentBatchChannel ch;
+	private PaymentBatchFactory f;
+	private PaymentBatchChannelOptions opts;
 	
-	public PaymentChannelStatusTable(PaymentBatchChannel bpl) {
+	public PaymentChannelStatusTable(PaymentBatchFactory factory, PaymentBatchChannel bpl) {
 
 		addColumn("Key");
 		addColumn("Value");
@@ -18,6 +22,8 @@ public class PaymentChannelStatusTable extends GenericTable {
 		}
 		
 		ch = bpl;
+		f = factory;
+		opts = f.getChannelOptions();
 		
 		populateRows();
 		
@@ -34,6 +40,12 @@ public class PaymentChannelStatusTable extends GenericTable {
 		addRow().addContent("Tenant", getTenantName());
 		addRow().addContent("Flow", getFlow());
 		addRow().addContent("Source dir", getSourceDirectory());
+		addRow().addContent("Currency", opts.getDefaultCurrency());
+		addRow().addContent("Bank.acct", opts.getGeneralLedgerBankAccount());
+		addRow().addContent("Reconc.acct", opts.getGeneralLedgerReconciliationAccount());
+		addRow().addContent("Intransit acct", opts.getGeneralLedgerInTransitAccount());
+		addRow().addContent("Fee acct", opts.getGeneralLedgerFeeAccount());
+		addRow().addContent("Unknown acct", opts.getGeneralLedgerUnknownTrxAccount());
 		addRow().addContent("Last batch", getLastBatch());
 		addRow().addContent("R. until", getReconciledUntilString());
 		

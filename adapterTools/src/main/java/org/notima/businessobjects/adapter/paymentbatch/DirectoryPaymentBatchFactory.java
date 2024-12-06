@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.slf4j.Logger;
@@ -21,17 +22,8 @@ import org.slf4j.LoggerFactory;
 public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactory {
 
 	public Logger log = LoggerFactory.getLogger(this.getClass());		
-	
-	protected TaxSubjectIdentifier 		taxIdentifier;
-	protected String					directory;
-	protected File						directoryFile;
-	protected String					defaultCurrency;
-	protected String					generalLedgerBankAccount;
-	protected String					generalLedgerInTransitAccount;
-	protected String					generalLedgerReconciliationAccount;
-	protected String					generalLedgerFeeAccount;
-	protected String					generalLedgerUnknownTrxAccount;
-	protected String					voucherSeries;
+
+	protected PaymentBatchChannelOptions channelOptions = new PaymentBatchChannelOptions();
 
 	/**
 	 * The property file that contains the values for this reader
@@ -46,35 +38,39 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 	
 	public void setSource(String directoryToRead) throws Exception {
 
-		directory = directoryToRead;
-		taxIdentifier = TaxSubjectIdentifier.getUndefinedIdentifier();
+		channelOptions.setDirectory(directoryToRead);
+		channelOptions.setTaxIdentifier(TaxSubjectIdentifier.getUndefinedIdentifier());
 		checkDirectoryValid();
 		checkForTaxIdentifierAndCurrency();
 		
 	}
 
+	public PaymentBatchChannelOptions getChannelOptions() {
+		return channelOptions;
+	}
+	
 	public TaxSubjectIdentifier getTaxIdentifier() {
-		return taxIdentifier;
+		return channelOptions.getTaxIdentifier();
 	}
 
 	public void setTaxIdentifier(TaxSubjectIdentifier taxIdentifier) {
-		this.taxIdentifier = taxIdentifier;
+		channelOptions.setTaxIdentifier(taxIdentifier);
 	}
 
 	public String getDefaultCurrency() {
-		return defaultCurrency;
+		return channelOptions.getDefaultCurrency();
 	}
 
 	public void setDefaultCurrency(String defaultCurrency) {
-		this.defaultCurrency = defaultCurrency;
+		channelOptions.setDefaultCurrency(defaultCurrency);
 	}
 
 	private void checkDirectoryValid() throws FileNotFoundException {
-		File f = new File(directory);
+		File f = new File(channelOptions.getDirectory());
 		if (!f.isDirectory()) {
-			throw new FileNotFoundException(directory);
+			throw new FileNotFoundException(channelOptions.getDirectory());
 		}
-		directoryFile = f;
+		channelOptions.setDirectoryFile(f);
 	}
 	
 	/**
@@ -82,7 +78,7 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 	 */
 	private void checkForTaxIdentifierAndCurrency() {
 
-		File f = new File(directory + File.separator + getPropertyFile());
+		File f = new File(channelOptions.getDirectory() + File.separator + getPropertyFile());
 		if (f.exists() && f.canRead()) {
 			readPropertyFile(f);
 		}
@@ -117,14 +113,14 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 			
 			String taxId = props.getProperty("taxId");
 			String countryCode = props.getProperty("countryCode");
-			defaultCurrency = props.getProperty("defaultCurrency");
-			taxIdentifier = new TaxSubjectIdentifier(taxId, countryCode);
-			generalLedgerBankAccount = props.getProperty("generalLedgerBankAccount");
-			generalLedgerInTransitAccount = props.getProperty("generalLedgerInTransitAccount");
-			generalLedgerReconciliationAccount = props.getProperty("generalLedgerReconciliationAccount");
-			generalLedgerFeeAccount = props.getProperty("generalLedgerFeeAccount");
-			generalLedgerUnknownTrxAccount = props.getProperty("generalLedgerUnknownTrxAccount");
-			voucherSeries = props.getProperty("voucherSeries");
+			channelOptions.setDefaultCurrency(props.getProperty("defaultCurrency"));
+			channelOptions.setTaxIdentifier(new TaxSubjectIdentifier(taxId, countryCode));
+			channelOptions.setGeneralLedgerBankAccount(props.getProperty("generalLedgerBankAccount"));
+			channelOptions.setGeneralLedgerInTransitAccount(props.getProperty("generalLedgerInTransitAccount"));
+			channelOptions.setGeneralLedgerReconciliationAccount(props.getProperty("generalLedgerReconciliationAccount"));
+			channelOptions.setGeneralLedgerFeeAccount(props.getProperty("generalLedgerFeeAccount"));
+			channelOptions.setGeneralLedgerUnknownTrxAccount(props.getProperty("generalLedgerUnknownTrxAccount"));
+			channelOptions.setVoucherSeries(props.getProperty("voucherSeries"));
 			logRetrievedProperties();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -135,8 +131,8 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 	protected void logRetrievedProperties() {
 		// TODO: Improve logging
 		if (log.isDebugEnabled()) {
-			if (defaultCurrency!=null) {
-				log.debug("Currency defined in %s: %s", getPropertyFile(), defaultCurrency);
+			if (channelOptions.getDefaultCurrency()!=null) {
+				log.debug("Currency defined in %s: %s", getPropertyFile(), channelOptions.getDefaultCurrency());
 			}
 		}
 	}

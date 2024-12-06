@@ -11,6 +11,12 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelList;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 
+/**
+ * 
+ * This is the common code for all payment batch channel factories. 
+ * Implementations of this abstract class should focus on how to store the channel information.
+ * 
+ */
 public abstract class BasicPaymentBatchChannelFactory implements PaymentBatchChannelFactory {
 
 	protected CanonicalObjectFactory	cof;
@@ -47,7 +53,13 @@ public abstract class BasicPaymentBatchChannelFactory implements PaymentBatchCha
 		return list;
 		
 	}
-	
+
+	/**
+	 * Looks for unprocessed entries for this given channel.
+	 * 
+	 * @param pbc
+	 * @return
+	 */
 	protected PaymentBatchChannel populateUnProcessedEntries(PaymentBatchChannel pbc) {
 
 		PaymentBatchFactory paymentFactory;
@@ -58,7 +70,8 @@ public abstract class BasicPaymentBatchChannelFactory implements PaymentBatchCha
 
 			try {
 				paymentFactory.setSource(pbc.getOptions().getSourceDirectory());
-				List<PaymentBatch> batches =paymentFactory.readPaymentBatches(); 
+
+				List<PaymentBatch> batches = paymentFactory.readPaymentBatches(); 
 				
 				List<String> entries = new ArrayList<String>();
 				for (PaymentBatch b : batches) {

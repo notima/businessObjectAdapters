@@ -38,28 +38,28 @@ public class AdyenDirectoryToPaymentBatch extends DirectoryPaymentBatchFactory {
 	
 	public PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
 		
-		AdyenReport ratepayReport = AdyenReportParser.createFromFile(directory + File.separator + file);
-		ratepayReport.setCurrency(defaultCurrency);
+		AdyenReport ratepayReport = AdyenReportParser.createFromFile(channelOptions.getDirectory() + File.separator + file);
+		ratepayReport.setCurrency(channelOptions.getDefaultCurrency());
 		AdyenReportToPaymentBatch converter = AdyenReportToPaymentBatch.buildFromReport(ratepayReport);
 		PaymentBatch result = converter.getPaymentBatch();
-		result.setBatchOwner(taxIdentifier);
+		result.setBatchOwner(channelOptions.getTaxIdentifier());
 		result.setPaymentType(PaymentType.RECEIVABLE);
 		BankAccountDetail bad = new BankAccountDetail();
-		bad.setCurrency(defaultCurrency);
-		bad.setGeneralLedgerBankAccount(generalLedgerBankAccount);
-		bad.setGeneralLedgerInTransitAccount(generalLedgerInTransitAccount);
-		bad.setGeneralLedgerReconciliationAccount(generalLedgerReconciliationAccount);
-		bad.setGeneralLedgerFeeAccount(generalLedgerFeeAccount);
-		result.setVoucherSeries(voucherSeries);
+		bad.setCurrency(channelOptions.getDefaultCurrency());
+		bad.setGeneralLedgerBankAccount(channelOptions.getGeneralLedgerBankAccount());
+		bad.setGeneralLedgerInTransitAccount(channelOptions.getGeneralLedgerInTransitAccount());
+		bad.setGeneralLedgerReconciliationAccount(channelOptions.getGeneralLedgerReconciliationAccount());
+		bad.setGeneralLedgerFeeAccount(channelOptions.getGeneralLedgerFeeAccount());
+		result.setVoucherSeries(channelOptions.getVoucherSeries());
 		result.setBankAccount(bad);
 		result.setSource(file);
-		result.setGeneralLedgerUnknownTrxAccount(generalLedgerUnknownTrxAccount);
+		result.setGeneralLedgerUnknownTrxAccount(channelOptions.getGeneralLedgerUnknownTrxAccount());
 		return result;
 		
 	}
 	
 	public String[] getFilteredFiles() {
-		String[] files = directoryFile.list(new FilenameFilter() {
+		String[] files = channelOptions.getDirectoryFile().list(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				if (name.toLowerCase().endsWith("xlsx"))

@@ -3,6 +3,7 @@ package org.notima.businessobjects.adapter.sebanking;
 import java.util.List;
 
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 
 public class SeBankingPaymentBatchFactory implements PaymentBatchFactory {
@@ -36,6 +37,12 @@ public class SeBankingPaymentBatchFactory implements PaymentBatchFactory {
 	@Override
 	public String getSystemName() {
 		return SYSTEMNAME;
+	}
+
+	@Override
+	public PaymentBatchChannelOptions getChannelOptions() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -10,6 +10,7 @@ import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.table.PaymentChannelStatusTable;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 
 @Command(scope = "notima", name = "show-payment-channel-status", description = "Shows channel status")
 @Service
@@ -25,6 +26,7 @@ public class ShowPaymentChannelStatus implements Action {
 	private String channelId = "";
 	
 	private PaymentBatchChannelFactory channelFactory;
+	private PaymentBatchFactory	paymentBatchFactory;
 	private PaymentBatchChannel channel;
 	
 	
@@ -40,7 +42,7 @@ public class ShowPaymentChannelStatus implements Action {
 	
 	private void showChannelStatus() {
 		
-		PaymentChannelStatusTable pcst = new PaymentChannelStatusTable(channel);
+		PaymentChannelStatusTable pcst = new PaymentChannelStatusTable(paymentBatchFactory, channel);
 		pcst.getShellTable().print(sess.getConsole());
 		
 	}
@@ -53,6 +55,9 @@ public class ShowPaymentChannelStatus implements Action {
 		
 		channel = channelFactory.findChannelWithId(channelId);
 		if (channel==null) throw new Exception("No channel with ID [" + channelId + "] found.");
+		
+		paymentBatchFactory = cof.lookupPaymentBatchFactory(channel.getSourceSystem());	
+		paymentBatchFactory.setSource(channel.getOptions().getSourceDirectory());
 		
 	}
 	

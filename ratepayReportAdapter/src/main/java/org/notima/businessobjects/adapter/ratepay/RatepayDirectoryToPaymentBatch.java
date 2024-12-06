@@ -2,20 +2,17 @@ package org.notima.businessobjects.adapter.ratepay;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
-import org.jline.utils.Log;
+import org.notima.businessobjects.adapter.paymentbatch.DirectoryPaymentBatchFactory;
 import org.notima.generic.businessobjects.BankAccountDetail;
 import org.notima.generic.businessobjects.Payment.PaymentType;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
-import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.ratepay.RatepayReport;
 import org.notima.ratepay.RatepayReportParser;
 
@@ -26,20 +23,9 @@ import org.notima.ratepay.RatepayReportParser;
  * @author Daniel Tamm
  *
  */
-public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
+public class RatepayDirectoryToPaymentBatch extends DirectoryPaymentBatchFactory {
 
 	public static String			RATEPAY_PROPERTY_FILE = "ratepay.properties";
-	
-	private TaxSubjectIdentifier 	taxIdentifier;
-	private String					directory;
-	private File					directoryFile;
-	private String					defaultCurrency;
-	private String					generalLedgerBankAccount;
-	private String					generalLedgerInTransitAccount;
-	private String					generalLedgerReconciliationAccount;
-	private String					generalLedgerFeeAccount;
-	private String					generalLedgerUnknownTrxAccount;
-	private String					voucherSeries;
 	
 	public RatepayDirectoryToPaymentBatch(String directoryToRead) throws Exception {
 		setSource(directoryToRead);
@@ -51,8 +37,8 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	
 	public void setSource(String directoryToRead) throws Exception {
 
-		directory = directoryToRead;
-		taxIdentifier = TaxSubjectIdentifier.getUndefinedIdentifier();
+		channelOptions.setDirectory(directoryToRead);
+		channelOptions.setTaxIdentifier(TaxSubjectIdentifier.getUndefinedIdentifier());
 		checkDirectoryValid();
 		checkForTaxIdentifierAndCurrency();
 		
@@ -68,7 +54,7 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	public List<PaymentBatch> readFilesInDirectory() {
 		List<PaymentBatch> result = new ArrayList<PaymentBatch>();
 
-		String[] filesToRead = getCsvFiles();
+		String[] filesToRead = getFilteredFiles();
 		for (String file : filesToRead) {
 			try {
 				result.add(createPaymentBatchFromFile(file));
@@ -82,28 +68,28 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	
 	public PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
 		
-		RatepayReport ratepayReport = RatepayReportParser.createFromFile(directory + File.separator + file);
-		ratepayReport.setCurrency(defaultCurrency);
+		RatepayReport ratepayReport = RatepayReportParser.createFromFile(channelOptions.getDirectory() + File.separator + file);
+		ratepayReport.setCurrency(channelOptions.getDefaultCurrency());
 		RatepayToPaymentBatch converter = RatepayToPaymentBatch.buildFromReport(ratepayReport);
 		PaymentBatch result = converter.getPaymentBatch();
-		result.setBatchOwner(taxIdentifier);
+		result.setBatchOwner(channelOptions.getTaxIdentifier());
 		result.setPaymentType(PaymentType.RECEIVABLE);
 		BankAccountDetail bad = new BankAccountDetail();
-		bad.setCurrency(defaultCurrency);
-		bad.setGeneralLedgerBankAccount(generalLedgerBankAccount);
-		bad.setGeneralLedgerInTransitAccount(generalLedgerInTransitAccount);
-		bad.setGeneralLedgerReconciliationAccount(generalLedgerReconciliationAccount);
-		bad.setGeneralLedgerFeeAccount(generalLedgerFeeAccount);
-		result.setVoucherSeries(voucherSeries);
+		bad.setCurrency(channelOptions.getDefaultCurrency());
+		bad.setGeneralLedgerBankAccount(channelOptions.getGeneralLedgerBankAccount());
+		bad.setGeneralLedgerInTransitAccount(channelOptions.getGeneralLedgerInTransitAccount());
+		bad.setGeneralLedgerReconciliationAccount(channelOptions.getGeneralLedgerReconciliationAccount());
+		bad.setGeneralLedgerFeeAccount(channelOptions.getGeneralLedgerFeeAccount());
+		result.setVoucherSeries(channelOptions.getVoucherSeries());
 		result.setBankAccount(bad);
 		result.setSource(file);
-		result.setGeneralLedgerUnknownTrxAccount(generalLedgerUnknownTrxAccount);
+		result.setGeneralLedgerUnknownTrxAccount(channelOptions.getGeneralLedgerUnknownTrxAccount());
 		return result;
 		
 	}
 	
-	private String[] getCsvFiles() {
-		String[] files = directoryFile.list(new FilenameFilter() {
+	public String[] getFilteredFiles() {
+		String[] files = channelOptions.getDirectoryFile().list(new FilenameFilter() {
 			@Override
 			public boolean accept(File dir, String name) {
 				if (name.toLowerCase().endsWith("csv"))
@@ -113,29 +99,13 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 		Arrays.sort(files);
 		return files;
 	}
-	
-	public TaxSubjectIdentifier getTaxIdentifier() {
-		return taxIdentifier;
-	}
-
-	public void setTaxIdentifier(TaxSubjectIdentifier taxIdentifier) {
-		this.taxIdentifier = taxIdentifier;
-	}
-
-	public String getDefaultCurrency() {
-		return defaultCurrency;
-	}
-
-	public void setDefaultCurrency(String defaultCurrency) {
-		this.defaultCurrency = defaultCurrency;
-	}
 
 	private void checkDirectoryValid() throws FileNotFoundException {
-		File f = new File(directory);
+		File f = new File(channelOptions.getDirectory());
 		if (!f.isDirectory()) {
-			throw new FileNotFoundException(directory);
+			throw new FileNotFoundException(channelOptions.getDirectory());
 		}
-		directoryFile = f;
+		channelOptions.setDirectoryFile(f);
 	}
 	
 	/**
@@ -143,44 +113,13 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	 */
 	private void checkForTaxIdentifierAndCurrency() {
 
-		File f = new File(directory + File.separator + RATEPAY_PROPERTY_FILE);
+		File f = new File(channelOptions.getDirectory() + File.separator + RATEPAY_PROPERTY_FILE);
 		if (f.exists() && f.canRead()) {
-			readRatepayPropertyFile(f);
+			readPropertyFile(f);
 		}
 		
 	}
 	
-	private void readRatepayPropertyFile(File f) {
-		
-		Properties props = new Properties();
-		try {
-			props.load(new FileReader(f));
-			
-			String taxId = props.getProperty("taxId");
-			String countryCode = props.getProperty("countryCode");
-			defaultCurrency = props.getProperty("defaultCurrency");
-			taxIdentifier = new TaxSubjectIdentifier(taxId, countryCode);
-			generalLedgerBankAccount = props.getProperty("generalLedgerBankAccount");
-			generalLedgerInTransitAccount = props.getProperty("generalLedgerInTransitAccount");
-			generalLedgerReconciliationAccount = props.getProperty("generalLedgerReconciliationAccount");
-			generalLedgerFeeAccount = props.getProperty("generalLedgerFeeAccount");
-			generalLedgerUnknownTrxAccount = props.getProperty("generalLedgerUnknownTrxAccount");
-			voucherSeries = props.getProperty("voucherSeries");
-			logRetrievedProperties();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
-
-	private void logRetrievedProperties() {
-		// TODO: Improve logging
-		if (RatepayAdapter.log.isDebugEnabled()) {
-			if (defaultCurrency!=null) {
-				Log.debug("Currency defined in ratepay.properties: %s",  defaultCurrency);
-			}
-		}
-	}
 	
 	@Override
 	public String getSystemName() {
@@ -202,6 +141,11 @@ public class RatepayDirectoryToPaymentBatch implements PaymentBatchFactory {
 	public PaymentBatch writePaymentBatch(PaymentBatch batch) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public String getPropertyFile() {
+		return RATEPAY_PROPERTY_FILE;
 	}
 	
 	

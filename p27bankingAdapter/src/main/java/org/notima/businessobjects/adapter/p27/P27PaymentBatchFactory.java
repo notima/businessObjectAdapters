@@ -3,6 +3,7 @@ package org.notima.businessobjects.adapter.p27;
 import java.util.List;
 
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 
 public class P27PaymentBatchFactory implements PaymentBatchFactory {
@@ -33,6 +34,12 @@ public class P27PaymentBatchFactory implements PaymentBatchFactory {
 
 	@Override
 	public String getSystemName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PaymentBatchChannelOptions getChannelOptions() {
 		// TODO Auto-generated method stub
 		return null;
 	}

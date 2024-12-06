@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.notima.businessobjects.adapter.json.impl.PaymentBatchChannelListImpl;
 import org.notima.businessobjects.adapter.paymentbatch.BasicPaymentBatchChannelFactory;
-import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.util.IDGenerator;
 
