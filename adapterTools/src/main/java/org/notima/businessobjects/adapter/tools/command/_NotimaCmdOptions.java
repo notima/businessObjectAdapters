@@ -8,4 +8,6 @@ public class _NotimaCmdOptions {
 	
 	public static final String	ENRICH = "--enrich";
 	
+	public static final String	UNTIL_DATE = "--until-date";
+	
 }

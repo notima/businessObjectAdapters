@@ -218,7 +218,6 @@
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/sieAdapter/${project.version}</bundle>
 	</feature>
     
-    
     <feature name="notima-adempiere" description="Notima ADempiere Adapter" version="${project.version}" install="manual">
 
     	<feature>notima-businessobjects</feature>
@@ -268,6 +267,26 @@
     <feature name="notima-excel" description="Notima Excel Adapter" version="${project.version}" install="manual">
     	<feature>notima-businessobjects</feature>
     	<bundle>mvn:org.notima.generic.businessobjects.adapter/excelAdapter/${project.version}</bundle>
+    </feature>
+    
+    
+    <feature name="notima-payments2fortnox" description="Summary feature for payment providers" version="${project.version}" install="manual">
+    
+    	<feature>notima-json</feature>
+		<feature>notima-persistence</feature>    	
+    	<feature>notima-ratepay</feature>
+    	<feature>notima-adyen</feature>
+    	<feature>notima-fortnox4j</feature>
+    
+    </feature>
+    
+    <feature name="notima-camel-routes" description="Summary feature for activating camel routes" version="${project.version}" install="manual">
+		<!-- repo-add camel (3.22.2) -->    
+    	<feature>camel-core</feature>
+		<feature>camel-ftp</feature>    	
+    	<feature>camel-ssh</feature>
+    	<feature>camel-blueprint</feature>
+    
     </feature>
     
     

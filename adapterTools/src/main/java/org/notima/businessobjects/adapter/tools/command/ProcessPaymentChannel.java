@@ -1,5 +1,7 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Properties;
 
@@ -20,6 +22,7 @@ import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.util.LocalDateUtils;
@@ -49,6 +52,9 @@ public class ProcessPaymentChannel implements Action {
     @Option(name = "-d", aliases = { "--dry-run" }, description = "Let's you know what would be done, but doesn't do it", required = false, multiValued = false)
     private boolean dryRun;
     
+    @Option(name = _NotimaCmdOptions.UNTIL_DATE, description = "Only process until this date yyyy-MM-dd", required = false)
+    private String untilDateStr;
+    
     @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
     private boolean feesPerPayment;
 	
@@ -69,9 +75,11 @@ public class ProcessPaymentChannel implements Action {
 	private PaymentBatchTable paymentBatchTable;
 	private ReportFormatter<GenericTable> rf;
 	
+	private LocalDate	untilDate;
+	
 	private PaymentBatchChannelFactory channelFactory;
 	private PaymentBatchChannel channel;
-	private PaymentFactory		sourcePaymentFactory;
+	private PaymentBatchFactory		sourcePaymentFactory;
 	private PaymentBatchProcessor destinationPaymentProcessor;
 	private PaymentBatchProcessOptions processOptions;
 
@@ -83,7 +91,7 @@ public class ProcessPaymentChannel implements Action {
 		channel = channelFactory.findChannelWithId(channelId);
 		if (channel==null) throw new Exception("No channel with ID [" + channelId + "] found.");
 
-		sourcePaymentFactory = cof.lookupPaymentFactory(channel.getSourceSystem());
+		sourcePaymentFactory = cof.lookupPaymentBatchFactory(channel.getSourceSystem());
 		destinationPaymentProcessor = cof.lookupPaymentBatchProcessor(channel.getDestinationSystem());
 
 		if (channel.getOptions()==null || channel.getOptions().getSourceDirectory()==null) throw new Exception("Source directory not defined");
@@ -99,14 +107,18 @@ public class ProcessPaymentChannel implements Action {
 			processOptions.setDryRun(true);
 		}
 		
+		if (untilDateStr!=null) {
+			untilDate = LocalDate.parse(untilDateStr, DateTimeFormatter.ISO_LOCAL_DATE);
+		}
+		
 	}
 	
 	@Override
 	public Object execute() throws Exception {
 		
 		initParameters();
-		
-		List<PaymentBatch> batches = sourcePaymentFactory.readPaymentBatchesFromSource(paymentSource); 
+		sourcePaymentFactory.setSource(paymentSource);
+		List<PaymentBatch> batches = sourcePaymentFactory.readPaymentBatches(); 
 		
 		for (PaymentBatch pb : batches) {
 			processAndPrint(pb);
@@ -117,6 +129,10 @@ public class ProcessPaymentChannel implements Action {
 	
 	private void processAndPrint(PaymentBatch pb) throws Exception {
 
+		if (!shouldProcess(pb)) {
+			return;
+		}
+		
 		if (matchOnly) {
 			destinationPaymentProcessor.lookupInvoiceReferences(pb);
 		} else {
@@ -130,6 +146,24 @@ public class ProcessPaymentChannel implements Action {
 		}
 		
 		formatReport(pb);
+		
+	}
+	
+	/**
+	 * Checks until date to see if this should be processed.
+	 * 
+	 * @param pb
+	 * @return
+	 */
+	private boolean shouldProcess(PaymentBatch pb) {
+		if (untilDate==null) return true;
+		
+		LocalDate firstPaymentDate = LocalDateUtils.asLocalDate(pb.getFirstPaymentDate());
+		
+		if (firstPaymentDate.isAfter(untilDate)) {
+			return false;
+		}
+		return true;
 		
 	}
 	
