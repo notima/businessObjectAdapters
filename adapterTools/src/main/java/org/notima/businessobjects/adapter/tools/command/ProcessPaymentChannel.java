@@ -24,7 +24,6 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
-import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.util.LocalDateUtils;
 
 @Command(scope = "notima", name = "process-payment-channel", description = "Processes a payment channel")
@@ -193,6 +192,8 @@ public class ProcessPaymentChannel implements Action {
 				
 				String of = rf.formatReport((GenericTable)paymentBatchTable, format, props);
 				sess.getConsole().println("Output file to: " + of);
+				// Reset outfile for another run
+				outFile = null;
 			} else {
 				sess.getConsole().println("Can't find formatter for " + format);
 			}
