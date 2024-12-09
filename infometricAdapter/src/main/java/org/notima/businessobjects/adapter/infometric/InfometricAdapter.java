@@ -1,6 +1,8 @@
 package org.notima.businessobjects.adapter.infometric;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * 
@@ -40,6 +42,7 @@ import org.notima.generic.businessobjects.PriceList;
 import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.ProductCategory;
 import org.notima.generic.businessobjects.Tax;
+import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.FactoringReservation;
 
 /**
@@ -62,8 +65,11 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	public static final String PROP_BILLINGPRODUCT = "billingProduct";
 	public static final String PROP_INVOICELINETEXT = "invoiceLineText";
 	
+	public static final String TENANTLIST_FILE="tenants.json";
+	
 	public String baseDirectory;
 	
+	private InfometricTenantList	tenantList;
 	
 	public void setInfometricBaseDirectory(String directory) {
 		baseDirectory = directory;
@@ -71,7 +77,12 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	}
 	
 	private void reloadTenants() {
-		// TODO: Refresh tenant list based on the contents of the directory
+		try {
+			tenantList = InfometricTenantList.createFromFile(new File(baseDirectory + File.separator + TENANTLIST_FILE));
+			this.refreshTenantMap();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -98,6 +109,17 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	}
 	
 	@Override
+	public void setTenant(String orgNo, String countryCode) throws NoSuchTenantException {
+		super.setTenant(orgNo, countryCode);
+		InfometricTenant t = currentTenant.getNativeBusinessPartner();
+		try {
+			t.refreshTenantDirectory();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
 	public BusinessPartner<InfometricTenant> addTenant(String orgNo, String countryCode, String name,
 			Properties props) {
 		
@@ -120,6 +142,8 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 			}
 			it.savePropertyFile();
 			newTenant.setNativeBusinessPartner(it);
+			tenantList.addTenant(it);
+			tenantList.saveToFile();
 			return newTenant;
 			
 		} catch (Exception ee) {
@@ -131,8 +155,7 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 
 	@Override
 	public BusinessPartnerList<InfometricTenant> listTenants() {
-		// TODO Auto-generated method stub
-		return null;
+		return tenantList.listTenants();
 	}
 
 	@Override

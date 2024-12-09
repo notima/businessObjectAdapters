@@ -25,9 +25,9 @@ public class InfometricTenant {
 	private String orgNo;
 	private String countryCode;
 	private String name;
-	private File   directoryFile;
-	private File   propertyFile;
-	private InfometricTenantSettings 	tenantSettings = new InfometricTenantSettings();
+	private transient File   directoryFile;
+	private transient File   propertyFile;
+	private transient InfometricTenantSettings 	tenantSettings = new InfometricTenantSettings();
 	
 	private String tenantDirectory;
 
@@ -80,6 +80,12 @@ public class InfometricTenant {
 		checkDirectoryValid();
 		checkForTaxIdentifierAndCurrency();
 	}
+	
+	public void refreshTenantDirectory() throws FileNotFoundException {
+		checkDirectoryValid();
+		checkForTaxIdentifierAndCurrency();
+	}
+	
 	
 	public TaxSubjectIdentifier getTaxIdentifier() {
 		return taxIdentifier;
@@ -159,7 +165,7 @@ public class InfometricTenant {
 		
 	}
 
-	private void readInfometricTenantSettings() {
+	public void readInfometricTenantSettings() {
 		
 		File f = new File(directoryFile.getAbsolutePath() + File.separator + INFOMETRIC_JSON_FILE);
 		Gson gson = JsonUtil.buildGson();
