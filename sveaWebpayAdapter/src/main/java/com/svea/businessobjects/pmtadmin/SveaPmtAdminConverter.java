@@ -71,7 +71,9 @@ public class SveaPmtAdminConverter {
 		bp.setTaxId(s.getNationalId());
 		bp.setCompany(s.isCompany());
 		
-		dst.setDocumentKey(Long.toString(s.getId()));
+		if (s.getId()!=null) {
+			dst.setDocumentKey(Long.toString(s.getId()));
+		}
 		dst.setOrderKey(s.getMerchantOrderId());
 		dst.setCurrency(s.getCurrency());
 		dst.setDateOrdered(PmtApiUtil.dateTimeFmt.parse(s.getCreatationDate()));
