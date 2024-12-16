@@ -33,6 +33,14 @@ public class FortnoxTaxRateFetcher {
 		10,
 		0
 	};
+	
+	private double[] taxRates_NO = new double[] {
+			25,
+			15,
+			12,
+			0
+		};
+	
 
 	private Map<String, double[]> taxRateMapByCountry = new TreeMap<String, double[]>();
 	
@@ -42,6 +50,7 @@ public class FortnoxTaxRateFetcher {
 	private FortnoxClient3 fc3;
 	private TaxSubjectIdentifier tsi;
 	private TaxRatesFI 	taxRatesFi = new TaxRatesFI();
+	private TaxRatesNO  taxRatesNo = new TaxRatesNO();
 	private List<Tax> lastValidRates;
 	
 	public FortnoxTaxRateFetcher(FortnoxAdapter bof, TaxSubjectIdentifier tsi) throws NoSuchTenantException {
@@ -61,6 +70,7 @@ public class FortnoxTaxRateFetcher {
 		
 		taxRateMapByCountry.put("SE", taxRates_SE);
 		taxRateMapByCountry.put("FI", taxRates_FI);
+		taxRateMapByCountry.put("NO", taxRates_NO);
 		
 	}
 
@@ -68,6 +78,10 @@ public class FortnoxTaxRateFetcher {
 
 		if ("FI".equals(taxDomicile)) {
 			return taxRatesFi.getTaxRates();
+		}
+		
+		if ("NO".equals(taxDomicile)) {
+			return taxRatesNo.getTaxRates();
 		}
 		
 		// TODO: Extend this to actually query Fortnox.

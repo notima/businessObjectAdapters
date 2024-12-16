@@ -46,6 +46,7 @@ public class FortnoxTaxRateProvider implements BundleActivator, TaxRateProvider 
         }
         domiciles.add("SE");
         domiciles.add("FI");
+        domiciles.add("NO");
     }
 
     @Override
