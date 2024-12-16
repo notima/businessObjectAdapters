@@ -1,6 +1,5 @@
 package org.notima.businessobjects.adapter.tools.command;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -15,7 +14,7 @@ import org.notima.businessobjects.adapter.tools.task.TaskLockManager;
 @Service
 public class ListTasks implements Action {
 
-	@Reference
+//	@Reference (depends on persistence which dependency we're not ready for yet)
 	private TaskLockManager taskLockManager;
 	
 	@Reference 
