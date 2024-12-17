@@ -28,6 +28,10 @@ import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
 import org.notima.generic.businessobjects.Product;
+import org.notima.generic.businessobjects.Tax;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.exception.NoSuchTenantException;
+import org.notima.generic.businessobjects.exception.TaxRatesNotAvailableException;
 import org.notima.util.LocalDateUtils;
 
 /**
@@ -52,19 +56,19 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 * 
 	 * @param fa				FortnoxAdapter (ie client)
 	 * @param accountingType	The accounting type to be mapped
-	 * @param taxKey			The tax key to be mapped (can be null)
+	 * @param tax				The tax key to be mapped (can be null)
 	 * @return					The suggested account for the given client.
 	 */
-	public String getTargetAccountNo(FortnoxAdapter fa, String accountingType, String taxKey) throws Exception {
+	public String getTargetAccountNo(FortnoxAdapter fa, String accountingType, Tax tax) throws Exception {
 
 		String acctNo = null;
 		
 		switch (accountingType) {
 			case AccountingType.REVENUE:
-				acctNo = fa.getRevenueAcctNo(taxKey, null, null);
+				acctNo = fa.getRevenueAcctNo(tax.getKey(), tax.getRate(), tax.getCountryCode());
 				break;
 			case AccountingType.LIABILITY_VAT:
-				acctNo = fa.getOutVatAccount(taxKey);
+				acctNo = fa.getOutVatAccount(tax.getKey());
 				break;
 			case AccountingType.CLAIM_VAT:
 				acctNo = fa.getPredefinedAccount(FortnoxConstants.ACCT_INVAT);
@@ -121,7 +125,8 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		}
 
 		VoucherRow r = null;
-		String taxKey = null;
+		Tax suggestedTax = null;
+		TaxSubjectIdentifier tsi = new TaxSubjectIdentifier(fa.getCurrentTenant().getTaxId(), FortnoxConstants.DEFAULT_TAX_DOMICILE);
 		
 		for (AccountingVoucherLine avl : src.getLines()) {
 			
@@ -130,10 +135,10 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 			if ((avl.getAcctNo()==null || avl.getAcctNo().trim().length()==0) 
 					&& avl.getAcctType()!=null && avl.getAcctType().trim().length()>0) {
 				
-				taxKey = convertTaxKey(avl.getTaxKey());
+				suggestedTax = convertTaxKey(tsi, avl.getTaxKey(), avl.getTaxDomicile(), src.getAcctDate());
 
 				// Set account number using getTargetAccountNo
-				avl.setAcctNo(getTargetAccountNo(fa, avl.getAcctType(), taxKey));
+				avl.setAcctNo(getTargetAccountNo(fa, avl.getAcctType(), suggestedTax));
 				
 			} else {
 				
@@ -167,38 +172,76 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	/**
 	 * Converts tax key from numeric vat rate to Fortnox tax key
 	 * 
+	 * @param tsi		The tax subject.
 	 * @param taxKey
+	 * @param taxDomicile if applicable. Default is SE.
+	 * @param acctDate
+	 * 
 	 * @return	A converted tax key.
 	 */
-	public String convertTaxKey(String taxKey) {
+	private Tax convertTaxKey(TaxSubjectIdentifier tsi, String taxKey, String taxDomicile, LocalDate acctDate) {
 		
 		if (taxKey==null) return null;
-		
+		Tax suggestedTax;
+
 		double vatRate = 0;
 		try {
 			vatRate = Double.parseDouble(taxKey);
 		} catch (NumberFormatException pe) {
-			return taxKey;
+			suggestedTax = new Tax();
+			suggestedTax.setKey(taxKey);
+			return suggestedTax;
 		}
+		
+		List<Tax> taxes;
+		
+		if (hasTaxRateProvider()) {
+			try {
+				taxes = getTaxRateProvider().getValidTaxRates(tsi, taxDomicile, acctDate);
+				suggestedTax = findClosestTaxRate(taxes, vatRate);
+				if (suggestedTax!=null) {
+					return suggestedTax;
+				}
+			} catch (NoSuchTenantException e) {
+				e.printStackTrace();
+			} catch (TaxRatesNotAvailableException e) {
+				e.printStackTrace();
+			}
+			
+		}
+		
+		suggestedTax = new Tax();
+		suggestedTax.setRate(vatRate);
 		
 		if (vatRate>16) {
-			return FortnoxConstants.VAT_MP1;
-		}
-		if (vatRate>10) {
-			return FortnoxConstants.VAT_MP2;
-		}
-		if (vatRate>5) {
-			return FortnoxConstants.VAT_MP3;
-		}
-		
-		if (vatRate==0) {
-			return FortnoxConstants.VAT_MP0;
+			suggestedTax.setKey(FortnoxConstants.VAT_MP1);
+		} else if (vatRate>10) {
+			suggestedTax.setKey(FortnoxConstants.VAT_MP2);
+		} else if (vatRate>5) {
+			suggestedTax.setKey(FortnoxConstants.VAT_MP3);
+		} else {
+			suggestedTax.setKey(FortnoxConstants.VAT_MP0);
 		}
 		
-		return FortnoxConstants.VAT_MP0;
+		return suggestedTax;
 		
 	}
 	
+	private Tax findClosestTaxRate(List<Tax> taxes, double actualTaxRate) {
+		
+		Tax closestTaxRate = taxes.get(0);
+		double minDifference = Math.abs(actualTaxRate - closestTaxRate.getRate());
+		
+		for (Tax t : taxes) {
+			double difference = Math.abs(actualTaxRate - t.getRate());
+			if (difference < minDifference) {
+				minDifference = difference;
+				closestTaxRate = t;
+			}
+		}
+		
+		return closestTaxRate;
+	}
 	
 	/**
 	 * Creates a single transaction voucher with a vat amount. 
