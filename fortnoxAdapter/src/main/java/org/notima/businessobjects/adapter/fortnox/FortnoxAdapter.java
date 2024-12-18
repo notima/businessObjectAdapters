@@ -839,6 +839,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 					accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT);
 				} else if ("ES".equals(taxKey)) {
 						accountNo = getRevenueAccount(FortnoxConstants.ACCT_SALES_EXPORT_SERVICE);
+				} else {
+					// Try the tax key itself
+					accountNo = getRevenueAccount(taxKey);
 				}
 			}
 	
