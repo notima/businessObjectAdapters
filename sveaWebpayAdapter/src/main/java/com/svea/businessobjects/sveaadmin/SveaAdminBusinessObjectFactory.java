@@ -40,7 +40,6 @@ import com.svea.webpayadminservice.client.ArrayOfOrderStatus;
 import com.svea.webpayadminservice.client.ArrayOflong;
 import com.svea.webpayadminservice.client.CreateOrderRequest;
 import com.svea.webpayadminservice.client.CreateOrderResponse;
-import com.svea.webpayadminservice.client.CreateOrderResponse2;
 import com.svea.webpayadminservice.client.CreatePaymentPlanDetails;
 import com.svea.webpayadminservice.client.DeliverOrderInformation;
 import com.svea.webpayadminservice.client.DeliveryRequest;
@@ -48,11 +47,9 @@ import com.svea.webpayadminservice.client.DeliveryResponse;
 import com.svea.webpayadminservice.client.GetInvoiceInformation;
 import com.svea.webpayadminservice.client.GetInvoicesRequest;
 import com.svea.webpayadminservice.client.GetInvoicesResponse;
-import com.svea.webpayadminservice.client.GetInvoicesResponse2;
 import com.svea.webpayadminservice.client.GetOrderInformation;
 import com.svea.webpayadminservice.client.GetOrdersRequest;
 import com.svea.webpayadminservice.client.GetOrdersResponse;
-import com.svea.webpayadminservice.client.GetOrdersResponse2;
 import com.svea.webpayadminservice.client.IAdminService;
 import com.svea.webpayadminservice.client.OrderDeliveryStatus;
 import com.svea.webpayadminservice.client.OrderListItem;
@@ -61,7 +58,6 @@ import com.svea.webpayadminservice.client.OrderType;
 import com.svea.webpayadminservice.client.SearchOrderFilter;
 import com.svea.webpayadminservice.client.SearchOrdersRequest;
 import com.svea.webpayadminservice.client.SearchOrdersResponse;
-import com.svea.webpayadminservice.client.SearchOrdersResponse2;
 import com.svea.webpayadminservice.client.TextMatchType;
 
 
