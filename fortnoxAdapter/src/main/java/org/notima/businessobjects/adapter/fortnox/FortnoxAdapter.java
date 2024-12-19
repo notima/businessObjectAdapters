@@ -121,6 +121,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public static final String SYSTEMNAME = "Fortnox";
 	
 	private FortnoxClient3 fortnoxClient;
+	private FortnoxExtendedClient	extendedClient;	
 	
 	private FortnoxClientInfo			currentFortnoxTenant = null;
 	private FortnoxCredentialsProvider	currentFortnoxCredentials = null;
@@ -186,9 +187,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * Create an adapter with a pre-initialized client / orgno.
 	 * 
 	 * @param orgNo
-	 * @throws IOException
+	 * @throws Exception 
 	 */
-	public FortnoxAdapter(String orgNo) throws IOException {
+	public FortnoxAdapter(String orgNo) throws Exception {
 		currentFortnoxTenant = null;
 		currentOrgNo = orgNo;
 		if (getClientManager()!=null) {
@@ -196,6 +197,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		}
 		currentFortnoxCredentials = new FileCredentialsProvider(currentOrgNo);
 		fortnoxClient = new FortnoxClient3(currentFortnoxCredentials);
+		extendedClient = new FortnoxExtendedClient(this);
 	}
 	
 	/**
@@ -220,7 +222,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		fci.setAccessToken(accessToken);
 		fci.setClientSecret(clientSecret);
 		currentFortnoxTenant = fci;
-		
+		extendedClient = new FortnoxExtendedClient(this);
 	}
 	
 	/**
@@ -1563,7 +1565,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	}
 
 	private void updateCurrentTenant() throws NoSuchTenantException {
-
+		
 		if (getClientManager()!=null) {
 			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(currentOrgNo);
 			currentFortnoxCredentials.setDefaultClientId(clientManager.getDefaultClientId());
@@ -1572,6 +1574,15 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		} else {
 			throw new NoSuchTenantException("Can't find client manager while looking for " + currentOrgNo);
 		}
+
+		try {
+			if (extendedClient!=null)
+				extendedClient.refreshFromAdapter();
+			else
+				extendedClient = new FortnoxExtendedClient(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 		
 	}
 	
@@ -1653,7 +1664,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		for (AccountingVoucher v : vouchers) {
 			target = conv.mapFromBusinessObjectVoucher(this, v.getVoucherSeries(), v);
 			try {
-				fortnoxVoucher = fortnoxClient.setVoucher(target);
+				fortnoxVoucher = extendedClient.accountFortnoxVoucher(target, v.getSourceCurrency(), FortnoxConstants.GET_RATE_FROM_FORTNOX);
 				v.setVoucherNo(fortnoxVoucher.getVoucherNumber().toString());
 				result.add(v);
 			} catch (Exception e) {

@@ -102,12 +102,16 @@ public class FortnoxExtendedClient {
 	
 	public FortnoxExtendedClient(FortnoxAdapter fortnoxAdapter) throws Exception {
 		bof = fortnoxAdapter;
+		refreshFromAdapter();
+	}
+
+	public void refreshFromAdapter() throws Exception {
 		clientOrgNo = bof.getCurrentTenant().getTaxId();
 		currencies = new TreeMap<String,Currency>();
 		PreDefinedAccount pdef = getCurrentFortnoxClient().getPreDefinedAccount(FortnoxConstants.ACCT_ROUNDING);
 		roundingAcct = pdef.getAccount();
 	}
-
+	
 	public FortnoxClient3 getCurrentFortnoxClient() {
 		return bof.getClient();
 	}
@@ -820,6 +824,9 @@ public class FortnoxExtendedClient {
 			Currency currency;
 			if (rate==FortnoxConstants.GET_RATE_FROM_FORTNOX) {
 				currency = getCurrency(srcCurrency);
+				if (currency==null) {
+					throw new FortnoxException("Currency " + srcCurrency + " is not active. Conversion not possible");
+				}
 			} else {
 				currency = new Currency(srcCurrency);
 				currency.setBuyRate(rate);
