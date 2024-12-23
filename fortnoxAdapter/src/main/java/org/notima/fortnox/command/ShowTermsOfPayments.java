@@ -12,7 +12,7 @@ import org.notima.api.fortnox.entities3.TermsOfPayments;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.TermsOfPaymentsTable;
 
-@Command(scope = "fortnox", name = "show-fortnox-modes-of-payments", description = "Lists modes of payments")
+@Command(scope = "fortnox", name = "show-terms-of-payments", description = "Lists terms of payments")
 @Service
 public class ShowTermsOfPayments extends FortnoxCommand implements Action {
 	
