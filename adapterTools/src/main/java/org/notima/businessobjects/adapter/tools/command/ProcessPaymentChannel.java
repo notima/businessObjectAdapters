@@ -1,7 +1,9 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -81,6 +83,11 @@ public class ProcessPaymentChannel implements Action {
 	private PaymentBatchFactory		sourcePaymentFactory;
 	private PaymentBatchProcessor destinationPaymentProcessor;
 	private PaymentBatchProcessOptions processOptions;
+	
+	private List<PaymentBatch>	listOfBatches = null;
+	private boolean				allBatchesProcessed = false;
+	
+	private SimpleDateFormat	dfmt = new SimpleDateFormat("YYMMdd"); 
 
 	private void initParameters() throws Exception {
 
@@ -119,9 +126,14 @@ public class ProcessPaymentChannel implements Action {
 		sourcePaymentFactory.setSource(paymentSource);
 		List<PaymentBatch> batches = sourcePaymentFactory.readPaymentBatches(); 
 		
+		listOfBatches = new ArrayList<PaymentBatch>();
+		
 		for (PaymentBatch pb : batches) {
 			processAndPrint(pb);
 		}
+		allBatchesProcessed = true;
+		
+		printAllBatches();
 		
 		return null;
 	}
@@ -170,16 +182,33 @@ public class ProcessPaymentChannel implements Action {
 	private void constructOutFile(PaymentBatch pb) {
 		if (format!=null && outFile==null && rf!=null) {
 			// We need to construct an outfile.
-			outFile = pb.getSource() + "." + format;
+			if (!pb.isDateRange()) {
+				outFile = pb.getSource() + "." + format;
+			} else {
+				outFile = pb.getSource() + "_" + dfmt.format(pb.getLastPaymentDate()) + "." + format;
+			}
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void formatReport(PaymentBatch pb) throws Exception {
-		
+
 		paymentBatchTable = new PaymentBatchTable(pb, true);
+
+		writeToFormat(pb);
+
+		if (!allBatchesProcessed) {
+			listOfBatches.add(pb);
+			return;
+		}
 		paymentBatchTable.getShellTable().print(sess.getConsole());
 		
+
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void writeToFormat(PaymentBatch pb) throws Exception {
+
 		if (format!=null) {
 			
 			// Try to find a report formatter
@@ -198,7 +227,24 @@ public class ProcessPaymentChannel implements Action {
 				sess.getConsole().println("Can't find formatter for " + format);
 			}
 		}
+		
+	}
+	
+	private void printAllBatches() throws Exception {
 
+		if (listOfBatches.size()==0) return;
+		PaymentBatch pb = listOfBatches.get(0);
+		PaymentBatch add;
+		
+		for (int i = 1 ; i<listOfBatches.size(); i++) {
+			add = listOfBatches.get(i);
+			pb.getPayments().addAll(add.getPayments());
+		}
+
+		paymentBatchTable = new PaymentBatchTable(pb, true);
+		paymentBatchTable.getShellTable().print(sess.getConsole());
+		writeToFormat(pb);
+		
 	}
 	
 
