@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +27,7 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
+import org.notima.util.FileUtils;
 import org.notima.util.LocalDateUtils;
 
 @Command(scope = "notima", name = "process-payment-channel", description = "Processes a payment channel")
@@ -37,6 +39,8 @@ public class ProcessPaymentChannel implements Action {
 	
 	@Reference
 	private CanonicalObjectFactory cof;
+	
+	private static final String		DONE_DIR = "done";
 	
 	@Reference 
 	Session sess;
@@ -153,6 +157,9 @@ public class ProcessPaymentChannel implements Action {
 				channel.setReconciledUntil(LocalDateUtils.asLocalDate(pb.getFirstPaymentDate()));
 				channel.setLastProcessedBatch(pb.getSource());
 				channelFactory.persistChannel(channel);
+				FileUtils.moveFileToNewDirectory(
+						channel.getOptions().getSourceProperties().get("directory") + File.separator + pb.getSource(),
+						DONE_DIR);
 			}
 		}
 		
@@ -190,7 +197,6 @@ public class ProcessPaymentChannel implements Action {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void formatReport(PaymentBatch pb) throws Exception {
 
 		paymentBatchTable = new PaymentBatchTable(pb, true);
