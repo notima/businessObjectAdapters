@@ -30,6 +30,9 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     @Option(name = "--clientSecret", description = "The client secret for our Fortnox integration. If omitted, the default client secret is used (if set).", required = false, multiValued = false)
     private String clientSecret;
 	
+    @Option(name = "--renew", description = "Renew from scratch, even if credentials/client exist")
+    private boolean renew;
+    
     private FortnoxClient3		fortnoxClient;
     private FortnoxClientManager	clientManager;
     private Fortnox4jCLI		creator;
@@ -45,7 +48,7 @@ public class AddOauthClient extends FortnoxCommand implements Action {
 			return null;
 		}
 
-		if (existingClient) {
+		if (existingClient && !renew) {
 			sess.getConsole().println("Client already exists");
 		}
 		
@@ -124,7 +127,7 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     	creator.setClientSecret(clientSecret);
     	
     	creator.setFortnoxClientManager(clientManager, orgNo);
-    	if (creator.hasAuthenticationCode()) {
+    	if (creator.hasAuthenticationCode() && !renew) {
     		creator.setGetAccessToken(true);
     	} else {
     		creator.setGetAllTokens(true);
