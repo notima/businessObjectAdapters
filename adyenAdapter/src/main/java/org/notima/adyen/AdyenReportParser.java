@@ -113,7 +113,7 @@ public class AdyenReportParser {
     	if (reportRow.isFee() || reportRow.isDepositAdjustment()) {
     		addFeeLine(reportRow);
     	}
-    	if (reportRow.isPayout()) {
+    	if (reportRow.isPayout() || reportRow.isRefund()) {
     		addPayoutLine(reportRow);
     	}
     	if (reportRow.hasPaymentReference()) {

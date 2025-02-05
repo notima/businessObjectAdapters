@@ -14,6 +14,7 @@ public class AdyenReportRow implements PaymentReportRow {
 	public static final String	SETTLED_TYPE = "Settled";
 	public static final String	FEE_TYPE = "Fee";
 	public static final String	PAYOUT_TYPE = "MerchantPayout";
+	public static final String	REFUND_TYPE = "Refunded";
 	public static final String  DEPOSIT_CORRECTION = "DepositCorrection";
 	
 	  // Initialize the static set using a static block
@@ -23,6 +24,7 @@ public class AdyenReportRow implements PaymentReportRow {
         tempSet.add(SETTLED_TYPE);
         tempSet.add(FEE_TYPE);
         tempSet.add(PAYOUT_TYPE);
+        tempSet.add(REFUND_TYPE);
         TYPES = Collections.unmodifiableSet(tempSet);
     }
     
@@ -396,6 +398,11 @@ public class AdyenReportRow implements PaymentReportRow {
 	public boolean isPayout() {
 		return PAYOUT_TYPE.equals(lineType);
 	}
+	
+	public boolean isRefund() {
+		return REFUND_TYPE.equals(lineType);
+	}
+	
 
 	@Override
 	public String getPaymentReference() {
