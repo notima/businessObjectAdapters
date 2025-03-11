@@ -23,8 +23,6 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 
 	private OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
 	
-	private OrderInvoiceWriterOptions	options;
-	
 	public FortnoxInvoiceWriter(FortnoxAdapter adapter, OrderInvoiceWriterOptions opts) {
 		
 		this.adapter = adapter;
@@ -55,9 +53,10 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 			
 			bp = canonicalInvoice.getBusinessPartner();
 
-			if (bp.getIdentityNo()!=null && bp.getIdentityNo().trim().length()>0) {
+			if (!options.isMapOnAddressFirst() && bp.getIdentityNo()!=null && bp.getIdentityNo().trim().length()>0) {
 				lookedUpBp = custMapById.get(bp.getIdentityNo());
 			}
+			
 			if (lookedUpBp==null)  {
 				if (bp.hasLocations()) {
 					loc = bp.getAddressShipping()!=null ? bp.getAddressShipping() : bp.getAddressOfficial();
@@ -70,15 +69,19 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 					if (lookedUpBp!=null) {
 						bp.setIdentityNo(lookedUpBp.getIdentityNo());
 					}
-				} else {
-					if (!options.isCreateBusinessPartner()) {
-						throw new Exception("Can't find business partner " + custNo + " " + bp.getName());
-					}
-					// New customer
-					bp.setIdentityNo(custNo);
-					FortnoxAdapter.logger.info("Persisting new customer " + bp.getName());
-					adapter.persist(bp);
+				} else if (options.isMapOnAddressFirst() && bp.hasIdentityNo()) {
+					lookedUpBp = custMapById.get(bp.getIdentityNo());
 				}
+			}
+			
+			if (custNo==null && lookedUpBp==null) {
+				if (!options.isCreateBusinessPartner()) {
+					throw new Exception("Can't find business partner " + custNo + " " + bp.getName());
+				}
+				// New customer
+				bp.setIdentityNo(custNo);
+				FortnoxAdapter.logger.info("Persisting new customer " + bp.getName());
+				adapter.persist(bp);
 			}
 			ocount++;
 			

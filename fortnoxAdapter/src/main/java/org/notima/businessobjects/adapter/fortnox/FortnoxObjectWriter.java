@@ -9,8 +9,8 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.generic.businessobjects.BusinessPartner;
-import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.OrderInvoice;
 
@@ -23,6 +23,8 @@ public class FortnoxObjectWriter {
 	protected Map<String, String> custMap = new TreeMap<String,String>();
 	protected Map<String, BusinessPartner<?>> custMapById = new TreeMap<String, BusinessPartner<?>>();
 	protected Map<TaxSubjectIdentifier, BusinessPartner<?>> custMapByTaxId = new TreeMap<TaxSubjectIdentifier, BusinessPartner<?>>();
+	
+	protected OrderInvoiceWriterOptions	options;
 	
 	protected void refreshCustomerMaps() throws Exception {
 		
