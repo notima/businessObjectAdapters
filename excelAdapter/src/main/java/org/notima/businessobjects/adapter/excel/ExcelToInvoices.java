@@ -7,7 +7,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.bind.JAXB;
 
@@ -47,6 +49,8 @@ public class ExcelToInvoices {
 
 	private OrderInvoiceLineValidator			invoiceLineValidator;
 	
+	private Set<String> taxExemptArticles = new TreeSet<String>();
+	
 	public boolean isPriceIncludesTaxGlobal() {
 		return priceIncludesTaxGlobal;
 	}
@@ -61,6 +65,10 @@ public class ExcelToInvoices {
 
 	public void setTaxPercentGlobal(double taxPercentGlobal) {
 		this.taxPercentGlobal = taxPercentGlobal;
+	}
+	
+	public void addTaxExemptArticle(String articleNo) {
+		taxExemptArticles.add(articleNo);
 	}
 	
 	public OrderInvoiceLineValidator getInvoiceLineValidator() {
@@ -238,7 +246,10 @@ public class ExcelToInvoices {
 			case 5:
 				il.setQtyEntered(1);
 				il.setPriceActual(Double.parseDouble(Long.toString(Math.round(cell.getNumericCellValue()))));
-				if (priceIncludesTaxGlobal) {
+				if (il.getProductKey()!=null && priceIncludesTaxGlobal && taxExemptArticles.contains(il.getProductKey())) {
+					il.setTaxIncludedInPrice(true);
+					il.setTaxPercent(0);
+				} else if (priceIncludesTaxGlobal) {
 					il.setTaxIncludedInPrice(true);
 					il.setTaxPercent(taxPercentGlobal);
 					il.calculateLineTotalIncTax(2);

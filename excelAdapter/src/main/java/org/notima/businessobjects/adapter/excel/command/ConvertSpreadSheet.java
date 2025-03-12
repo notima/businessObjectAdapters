@@ -42,6 +42,9 @@ public class ConvertSpreadSheet implements Action {
 	@Option(name = "--taxPercent", description = "Used in conjunction with --price-includes-tax", required = false, multiValued = false)
 	private double taxPercent;
 	
+	@Option(name = "--taxExemptArticle", description = "Used in conjunction with --price-includes-tax", required = false, multiValued = false)
+	private String taxExemptArticle;
+	
 	@Option(name = "--skip-lines-with-zero-amount", description = "Don't include lines with zero amount", required = false, multiValued = false)
 	private boolean	skipLinesWithZeroAmount;
 	
@@ -131,6 +134,10 @@ public class ConvertSpreadSheet implements Action {
 		}
 		eti.setPriceIncludesTaxGlobal(priceIncludesTax);
 		eti.setTaxPercentGlobal(taxPercent);
+		
+		if (taxExemptArticle!=null) {
+			eti.addTaxExemptArticle(taxExemptArticle);
+		}
 		
 		if (skipLinesWithZeroAmount) {
 			createLineValidator();
