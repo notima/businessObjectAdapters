@@ -31,6 +31,7 @@ public class PaymentBatchTable extends GenericTable {
 			addColumn("Paid amt", GenericColumn.ALIGNMENT_RIGHT);
 			addColumn("Orig amt", GenericColumn.ALIGNMENT_RIGHT);
 			addColumn("Matched invoice");
+			addColumn("Open amt", GenericColumn.ALIGNMENT_RIGHT);
 		}
 		else{
 			addColumn("Total", GenericColumn.ALIGNMENT_RIGHT);
@@ -144,13 +145,15 @@ public class PaymentBatchTable extends GenericTable {
     	int count = 0;
     	double totalPaidAmount = 0d;
     	double totalOriginalAmount = 0d;
+    	double totalOpenAmount = 0d;
     	
     	GenericRow row = null;
-			
+    	
 		for (Payment<?> d : report.getPayments()) {
 
 			totalPaidAmount += d.getAmount();
 			totalOriginalAmount += d.getOriginalAmount();
+			totalOpenAmount += d.getMatchedInvoiceOpenAmount();
 
 			row = new GenericRow();
 			row.addContent(
@@ -163,21 +166,23 @@ public class PaymentBatchTable extends GenericTable {
 				d.getClientOrderNo(),
 				nfmt.format(d.getAmount()),
 				nfmt.format(d.getOriginalAmount()),
-				d.getMatchedInvoiceNo());
+				d.getMatchedInvoiceNo(),
+				(d.hasMatchedInvoiceNo() ? nfmt.format(d.getMatchedInvoiceOpenAmount()) : "")
+				);
 
 			rows.add(row);
 		}
 			
 		row = new GenericRow();
-		row.addContent("=====","==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========");
+		row.addContent("=====","==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========");
 		rows.add(row);
 
 		row = new GenericRow();
-		row.addContent("", "", "", "", "", "", "TOTAL", nfmt.format(totalPaidAmount), nfmt.format(totalOriginalAmount), "");
+		row.addContent("", "", "", "", "", "", "TOTAL", nfmt.format(totalPaidAmount), nfmt.format(totalOriginalAmount), "", nfmt.format(totalOpenAmount));
 		rows.add(row);
 
 		row = new GenericRow();
-		row.addContent("", "", "", "", "", "", "", "", "", "");
+		row.addContent("", "", "", "", "", "", "", "", "", "", "");
 		rows.add(row);
     	
     	return rows; 

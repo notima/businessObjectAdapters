@@ -296,6 +296,10 @@ public class FortnoxPaymentBatchRunner {
 	
  	public Invoice getInvoiceToPayAndUpdatePayment(Payment<?> payment) throws Exception {
 		
+ 		if (payment.hasDestinationSystemReferenceRegex()) {
+ 			extendedClient.setReferenceRegex(payment.getDestinationSystemReferenceRegex());
+ 		}
+ 		
 		Invoice inv = extendedClient.getInvoiceToPay(
 				payment.getDestinationSystemReference(), 
 				ReferenceField.valueOf(payment.getDestinationSystemReferenceField()), 
@@ -306,6 +310,9 @@ public class FortnoxPaymentBatchRunner {
 				payment.setMatchedInvoiceNo(inv.getOCR());
 			else 
 				payment.setMatchedInvoiceNo(inv.getDocumentNumber());
+			
+			payment.setMatchedInvoiceOpenAmount(inv.getBalance());
+			
 			if (payment.getPayerName()==null || payment.getPayerName().trim().length()==0) {
 				BusinessPartner<?> bp = payment.getBusinessPartner();
 				if (bp==null) {

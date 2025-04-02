@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Class for accessing Fortnox using higher level concepts.
  * 
- * Copyright 2018-2021 Notima System Integration AB (Sweden)
+ * Copyright 2018-2025 Ekonomibolaget Notima AB (Sweden)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,8 +78,16 @@ public class FortnoxExtendedClient {
 	
 	// Invoice Map mapping relevant key to invoice
 	private Map<String,Invoice>	invoiceMap;
+	// Current reference field used as key for the invoice map
+	private ReferenceField invoiceMapReferenceField;
+	
+	private Pattern referenceRegex;
+	
 	// Order Map mapping relevant key to order
 	private Map<String,Order> orderMap;
+	// Current reference field used as key for the order map
+	private ReferenceField orderMapReferenceField;
+	
 	// Access Token associated with the maps
 	private String mapOrgNo;
 	// Company name associated with the access token.
@@ -97,6 +105,7 @@ public class FortnoxExtendedClient {
 	private String lastClientOrgNo;
 	private FortnoxAdapter 	bof;
 	private Integer	roundingAcct;
+	
 	
 	private Logger log = LoggerFactory.getLogger(FortnoxExtendedClient.class);
 	
@@ -253,6 +262,19 @@ public class FortnoxExtendedClient {
 	}
 	
 	/**
+	 * True if there's a regular expression that filters the reference
+	 * 	
+	 * @return
+	 */
+	public boolean hasReferenceRegex() {
+		return referenceRegex!=null;
+	}
+
+	public void setReferenceRegex(String referenceRegexStr) {
+		referenceRegex = Pattern.compile(referenceRegexStr);
+	}
+
+	/**
 	 * Gets a supplier with given orgNo. If the supplier is missing it's created by default.
 	 * 
 	 * @param orgNo
@@ -360,16 +382,19 @@ public class FortnoxExtendedClient {
 	 * @param referenceField	Possible values ExternalInvoiceReference1, ExternalInvoiceReference2, 
 	 * 							InvoiceReference, OCR, OrderReference, OurReference, YourOrderNumber, YourReference
 	 * 
+	 * @param invoiceRefRegEx	Use to override the referenceRegex
+	 * 
 	 * @see org.notima.api.fortnox.FortnoxConstants
 	 * @return
 	 */
 	public Map<String,Invoice> getInvoiceMap(String referenceField, String invoiceRefRegEx) throws Exception {
 		
-		if (invoiceMap==null || !clientOrgNo.equals(mapOrgNo)) {
+		if (invoiceMap==null || !clientOrgNo.equals(mapOrgNo) || !invoiceMapReferenceField.toString().equals(referenceField) ) {
 
-			log.info("Refreshing invoiceMap. This might take some time...");
+			log.info("Refreshing invoiceMap using " + referenceField + ". This might take some time...");
 			
 			bof = getFortnoxAdapter(clientOrgNo);
+			invoiceMapReferenceField = ReferenceField.valueOf(referenceField);
 			
 			CompanySetting cs = bof.getClient().getCompanySetting();
 			clientName = cs.getName();
@@ -400,6 +425,10 @@ public class FortnoxExtendedClient {
 			
 			if (invoiceRefRegEx!=null && invoiceRefRegEx.trim().length()>0) {
 				re = Pattern.compile(invoiceRefRegEx);
+			} else {
+				if (this.hasReferenceRegex()) {
+					re = referenceRegex;
+				}
 			}
 			
 			int invoiceCount = 0;
@@ -481,7 +510,7 @@ public class FortnoxExtendedClient {
 	 */
 	public Map<String,Order> getOrderMap(ReferenceField referenceField, String refRegEx) throws Exception {
 		
-		if (orderMap==null || !clientOrgNo.equals(mapOrgNo)) {
+		if (orderMap==null || !clientOrgNo.equals(mapOrgNo) || !referenceField.equals(orderMapReferenceField)) {
 
 			bof = getFortnoxAdapter(clientOrgNo);
 			
@@ -490,6 +519,7 @@ public class FortnoxExtendedClient {
 			taxId = cs.getOrganizationNumber();
 			
 			orderMap = new TreeMap<String, Order>();
+			orderMapReferenceField = referenceField;
 			
 			Orders orders = bof.getClient().getOrders(FortnoxConstants.FILTER_INVOICENOTCREATED);
 			

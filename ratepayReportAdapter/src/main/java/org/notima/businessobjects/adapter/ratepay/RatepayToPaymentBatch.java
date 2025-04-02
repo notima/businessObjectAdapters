@@ -73,6 +73,7 @@ public class RatepayToPaymentBatch {
 		dst.setComment(src.getDescription());
 		dst.setDestinationSystemReference(src.getTransactionId());
 		dst.setDestinationSystemReferenceField("ExternalInvoiceReference2");
+		dst.setDestinationSystemReferenceRegex("^pmratepayinvoice\\.\\d+\\.(.*)$");
 		dst.setClientOrderNo(src.getShopsOrderId());
 		if (report.getCurrency()!=null) {
 			dst.setCurrency(report.getCurrency());
