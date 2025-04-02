@@ -46,6 +46,12 @@ public class PaymentChannelStatusTable extends GenericTable {
 		addRow().addContent("Intransit acct", opts.getGeneralLedgerInTransitAccount());
 		addRow().addContent("Fee acct", opts.getGeneralLedgerFeeAccount());
 		addRow().addContent("Unknown acct", opts.getGeneralLedgerUnknownTrxAccount());
+		if (opts.hasSourceReference()) {
+			addRow().addContent("Source ref", opts.getSourceReference());
+		}
+		if (opts.hasDestinationReference()) {
+			addRow().addContent("Destination ref", opts.getDestinationReference());
+		}
 		addRow().addContent("Last batch", getLastBatch());
 		addRow().addContent("R. until", getReconciledUntilString());
 		
