@@ -59,6 +59,9 @@ public class ProcessPaymentChannel implements Action {
     
     @Option(name = _NotimaCmdOptions.UNTIL_DATE, description = "Only process until this date yyyy-MM-dd", required = false)
     private String untilDateStr;
+
+    @Option(name = _NotimaCmdOptions.MANUAL_MAP, description = "Manual mapping. Example \"Ref=InvoiceNo,Ref=InvoiceNo\"", required = false)
+    private String	manualMapStr;
     
     @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
     private boolean feesPerPayment;
@@ -113,6 +116,7 @@ public class ProcessPaymentChannel implements Action {
 		processOptions.setDraftPaymentsIfPossible(draftPayments);
 		processOptions.setFeesPerPayment(feesPerPayment);
 		processOptions.setAccountPayoutOnly(accountPayoutOnly);
+		processOptions.addManualReferenceMapFromCommaList(manualMapStr);
 		if (dryRun) {
 			processOptions.setDryRun(true);
 		}
@@ -149,7 +153,7 @@ public class ProcessPaymentChannel implements Action {
 		}
 		
 		if (matchOnly) {
-			destinationPaymentProcessor.lookupInvoiceReferences(pb);
+			destinationPaymentProcessor.lookupInvoiceReferences(pb, processOptions);
 		} else {
 			destinationPaymentProcessor.processPaymentBatch(pb, processOptions);
 			if (!dryRun) {

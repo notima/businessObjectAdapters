@@ -105,7 +105,7 @@ public class ProcessPaymentBatch implements Action {
 	private void processAndPrint(PaymentBatch pb) throws Exception {
 
 		if (matchOnly) {
-			paymentProcessor.lookupInvoiceReferences(pb);
+			paymentProcessor.lookupInvoiceReferences(pb, processOptions);
 		} else {
 			paymentProcessor.processPaymentBatch(pb, processOptions);
 		}

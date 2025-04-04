@@ -10,4 +10,6 @@ public class _NotimaCmdOptions {
 	
 	public static final String	UNTIL_DATE = "--until-date";
 	
+	public static final String	MANUAL_MAP = "--manual-map";
+	
 }

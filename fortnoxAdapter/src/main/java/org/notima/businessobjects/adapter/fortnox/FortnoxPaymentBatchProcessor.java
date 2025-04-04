@@ -38,7 +38,7 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 	}
 	
 	@Override
-	public PaymentBatch lookupInvoiceReferences(PaymentBatch report) throws Exception {
+	public PaymentBatch lookupInvoiceReferences(PaymentBatch report, PaymentBatchProcessOptions options) throws Exception {
 
 		if (!report.hasPayments()) return report;
 
@@ -56,6 +56,10 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 		for (Payment<?> payment : report.getPayments()) {
 			
 			existingReference = payment.getMatchedInvoiceNo();
+
+			if (options.hasManualReferenceMap() && existingReference==null) {
+				existingReference = options.getManualReferenceFor(payment.getDestinationSystemReference());
+			}
 			
 			if (existingReference==null) {
 				// Try to lookup Fortnox invoice id

@@ -10,7 +10,7 @@ public class FilePaymentBatchProcessor extends BasicPaymentBatchProcessor {
 	public static final String SystemName = "File";
 	
 	@Override
-	public PaymentBatch lookupInvoiceReferences(PaymentBatch report) throws Exception {
+	public PaymentBatch lookupInvoiceReferences(PaymentBatch report, PaymentBatchProcessOptions options) throws Exception {
 		return report;
 	}
 
