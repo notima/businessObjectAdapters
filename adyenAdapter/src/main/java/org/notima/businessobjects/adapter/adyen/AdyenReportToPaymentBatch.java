@@ -83,8 +83,8 @@ public class AdyenReportToPaymentBatch {
 		dst.setAmount(src.getAmount());
 		dst.setOrderNo(src.getMerchantReference());
 		dst.setComment(src.getModificationReference());
-		dst.setDestinationSystemReference(src.getPspReference());
-		dst.setDestinationSystemReferenceField("ExternalInvoiceReference2");
+		dst.setDestinationSystemReference(src.getMerchantReference());
+		dst.setDestinationSystemReferenceField("order");
 		dst.setClientOrderNo(src.getMerchantReference());
 		if (report.getCurrency()!=null) {
 			dst.setCurrency(report.getCurrency());

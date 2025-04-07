@@ -76,6 +76,8 @@ public class FortnoxPaymentBatchProcessor extends BasicPaymentBatchProcessor {
 					inv = cl.getFortnoxInvoice(existingReference);
 					if (inv!=null) {
 						matchCount++;
+						payment.setMatchedInvoiceNo(inv.getDocumentNumber());
+						payment.setMatchedInvoiceOpenAmount(inv.getBalance());
 					}
 				}
 

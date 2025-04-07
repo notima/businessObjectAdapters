@@ -61,7 +61,7 @@ public class PaymentBatchTable extends GenericTable {
 
     private void addRows(List<GenericRow> rows) {
 
-		if (rows.size()==0 || rows==null) {
+		if (rows==null || rows.size()==0) {
 			setEmptyTableText("No report");
 			return;
 		}
@@ -141,6 +141,8 @@ public class PaymentBatchTable extends GenericTable {
 	public static List<GenericRow> getDetailedTableRows(PaymentBatch report) throws ParseException {
     	
     	List<GenericRow> rows = new ArrayList<GenericRow>();
+    	
+    	if (report.isEmpty()) return rows;
     	
     	int count = 0;
     	double totalPaidAmount = 0d;

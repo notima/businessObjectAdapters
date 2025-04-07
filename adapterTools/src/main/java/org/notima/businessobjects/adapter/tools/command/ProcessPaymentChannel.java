@@ -21,6 +21,7 @@ import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.ReportFormatter;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
+import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
@@ -219,7 +220,7 @@ public class ProcessPaymentChannel implements Action {
 	@SuppressWarnings("unchecked")
 	private void writeToFormat(PaymentBatch pb) throws Exception {
 
-		if (format!=null) {
+		if (format!=null && !pb.isEmpty()) {
 			
 			// Try to find a report formatter
 			rf = (ReportFormatter<GenericTable>) formatterFactory.getReportFormatter(GenericTable.class, format);
@@ -244,11 +245,19 @@ public class ProcessPaymentChannel implements Action {
 
 		if (listOfBatches.size()==0) return;
 		PaymentBatch pb = listOfBatches.get(0);
+		// Check if pb has payments.
+		if (pb.getPayments()==null) {
+			List<Payment<?>> list = new ArrayList<Payment<?>>();
+			pb.setPayments(list);
+		}
+		
 		PaymentBatch add;
 		
 		for (int i = 1 ; i<listOfBatches.size(); i++) {
 			add = listOfBatches.get(i);
-			pb.getPayments().addAll(add.getPayments());
+			if (!add.isEmpty()) {
+				pb.getPayments().addAll(add.getPayments());
+			}
 		}
 
 		paymentBatchTable = new PaymentBatchTable(pb, true);
