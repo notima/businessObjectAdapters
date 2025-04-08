@@ -169,7 +169,7 @@ public class FortnoxPaymentBatchRunner {
 		}
 		
 		inv = getInvoiceToPayAndUpdatePayment(payment);
-		if (inv!=null) {
+		if (inv!=null && inv.getBalance()!=0) {
 			paymentResult = payInvoice(inv, payment);
 		} else if (processOptions.isNonMatchedAsPrepayments()) { 
 			paymentResult = createUnmatchedPrepayment(payment);
