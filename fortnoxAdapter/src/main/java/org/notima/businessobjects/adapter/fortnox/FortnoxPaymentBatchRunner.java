@@ -161,6 +161,13 @@ public class FortnoxPaymentBatchRunner {
 		Invoice inv;
 		PaymentProcessResult paymentResult;
 		
+		if (processOptions.hasManualReferenceMap()) {
+			String overrideReference = processOptions.getManualReferenceFor(payment.getDestinationSystemReference());
+			if (overrideReference!=null) {
+				payment.setMatchedInvoiceNo(overrideReference);
+			}
+		}
+		
 		inv = getInvoiceToPayAndUpdatePayment(payment);
 		if (inv!=null) {
 			paymentResult = payInvoice(inv, payment);
@@ -300,11 +307,19 @@ public class FortnoxPaymentBatchRunner {
  			extendedClient.setReferenceRegex(payment.getDestinationSystemReferenceRegex());
  		}
  		
-		Invoice inv = extendedClient.getInvoiceToPay(
-				payment.getDestinationSystemReference(), 
-				ReferenceField.valueOf(payment.getDestinationSystemReferenceField()), 
-				payment.getPaymentDate(),
-				null);
+ 		Invoice inv = null;
+ 		// If the invoice is already matched, lookup that invoice
+ 		if (payment.getMatchedInvoiceNo()!=null) {
+ 			inv = extendedClient.getFortnoxInvoice(payment.getMatchedInvoiceNo());
+ 		}
+ 		
+ 		if (inv==null) {
+			inv = extendedClient.getInvoiceToPay(
+			payment.getDestinationSystemReference(), 
+			ReferenceField.valueOf(payment.getDestinationSystemReferenceField()), 
+			payment.getPaymentDate(),
+			null);
+ 		}
 		if (inv!=null) {
 			if (inv.getOCR()!=null && inv.getOCR().trim().length()>0)
 				payment.setMatchedInvoiceNo(inv.getOCR());
