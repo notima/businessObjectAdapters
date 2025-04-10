@@ -12,9 +12,11 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxAuthenticationException;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
+import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 
 @Command(scope = "fortnox", name = "show-fortnox-support-info", description = "Show support info for client")
 @Service
@@ -30,8 +32,10 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 	private boolean	showSecrets;
 	
 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
+	
+	private FortnoxAdapter fa;
 	private FortnoxClient3 fc;
+	private FortnoxCredentialsProvider credentialsProvider;
 	private FortnoxCredentials credentials;
 	
 	private CompanySetting cs;
@@ -96,7 +100,7 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 	
 	
 	private void printLegacy() {
-		sess.getConsole().println("Using Legacy Access Token with client ID: " + credentials.getClientId());
+		sess.getConsole().println("Using Legacy Access Token with client ID: " + getClientId(credentials));
 
 		if (showSecrets) {
 			sess.getConsole().println("** Legacy Access Token: " + credentials.getLegacyToken());
@@ -105,6 +109,20 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 		
 	}
 	
+	
+    private String getClientId(FortnoxCredentials cred) {
+    	
+    	String clientId = cred.getClientId();
+    	if (clientId==null) {
+    		// Lookup default
+    		clientId = credentialsProvider.getDefaultClientId();
+    	}
+    	if (clientId==null && fa!=null && fa.getClientManager()!=null) {
+    		clientId = fa.getClientManager().getDefaultClientId();
+    	}
+    	return clientId;
+    	
+    }
 	
 	private void printAccessToken() {
 		
@@ -122,7 +140,8 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 	}
 	
 	private void getCredentials() throws Exception {
-		credentials = new FileCredentialsProvider(orgNo).getCredentials();
+		credentialsProvider = new FileCredentialsProvider(orgNo);
+		credentials = credentialsProvider.getCredentials();
 
 		if(credentials == null) {
 			message = "No credentials found";
@@ -133,8 +152,9 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 	
 	
 	private void getFortnoxClient() throws Exception {
-		
-		fc = getFortnoxClient(orgNo);
+
+		fa = getBusinessObjectFactoryForOrgNo(orgNo);
+		fc = fa.getClient();
 		if (fc == null) {
 			message = "Can't get client for " + orgNo;
 			throw new Exception(message);
