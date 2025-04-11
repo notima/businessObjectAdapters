@@ -68,6 +68,11 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 					lookedUpBp = custMapByTaxId.get(new TaxSubjectIdentifier(FortnoxUtil.convertTaxIdToFortnoxFormat(bp.getTaxId()),bp.getCountryCode()));
 					if (lookedUpBp!=null) {
 						bp.setIdentityNo(lookedUpBp.getIdentityNo());
+					} else {
+						lookedUpBp = custMapByTaxId.get(new TaxSubjectIdentifier(bp.getTaxId()));
+						if (lookedUpBp!=null) {
+							bp.setIdentityNo(lookedUpBp.getIdentityNo());
+						}
 					}
 				} else if (options.isMapOnAddressFirst() && bp.hasIdentityNo()) {
 					lookedUpBp = custMapById.get(bp.getIdentityNo());
@@ -76,7 +81,7 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 			
 			if (custNo==null && lookedUpBp==null) {
 				if (!options.isCreateBusinessPartner()) {
-					throw new Exception("Can't find business partner " + custNo + " " + bp.getName());
+					throw new Exception("Can't find business partner " + bp.getIdentityNo() + " " + bp.getName());
 				}
 				// New customer
 				bp.setIdentityNo(custNo);

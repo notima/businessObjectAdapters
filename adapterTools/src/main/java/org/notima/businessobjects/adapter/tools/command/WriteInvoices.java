@@ -47,6 +47,9 @@ public class WriteInvoices extends AbstractAction {
 
     @Option(name="--merge-on-customer", description="Merge invoices if there are many on the same customer", required = false, multiValued = false)
     private boolean mergeOnBp;
+
+    @Option(name="--append-to-existing", description="Append to existing invoice if possible", required = false, multiValued = false)
+    private boolean appendToExisting;
     
     @Option(name="--use-tax-id", description="Use tax ID to map the customer", required = false, multiValued = false)
     private boolean useTaxId;
@@ -119,6 +122,7 @@ public class WriteInvoices extends AbstractAction {
 		writerOptions.setCreateLimit(createLimit);
 		writerOptions.setMapOnTaxId(useTaxId);
 		writerOptions.setMapOnAddressFirst(mapOnAddressFirst);
+		writerOptions.setAppendToExisting(appendToExisting);
 		
 	}
 	
