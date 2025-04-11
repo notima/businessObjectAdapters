@@ -13,6 +13,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxAuthenticationException;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
+import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
@@ -113,12 +114,17 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
     private String getClientId(FortnoxCredentials cred) {
     	
     	String clientId = cred.getClientId();
+    	if (clientId==null && fa!=null && fa.getClientManager()!=null) {
+    		FortnoxClientInfo fi = fa.getClientManager().getClientInfoByOrgNo(orgNo);
+    		if (fi!=null) {
+    			clientId = fi.getClientId();
+    		} else {
+    			clientId = fa.getClientManager().getDefaultClientId();
+    		}
+    	}
     	if (clientId==null) {
     		// Lookup default
     		clientId = credentialsProvider.getDefaultClientId();
-    	}
-    	if (clientId==null && fa!=null && fa.getClientManager()!=null) {
-    		clientId = fa.getClientManager().getDefaultClientId();
     	}
     	return clientId;
     	

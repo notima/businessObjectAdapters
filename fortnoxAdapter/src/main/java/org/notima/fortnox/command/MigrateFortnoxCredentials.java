@@ -7,6 +7,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
+import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.api.fortnox.oauth2.FortnoxOAuth2Client;
@@ -59,12 +60,18 @@ public class MigrateFortnoxCredentials extends FortnoxCommand implements Action 
     	
     	String clientId = cred.getClientId();
     	if (clientId==null) {
+    		fa = getBusinessObjectFactoryForOrgNo(orgNo);
+    		FortnoxClientInfo fi = fa.getClientManager().getClientInfoByOrgNo(orgNo);
+    		if (fi!=null)
+    			clientId = fi.getClientId();
+    		if (clientId==null) {
+    			clientId = fa.getClientManager().getDefaultClientId();
+    		}
+    	}
+    	
+    	if (clientId==null) {
     		// Lookup default
     		clientId = credentialsProvider.getDefaultClientId();
-    	}
-    	if (clientId==null) {
-    		fa = getBusinessObjectFactoryForOrgNo(orgNo);
-    		clientId = fa.getClientManager().getDefaultClientId();
     	}
     	return clientId;
     	
