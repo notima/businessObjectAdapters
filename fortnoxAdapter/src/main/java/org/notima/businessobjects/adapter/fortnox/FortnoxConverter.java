@@ -68,7 +68,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 				acctNo = fa.getRevenueAcctNo(tax.getKey(), tax.getRate(), tax.getCountryCode());
 				break;
 			case AccountingType.LIABILITY_VAT:
-				acctNo = fa.getOutVatAccount(tax.getKey());
+				acctNo = fa.getOutVatAccount(tax.getKey(), tax.getCountryCode());
 				break;
 			case AccountingType.CLAIM_VAT:
 				acctNo = fa.getPredefinedAccount(FortnoxConstants.ACCT_INVAT);
@@ -179,7 +179,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	 * 
 	 * @return	A converted tax key.
 	 */
-	private Tax convertTaxKey(TaxSubjectIdentifier tsi, String taxKey, String taxDomicile, LocalDate acctDate) {
+	public Tax convertTaxKey(TaxSubjectIdentifier tsi, String taxKey, String taxDomicile, LocalDate acctDate) {
 		
 		if (taxKey==null) return null;
 		Tax suggestedTax;

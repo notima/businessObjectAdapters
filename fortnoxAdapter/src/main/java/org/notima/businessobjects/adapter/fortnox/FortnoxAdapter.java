@@ -434,9 +434,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @return		
 	 * @throws Exception
 	 */
-	public String getOutVatAccount(String taxKey) throws Exception {
-
+	public String getOutVatAccount(String taxKey, String taxDomicile) throws Exception {
+		
 		String account = getPredefinedAccount("OUTVAT_" + taxKey.toUpperCase());
+		if (account==null) {
+			FortnoxConverter fc = new FortnoxConverter();
+			Tax convertedTaxKey = fc.convertTaxKey(null, taxKey, taxDomicile, null);
+			account = getPredefinedAccount("OUTVAT_" + convertedTaxKey.getKey());
+		}
 		return account;
 		
 	}
