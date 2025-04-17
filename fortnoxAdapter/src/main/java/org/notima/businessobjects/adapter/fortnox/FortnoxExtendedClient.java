@@ -116,6 +116,7 @@ public class FortnoxExtendedClient {
 
 	public void refreshFromAdapter() throws Exception {
 		clientOrgNo = bof.getCurrentTenant().getTaxId();
+		bof.syncCredentials();
 		currencies = new TreeMap<String,Currency>();
 		PreDefinedAccount pdef = getCurrentFortnoxClient().getPreDefinedAccount(FortnoxConstants.ACCT_ROUNDING);
 		roundingAcct = pdef.getAccount();

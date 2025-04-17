@@ -1569,17 +1569,23 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		updateCurrentTenant();
 	}
 
-	private void updateCurrentTenant() throws NoSuchTenantException {
-		
+	public void syncCredentials() throws NoSuchTenantException {
+
 		if (getClientManager()!=null) {
 			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(currentOrgNo);
 			currentFortnoxCredentials.setDefaultClientId(clientManager.getDefaultClientId());
 			currentFortnoxCredentials.setDefaultClientSecret(clientManager.getDefaultClientSecret());
-			currentTenant = convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
 		} else {
 			throw new NoSuchTenantException("Can't find client manager while looking for " + currentOrgNo);
 		}
-
+		
+	}
+	
+	private void updateCurrentTenant() throws NoSuchTenantException {
+		
+		syncCredentials();
+		currentTenant = convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
+		
 		try {
 			if (extendedClient!=null)
 				extendedClient.refreshFromAdapter();
