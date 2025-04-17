@@ -12,20 +12,21 @@
     	<feature>activation</feature>
     	<!-- 
     	<bundle>mvn:javax.activation/javax.activation-api/1.2.0</bundle>
-    	 -->
 		<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
 		<bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
-		<bundle>mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
 		<bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
+		-->
 		
-		<!-- JDK >=9 bundles -->
 		<!-- 
+		JDK >=9 bundles 
 		<bundle>mvn:javax.xml.soap/javax.xml.soap-api/1.4.0</bundle>
 		<bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
 		<bundle>mvn:javax.xml.ws/jaxws-api/2.3.1</bundle>
 		<bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
-		<bundle>mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
 		 -->
+		<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>		 
+		<bundle>mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
+		<bundle>mvn:jakarta.xml.ws/jakarta.xml.ws-api/2.3.3</bundle>
 		
 <!--   
         <bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
@@ -42,9 +43,11 @@
 		<bundle>mvn:jakarta.xml.ws/jakarta.xml.ws-api/3.0.1</bundle>
 		 -->
 		<!-- Legacy -->
+		<!-- 
 		<bundle>mvn:javax.xml.soap/javax.xml.soap-api/1.4.0</bundle>
 		<bundle>mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
-		<bundle>mvn:javax.xml.ws/jaxws-api/2.2.11</bundle>
+		<bundle>mvn:javax.xml.ws/jaxws-api/2.3.1</bundle>
+		-->
 		<!-- 
 		<bundle>mvn:javax.jws/javax.jws-api/1.1</bundle>
 		 -->
@@ -178,6 +181,7 @@
     <feature name="notima-sveawebpay" description="Notima SveaWebPay Adapter" version="${project.version}" install="manual">
     	<feature>notima-csv</feature>
     	<feature>notima-ws</feature>
+    	<feature>cxf</feature>
     	<bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
 		
         <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.4.15</bundle>
@@ -195,7 +199,7 @@
 		<bundle>wrap:mvn:com.svea/webpay-report-converters/${webpay-common.version}</bundle>
 		
 		<bundle>wrap:mvn:com.svea/webpayws/${webpay-common.version}</bundle>
-		<bundle>wrap:mvn:com.svea/webpayadmin-reports/${webpay-common.version}</bundle>
+		<bundle>mvn:com.svea/webpayadmin-reports/${webpayadminreports.version}</bundle>
     	
     	<bundle>mvn:org.notima.api.webpay/pmt-admin-api/${pmt-admin-api.version}</bundle>
     	<bundle>mvn:org.notima/swish4j/${swish4j.version}</bundle>
