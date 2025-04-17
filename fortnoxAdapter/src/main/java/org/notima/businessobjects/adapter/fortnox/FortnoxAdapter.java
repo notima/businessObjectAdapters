@@ -1569,10 +1569,19 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		updateCurrentTenant();
 	}
 
-	public void syncCredentials() throws NoSuchTenantException {
+	public void syncCredentials() throws Exception {
 
 		if (getClientManager()!=null) {
 			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(currentOrgNo);
+			FortnoxCredentials fc = currentFortnoxCredentials.getCredentials();
+			if (currentFortnoxTenant!=null && fc!=null) {
+				if (fc.getClientId()==null && currentFortnoxTenant.getClientId()!=null) {
+					fc.setClientId(currentFortnoxTenant.getClientId());
+				}
+				if (fc.getClientSecret()==null && currentFortnoxTenant.getClientSecret()!=null) {
+					fc.setClientSecret(currentFortnoxTenant.getClientSecret());
+				}
+			}
 			currentFortnoxCredentials.setDefaultClientId(clientManager.getDefaultClientId());
 			currentFortnoxCredentials.setDefaultClientSecret(clientManager.getDefaultClientSecret());
 		} else {
@@ -1583,7 +1592,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	private void updateCurrentTenant() throws NoSuchTenantException {
 		
-		syncCredentials();
+		try {
+			syncCredentials();
+		} catch (Exception ee) {
+			ee.printStackTrace();
+		}
 		currentTenant = convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
 		
 		try {
