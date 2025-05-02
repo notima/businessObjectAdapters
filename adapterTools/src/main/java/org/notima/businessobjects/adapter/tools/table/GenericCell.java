@@ -2,6 +2,7 @@ package org.notima.businessobjects.adapter.tools.table;
 
 public class GenericCell {
     private Object data;
+    private Object originalData;
     private int color = -1;
 
     private String ansiColor;
@@ -23,6 +24,18 @@ public class GenericCell {
         this.data = data;
     }
 
+    /**
+     * If you format the data but want to keep a reference to the original data, use this
+     * @param od
+     */
+    public void setOriginalData(Object od) {
+    	originalData = od;
+    }
+
+    public Object getOriginalData() {
+    	return originalData;
+    }
+    
     public int getColor() {
         return color;
     }

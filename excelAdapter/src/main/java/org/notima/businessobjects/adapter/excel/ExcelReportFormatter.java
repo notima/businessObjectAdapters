@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.excel;
 
 import java.io.FileOutputStream;
+import java.util.Date;
 import java.util.Properties;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -53,6 +54,8 @@ public class ExcelReportFormatter extends BasicReportFormatter implements Report
 			}
 		}
 		
+		boolean valueSet = false;
+		
 		// Add lines
 		if (!data.isEmpty()) {
 
@@ -64,7 +67,13 @@ public class ExcelReportFormatter extends BasicReportFormatter implements Report
 					cell = row.createCell(colId++);
 					if (oc instanceof GenericCell) {
 						gc = (GenericCell)oc;
-						if (gc.getData()!=null) {
+						valueSet = false;
+						if (gc.getOriginalData()!=null) {
+							
+							valueSet = setCellValueFromOriginalData(gc, cell);
+							
+						}
+						if (!valueSet && gc.getData()!=null) {
 							cell.setCellValue(gc.getData().toString());
 						}
 					} else {
@@ -92,6 +101,21 @@ public class ExcelReportFormatter extends BasicReportFormatter implements Report
 		
 	}
 
+	private boolean setCellValueFromOriginalData(GenericCell gc, Cell cell) {
+		
+		Object od = gc.getOriginalData();
+		if (od instanceof Number) {
+			cell.setCellValue(((Number)od).doubleValue());
+			return true;
+		}
+		if (od instanceof Date) {
+			cell.setCellValue(((Date)od));
+			return true;
+		}
+
+		return false;
+	}
+	
 	@Override
 	public GenericTable getClazz() {
 		return new GenericTable();

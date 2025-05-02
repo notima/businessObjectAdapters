@@ -148,15 +148,29 @@ public class PaymentBatchTable extends GenericTable {
     	double totalPaidAmount = 0d;
     	double totalOriginalAmount = 0d;
     	double totalOpenAmount = 0d;
+
+    	GenericCell	paidAmtCell;
+    	GenericCell originalAmtCell;
+    	GenericCell openAmtCell;
     	
     	GenericRow row = null;
     	
 		for (Payment<?> d : report.getPayments()) {
 
 			totalPaidAmount += d.getAmount();
+			paidAmtCell = new GenericCell(nfmt.format(d.getAmount()));
+			paidAmtCell.setOriginalData(d.getAmount());
+			
 			totalOriginalAmount += d.getOriginalAmount();
+			originalAmtCell = new GenericCell(nfmt.format(d.getOriginalAmount()));
+			originalAmtCell.setOriginalData(d.getOriginalAmount());
+			
 			totalOpenAmount += d.getMatchedInvoiceOpenAmount();
-
+			openAmtCell = new GenericCell(d.hasMatchedInvoiceNo() ? nfmt.format(d.getMatchedInvoiceOpenAmount()) : "");
+			if (d.hasMatchedInvoiceNo()) {
+				openAmtCell.setOriginalData(d.getMatchedInvoiceOpenAmount());
+			}
+			
 			row = new GenericRow();
 			row.addContent(
 				count++,
@@ -166,10 +180,10 @@ public class PaymentBatchTable extends GenericTable {
 				d.getDestinationSystemReference(),
 				d.getPayerName(),
 				d.getClientOrderNo(),
-				nfmt.format(d.getAmount()),
-				nfmt.format(d.getOriginalAmount()),
+				paidAmtCell,
+				originalAmtCell,
 				d.getMatchedInvoiceNo(),
-				(d.hasMatchedInvoiceNo() ? nfmt.format(d.getMatchedInvoiceOpenAmount()) : "")
+				openAmtCell
 				);
 
 			rows.add(row);
