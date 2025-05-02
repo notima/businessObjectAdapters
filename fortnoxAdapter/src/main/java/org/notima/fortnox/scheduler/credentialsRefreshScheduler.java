@@ -7,8 +7,11 @@ import java.util.List;
 
 import org.apache.karaf.scheduler.Scheduler;
 import org.notima.api.fortnox.FortnoxCredentialsProvider;
+import org.notima.api.fortnox.clients.FortnoxClientInfo;
+import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.oauth2.FortnoxOAuth2Client;
+import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
@@ -29,11 +32,22 @@ import org.slf4j.LoggerFactory;
 public class credentialsRefreshScheduler implements Runnable {
 	private Logger log = LoggerFactory.getLogger(credentialsRefreshScheduler.class);
 
+	private FortnoxAdapter fa;
+	private FortnoxClientInfo fci;
+	private FortnoxClientManager fcm;
+	
     @SuppressWarnings("rawtypes")
 	@Override
     public void run() {
 	    List<BusinessObjectFactory> bofs;
+	    List<FortnoxClientManager> managers;
         try {
+        	
+        	managers = getServiceReferences(FortnoxClientManager.class);
+        	if (managers!=null && managers.size()>0) {
+        		fcm = managers.get(0);
+        	}
+        	
             bofs = getServiceReferences(BusinessObjectFactory.class);
 
             if (bofs==null) {
@@ -41,7 +55,8 @@ public class credentialsRefreshScheduler implements Runnable {
             } else {
                 for (BusinessObjectFactory bf : bofs) {
                     if ("Fortnox".equals(bf.getSystemName())) {
-                        BusinessPartnerList<?> bpl = 
+                        fa = (FortnoxAdapter)bf;
+                    	BusinessPartnerList<?> bpl = 
                                 bf.listTenants();
                         for(BusinessPartner<?> bp : bpl.getBusinessPartner()) {
                             checkCredentials(bp);
@@ -59,6 +74,9 @@ public class credentialsRefreshScheduler implements Runnable {
     private void checkCredentials(BusinessPartner<?> bp) throws Exception {
         FortnoxCredentialsProvider credentialsProvider = new FileCredentialsProvider(bp.getTaxId());
         FortnoxCredentials credentials = credentialsProvider.getCredentials();
+        if (fa.getClientManager()!=null) {
+        	fci = fa.getClientManager().getClientInfoByOrgNo(bp.getTaxId());
+        }
         if(credentials != null && credentials.hasRefreshToken()) {
             Instant expiryDate = credentials.getLastRefreshAsDate().toInstant();
             Duration expiresIn = Duration.between(Instant.now(), expiryDate);
@@ -75,13 +93,53 @@ public class credentialsRefreshScheduler implements Runnable {
 
     private void updateCredentials(FortnoxCredentialsProvider credentialsProvider) throws Exception {
         FortnoxCredentials credentials = credentialsProvider.getCredentials();
+        String clientId = getClientId(credentials, credentialsProvider);
+        String clientSecret = getClientSecret(credentials, credentialsProvider);
+        if (clientId==null) {
+       		throw new Exception("No clientId for orgNo " + credentialsProvider.getOrgNo());
+        }
+        if (clientSecret==null) {
+       		throw new Exception("No clientSecret for orgNo " + credentialsProvider.getOrgNo());
+        }
         FortnoxCredentials newCredentials = FortnoxOAuth2Client.refreshAccessToken(
-            credentials.getClientId(), 
-            credentials.getClientSecret(), 
+            clientId, 
+            clientSecret, 
             credentials.getRefreshToken());
         credentialsProvider.setCredentials(newCredentials);
     }
 
+    
+    private String getClientId(FortnoxCredentials credentials, FortnoxCredentialsProvider credentialsProvider) {
+    	String clientId = credentials.getClientId();
+    	if (clientId==null) {
+    		clientId = credentialsProvider.getDefaultClientId();
+    	}
+    	if (clientId==null && fci!=null) {
+    		clientId = fci.getClientId();
+    	}
+		if (clientId==null && fcm!=null) {
+			clientId = fcm.getDefaultClientId();
+		}
+    	return clientId;
+		
+    }
+    
+    private String getClientSecret(FortnoxCredentials credentials, FortnoxCredentialsProvider credentialsProvider) {
+    	String secret = credentials.getClientSecret();
+    	if (secret==null) {
+    		secret = credentialsProvider.getDefaultClientSecret();
+    	}
+    	if (secret==null && fci!=null) {
+    		secret = fci.getClientSecret();
+    	}
+    	if (secret==null && fcm!=null) {
+    		secret = fcm.getDefaultClientSecret();
+    	}
+    	
+    	return secret;
+    	
+    }
+    
     @SuppressWarnings("unchecked")
 	protected <S> List<S> getServiceReferences(Class<S> clazz) throws InvalidSyntaxException {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());

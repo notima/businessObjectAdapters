@@ -434,9 +434,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * @return		
 	 * @throws Exception
 	 */
-	public String getOutVatAccount(String taxKey) throws Exception {
-
+	public String getOutVatAccount(String taxKey, String taxDomicile) throws Exception {
+		
 		String account = getPredefinedAccount("OUTVAT_" + taxKey.toUpperCase());
+		if (account==null) {
+			FortnoxConverter fc = new FortnoxConverter();
+			Tax convertedTaxKey = fc.convertTaxKey(null, taxKey, taxDomicile, null);
+			account = getPredefinedAccount("OUTVAT_" + convertedTaxKey.getKey());
+		}
 		return account;
 		
 	}
@@ -1588,17 +1593,36 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		updateCurrentTenant();
 	}
 
-	private void updateCurrentTenant() throws NoSuchTenantException {
-		
+	public void syncCredentials() throws Exception {
+
 		if (getClientManager()!=null) {
 			currentFortnoxTenant = getClientManager().getClientInfoByOrgNo(currentOrgNo);
+			FortnoxCredentials fc = currentFortnoxCredentials.getCredentials();
+			if (currentFortnoxTenant!=null && fc!=null) {
+				if (fc.getClientId()==null && currentFortnoxTenant.getClientId()!=null) {
+					fc.setClientId(currentFortnoxTenant.getClientId());
+				}
+				if (fc.getClientSecret()==null && currentFortnoxTenant.getClientSecret()!=null) {
+					fc.setClientSecret(currentFortnoxTenant.getClientSecret());
+				}
+			}
 			currentFortnoxCredentials.setDefaultClientId(clientManager.getDefaultClientId());
 			currentFortnoxCredentials.setDefaultClientSecret(clientManager.getDefaultClientSecret());
-			currentTenant = convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
 		} else {
 			throw new NoSuchTenantException("Can't find client manager while looking for " + currentOrgNo);
 		}
-
+		
+	}
+	
+	private void updateCurrentTenant() throws NoSuchTenantException {
+		
+		try {
+			syncCredentials();
+		} catch (Exception ee) {
+			ee.printStackTrace();
+		}
+		currentTenant = convertToBusinessPartnerFromFortnoxClientInfo(currentFortnoxTenant);
+		
 		try {
 			if (extendedClient!=null)
 				extendedClient.refreshFromAdapter();

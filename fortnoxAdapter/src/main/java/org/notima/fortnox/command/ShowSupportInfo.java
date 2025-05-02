@@ -16,7 +16,6 @@ import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
 import org.notima.api.fortnox.entities3.CompanySetting;
-import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 
 @Command(scope = "fortnox", name = "show-fortnox-support-info", description = "Show support info for client")
@@ -132,7 +131,7 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 	
 	private void printAccessToken() {
 		
-		sess.getConsole().println("Using OAuth2 Access Token with client ID: " + credentials.getClientId());
+		sess.getConsole().println("Using OAuth2 Access Token with client ID: " + getClientId(credentials));
 		sess.getConsole().println("Last token refresh: " + dateFormat.format(credentials.getLastRefreshAsDate()));
 
 		if (showSecrets) {
@@ -146,14 +145,14 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 	}
 	
 	private void getCredentials() throws Exception {
-		credentialsProvider = new FileCredentialsProvider(orgNo);
-		credentials = credentialsProvider.getCredentials();
+		credentials = fa.getClient().getCurrentCredentials();
 
 		if(credentials == null) {
 			message = "No credentials found";
 			throw new Exception(message);
 		}
 
+		
 	}
 	
 	
@@ -165,6 +164,7 @@ public class ShowSupportInfo extends FortnoxCommand implements Action {
 			message = "Can't get client for " + orgNo;
 			throw new Exception(message);
 		}
+		fa.syncCredentials();
 		
 		
 	}
