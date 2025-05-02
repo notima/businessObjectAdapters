@@ -1485,6 +1485,30 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return null;
 	}
 
+	
+	
+	@Override
+	public Map<Object, Invoice<org.notima.api.fortnox.entities3.Invoice>> lookupUnpostedSalesInvoices()
+			throws Exception {
+		
+		Map<Object,Invoice<?>> invoiceMap = lookupUnpostedSalesInvoicesSubset();
+		
+		return super.lookupUnpostedSalesInvoices();
+	}
+	
+	@Override
+	public Map<Object, Invoice<?>> lookupUnpostedSalesInvoicesSubset() throws Exception {
+
+		Map<Object, Object> invoiceMap = lookupList(FortnoxAdapter.LIST_UNPOSTED);
+		Map<Object, Invoice<?>> resultMap = new TreeMap<Object, Invoice<?>>();
+		
+		if (invoiceMap!=null && invoiceMap.size()>0) {
+			
+		}
+		
+		return resultMap;
+	}
+
 	@Override
 	public org.notima.api.fortnox.entities3.Order persistNativeOrder(
 			org.notima.api.fortnox.entities3.Order order) throws Exception {
