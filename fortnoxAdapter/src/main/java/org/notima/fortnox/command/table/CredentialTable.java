@@ -11,6 +11,10 @@ import org.notima.businessobjects.adapter.tools.table.GenericTable;
 
 public class CredentialTable extends GenericTable {
 
+	public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_RESET = "\u001B[0m";
+
 	private DateFormat dfmt = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 	
 	private List<FortnoxCredentials> creds;
@@ -27,6 +31,7 @@ public class CredentialTable extends GenericTable {
 		column("Last refresh");
 		column("Timestamp");
 		column("Expires in");
+		column("Lock status");
 	
 		addRows();
 		
@@ -78,7 +83,8 @@ public class CredentialTable extends GenericTable {
 				cred.getRefreshTokenAbbreviated(),
 				dfmt.format(cred.getLastRefreshAsDate()),
 				cred.getLastRefresh(),
-				cred.getExpiresIn());
+				cred.getExpiresIn(),
+				cred.isRefreshLocked() ? ANSI_RED+"[Locked]"+ANSI_RESET : ANSI_GREEN+"[Unlocked]"+ANSI_RESET);
 		
 	}
 	
@@ -89,6 +95,7 @@ public class CredentialTable extends GenericTable {
 				cred.getClientId(),
 				cred.getLegacyTokenAbbreviated(),
 				"Legacy", 
+				"N/A",
 				"N/A",
 				"N/A",
 				"N/A",

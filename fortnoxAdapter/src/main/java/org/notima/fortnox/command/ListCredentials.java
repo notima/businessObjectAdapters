@@ -18,6 +18,8 @@ import org.notima.api.fortnox.entities3.CompanySetting;
 import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.CredentialTable;
+import org.notima.generic.businessobjects.BusinessPartnerList;
+import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 @Command(scope = _FortnoxCommandNames.SCOPE, name = _FortnoxCommandNames.ListCredentials, description = "List credentials for client")
 @Service
@@ -26,52 +28,74 @@ public class ListCredentials extends FortnoxCommand implements Action {
 	@Reference 
 	Session sess;
 	
-	@Argument(index = 0, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Argument(index = 0, name = "orgNo", description ="The orgnos of the clients. Leave empty to show credentials for all clients.", required = false, multiValued = true)
 	@Completion(FortnoxTenantCompleter.class)	
-	private String orgNo = "";
+	private String[] orgNos;
 
 	DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
 	private FortnoxClient3 fc;
 	private CompanySetting cs;
+
+
+	@SuppressWarnings("rawtypes")
+	@Reference
+	private List<BusinessObjectFactory> bofs;
 	
 	@Override
 	public Object execute() throws Exception {
-
-		List<FortnoxCredentials> credentials = new FileCredentialsProvider(orgNo).getAllCredentials();
-
-		if(credentials == null) {
-			sess.getConsole().println("No credentials found");
-			return null;
+		if(orgNos == null) {
+			for (BusinessObjectFactory bf : bofs) {
+				if ("Fortnox".equals(bf.getSystemName())) {
+					BusinessPartnerList<?> bpl = bf.listTenants();
+					orgNos = new String[bpl.getBusinessPartner().size()];
+					for(int i = 0; i < orgNos.length; i++) {
+						orgNos[i] = bpl.getBusinessPartner().get(i).getTaxId();
+					}
+				}
+			}
 		}
 
-		CredentialTable table = new CredentialTable(credentials);
+		for(String orgNo : orgNos) {
 
-		table.getShellTable().print(sess.getConsole());
-		
-		fc = getFortnoxClient(orgNo);
-		if (fc == null) {
-			sess.getConsole().println("Can't get client for " + orgNo);
-			return null;
-		}
-		
-		try {
-			cs = fc.getCompanySetting();
-			sess.getConsole().println("[ " + cs.getOrganizationNumber() + " ] - " + cs.getName());
-			sess.getConsole().println("Contact: " + cs.getContactFirstName() + " " + cs.getContactLastName());
-			sess.getConsole().println("Email: " + cs.getEmail());
-			sess.getConsole().println("Subscription-ID: " + cs.getDatabaseNumber());
+			sess.getConsole().println("\033[4mCredentials for \033[1m" + orgNo + "\033[0m");
+
+			List<FortnoxCredentials> credentials = new FileCredentialsProvider(orgNo).getAllCredentials();
+
+			if(credentials == null) {
+				sess.getConsole().println("No credentials found");
+				return null;
+			}
+
+			CredentialTable table = new CredentialTable(credentials);
+
+			table.getShellTable().print(sess.getConsole());
 			
-			if (credentials.size()>4) {
-				sess.getConsole().println("\nUse " + _FortnoxCommandNames.PurgeCredentials + " to purge old credentials.");
+			fc = getFortnoxClient(orgNo);
+			if (fc == null) {
+				sess.getConsole().println("Can't get client for " + orgNo);
+				return null;
 			}
 			
-		} catch(FortnoxAuthenticationException e) {
-			sess.getConsole().println("Authentication failed!");
-			sess.getConsole().println(e.getMessage());
-			if (e.getCredentials()!=null) {
-				sess.getConsole().println(e.getCredentials().toString());
+			try {
+				cs = fc.getCompanySetting();
+				sess.getConsole().println("[ " + cs.getOrganizationNumber() + " ] - " + cs.getName());
+				sess.getConsole().println("Contact: " + cs.getContactFirstName() + " " + cs.getContactLastName());
+				sess.getConsole().println("Email: " + cs.getEmail());
+				sess.getConsole().println("Subscription-ID: " + cs.getDatabaseNumber());
+				
+				if (credentials.size()>4) {
+					sess.getConsole().println("\nUse " + _FortnoxCommandNames.PurgeCredentials + " to purge old credentials.");
+				}
+				
+			} catch(FortnoxAuthenticationException e) {
+				sess.getConsole().println("Authentication failed!");
+				sess.getConsole().println(e.getMessage());
+				if (e.getCredentials()!=null) {
+					sess.getConsole().println(e.getCredentials().toString());
+				}
 			}
+
 		}
 		
 		
