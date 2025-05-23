@@ -85,7 +85,7 @@ public class credentialsRefreshScheduler implements Runnable {
                 try {
                     updateCredentials(credentialsProvider);
                 } catch (Exception e) {
-                    log.error("Token refresh failed", e);
+                    log.error("Token refresh failed for " + bp.getName(), e);
                 }
             }
         }
