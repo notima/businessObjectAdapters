@@ -15,7 +15,7 @@ public class TaxRatesFI {
 	public TaxRatesFI() {
 
 		taxRates = new ArrayList<Tax>();
-		Tax t = new Tax("24", countryCode, 24, "MP4_KUND", "OUTVAT_MP4_KUND", "INVAT");
+		Tax t = new Tax("26", countryCode, 25.5, "MP4_KUND", "OUTVAT_MP4_KUND", "INVAT");
 		t.setDefaultRevenueAccount(new AccountElement("3151"));
 		t.setTaxDebtAccount(new AccountElement("2690"));
 		taxRates.add(t);
