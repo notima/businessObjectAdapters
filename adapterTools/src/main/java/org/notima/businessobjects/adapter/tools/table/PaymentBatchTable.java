@@ -174,7 +174,7 @@ public class PaymentBatchTable extends GenericTable {
 			row = new GenericRow();
 			row.addContent(
 				count++,
-				dfmt.format(d.getPaymentDate()),
+				d.getPaymentDate()!=null ? dfmt.format(d.getPaymentDate()) : "-",
 				d.getInvoiceNo(),
 				d.getOrderNo(),
 				d.getDestinationSystemReference(),
