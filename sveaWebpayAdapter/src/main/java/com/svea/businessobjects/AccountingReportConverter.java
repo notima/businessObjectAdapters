@@ -94,11 +94,13 @@ public class AccountingReportConverter {
 					if (rl.getTaxAmount()!=0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(-rl.getTaxAmount()), AccountingType.LIABILITY_VAT);
 						avl.setTaxKey(rl.getTaxKey());
+						avl.setTaxDomicile(rl.getTaxDomicile());
 						dst.addVoucherLine(avl);
 					}
 					if (rl.getTaxBase()!=0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(-rl.getTaxBase()), "?".equals(rl.getTaxKey()) ? AccountingType.REVENUE_UNCLEAR : AccountingType.REVENUE);
 						avl.setTaxKey(rl.getTaxKey());
+						avl.setTaxDomicile(rl.getTaxDomicile());
 						if (rl.getRevenueAcctNo()!=null && rl.getRevenueAcctNo().trim().length()>0) {
 							avl.setAcctNo(rl.getRevenueAcctNo());
 						}
@@ -120,6 +122,7 @@ public class AccountingReportConverter {
 						if (pl.getFeeSpecification()==null || pl.getFeeSpecification().isEmpty()) {
 							avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getFeeAmount()), AccountingType.OTHER_EXPENSES_SALES);
 							avl.setTaxKey(pl.getTaxKey());
+							avl.setTaxDomicile(pl.getTaxDomicile());
 							dst.addVoucherLine(avl);
 						} else {
 							// We have a fee specification
@@ -127,6 +130,7 @@ public class AccountingReportConverter {
 							if (unspecifiedFee!=0) {
 								avl = new AccountingVoucherLine(BigDecimal.valueOf(unspecifiedFee), AccountingType.OTHER_EXPENSES_SALES);
 								avl.setTaxKey(pl.getTaxKey());
+								avl.setTaxDomicile(pl.getTaxDomicile());
 								dst.addVoucherLine(avl);
 							}
 							
@@ -138,6 +142,7 @@ public class AccountingReportConverter {
 									avl.setDescription(fd.getDescription());
 								}
 								avl.setTaxKey(pl.getTaxKey());
+								avl.setTaxDomicile(pl.getTaxDomicile());
 								mapWebpayFeeTypesToAccountingType(fd.getFeeType(), avl);
 								dst.addVoucherLine(avl);
 								
@@ -149,6 +154,7 @@ public class AccountingReportConverter {
 					if (pl.getTaxAmount()!=0) {
 						avl = new AccountingVoucherLine(BigDecimal.valueOf(pl.getTaxAmount()), AccountingType.CLAIM_VAT);
 						avl.setTaxKey(pl.getTaxKey());
+						avl.setTaxDomicile(pl.getTaxDomicile());
 						dst.addVoucherLine(avl);
 					}
 					

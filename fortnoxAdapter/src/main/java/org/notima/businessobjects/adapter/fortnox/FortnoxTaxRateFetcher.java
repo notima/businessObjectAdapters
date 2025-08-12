@@ -28,7 +28,7 @@ public class FortnoxTaxRateFetcher {
 	};
 	
 	private double[] taxRates_FI = new double[] {
-		24,
+		25.5,
 		14,
 		10,
 		0
