@@ -6,6 +6,8 @@ import java.util.Properties;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -42,9 +44,15 @@ public class ExcelReportFormatter extends BasicReportFormatter implements Report
 
 		if (data.hasHeaders()) {
 		
+			Font headerFont = wb.createFont();
+			headerFont.setBold(true);
+			CellStyle headerStyle = wb.createCellStyle();
+			headerStyle.setFont(headerFont);
+			
 			for (GenericColumn cc : data.getColumns()) {
 				cell = row.createCell(colId++);
 				cell.setCellValue(cc.getHeader());
+				cell.setCellStyle(headerStyle);
 			}
 			
 		} else if (data.isEmpty()) {
@@ -87,6 +95,11 @@ public class ExcelReportFormatter extends BasicReportFormatter implements Report
 			
 		}
 
+		// Autosize columns
+		for (colId = 0; colId < data.getColumns().size(); colId++) {
+			sheet.autoSizeColumn(colId);
+		}
+		
 		String path = getPath();
 		
 		if (!path.toLowerCase().endsWith(".xls")) {
