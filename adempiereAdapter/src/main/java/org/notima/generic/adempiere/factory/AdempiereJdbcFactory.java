@@ -77,6 +77,8 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		// Add tenant
 		this.addTenant(Integer.toString(adClientId), null, bp.getName(), null);
 		
+		refreshTenantMap();
+		
 	}
 	
 	public AdempiereJdbcFactory(String jdbcUrl, String user, String pass, int clientId, int orgId) throws Exception {
