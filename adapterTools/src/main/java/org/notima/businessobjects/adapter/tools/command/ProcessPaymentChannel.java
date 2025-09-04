@@ -194,10 +194,13 @@ public class ProcessPaymentChannel implements Action {
 	private void constructOutFile(PaymentBatch pb) {
 		if (format!=null && outFile==null && rf!=null) {
 			// We need to construct an outfile.
+			String filePrefix = 
+					(channel.getChannelDescription()!=null && channel.getChannelDescription().trim().length()>0 ? channel.getChannelDescription() : channel.getSourceSystem());
+
 			if (!pb.isDateRange()) {
-				outFile = pb.getSource() + "." + format;
+				outFile = filePrefix + "_" + pb.getSource() + "." + format;
 			} else {
-				outFile = pb.getSource() + "_" + dfmt.format(pb.getLastPaymentDate()) + "." + format;
+				outFile = filePrefix + "_" + pb.getSource() + "_" + dfmt.format(pb.getLastPaymentDate()) + "." + format;
 			}
 		}
 	}
