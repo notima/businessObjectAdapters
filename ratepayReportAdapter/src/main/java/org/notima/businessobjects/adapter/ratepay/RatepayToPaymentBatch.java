@@ -91,7 +91,12 @@ public class RatepayToPaymentBatch {
 			for (RatepayFee fee : src.getFees()) {
 				addFeeToPayment(dst, fee);
 			}
+		} else if (src.getFeeType()!=RatepayReportRow.FEETYPE_PAYMENT) {
+			// Fee only transaction
+			dst.setAccountNo(Integer.toString(src.getFeeType()));
+			dst.setOriginalAmount(0D);
 		}
+		 
 		
 		dst.calculateAmountDeductingWriteOffsFromOriginalAmount();
 		
