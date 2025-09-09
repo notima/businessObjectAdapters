@@ -71,11 +71,11 @@ public class RatepayToPaymentBatch {
 		dst.setAmount(new Double(-src.getAmount()));
 		dst.setOrderNo(src.getDescriptor());
 		dst.setComment(src.getDescription());
-		//dst.setDestinationSystemReference(src.getTransactionId());
-		//dst.setDestinationSystemReferenceField("ExternalInvoiceReference2");
-		//dst.setDestinationSystemReferenceRegex("^pmratepayinvoice\\.\\d+\\.(.*)$");
-		dst.setDestinationSystemReference(src.getShopsOrderId());
-		dst.setDestinationSystemReferenceField("order");
+		dst.setDestinationSystemReference(src.getTransactionId());
+		dst.setDestinationSystemReferenceField("ExternalInvoiceReference2");
+		dst.setDestinationSystemReferenceRegex("^pm_shopware:ratepay_invoice\\.(.*)$");
+		// dst.setDestinationSystemReference(src.getShopsOrderId());
+		// dst.setDestinationSystemReferenceField("order");
 		dst.setClientOrderNo(src.getShopsOrderId());
 		if (report.getCurrency()!=null) {
 			dst.setCurrency(report.getCurrency());
@@ -91,7 +91,12 @@ public class RatepayToPaymentBatch {
 			for (RatepayFee fee : src.getFees()) {
 				addFeeToPayment(dst, fee);
 			}
+		} else if (src.getFeeType()!=RatepayReportRow.FEETYPE_PAYMENT) {
+			// Fee only transaction
+			dst.setAccountNo(Integer.toString(src.getFeeType()));
+			dst.setOriginalAmount(0D);
 		}
+		 
 		
 		dst.calculateAmountDeductingWriteOffsFromOriginalAmount();
 		

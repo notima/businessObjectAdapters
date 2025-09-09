@@ -69,6 +69,7 @@
 										org.hamcrest.core</Export-Package>
 						<Import-Package>
 										org.notima.bg*,
+										org.osgi.framework;version="[1.0,2)",
 										!com.ibm*,
 										!com.sun.jdmk*,
 										!javax.jmdns*,
@@ -87,6 +88,7 @@
 										!org.bouncycastle*,
 										!org.glassfish.hk2.osgiresourcelocator,
 										!org.junit*,
+										!org.slf4j.impl*,
 										!org.mozilla.universalchardet,
 										!javax.annotation,										
 										*

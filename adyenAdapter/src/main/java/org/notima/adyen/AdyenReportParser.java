@@ -105,6 +105,21 @@ public class AdyenReportParser {
 			
 		}
 		
+		checkSettlementDate();
+		
+    }
+    
+    private void checkSettlementDate() {
+    	
+    	if (report.getSettlementDate()==null) {
+    		// If we're here, there's no settlement in the payoutlines.
+    		for (AdyenReportRow arr : reportLines) {
+    			if (arr.isPayment() && arr.getCreationDate()!=null) {
+    				report.setSettlementDate(LocalDateUtils.asLocalDate(arr.getCreationDate()));
+    			}
+    		}
+    	}
+    	
     }
 
     private void addReportRow(AdyenReportRow reportRow) {

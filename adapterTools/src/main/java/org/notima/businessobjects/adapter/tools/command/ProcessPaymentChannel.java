@@ -126,6 +126,10 @@ public class ProcessPaymentChannel implements Action {
 			untilDate = LocalDate.parse(untilDateStr, DateTimeFormatter.ISO_LOCAL_DATE);
 		}
 		
+		if (channel.getChannelDescription()!=null && channel.getChannelDescription().trim().length()>0) {
+			sess.getConsole().println("Processing channel " + channel.getChannelDescription());
+		}
+		
 	}
 	
 	@Override
@@ -183,7 +187,7 @@ public class ProcessPaymentChannel implements Action {
 		
 		LocalDate firstPaymentDate = LocalDateUtils.asLocalDate(pb.getFirstPaymentDate());
 		
-		if (firstPaymentDate.isAfter(untilDate)) {
+		if (firstPaymentDate!=null && firstPaymentDate.isAfter(untilDate)) {
 			return false;
 		}
 		return true;
@@ -194,10 +198,13 @@ public class ProcessPaymentChannel implements Action {
 	private void constructOutFile(PaymentBatch pb) {
 		if (format!=null && outFile==null && rf!=null) {
 			// We need to construct an outfile.
+			String filePrefix = 
+					(channel.getChannelDescription()!=null && channel.getChannelDescription().trim().length()>0 ? channel.getChannelDescription() : channel.getSourceSystem());
+
 			if (!pb.isDateRange()) {
-				outFile = pb.getSource() + "." + format;
+				outFile = filePrefix + "_" + pb.getSource() + "." + format;
 			} else {
-				outFile = pb.getSource() + "_" + dfmt.format(pb.getLastPaymentDate()) + "." + format;
+				outFile = filePrefix + "_" + pb.getSource() + "_" + dfmt.format(pb.getLastPaymentDate()) + "." + format;
 			}
 		}
 	}
@@ -205,8 +212,6 @@ public class ProcessPaymentChannel implements Action {
 	private void formatReport(PaymentBatch pb) throws Exception {
 
 		paymentBatchTable = new PaymentBatchTable(pb, true);
-
-		writeToFormat(pb);
 
 		if (!allBatchesProcessed) {
 			listOfBatches.add(pb);

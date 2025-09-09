@@ -40,7 +40,7 @@ public class FortnoxObjectWriter {
 			custMap.put(loc.getAddress1().trim().toUpperCase(), bp.getIdentityNo());
 			custMapById.put(bp.getIdentityNo(), bp);
 			custMapByTaxId.put(new TaxSubjectIdentifier(bp), bp);
-			FortnoxAdapter.logger.info("Adding " + bp.getName() + " => " + bp.getIdentityNo());
+			FortnoxAdapter.logger.info("Adding " + bp.getName() + " on " + loc.getAddress1() + " => " + bp.getIdentityNo());
 		}
 		
 	}

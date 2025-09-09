@@ -153,6 +153,10 @@ public class PaymentBatchTable extends GenericTable {
     	GenericCell originalAmtCell;
     	GenericCell openAmtCell;
     	
+    	GenericCell totalPaidAmtCell;
+    	GenericCell totalOriginalAmtCell;
+    	GenericCell totalOpenAmtCell;
+    	
     	GenericRow row = null;
     	
 		for (Payment<?> d : report.getPayments()) {
@@ -174,7 +178,7 @@ public class PaymentBatchTable extends GenericTable {
 			row = new GenericRow();
 			row.addContent(
 				count++,
-				dfmt.format(d.getPaymentDate()),
+				d.getPaymentDate()!=null ? dfmt.format(d.getPaymentDate()) : "-",
 				d.getInvoiceNo(),
 				d.getOrderNo(),
 				d.getDestinationSystemReference(),
@@ -194,7 +198,16 @@ public class PaymentBatchTable extends GenericTable {
 		rows.add(row);
 
 		row = new GenericRow();
-		row.addContent("", "", "", "", "", "", "TOTAL", nfmt.format(totalPaidAmount), nfmt.format(totalOriginalAmount), "", nfmt.format(totalOpenAmount));
+		totalPaidAmtCell = new GenericCell(nfmt.format(totalPaidAmount));
+		totalPaidAmtCell.setOriginalData(totalPaidAmount);
+		
+		totalOriginalAmtCell = new GenericCell(nfmt.format(totalOriginalAmount));
+		totalOriginalAmtCell.setOriginalData(totalOriginalAmount);
+		
+		totalOpenAmtCell = new GenericCell(nfmt.format(totalOpenAmount));
+		totalOpenAmtCell.setOriginalData(totalOpenAmount);
+				
+		row.addContent("", "", "", "", "", "", "TOTAL", totalPaidAmtCell, totalOriginalAmtCell, "", totalOpenAmtCell);
 		rows.add(row);
 
 		row = new GenericRow();
