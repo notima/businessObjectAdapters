@@ -75,6 +75,10 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 	
 	private boolean checkValidTaxRate() {
 
+		// By pass rounding
+		if ("rounding".equals(theLine.getKey())) {
+			return true;
+		}
 		// Calculate tax rate
 		double lineTaxRate = theLine.getTaxPercent();
 		Tax closestTaxRate = findClosestTaxRate(lineTaxRate);
