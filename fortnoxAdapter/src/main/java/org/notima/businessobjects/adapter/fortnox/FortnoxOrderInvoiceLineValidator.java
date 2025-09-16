@@ -77,6 +77,8 @@ public class FortnoxOrderInvoiceLineValidator implements OrderInvoiceLineValidat
 
 		// By pass rounding
 		if ("rounding".equals(theLine.getKey())) {
+			theLine.setTaxPercent(0);
+			theLine.setTaxKey("0");
 			return true;
 		}
 		// Calculate tax rate
