@@ -9,8 +9,8 @@
 		<bundle>mvn:com.google.code.gson/gson/${gson.version}</bundle>
         <bundle>mvn:commons-lang/commons-lang/2.6</bundle>
         <bundle>mvn:commons-configuration/commons-configuration/1.10</bundle>
-    	<bundle>wrap:mvn:commons-collections/commons-collections/LATEST</bundle>
-    	<bundle>mvn:commons-codec/commons-codec/LATEST</bundle>
+    	<bundle>wrap:mvn:commons-collections/commons-collections/3.2.2</bundle>
+    	<bundle>mvn:commons-codec/commons-codec/1.16.1</bundle>
     	<bundle>mvn:commons-beanutils/commons-beanutils/1.9.4</bundle>
     	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
 		<bundle>mvn:com.sun.activation/javax.activation/1.2.0</bundle>
