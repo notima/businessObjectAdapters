@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(immediate = true, property = {
-        Scheduler.PROPERTY_SCHEDULER_EXPRESSION + "=0 0 5 ? * MON,TUE,WED,THU,FRI,SAT,SUN *",
+        Scheduler.PROPERTY_SCHEDULER_EXPRESSION + "=0 45 18 ? * MON,TUE,WED,THU,FRI,SAT,SUN *",
         Scheduler.PROPERTY_SCHEDULER_NAME + "=" + "FortnoxCredentialsRefreshSchedule"
 } )
 public class credentialsRefreshScheduler implements Runnable {

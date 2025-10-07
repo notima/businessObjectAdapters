@@ -146,6 +146,10 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 
 				break;
 
+			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_NOT_COMPLETED:
+				changeNotCompleted();
+				break;
+				
 			case FortnoxInvoicePropertyCompleter.INVOICE_PROPERTY_COPY_PAYMENTTERM_TO_INVOICE:
 				changePaymentTermToCustomerPaymentTerm();
 				break;
@@ -187,6 +191,23 @@ public class ModifyInvoice extends FortnoxCommand implements Action  {
 		changePaymentTerm();
 	}
 
+	private void changeNotCompleted() throws Exception {
+		Boolean newBool = null;
+		if (Boolean.toString(true).equals(newValue) ) {
+			newBool = Boolean.TRUE;
+		}
+		if (Boolean.toString(false).equals(newValue) ) {
+			newBool = Boolean.FALSE;
+		}
+		if (newBool!=null) {
+			invoiceToModify.setNotCompleted(newBool);
+			fortnoxClient.setInvoice(invoiceToModify);
+		} else {
+			sess.getConsole().println(String.format("%s is not a boolean. Use 'true' or 'false'!", newValue));
+		}
+		
+	}
+	
 	private void changePaymentTerm() throws Exception {
 		invoiceToModify.setTermsOfPayment(newValue);
 		fortnoxClient.setInvoice(invoiceToModify);

@@ -872,7 +872,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			// TODO: Use document date
 			List<Tax> validTaxes = ftrf.getValidTaxes(LocalDate.now(), taxDomicile);
 
-			Tax tax = TaxTool.getFirstMatchOnRate(taxPercent, validTaxes);
+			Tax tax = TaxTool.getFirstMatchOnRate(taxPercent, 0.5, validTaxes);
 			accountNo = tax.getDefaultRevenueAccount().getAccountNo();
 			
 		}
