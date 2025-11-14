@@ -28,9 +28,9 @@ import org.notima.generic.ifacebusinessobjects.MappingService;
 import org.notima.generic.ifacebusinessobjects.MappingServiceInstanceFactory;
 import org.notima.util.LocalDateUtils;
 
-@Command(scope = "notima", name = "read-invoices", description = "Reads invoices from an adapter and writes them to the destination adapter (or XML-file if no adapter is specified")
+@Command(scope = "notima", name = "list-invoices", description = "Lists invoices from an adapter. See also read-invoices.")
 @Service
-public class ReadInvoices extends AbstractAction {
+public class ListInvoices extends AbstractAction {
 	
 	@Reference
 	private CanonicalObjectFactory cof;
@@ -46,21 +46,6 @@ public class ReadInvoices extends AbstractAction {
 
     @Option(name="--until-date", description="Until date", required = false, multiValued = false)
     private String	untilDateStr;
-
-    @Option(name="--create-limit", description="Create limit.", required = false, multiValued = false)
-    private Integer	createLimit;
-    
-    @Option(name="--unit-price", description="Price per unit, unless specified in source", required = false, multiValued = false)
-    private Double  unitPrice;
-    
-	@Option(name = "--price-includes-tax", description = "If price per unit contains tax", required = false, multiValued = false)
-	private boolean priceIncludesTax;
-
-	@Option(name = "--taxPercent", description = "Used in conjunction with --price-includes-tax", required = false, multiValued = false)
-	private double taxPercent;
-    
-    @Option(name="--apartment-mapping-service", description="Apartment to customer mapping service to use", required = false, multiValued = false)
-    private String  apartmentMappingService;
     
 	@Argument(index = 0, name = "adapterName", description ="The source adapter name", required = true, multiValued = false)
 	private String adapterName = "";
@@ -68,15 +53,10 @@ public class ReadInvoices extends AbstractAction {
     @Argument(index = 1, name = "orgNo", description = "The org number of the tenant to read from", required = true, multiValued = false)
     private String orgNo;
 	
-	@Argument(index = 2, name = "invoiceFile", description ="The canonical invoice to write to (xml-format)", required = true, multiValued = false)
-	@Completion(FileCompleter.class)   
-	private String invoiceFile = "";
-	
 	private BusinessObjectFactory<?,?,?,?,?,?> adapter;
 	private OrderInvoiceReaderOptions readerOptions;
 	private OrderInvoiceOperationResult invoiceResult;
 	
-	private MappingService mappingService = null;
 	
 	private Date	fromDate;
 	private Date	untilDate;
@@ -87,9 +67,6 @@ public class ReadInvoices extends AbstractAction {
 		initBusinessObjectFactory();
 		parseOptions();
 		readInvoices();
-		updateUnitPrice();
-		remapCustomerIds();
-		writeInvoicesToXmlFile();
 		
 		return null;
 	}
@@ -100,19 +77,11 @@ public class ReadInvoices extends AbstractAction {
 		adapter.setTenant(orgNo, countryCode);
 		
 	}
-
-	private void writeInvoicesToXmlFile() throws IOException {
-		
-		FileOutputStream fis = new FileOutputStream(invoiceFile);
-		JAXB.marshal(invoiceResult.getAffectedInvoices(), fis);
-		fis.close();
-		
-	}
 	
 	private void parseOptions() throws ParseException, NoSuchTenantException, Exception {
-		
-		readerOptions = new OrderInvoiceReaderOptions();		
-		
+
+		readerOptions = new OrderInvoiceReaderOptions();
+
 		if (fromDateStr!=null) {
 			fromDate = dfmt.parse(fromDateStr);
 			readerOptions.setFromDate(LocalDateUtils.asLocalDate(fromDate));
@@ -122,71 +91,14 @@ public class ReadInvoices extends AbstractAction {
 			readerOptions.setUntilDate(LocalDateUtils.asLocalDate(untilDate));
 		}
 		
-		if (createLimit==null) createLimit = 0;
-		readerOptions.setReadLimit(createLimit);
-		
-		initiateMapper();
 		
 	}
-	
-	private void initiateMapper() throws NoSuchTenantException, Exception {
-		
-		if (apartmentMappingService!=null) {
-			MappingServiceInstanceFactory instanceFactory = mappingFactory.getMappingServiceFor(apartmentMappingService);
-			if (instanceFactory!=null) {
-				mappingService = instanceFactory.getMappingService(new TaxSubjectIdentifier(orgNo, countryCode));
-			} else {
-				throw new Exception("No mapping service for " + apartmentMappingService + " found.");
-			}
-		}
-		
-	}
-	
 	
 	private void readInvoices() throws Exception {
 		
 		invoiceResult = adapter.readInvoices(readerOptions);
 		
 	}
-	
-	private void remapCustomerIds() {
-		if (mappingService!=null) {
-			mapFromApartmentsToCustomer();
-		}
-	}
-	
-	private void mapFromApartmentsToCustomer() {
-		
-		InvoiceList invoiceList = invoiceResult.getAffectedInvoices();
-		TaxSubjectIdentifier resultCustomer;
-		for (Invoice<?> il : invoiceList.getInvoiceList()) {
-			resultCustomer = mappingService.mapApartmentNoToTaxSubject(il.getBusinessPartner().getIdentityNo());
-			if (resultCustomer!=null && !resultCustomer.isUndefined()) {
-				il.getBusinessPartner().setTaxId(resultCustomer.getTaxId());
-			}
-		}
-		
-	}
-	
-	
-	private void updateUnitPrice() {
-		
-		if (unitPrice!=null) {
-
-			SetSpecificPriceInvoiceLineValidator validator = new SetSpecificPriceInvoiceLineValidator(unitPrice, priceIncludesTax, priceIncludesTax, taxPercent);
-			
-			InvoiceList invoiceList = invoiceResult.getAffectedInvoices();
-			for (Invoice<?> il : invoiceList.getInvoiceList()) {
-				il.setOrderInvoiceLineValidator(validator);
-				il.getInvalidLines();
-				il.calculateGrandTotal();
-
-			}
-			
-		}
-		
-	}
-	
 	
 	
 }

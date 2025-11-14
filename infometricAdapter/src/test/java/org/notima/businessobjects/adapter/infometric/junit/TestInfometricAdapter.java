@@ -65,7 +65,7 @@ public class TestInfometricAdapter {
 	@Test
 	public void testReadAllFiles() throws Exception {
 
-		OrderInvoiceOperationResult result = adapter.readInvoices(null, null, 1);
+		OrderInvoiceOperationResult result = adapter.readInvoices(null);
 		
 		log.info("{} invoices created.", result.getAffectedInvoices().getInvoiceList().size());
 		

@@ -36,6 +36,7 @@ import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.PaymentTerm;
 import org.notima.generic.businessobjects.PriceList;
@@ -86,7 +87,7 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	}
 	
 	@Override
-	public OrderInvoiceOperationResult readInvoices(Date fromDate, Date untilDate, int readLimit) throws Exception {
+	public OrderInvoiceOperationResult readInvoices(OrderInvoiceReaderOptions opts) throws Exception {
 		
 		InfometricTenant it = this.getCurrentTenant()!=null ? this.getCurrentTenant().getNativeBusinessPartner() : null;
 		if (it==null) {
