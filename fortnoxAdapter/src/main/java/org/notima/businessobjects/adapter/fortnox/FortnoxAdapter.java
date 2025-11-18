@@ -53,6 +53,7 @@ import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
 import org.notima.generic.businessobjects.OrderLine;
 import org.notima.generic.businessobjects.Location;
@@ -1489,9 +1490,22 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	
+	@Override
+	public OrderInvoiceOperationResult readInvoices(OrderInvoiceReaderOptions opts) throws Exception {
+		OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
 
-	
-	
+		if (opts==null || (opts.isUnpostedOnly() && opts.isSalesOnly())) {
+			Map<Object,Invoice<?>> invoiceMap = lookupUnpostedSalesInvoicesSubset();
+			for (Invoice<?> inv : invoiceMap.values()) {
+				result.addAffectedInvoice(inv);
+			}
+		}
+		
+		return result;
+	}
+
 	@Override
 	public Map<Object, Invoice<org.notima.api.fortnox.entities3.Invoice>> lookupUnpostedSalesInvoices()
 			throws Exception {
@@ -1508,7 +1522,19 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		Map<Object, Invoice<?>> resultMap = new TreeMap<Object, Invoice<?>>();
 		
 		if (invoiceMap!=null && invoiceMap.size()>0) {
-			
+			Object invoiceObject;
+			Invoice<?> targetInvoice;
+			for (Object oo : invoiceMap.keySet()) {
+				invoiceObject = invoiceMap.get(oo);
+				if (invoiceObject instanceof org.notima.api.fortnox.entities3.Invoice) {
+					targetInvoice = convertToCanonicalInvoice((org.notima.api.fortnox.entities3.Invoice)invoiceObject);
+					resultMap.put(oo, targetInvoice);
+				}
+				if (invoiceObject instanceof org.notima.api.fortnox.entities3.InvoiceSubset) {
+					targetInvoice = lookupInvoice(oo.toString());
+					resultMap.put(oo, targetInvoice);
+				}
+			}
 		}
 		
 		return resultMap;
