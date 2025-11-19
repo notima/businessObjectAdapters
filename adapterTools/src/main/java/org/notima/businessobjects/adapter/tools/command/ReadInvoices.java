@@ -76,6 +76,9 @@ public class ReadInvoices extends AbstractAction {
 	private OrderInvoiceReaderOptions readerOptions;
 	private OrderInvoiceOperationResult invoiceResult;
 	
+	private boolean	unpostedOnly = true;
+	private boolean salesOnly = true;
+	
 	private MappingService mappingService = null;
 	
 	private Date	fromDate;
@@ -102,6 +105,9 @@ public class ReadInvoices extends AbstractAction {
 	}
 
 	private void writeInvoicesToXmlFile() throws IOException {
+
+		// Remove references to any native formats
+		invoiceResult.canonize();
 		
 		FileOutputStream fis = new FileOutputStream(invoiceFile);
 		JAXB.marshal(invoiceResult.getAffectedInvoices(), fis);
@@ -124,6 +130,9 @@ public class ReadInvoices extends AbstractAction {
 		
 		if (createLimit==null) createLimit = 0;
 		readerOptions.setReadLimit(createLimit);
+		
+		readerOptions.setSalesOnly(salesOnly);
+		readerOptions.setUnpostedOnly(unpostedOnly);
 		
 		initiateMapper();
 		

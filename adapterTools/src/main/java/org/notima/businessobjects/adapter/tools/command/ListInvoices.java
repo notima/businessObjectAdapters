@@ -1,31 +1,19 @@
 package org.notima.businessobjects.adapter.tools.command;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
-import javax.xml.bind.JAXB;
-
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
-import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.support.completers.FileCompleter;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.MappingServiceFactory;
-import org.notima.generic.businessobjects.Invoice;
-import org.notima.generic.businessobjects.InvoiceList;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
-import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
-import org.notima.generic.businessobjects.util.SetSpecificPriceInvoiceLineValidator;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
-import org.notima.generic.ifacebusinessobjects.MappingService;
-import org.notima.generic.ifacebusinessobjects.MappingServiceInstanceFactory;
 import org.notima.util.LocalDateUtils;
 
 @Command(scope = "notima", name = "list-invoices", description = "Lists invoices from an adapter. See also read-invoices.")
@@ -47,6 +35,9 @@ public class ListInvoices extends AbstractAction {
     @Option(name="--until-date", description="Until date", required = false, multiValued = false)
     private String	untilDateStr;
     
+    @Option(name="-p", description="Prints the invoices to PDF and/or e-mail", required = false, multiValued = false)
+    private boolean	print;
+    
 	@Argument(index = 0, name = "adapterName", description ="The source adapter name", required = true, multiValued = false)
 	private String adapterName = "";
 
@@ -56,6 +47,8 @@ public class ListInvoices extends AbstractAction {
 	private BusinessObjectFactory<?,?,?,?,?,?> adapter;
 	private OrderInvoiceReaderOptions readerOptions;
 	private OrderInvoiceOperationResult invoiceResult;
+	private boolean	unpostedOnly = true;
+	private boolean salesOnly = true;
 	
 	
 	private Date	fromDate;
@@ -67,6 +60,11 @@ public class ListInvoices extends AbstractAction {
 		initBusinessObjectFactory();
 		parseOptions();
 		readInvoices();
+		
+		if (print) {
+			printInvoices();
+		}
+				
 		
 		return null;
 	}
@@ -90,13 +88,21 @@ public class ListInvoices extends AbstractAction {
 			untilDate = dfmt.parse(untilDateStr);
 			readerOptions.setUntilDate(LocalDateUtils.asLocalDate(untilDate));
 		}
-		
+
+		readerOptions.setSalesOnly(salesOnly);
+		readerOptions.setUnpostedOnly(unpostedOnly);
 		
 	}
 	
 	private void readInvoices() throws Exception {
 		
 		invoiceResult = adapter.readInvoices(readerOptions);
+		
+	}
+	
+	private void printInvoices() throws Exception {
+		
+		
 		
 	}
 	

@@ -1503,6 +1503,10 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			}
 		}
 		
+		// Set creditor
+		BusinessPartner<?> bp = lookupThisCompanyInformation();
+		result.getAffectedInvoices().setCreditor(bp);
+		
 		return result;
 	}
 
@@ -1570,6 +1574,16 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		result.setTaxId(cs.getOrganizationNumber());
 		result.setVatNo(cs.getVatNumber());
 		result.setIdentityNo(cs.getDatabaseNumber());
+		if (cs.getBg()!=null && cs.getBg().trim().length()>0) {
+			result.setRemitToAccount(cs.getBg());
+			result.setRemitToAccountType("BG");
+		}
+		if (cs.getiBAN()!=null && cs.getiBAN().trim().length()>0) {
+			result.setRemitToIBAN(cs.getiBAN());
+		}
+		if (cs.getBic()!=null && cs.getBic().trim().length()>0) {
+			result.setRemitToBIC(cs.getBic());
+		}
 		result.setNativeBusinessPartner(currentFortnoxTenant);
 		Location officialAddress = new Location();
 		officialAddress.setAddress1(cs.getAdress());
