@@ -33,6 +33,7 @@ public class TestInvoiceReminderToPDF {
 			try {
 				list = DunningEntryXmlDataSource.getDunningEntries();
 			} catch (Exception e) {
+				this.getClass().getClassLoader();
 				// Try to find orderlist as resource
 				InputStream is = ClassLoader.getSystemResourceAsStream("reminders-example.xml");
 				if (is!=null) {
@@ -49,9 +50,12 @@ public class TestInvoiceReminderToPDF {
 			
 			JasperInvoiceReminderFormatter formatter = new JasperInvoiceReminderFormatter();
 			
-			String path = formatter.formatReminder(list.iterator().next(), formatter.getFormats()[0], props);
-
-			System.out.println(path);
+			if (list!=null) { 
+				String path = formatter.formatReminder(list.iterator().next(), formatter.getFormats()[0], props);
+				System.out.println(path);
+			} else {
+				System.out.println("No reminders found.");
+			}
 			
 		} catch (Exception e) {
 
