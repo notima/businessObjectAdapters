@@ -103,7 +103,7 @@ public class SendMessage extends AbstractAction {
 		
 	}
 	
-    public void privatizeIfPossible() {
+    private void privatizeIfPossible() {
     	
     	if (sign) {
     	
@@ -117,13 +117,6 @@ public class SendMessage extends AbstractAction {
     	}
     	
     }
-	
-	
-    protected ConfigurationAdmin getConfigAdmin() {
-		if(configAdmin == null)
-			configAdmin = (ConfigurationAdmin) getServiceReference(ConfigurationAdmin.class);
-		return configAdmin;
-	}
 
     private KeyManager getPGPService() {
 		return (KeyManager) getServiceReference(KeyManager.class);
