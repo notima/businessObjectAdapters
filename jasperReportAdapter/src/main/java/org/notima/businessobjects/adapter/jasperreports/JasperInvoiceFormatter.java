@@ -19,12 +19,15 @@ public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements In
 		}
 		
 		String jasperFile = props.getProperty(JASPER_FILE);
-		// Lookup default jasper file as a resource
-		URL url = ClassLoader.getSystemResource("reports/InvoiceBasic.jasper");
-		if (url!=null) {
-			jasperFile = url.getFile();
-		} else {
-			throw new Exception("The property " + JASPER_FILE + " must be set.");
+		if (jasperFile==null) {
+			jasperFile = "reports/InvoiceBasic.jasper";
+			// Lookup default jasper file as a resource
+			URL url = this.getClass().getClassLoader().getResource(jasperFile);
+			if (url!=null) {
+				jasperFile = url.getFile();
+			} else {
+				throw new Exception("The property " + JASPER_FILE + " must be set.");
+			}
 		}
 		
 		Object[] data = new Object[1];

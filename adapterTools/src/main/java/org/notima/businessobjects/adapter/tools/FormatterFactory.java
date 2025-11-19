@@ -3,6 +3,15 @@ package org.notima.businessobjects.adapter.tools;
 public interface FormatterFactory {
 
 	/**
+	 * 
+	 * Returns an invoice formatter for given format.
+	 * 
+	 * @param format
+	 * @return	An invoice formatter
+	 */
+	public InvoiceFormatter getInvoiceFormatter(String format);	
+	
+	/**
 	 * Returns an orderlist formatter for given format.
 	 * 
 	 * @param format		The format.
