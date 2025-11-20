@@ -19,13 +19,15 @@ public class JasperInvoiceReminderFormatter extends JasperBasePdfFormatter imple
 		}
 		
 		String jasperFile = props.getProperty(JASPER_FILE);
-		this.getClass().getClassLoader();
-		// Lookup default jasper file as a resource
-		URL url = ClassLoader.getSystemResource("reports/InvoiceReminder.jasper");
-		if (url!=null) {
-			jasperFile = url.getFile();
-		} else {
-			throw new Exception("The property " + JASPER_FILE + " must be set.");
+		if (jasperFile==null) {
+			jasperFile = "reports/InvoiceReminder.jasper";
+			// Lookup default jasper file as a resource
+			URL url = this.getClass().getClassLoader().getResource(jasperFile);
+			if (url!=null) {
+				jasperFile = url.getFile();
+			} else {
+				throw new Exception("The property " + JASPER_FILE + " must be set.");
+			}
 		}
 		
 		Object[] data = new Object[1];
