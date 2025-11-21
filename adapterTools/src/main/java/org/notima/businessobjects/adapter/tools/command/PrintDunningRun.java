@@ -97,7 +97,11 @@ public class PrintDunningRun extends AbstractAction {
 		props.setProperty("JasperFile", 
 				"/home/daniel/develop/notima-workspace/businessObjectAdapters/jasperReportAdapter/src/main/resources/reports/InvoiceReminder.jasper");
 		
-		if (outputDirectory!=null) props.setProperty("JasperOutputDir", outputDirectory);
+		if (outputDirectory==null) {
+			outputDirectory = new File(invoiceFile).getParent();
+		}
+		
+		props.setProperty("JasperOutputDir", outputDirectory);
 		
 		if (sendByEmail) {
 			emailSender = getMessageSenderFactory().getMessageSender("email");
@@ -105,7 +109,7 @@ public class PrintDunningRun extends AbstractAction {
 			if (emailSender==null)
 				throw new Exception("No message sender available");
 			
-			emailBody = "Se bilaga. Avierna har justerat utseende pga ändringar i affärssystemet. Kontakta oss vid ev frågor. 08 776 31 30 eller svara på mailet.";
+			emailBody = "Se bilaga. Kontakta oss vid ev frågor. 08 776 31 30 eller svara på mailet.";
 		}
 	}
 	
@@ -124,7 +128,7 @@ public class PrintDunningRun extends AbstractAction {
 		
 		// jasperLang = props.getProperty(JASPER_LANG);
 		
-		String outputFilename = getFileNameForInvoice(entry);
+		String outputFilename = getFileNameForEntry(entry);
 		
 		props.setProperty("JasperOutputFilename", outputFilename);
 		
@@ -141,7 +145,8 @@ public class PrintDunningRun extends AbstractAction {
 		
 		if (entry.getDebtor().isEmailInvoice()) {
 			
-			String recipient = recipientAddress;
+			String recipient = (recipientAddress!=null ? recipientAddress : getEmail(entry));
+			subject = "Påminnelse från " + entry.getCreditor().getName() + " -";
 			if (recipient!=null) {
 
 		        Message message = new Message();
@@ -165,13 +170,31 @@ public class PrintDunningRun extends AbstractAction {
 		
 	}
 	
+	private String getEmail(DunningEntry<?,?> de) {
+		String email = null;
+		if (de.getDebtor().getAddressOfficial()!=null) {
+			email = de.getDebtor().getAddressOfficial().getEmail();
+		}
+		if (de.getDebtor().getContacts()!=null && de.getDebtor().getContacts().size()>0) {
+			for (Person p : de.getDebtor().getContacts()) {
+				if (p.getEmail()!=null) {
+					email = p.getEmail();
+					break;
+				}
+			}
+		}
+		if (email==null && de.getDebtor().getAddressShipping()!=null) {
+			email = de.getDebtor().getAddressShipping().getEmail();
+		}
+		return email;
+	}
 	
-	private String getFileNameForInvoice(DunningEntry<?,?> invoice) {
+	private String getFileNameForEntry(DunningEntry<?,?> de) {
 		
 		StringBuffer buf = new StringBuffer();
-		buf.append(invoice.getLetterNo());
-		String email = null; // invoice.getBillEmail();
-		if (email!=null && invoice.getDebtor().isEmailInvoice()) {
+		buf.append(de.getLetterNo());
+		String email = getEmail(de);
+		if (email!=null && de.getDebtor().isEmailInvoice()) {
 			buf.append("-email");
 		}
 
