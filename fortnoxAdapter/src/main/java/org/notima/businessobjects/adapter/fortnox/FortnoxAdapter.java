@@ -430,18 +430,38 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	/**
 	 * Returns the default outVAT (tax due) account.
 	 * 
+	 * If the VAT code is a zero VAT code (shouldn't happen), the revenue account for
+	 * that VAT code is returned. 
+	 * 
 	 * @param taxKey	Must be any of MP1, MP2, MP3 or MP4.
 	 * @return		
 	 * @throws Exception
 	 */
-	public String getOutVatAccount(String taxKey, String taxDomicile) throws Exception {
+	public String getOutVatAccount(String taxKey, double taxPercent, String taxDomicile) throws Exception {
+
+		FortnoxConverter fc = new FortnoxConverter();
+		if (fc.isNoVAT(taxKey)) {
+			return getRevenueAcctNo(taxKey, 0.0, taxDomicile);
+		}
 		
 		String account = getPredefinedAccount("OUTVAT_" + taxKey.toUpperCase());
 		if (account==null) {
-			FortnoxConverter fc = new FortnoxConverter();
 			Tax convertedTaxKey = fc.convertTaxKey(null, taxKey, taxDomicile, null);
 			account = getPredefinedAccount("OUTVAT_" + convertedTaxKey.getKey());
 		}
+		
+		if (account==null) {
+			
+			FortnoxTaxRateFetcher ftrf = new FortnoxTaxRateFetcher((FortnoxAdapter)this, new TaxSubjectIdentifier(getCurrentTenant().getTaxId()));
+			// TODO: Use document date
+			List<Tax> validTaxes = ftrf.getValidTaxes(LocalDate.now(), taxDomicile);
+
+			Tax tax = TaxTool.getFirstMatchOnRate(taxPercent, 0.5, validTaxes);
+			if (tax.getTaxDebtAccount()!=null)
+				account = tax.getTaxDebtAccount().getAccountNo();
+			
+		}
+		
 		return account;
 		
 	}
