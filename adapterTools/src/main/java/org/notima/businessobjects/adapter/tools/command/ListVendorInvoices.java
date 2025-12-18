@@ -8,6 +8,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.MappingServiceFactory;
 import org.notima.businessobjects.adapter.tools.table.InvoiceHeaderTable;
@@ -17,15 +18,18 @@ import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.util.LocalDateUtils;
 
-@Command(scope = "notima", name = "list-invoices", description = "Lists invoices from an adapter. See also read-invoices.")
+@Command(scope = "notima", name = "list-vendor-invoices", description = "Lists vendor invoices from an adapter.")
 @Service
-public class ListInvoices extends AbstractAction {
+public class ListVendorInvoices extends AbstractAction {
 	
 	@Reference
 	private CanonicalObjectFactory cof;
 	
 	@Reference
 	private MappingServiceFactory mappingFactory;
+	
+	@Reference
+	private Session	sess;
 
     @Option(name = "-co", aliases = { "--country-code" }, description = "Country code for the orgNo", required = false, multiValued = false)
     private String countryCode;
@@ -35,9 +39,6 @@ public class ListInvoices extends AbstractAction {
 
     @Option(name="--until-date", description="Until date", required = false, multiValued = false)
     private String	untilDateStr;
-    
-    @Option(name="-p", description="Prints the invoices to PDF and/or e-mail", required = false, multiValued = false)
-    private boolean	print;
     
 	@Argument(index = 0, name = "adapterName", description ="The source adapter name", required = true, multiValued = false)
 	private String adapterName = "";
@@ -51,7 +52,6 @@ public class ListInvoices extends AbstractAction {
 	private boolean	unpostedOnly = true;
 	private boolean salesOnly = true;
 	
-	
 	private Date	fromDate;
 	private Date	untilDate;
 	
@@ -61,11 +61,7 @@ public class ListInvoices extends AbstractAction {
 		initBusinessObjectFactory();
 		parseOptions();
 		readInvoices();
-		
-		if (print) {
-			printInvoices();
-		}
-				
+		printInvoices();
 		
 		return null;
 	}
@@ -97,14 +93,16 @@ public class ListInvoices extends AbstractAction {
 	
 	private void readInvoices() throws Exception {
 		
-		invoiceResult = adapter.readInvoices(readerOptions);
+		invoiceResult = adapter.readVendorInvoices(readerOptions);
 		
 	}
+	
 	
 	private void printInvoices() throws Exception {
 		
 		InvoiceHeaderTable table = new InvoiceHeaderTable(invoiceResult.getAffectedInvoices().getInvoiceList(), false);
 		table.getShellTable().print(sess.getConsole());
+		
 		
 	}
 	

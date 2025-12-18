@@ -106,7 +106,10 @@ public class PrintInvoices extends AbstractAction {
 				throw new Exception("No message sender available");
 			
 			subject = "Avi från " + invoiceList.getCreditor().getName();
-			emailBody = "Se bilaga. Avierna har justerat utseende pga ändringar i affärssystemet. Kontakta oss vid ev frågor. 08 776 31 30 eller svara på mailet.";
+			emailBody = "<p>Se bifogad avi.<br>" + "Kontaktuppgifter till " + invoiceList.getCreditor().getName() + " i bifogad PDF.</p>" + 
+			            "<p>Vid frågor om själva utskicket, kontakta oss på 08 776 31 30 eller svara på mailet.</p>" +
+					    "<p>Ekonomibolaget Notima AB</p>";
+			
 		}
 	}
 	

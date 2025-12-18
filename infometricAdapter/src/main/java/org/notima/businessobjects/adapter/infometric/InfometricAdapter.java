@@ -264,7 +264,7 @@ public class InfometricAdapter extends BasicBusinessObjectFactory<
 	}
 
 	@Override
-	public Map<Object, Object> lookupList(String listName) throws Exception {
+	public Map<Object, Object> lookupList(String listName, boolean customer) throws Exception {
 		// TODO Auto-generated method stub
 		return null;
 	}

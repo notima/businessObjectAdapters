@@ -14,10 +14,10 @@ public class InvoiceHeaderTable extends GenericTable {
 	private NumberFormat nfmt = new DecimalFormat("#,##0.00");
 	private boolean includeAddress = false;
 	
-	class InvoiceComparator implements Comparator<Invoice> {
+	class InvoiceComparator implements Comparator<Invoice<?>> {
 		
 		@Override
-		public int compare(Invoice o1, Invoice o2) {
+		public int compare(Invoice<?> o1, Invoice<?> o2) {
 			
 			// First compare dates
 			if (o1.getInvoiceDate().equals(o2.getInvoiceDate())) {
@@ -50,7 +50,7 @@ public class InvoiceHeaderTable extends GenericTable {
 		
 	}
 	
-	public InvoiceHeaderTable(List<Invoice> invoices, boolean includeAddress) {
+	public InvoiceHeaderTable(List<Invoice<?>> invoices, boolean includeAddress) {
 
 		this.includeAddress = includeAddress;
 		initColumns();
@@ -70,7 +70,7 @@ public class InvoiceHeaderTable extends GenericTable {
 		
 	}
 	
-	public InvoiceHeaderTable(Invoice invoice, boolean includeAddress) {
+	public InvoiceHeaderTable(Invoice<?> invoice, boolean includeAddress) {
 
 		this.includeAddress = includeAddress;
 		initColumns();
@@ -79,7 +79,7 @@ public class InvoiceHeaderTable extends GenericTable {
 
 	}
 	
-	private void addRow(Invoice invoice) {
+	private void addRow(Invoice<?> invoice) {
 
 		addRow().addContent(
 				invoice.getInvoiceDate(),
@@ -101,7 +101,7 @@ public class InvoiceHeaderTable extends GenericTable {
 		
 	}
 	
-	private String getCustomerName(Invoice invoice) {
+	private String getCustomerName(Invoice<?> invoice) {
 		
 		if (!includeAddress) {
 			return invoice.getBusinessPartner().getName();
