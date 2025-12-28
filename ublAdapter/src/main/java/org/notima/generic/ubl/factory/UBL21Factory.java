@@ -112,12 +112,6 @@ public class UBL21Factory extends BasicBusinessObjectFactory{
 	}
 
 	@Override
-	public Map lookupList(String listName) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Product lookupRoundingProduct() throws Exception {
 		// TODO Auto-generated method stub
 		return null;
