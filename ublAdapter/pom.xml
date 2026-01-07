@@ -68,7 +68,11 @@
 										org.hamcrest,
 										org.hamcrest.core</Export-Package>
 						<Import-Package>
+										javax.xml.bind;version="[2.3,3)",
+  										javax.xml.bind.annotation;version="[2.3,3)",
+  										javax.activation;version="[1.2,2)",							
 										org.notima.bg*,
+										org.notima.generic.businessobjects*,
 										org.osgi.framework;version="[1.0,2)",
 										!com.ibm*,
 										!com.sun.jdmk*,
@@ -90,14 +94,10 @@
 										!org.junit*,
 										!org.slf4j.impl*,
 										!org.mozilla.universalchardet,
-										!javax.annotation,										
-										*
+										!javax.annotation										
 										</Import-Package>
-						<Embed-Dependency>!ph-jaxb-pom|businessobjects|bankgiro-api,scope=compile|runtime</Embed-Dependency>
+						<Embed-Dependency>!businessobjects|bankgiro-api,scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
-						<Private-Package>
-							javax.xml.bind*
-						</Private-Package>
 					</instructions>
 				</configuration>
 			</plugin>
