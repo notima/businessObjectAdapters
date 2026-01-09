@@ -11,7 +11,7 @@ import org.notima.generic.businessobjects.Invoice;
 
 public class TestConfig {
 
-	public static String srcFile1 = "sample-bo-invoice.xml";
+	public static String srcFile1 = "my-test.xml";
 	
 	public static Invoice<?> sampleBoInvoice;
 	

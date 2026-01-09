@@ -18,8 +18,9 @@ import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoiceInterface;
-import org.notima.api.fortnox.entities3.InvoiceSubset;
-import org.notima.api.fortnox.entities3.Invoices;
+import org.notima.api.fortnox.entities3.SupplierInvoice;
+import org.notima.api.fortnox.entities3.SupplierInvoiceSubset;
+import org.notima.api.fortnox.entities3.SupplierInvoices;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
 import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
@@ -28,10 +29,11 @@ import org.notima.businessobjects.adapter.tools.command._NotimaCmdOptions;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.fortnox.command.table.InvoiceHeaderTable;
+import org.notima.fortnox.command.table.SupplierInvoiceHeaderTable;
 
-@Command(scope = _FortnoxCommandNames.SCOPE, name = _FortnoxCommandNames.ListInvoices, description = "Lists invoices in Fortnox")
+@Command(scope = _FortnoxCommandNames.SCOPE, name = _FortnoxCommandNames.ListSupplierInvoices, description = "Lists supplier invoices in Fortnox")
 @Service
-public class ListInvoices extends FortnoxCommand implements Action {
+public class ListSupplierInvoices extends FortnoxCommand implements Action {
 
 	@Reference 
 	Session sess;
@@ -53,12 +55,6 @@ public class ListInvoices extends FortnoxCommand implements Action {
 
 	@Option(name = "--all", description = "Show all invoices", required = false, multiValued = false)
 	private boolean all;
-
-	@Option(name = "--include-addresses", description = "Shows addresses on invoices (must be combined with enrich)", required = false, multiValued = false)
-	private boolean includeAddress;
-	
-	@Option(name = _FortnoxOptions.PaymentTerm, description = "Filter on payment term", required = false, multiValued = false)
-	private String paymentTerm;
 	
 	@Option(name = _FortnoxOptions.FromDate, description = "Select invoices from this date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String fromDateStr;
@@ -98,34 +94,32 @@ public class ListInvoices extends FortnoxCommand implements Action {
 		
 		if (!all) {
 			if (unbooked) {
-				invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPOSTED, true);
+				invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPOSTED, false);
 			} else {
-				invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPAID, true);
+				invoicesMap = bf.lookupList(FortnoxAdapter.LIST_UNPAID, false);
 			}
 		} else {
 			
 			FortnoxClient3 fc = getFortnoxClient(orgNo);
 			
-			Invoices allInvoices = fc.getAllCustomerInvoicesByDateRange(fromDate, untilDate);
-			if (allInvoices.getInvoiceSubset()!=null) {
-				invoices.addAll(allInvoices.getInvoiceSubset());
+			SupplierInvoices allInvoices = fc.getAllSupplierInvoicesByDateRange(fromDate, untilDate);
+			if (allInvoices.getSupplierInvoiceSubset()!=null) {
+				invoices.addAll(allInvoices.getSupplierInvoiceSubset());
 			}
 			
 		}
 		
 		checkCancelledAndDateRange();
-		enrichIfNecessary();
-		checkPaymentTerm();
 		
 		if (invoices.size()>0) {
 
-			printableReport = new InvoiceHeaderTable(invoices, includeAddress);
+			printableReport = new SupplierInvoiceHeaderTable(invoices);
 			printableReport.getShellTable().print(sess.getConsole());
 			
 			sess.getConsole().println("\n" + invoices.size() + " invoice(s).");
 			
 		}
-
+		
 		initAndRunReportFormatter();
 		
 		return null;
@@ -144,21 +138,21 @@ public class ListInvoices extends FortnoxCommand implements Action {
 			}
 			
 			Invoice inv = null;
-			InvoiceSubset invs = null;
+			SupplierInvoiceSubset invs = null;
 			for (InvoiceInterface oo : invoiceObjects) {
 				
 				// Check date filter
 				if (!FortnoxUtil.isInDateRange(oo.getInvoiceDate(), fromDate, untilDate))
 					continue;
 				
-				if (oo instanceof Invoice) {
+				if (oo instanceof SupplierInvoice) {
 					inv = (Invoice)oo;
 					if (!inv.isCancelled() || showCancelled) {
 						invoices.add(oo);
 					}
 				}
-				if (oo instanceof InvoiceSubset) {
-					invs = (InvoiceSubset)oo;
+				if (oo instanceof SupplierInvoiceSubset) {
+					invs = (SupplierInvoiceSubset)oo;
 					if (!invs.isCancelled() || showCancelled) {
 						invoices.add(oo);
 					}
@@ -170,44 +164,6 @@ public class ListInvoices extends FortnoxCommand implements Action {
 	
 	}
 
-	
-	private void enrichIfNecessary() throws Exception {
-		if (!enrich && paymentTerm==null) return;
-		List<InvoiceInterface> targetList = new ArrayList<InvoiceInterface>();
-		Invoice inv;
-		for (InvoiceInterface oo : invoices) {
-			
-			if (oo instanceof InvoiceSubset) {
-				inv = (Invoice)bf.lookupNativeInvoice(((InvoiceSubset)oo).getDocumentNumber());
-				targetList.add(inv);
-			} else {
-				targetList.add(oo);
-			}
-			
-		}
-		invoices = targetList;
-	}
-
-	/**
-	 * Here we can assume all invoices are enriched.
-	 * 
-	 */
-	private void checkPaymentTerm() {
-		
-		if (paymentTerm==null) return;
-		
-		List<InvoiceInterface> targetList = new ArrayList<InvoiceInterface>();
-		Invoice inv;
-		
-		for (InvoiceInterface oo : invoices) {
-			inv = (Invoice)oo;
-			if (paymentTerm.equals(inv.getTermsOfPayment())) {
-				targetList.add(inv);
-			}
-		}
-		
-		invoices = targetList;
-	}
 	
 	@SuppressWarnings("unchecked")
 	private void initAndRunReportFormatter() throws Exception {

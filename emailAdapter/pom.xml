@@ -43,12 +43,20 @@
 			<version>1.6.2</version>
 		</dependency>  
 		
+	   <dependency>
+	        <groupId>org.osgi</groupId>
+	        <artifactId>org.osgi.service.cm</artifactId>
+	        <version>1.6.0</version>
+	        <scope>provided</scope>
+	    </dependency>		
+		
 		<dependency>
 			<groupId>me.sniggle</groupId>
 			<artifactId>simple-pgp-java</artifactId>
 		</dependency>
 		
 		<!-- Below two are only needed for BCPGPEmailMessageSender -->
+		<!--
 		<dependency>
 		    <groupId>org.bouncycastle</groupId>
 		    <artifactId>bcpg-jdk15on</artifactId>
@@ -60,18 +68,12 @@
 		    <artifactId>bcprov-jdk15on</artifactId>
 		    <version>1.70</version>
 		</dependency>		
-		
-		<!-- Below dependencies are now hidden JRE-libraries, 8 and onwards -->
+		-->
 		<dependency>
-		    <groupId>org.glassfish.main.javaee-api</groupId>
-		    <artifactId>javax.jms</artifactId>
-		    <version>3.1.2.2</version>
-		</dependency>		
-		
-		<dependency>
-		    <groupId>javax.jmdns</groupId>
-		    <artifactId>jmdns</artifactId>
-		    <version>3.4.1</version>
+		    <groupId>javax.jms</groupId>
+		    <artifactId>javax.jms-api</artifactId>
+		    <version>2.0.1</version>
+		    <scope>provided</scope>
 		</dependency>
 		
 		<dependency>
@@ -99,6 +101,7 @@
 							sun.security.util
 						</Export-Package>
 						<Import-Package>
+							org.glassfish.hk2.osgiresourcelocator;resolution:=optional,
 							org.notima.generic.businessobjects,
 							org.notima.generic.businessobjects.exception,
 							org.notima.generic.businessobjects.util,
@@ -108,11 +111,6 @@
 							org.slf4j,
 							com.google.gson,
 							com.google.gson.annotations,
-							jakarta.xml.ws,
-							jakarta.xml.namespace,
-							jakarta.xml.bind,
-							jakarta.xml.bind.annotation,
-							jakarta.xml.*,
 							javax.net.*,
 							javax.naming,
 							org.apache.karaf.shell.api.action,
@@ -120,11 +118,12 @@
 							org.apache.karaf.shell.api.console,
 							org.apache.karaf.shell.support.completers,
 							org.apache.karaf.shell.support.table,
-							org.osgi.*;version="[1.8,2)",
+							org.osgi.framework;version="[1.6,2)",
+    					    org.osgi.service.cm;version="[1.3,2)",
 							*
 						</Import-Package>
 						<Embed-Dependency>*;scope=compile|runtime;
-						artifactId=!slf4j-api|slf4j-log4j12|org.apache.felix.utils|notima-util|org.apache.karaf.jaas.boot|org.apache.karaf.shell.core|org.apache.karaf.util|log4j|businessobjects|sshd-core|threeten-jaxb-core|jline|javax.persistence-api|jakarta.activation-api|jakarta.xml.bind-api</Embed-Dependency>
+						artifactId=!slf4j-api|slf4j-log4j12|org.apache.felix.utils|notima-util|org.apache.karaf.jaas.boot|org.apache.karaf.shell.core|org.apache.karaf.util|log4j|businessobjects|sshd-core|threeten-jaxb-core|jline|javax.persistence-api|jakarta.activation-api|jakarta.xml.bind-api|javax.jms</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
         				<Karaf-Commands>org.notima.generic.pgp.command*</Karaf-Commands>
 					</instructions>

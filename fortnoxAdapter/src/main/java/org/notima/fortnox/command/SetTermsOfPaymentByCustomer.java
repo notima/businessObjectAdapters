@@ -94,10 +94,12 @@ public class SetTermsOfPaymentByCustomer extends FortnoxCommand implements Actio
 		
 	}
 	
+	@SuppressWarnings("rawtypes")
 	private void setToPaymentTerm() throws Exception {
 		
 		// Get existing invoices
-		Map<Object,org.notima.api.fortnox.entities3.InvoiceSubset> invoiceMap = ((BusinessObjectFactory)bf).lookupList(FortnoxAdapter.LIST_UNPOSTED);
+		@SuppressWarnings("unchecked")
+		Map<Object,org.notima.api.fortnox.entities3.InvoiceSubset> invoiceMap = ((BusinessObjectFactory)bf).lookupList(FortnoxAdapter.LIST_UNPOSTED, true);
 		InvoiceSubset is;
 		Invoice<org.notima.api.fortnox.entities3.Invoice> invoice;
 		org.notima.api.fortnox.entities3.Invoice nativeInvoice;

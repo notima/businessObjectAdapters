@@ -76,7 +76,7 @@ public class ProcessPaymentChannel implements Action {
     @Option(name="-format", description="The format of match result file to be output", required = false, multiValued = false)
     private String format;
 
-	@Argument(index = 0, name = "channelId", description ="The payment channel to run", required = true, multiValued = false)
+	@Argument(index = 0, name = "channelId", description ="The payment channel to run. Could also be description (if unique)", required = true, multiValued = false)
 	private String channelId = "";
     
 	private String paymentSource;
@@ -97,14 +97,32 @@ public class ProcessPaymentChannel implements Action {
 	
 	private SimpleDateFormat	dfmt = new SimpleDateFormat("YYMMdd"); 
 
-	private void initParameters() throws Exception {
+	
+	@Override
+	public Object execute() throws Exception {
+		
+		initChannelFactory();
+		
+		findChannel();
+
+		initProcessOptions();
+
+		processChannel();
+		
+		printAllBatches();
+		
+		return null;
+	}
+	
+	private void initChannelFactory() throws Exception {
 
 		channelFactory = cof.lookupFirstPaymentBatchChannelFactory();
 		if (channelFactory==null) throw new Exception("No channel factories defined.");
 		
-		channel = channelFactory.findChannelWithId(channelId);
-		if (channel==null) throw new Exception("No channel with ID [" + channelId + "] found.");
-
+	}
+	
+	private void initProcessOptions() throws Exception {
+		
 		sourcePaymentFactory = cof.lookupPaymentBatchFactory(channel.getSourceSystem());
 		destinationPaymentProcessor = cof.lookupPaymentBatchProcessor(channel.getDestinationSystem());
 
@@ -126,16 +144,36 @@ public class ProcessPaymentChannel implements Action {
 			untilDate = LocalDate.parse(untilDateStr, DateTimeFormatter.ISO_LOCAL_DATE);
 		}
 		
+	}
+	
+	/**
+	 * Finds channel by ID first and then description
+	 * 
+	 * @throws Exception
+	 */
+	private void findChannel() throws Exception {
+
+		channel = channelFactory.findChannelWithId(channelId);
+		if (channel==null) {
+			channel = channelFactory.findChannelByDescription(channelId);
+		}
+		if (channel==null)
+			throw new Exception("No channel with ID [" + channelId + "] found.");
+		
+	}
+	
+	
+	/**
+	 * Process the batches in the currently selected channel
+	 * 
+	 * @throws Exception
+	 */
+	private void processChannel() throws Exception {
+		
 		if (channel.getChannelDescription()!=null && channel.getChannelDescription().trim().length()>0) {
 			sess.getConsole().println("Processing channel " + channel.getChannelDescription());
 		}
 		
-	}
-	
-	@Override
-	public Object execute() throws Exception {
-		
-		initParameters();
 		sourcePaymentFactory.setSource(paymentSource);
 		List<PaymentBatch> batches = sourcePaymentFactory.readPaymentBatches(); 
 		
@@ -146,9 +184,6 @@ public class ProcessPaymentChannel implements Action {
 		}
 		allBatchesProcessed = true;
 		
-		printAllBatches();
-		
-		return null;
 	}
 	
 	private void processAndPrint(PaymentBatch pb) throws Exception {

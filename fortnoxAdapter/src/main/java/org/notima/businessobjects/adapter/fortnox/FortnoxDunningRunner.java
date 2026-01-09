@@ -35,7 +35,7 @@ public class FortnoxDunningRunner {
 		fortnoxAdapter = fa;
 		fortnoxClient = fortnoxAdapter.getClient();
 		cs = fortnoxClient.getCompanySetting();
-		overdueList = fa.lookupList(FortnoxAdapter.LIST_UNPAIDOVERDUE);
+		overdueList = fa.lookupList(FortnoxAdapter.LIST_UNPAIDOVERDUE, true);
 
 	}
 	

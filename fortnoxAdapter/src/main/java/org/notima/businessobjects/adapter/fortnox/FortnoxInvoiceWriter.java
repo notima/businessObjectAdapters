@@ -93,7 +93,7 @@ public class FortnoxInvoiceWriter extends FortnoxObjectWriter {
 		}
 		
 		// Get existing invoices
-		Map<Object,Object> invoiceMap = adapter.lookupList("InvoiceSubset-ExternalInvoiceReference2");
+		Map<Object,Object> invoiceMap = adapter.lookupList("InvoiceSubset-ExternalInvoiceReference2", true);
 		
 		ocount = 0;
 		InvoiceSubset is = null;

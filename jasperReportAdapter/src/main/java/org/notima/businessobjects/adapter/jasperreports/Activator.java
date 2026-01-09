@@ -3,6 +3,8 @@ package org.notima.businessobjects.adapter.jasperreports;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.businessobjects.adapter.tools.InvoiceFormatter;
+import org.notima.businessobjects.adapter.tools.InvoiceReminderFormatter;
 import org.notima.businessobjects.adapter.tools.OrderListFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,8 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(OrderListFormatter.class),
+				@ProvideService(InvoiceFormatter.class),
+				@ProvideService(InvoiceReminderFormatter.class),
 		}
 )
 public class Activator extends BaseActivator {
@@ -22,6 +26,15 @@ public class Activator extends BaseActivator {
 		JasperOrderListFormatter formatter = new JasperOrderListFormatter();
 		log.info("Created JasperOrderListFormatter");
 		register(OrderListFormatter.class, formatter);
+		
+		JasperInvoiceFormatter invoiceFormatter = new JasperInvoiceFormatter();
+		log.info("Create JasperInvoiceFormatter");
+		register(InvoiceFormatter.class, invoiceFormatter);
+		
+		JasperInvoiceReminderFormatter reminderFormatter = new JasperInvoiceReminderFormatter();
+		log.info("Create JasperInvoiceReminderFormatter");
+		register(InvoiceReminderFormatter.class, reminderFormatter);
+		
 		
 	}
 	

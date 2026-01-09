@@ -1,7 +1,10 @@
 package org.notima.businessobjects.adapter.fortnox;
 
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.bind.JAXB;
 
 import org.jline.utils.Log;
 import org.notima.api.fortnox.FortnoxClient3;
@@ -94,7 +97,7 @@ public class FortnoxPaymentBatchRunner {
 	
 	public void processPayout() throws Exception {
 		
-		if (processOptions.isAccountFeesOnly() || processOptions.isDryRun() || processOptions.isDraftPaymentsIfPossible()) {
+		if (processOptions.isAccountFeesOnly()) {
 			return;
 		}
 
@@ -128,10 +131,12 @@ public class FortnoxPaymentBatchRunner {
 		
 		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
 		
-		if (!dryRun) {
+		if (!dryRun && !processOptions.isDryRun() && !processOptions.isDraftPaymentsIfPossible()) {
 			extendedClient.accountFortnoxVoucher(fortnoxVoucher, payout.getCurrency(), payout.getCurrencyRateToAccountingCurrency());
 		} else {
-			Log.info("Would have accounted voucher: " + fortnoxVoucher.toString());
+			StringWriter buf = new StringWriter();
+			JAXB.marshal(fortnoxVoucher, buf);
+			Log.info("Would have accounted voucher: " + buf.toString()); 
 		}
 		
 	}

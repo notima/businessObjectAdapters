@@ -13,11 +13,12 @@
     	<bundle>mvn:commons-digester/commons-digester/2.1</bundle>
     	<feature>activation</feature>
     	<bundle>mvn:javax.persistence/javax.persistence-api/2.2</bundle>
-    	<!-- 
+
     	<bundle>mvn:javax.activation/javax.activation-api/1.2.0</bundle>
 		<bundle>mvn:javax.xml.bind/jaxb-api/2.3.1</bundle>
 		<bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
-		-->
+		
+		<bundle>wrap:mvn:org.notima.bg/bankgiro-api/1.3.7</bundle>
 		
 		<!-- 
 		JDK >=9 bundles 
@@ -29,10 +30,6 @@
 		<bundle>mvn:jakarta.xml.ws/jakarta.xml.ws-api/2.3.3</bundle>
 				 -->
 		
-		
-<!--   
-        <bundle>mvn:com.sun.xml.bind/jaxb-impl/2.3.1</bundle>
-        -->
 	
 	</feature>
 

@@ -101,6 +101,14 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		return dst;
 	}
 
+	public static InvoiceType addPaymentMeansPlusgiro(InvoiceType dst, String pgAccount, String ref, String accountName) {
+		
+		dst = addPaymentMeans(dst, "30", ref, pgAccount, "SE:PLUSGIRO", accountName);
+		
+		return dst;
+	}
+	
+	
 	/**
 	 * Sets GLN number on customer on specific invoice.
 	 * 

@@ -72,7 +72,7 @@ public class FortnoxDataSource {
 		
 		try {
 			
-			Map<Object,Object> infoList = fortnoxAdapter.lookupList(FortnoxAdapter.LIST_UNPOSTED);
+			Map<Object,Object> infoList = fortnoxAdapter.lookupList(FortnoxAdapter.LIST_UNPOSTED, true);
 			// Put all invoice Ids in a set.
 			Set<String> invoiceNumbers = new TreeSet<String>();
 			for (Object key : infoList.keySet()) {

@@ -3,24 +3,24 @@ package org.notima.businessobjects.adapter.jasperreports;
 import java.net.URL;
 import java.util.Properties;
 
-import org.notima.businessobjects.adapter.tools.InvoiceReminderFormatter;
-import org.notima.generic.businessobjects.DunningEntry;
+import org.notima.businessobjects.adapter.tools.InvoiceFormatter;
+import org.notima.generic.businessobjects.Invoice;
 
-public class JasperInvoiceReminderFormatter extends JasperBasePdfFormatter implements InvoiceReminderFormatter {
+public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements InvoiceFormatter {
 	
 	public final static String JASPER_COMPANY_NAME = "JasperCompanyName";
 	public final static String JASPER_TAX_ID = "JasperTaxId";
 
 	@Override
-	public String formatReminder(DunningEntry<?, ?> dunningEntry, String format, Properties props) throws Exception {
+	public String formatInvoice(Invoice<?> invoice, String format, Properties props) throws Exception {
 
-		if (dunningEntry==null) {
-			throw new Exception("Dunning entry can't be null");
+		if (invoice==null) {
+			throw new Exception("Invoice entry can't be null");
 		}
 		
 		String jasperFile = props.getProperty(JASPER_FILE);
 		if (jasperFile==null) {
-			jasperFile = "reports/InvoiceReminder.jasper";
+			jasperFile = "reports/InvoiceBasic.jasper";
 			// Lookup default jasper file as a resource
 			URL url = this.getClass().getClassLoader().getResource(jasperFile);
 			if (url!=null) {
@@ -31,7 +31,7 @@ public class JasperInvoiceReminderFormatter extends JasperBasePdfFormatter imple
 		}
 		
 		Object[] data = new Object[1];
-		data[0] = dunningEntry;
+		data[0] = invoice;
 
 		JasperParameterCallback jpc = null;
 

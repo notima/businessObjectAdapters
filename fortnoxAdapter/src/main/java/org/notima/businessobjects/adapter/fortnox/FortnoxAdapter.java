@@ -42,6 +42,8 @@ import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.OrderRow;
 import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
 import org.notima.api.fortnox.entities3.Supplier;
+import org.notima.api.fortnox.entities3.SupplierInvoiceSubset;
+import org.notima.api.fortnox.entities3.SupplierInvoices;
 import org.notima.api.fortnox.entities3.VatInfo;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherFileConnection;
@@ -53,6 +55,7 @@ import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
 import org.notima.generic.businessobjects.OrderLine;
 import org.notima.generic.businessobjects.Location;
@@ -1365,10 +1368,11 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * 
 	 */
 	@Override
-	public Map<Object, Object> lookupList(String listName) throws Exception {
+	public Map<Object, Object> lookupList(String listName, boolean customer) throws Exception {
 
+		
 		// Invoice subset
-		if (LIST_EXTERNAL_INVOICE_REFERENCE1.equalsIgnoreCase(listName)) {
+		if (customer && LIST_EXTERNAL_INVOICE_REFERENCE1.equalsIgnoreCase(listName)) {
 			
 			Invoices invoices = fortnoxClient.getInvoices(null);
 			
@@ -1383,7 +1387,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			return result;
 		}
 		
-		if (LIST_EXTERNAL_INVOICE_REFERENCE2.equalsIgnoreCase(listName)) {
+		if (customer && LIST_EXTERNAL_INVOICE_REFERENCE2.equalsIgnoreCase(listName)) {
 			
 			Invoices invoices = fortnoxClient.getInvoices(null);
 			
@@ -1402,7 +1406,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Invoice subset - unposted
 		if (LIST_UNPOSTED.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNBOOKED);
+			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNBOOKED, customer);
 			
 			return result;
 		}
@@ -1410,14 +1414,14 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// Invoice subset - unpaid overdue
 		if (LIST_UNPAIDOVERDUE.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNPAID_OVERDUE);
+			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNPAID_OVERDUE, customer);
 			
 			return result;
 		}
 		
 		if (LIST_UNPAID.equalsIgnoreCase(listName)) {
 			
-			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNPAID);
+			Map<Object,Object> result = getFiltered(FortnoxConstants.FILTER_UNPAID, customer);
 			
 			return result;
 			
@@ -1430,19 +1434,32 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	 * Gets invoices using a filter. Handles pagination
 	 * 
 	 * @param filter
+	 * @param customerInvoices	Vendor invoices if false
 	 * @return
 	 * @throws Exception
 	 */
-	private Map<Object,Object> getFiltered(String filter) throws Exception {
-		
-		Invoices invoices = fortnoxClient.getInvoices(filter);
-		
+	private Map<Object,Object> getFiltered(String filter, boolean customerInvoices) throws Exception {
+
 		Map<Object, Object> result = new TreeMap<Object,Object>();
-		if (invoices!=null && invoices.getInvoiceSubset()!=null) {
-			for (InvoiceSubset is : invoices.getInvoiceSubset()) {
-				if (is.getDocumentNumber()!=null) 
-					result.put(is.getDocumentNumber(), is);
+		
+		if (customerInvoices) {
+			Invoices invoices = fortnoxClient.getInvoices(filter);
+			
+			if (invoices!=null && invoices.getInvoiceSubset()!=null) {
+				for (InvoiceSubset is : invoices.getInvoiceSubset()) {
+					if (is.getDocumentNumber()!=null) 
+						result.put(is.getDocumentNumber(), is);
+				}
 			}
+		} else {
+			SupplierInvoices invoices = fortnoxClient.getSupplierInvoices(filter);
+			if (invoices!=null && invoices.getSupplierInvoiceSubset()!=null) {
+				for (SupplierInvoiceSubset is : invoices.getSupplierInvoiceSubset()) {
+					if (is.getDocumentNumber()!=null) 
+						result.put(is.getDocumentNumber(), is);
+				}
+			}
+			
 		}
 		
 		return result;
@@ -1509,8 +1526,51 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 	
+	
+	@Override
+	public OrderInvoiceOperationResult readInvoices(OrderInvoiceReaderOptions opts) throws Exception {
+		OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
+
+		if (opts==null || (opts.isUnpostedOnly() && opts.isSalesOnly())) {
+			Map<Object,Invoice<?>> invoiceMap = lookupUnpostedSalesInvoicesSubset();
+			for (Invoice<?> inv : invoiceMap.values()) {
+				result.addAffectedInvoice(inv);
+			}
+		}
+		
+		// Set creditor
+		BusinessPartner<?> bp = lookupThisCompanyInformation();
+		result.getAffectedInvoices().setCreditor(bp);
+		
+		return result;
+	}
+	
+	@Override
+	public OrderInvoiceOperationResult readVendorInvoices(OrderInvoiceReaderOptions opts) throws Exception {
+		OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
+		
+		if (opts==null || (opts.isUnpostedOnly() && opts.isVendorOnly())) {
+			Map<Object,Invoice<?>> invoiceMap = lookupUnpostedSalesInvoicesSubset();
+			for (Invoice<?> inv : invoiceMap.values()) {
+				result.addAffectedInvoice(inv);
+			}
+		}
+		
+		// Set creditor
+		BusinessPartner<?> bp = lookupThisCompanyInformation();
+		result.getAffectedInvoices().setCreditor(bp);
+		
+		return result;
+	}
+
+	public List<Invoice<?>> lookupSupplierInvoices() throws Exception {
+		
+		SupplierInvoices invoices = fortnoxClient.getSupplierInvoices(null);
+		// TODO: Implement lookup supplier invoices
+		return null;
+		
+	}
 	
 	@Override
 	public Map<Object, Invoice<org.notima.api.fortnox.entities3.Invoice>> lookupUnpostedSalesInvoices()
@@ -1524,11 +1584,23 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public Map<Object, Invoice<?>> lookupUnpostedSalesInvoicesSubset() throws Exception {
 
-		Map<Object, Object> invoiceMap = lookupList(FortnoxAdapter.LIST_UNPOSTED);
+		Map<Object, Object> invoiceMap = lookupList(FortnoxAdapter.LIST_UNPOSTED, true);
 		Map<Object, Invoice<?>> resultMap = new TreeMap<Object, Invoice<?>>();
 		
 		if (invoiceMap!=null && invoiceMap.size()>0) {
-			
+			Object invoiceObject;
+			Invoice<?> targetInvoice;
+			for (Object oo : invoiceMap.keySet()) {
+				invoiceObject = invoiceMap.get(oo);
+				if (invoiceObject instanceof org.notima.api.fortnox.entities3.Invoice) {
+					targetInvoice = convertToCanonicalInvoice((org.notima.api.fortnox.entities3.Invoice)invoiceObject);
+					resultMap.put(oo, targetInvoice);
+				}
+				if (invoiceObject instanceof org.notima.api.fortnox.entities3.InvoiceSubset) {
+					targetInvoice = lookupInvoice(oo.toString());
+					resultMap.put(oo, targetInvoice);
+				}
+			}
 		}
 		
 		return resultMap;
@@ -1564,6 +1636,16 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		result.setTaxId(cs.getOrganizationNumber());
 		result.setVatNo(cs.getVatNumber());
 		result.setIdentityNo(cs.getDatabaseNumber());
+		if (cs.getBg()!=null && cs.getBg().trim().length()>0) {
+			result.setRemitToAccount(cs.getBg());
+			result.setRemitToAccountType("BG");
+		}
+		if (cs.getiBAN()!=null && cs.getiBAN().trim().length()>0) {
+			result.setRemitToIBAN(cs.getiBAN());
+		}
+		if (cs.getBic()!=null && cs.getBic().trim().length()>0) {
+			result.setRemitToBIC(cs.getBic());
+		}
 		result.setNativeBusinessPartner(currentFortnoxTenant);
 		Location officialAddress = new Location();
 		officialAddress.setAddress1(cs.getAdress());

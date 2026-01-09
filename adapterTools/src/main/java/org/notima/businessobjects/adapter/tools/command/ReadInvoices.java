@@ -19,12 +19,14 @@ import org.notima.businessobjects.adapter.tools.MappingServiceFactory;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.businessobjects.util.SetSpecificPriceInvoiceLineValidator;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.MappingService;
 import org.notima.generic.ifacebusinessobjects.MappingServiceInstanceFactory;
+import org.notima.util.LocalDateUtils;
 
 @Command(scope = "notima", name = "read-invoices", description = "Reads invoices from an adapter and writes them to the destination adapter (or XML-file if no adapter is specified")
 @Service
@@ -71,7 +73,11 @@ public class ReadInvoices extends AbstractAction {
 	private String invoiceFile = "";
 	
 	private BusinessObjectFactory<?,?,?,?,?,?> adapter;
+	private OrderInvoiceReaderOptions readerOptions;
 	private OrderInvoiceOperationResult invoiceResult;
+	
+	private boolean	unpostedOnly = true;
+	private boolean salesOnly = true;
 	
 	private MappingService mappingService = null;
 	
@@ -99,6 +105,9 @@ public class ReadInvoices extends AbstractAction {
 	}
 
 	private void writeInvoicesToXmlFile() throws IOException {
+
+		// Remove references to any native formats
+		invoiceResult.canonize();
 		
 		FileOutputStream fis = new FileOutputStream(invoiceFile);
 		JAXB.marshal(invoiceResult.getAffectedInvoices(), fis);
@@ -108,14 +117,22 @@ public class ReadInvoices extends AbstractAction {
 	
 	private void parseOptions() throws ParseException, NoSuchTenantException, Exception {
 		
+		readerOptions = new OrderInvoiceReaderOptions();		
+		
 		if (fromDateStr!=null) {
 			fromDate = dfmt.parse(fromDateStr);
+			readerOptions.setFromDate(LocalDateUtils.asLocalDate(fromDate));
 		}
 		if (untilDateStr!=null) {
 			untilDate = dfmt.parse(untilDateStr);
+			readerOptions.setUntilDate(LocalDateUtils.asLocalDate(untilDate));
 		}
 		
 		if (createLimit==null) createLimit = 0;
+		readerOptions.setReadLimit(createLimit);
+		
+		readerOptions.setSalesOnly(salesOnly);
+		readerOptions.setUnpostedOnly(unpostedOnly);
 		
 		initiateMapper();
 		
@@ -137,7 +154,7 @@ public class ReadInvoices extends AbstractAction {
 	
 	private void readInvoices() throws Exception {
 		
-		invoiceResult = adapter.readInvoices(fromDate, untilDate, createLimit);
+		invoiceResult = adapter.readInvoices(readerOptions);
 		
 	}
 	

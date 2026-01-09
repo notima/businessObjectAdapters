@@ -19,9 +19,9 @@
 		<karaf.version>4.4.6</karaf.version>
 		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 		<apache.poi.version>3.17</apache.poi.version>
-		<notima-util.version>1.0.2-SNAPSHOT</notima-util.version>
-		<businessobjects.version>1.1.1-SNAPSHOT</businessobjects.version>
-		<fortnox4j.version>2.0.3-SNAPSHOT</fortnox4j.version>
+		<notima-util.version>1.0.2</notima-util.version>
+		<businessobjects.version>1.1.2-SNAPSHOT</businessobjects.version>
+		<fortnox4j.version>2.0.4-SNAPSHOT</fortnox4j.version>
 		<gson.version>2.11.0</gson.version>
 		<siefilelib.version>1.0.6-SNAPSHOT</siefilelib.version>
 		<commons-csv.version>1.6</commons-csv.version>
@@ -29,8 +29,8 @@
 
 		<!-- Belongs to sveaWebpayAdapter but must be here to be accessible to feature.xml -->		
 		<pmt-admin-api.version>2.2.0-SNAPSHOT</pmt-admin-api.version>
-		<webpayadminreports.version>0.0.10-SNAPSHOT</webpayadminreports.version>
-		<webpay-common.version>0.0.9-SNAPSHOT</webpay-common.version>
+		<webpayadminreports.version>0.0.11-SNAPSHOT</webpayadminreports.version>
+		<webpay-common.version>0.0.10-SNAPSHOT</webpay-common.version>
 		
 	</properties>
 
@@ -144,21 +144,6 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<version>1.6.13</version>
-				<extensions>true</extensions>
-				<configuration>
-					<serverId>ossrh</serverId>
-					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-					<autoReleaseAfterClose>true</autoReleaseAfterClose>
-					<stagingProgressTimeoutMinutes>25</stagingProgressTimeoutMinutes>
-					<keepStagingRepositoryOnCloseRuleFailure>true</keepStagingRepositoryOnCloseRuleFailure>
-					<keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
 				</configuration>
 			</plugin>
 

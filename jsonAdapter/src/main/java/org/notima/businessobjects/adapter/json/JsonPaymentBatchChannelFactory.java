@@ -2,6 +2,7 @@ package org.notima.businessobjects.adapter.json;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.notima.businessobjects.adapter.json.impl.PaymentBatchChannelListImpl;
@@ -76,4 +77,37 @@ public class JsonPaymentBatchChannelFactory extends BasicPaymentBatchChannelFact
 		return null;
 	}
 
+	@Override
+	public PaymentBatchChannel findChannelByDescription(String desc) {
+		
+		if (desc==null || channelList==null) return null;
+		
+		for (PaymentBatchChannel ch : channelList.getChannelList()) {
+			if (desc.equals(ch.getChannelDescription())) {
+				return ch;
+			}
+		}
+		
+		return null;
+		
+	}
+	
+	@Override
+	public List<PaymentBatchChannel> findChannelsBySource(String source) {
+
+		List<PaymentBatchChannel> result = new ArrayList<PaymentBatchChannel>();
+		
+		if (source==null || channelList==null) return result;
+		
+		for (PaymentBatchChannel ch : channelList.getChannelList()) {
+			if (source.equals(ch.getSourceSystem())) {
+				result.add(ch);
+			}
+		}
+		
+		return result;
+		
+		
+	}
+	
 }
