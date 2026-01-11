@@ -28,6 +28,11 @@ public class JsonAdapter<C,I,O,P,B,T> extends BasicBusinessObjectFactory<C, I, O
 	private JsonPropertyFile	properties;
 
 	private TenantList			tenantList;
+
+	/** Needed for spi initialization */
+	public JsonAdapter() {
+		
+	}
 	
 	public JsonAdapter(JsonPropertyFile p) {
 		properties = p;
