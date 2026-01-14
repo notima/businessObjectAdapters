@@ -52,6 +52,19 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 	}
 
 	/**
+	 * Return true if this VAT code means no VAT is added.
+	 * 
+	 * @param taxKey
+	 * @return
+	 */
+	public boolean isNoVAT(String taxKey) {
+		
+		if (taxKey==null) return false;
+		return FortnoxConstants.PREDEFINED_SE_NO_VAT.contains(taxKey);
+		
+	}
+	
+	/**
 	 * Determines the target account number for the given Fortnox adapter, type and taxKey
 	 * 
 	 * @param fa				FortnoxAdapter (ie client)
@@ -68,7 +81,7 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 				acctNo = fa.getRevenueAcctNo(tax.getKey(), tax.getRate(), tax.getCountryCode());
 				break;
 			case AccountingType.LIABILITY_VAT:
-				acctNo = fa.getOutVatAccount(tax.getKey(), tax.getCountryCode());
+				acctNo = fa.getOutVatAccount(tax.getKey(), tax.getRate(), tax.getCountryCode());
 				break;
 			case AccountingType.CLAIM_VAT:
 				acctNo = fa.getPredefinedAccount(FortnoxConstants.ACCT_INVAT);
