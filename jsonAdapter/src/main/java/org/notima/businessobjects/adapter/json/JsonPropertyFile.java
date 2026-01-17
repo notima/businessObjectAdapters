@@ -7,11 +7,13 @@ public class JsonPropertyFile {
 	private String	tenantFile;
 	private String	customerFile;
 	private String	paymentBatchChannelFile;
+	private String	tenantsDirectory;
 	
 	public void setFromDictionary(Dictionary<String, Object> properties) {
 	    tenantFile = (String)properties.get("tenantFile");
 		customerFile = (String)properties.get("customerFile");
 		paymentBatchChannelFile = (String)properties.get("paymentBatchChannelFile");
+		tenantsDirectory = (String)properties.get("tenantsDirectory");
 	}
 	
 	public String getTenantFile() {
@@ -32,6 +34,19 @@ public class JsonPropertyFile {
 	public void setPaymentBatchChannelFile(String paymentBatchChannelFile) {
 		this.paymentBatchChannelFile = paymentBatchChannelFile;
 	}
-	
+
+	/**
+	 * Tenants directory are the main directory of all tenants. Each tenant will have a subdirectory 
+	 * in this directory.
+	 * 
+	 * @return
+	 */
+	public String getTenantsDirectory() {
+		return tenantsDirectory;
+	}
+
+	public void setTenantsDirectory(String tenantsDirectory) {
+		this.tenantsDirectory = tenantsDirectory;
+	}
 	
 }
