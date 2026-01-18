@@ -17,6 +17,7 @@ public class FormatterFactoryImpl implements FormatterFactory {
 	ConfigurationAdmin configAdmin;
 	
 	private Map<String, OrderListFormatter> services = new TreeMap<String, OrderListFormatter>();
+	private Map<String, InvoiceListFormatter> invoiceListFormatters = new TreeMap<String, InvoiceListFormatter>();
 	private Map<String, InvoiceFormatter> invoiceFormatters = new TreeMap<String, InvoiceFormatter>();
 	private Map<String, InvoiceReminderFormatter> invoiceReminderServices = new TreeMap<String, InvoiceReminderFormatter>();
 	// The class name is the key
@@ -55,6 +56,23 @@ public class FormatterFactoryImpl implements FormatterFactory {
 			}
 		}
 
+		Collection<ServiceReference<InvoiceListFormatter>> ilrefs = ctx.getServiceReferences(InvoiceListFormatter.class, null);		
+		
+		invoiceListFormatters.clear();
+		
+		if (ilrefs!=null) {
+			InvoiceListFormatter srv;
+			for (ServiceReference<InvoiceListFormatter> sr : ilrefs) {
+				srv = ctx.getService(sr);
+				String[] formats = srv.getFormats();
+				if (formats!=null) {
+					for (String s : formats) {
+						invoiceListFormatters.put(s, srv);
+					}
+				}
+			}
+		}
+		
 		Collection<ServiceReference<InvoiceReminderFormatter>> irefs = ctx.getServiceReferences(InvoiceReminderFormatter.class, null);		
 		
 		invoiceReminderServices.clear();
@@ -162,6 +180,19 @@ public class FormatterFactoryImpl implements FormatterFactory {
 		try {
 			resetServices();
 			return invoiceFormatters.get(format);
+		} catch (Exception ee) {
+			ee.printStackTrace();
+		}
+		
+		return null;
+		
+	}
+	
+	public InvoiceListFormatter getInvoiceListFormatter(String format) {
+
+		try {
+			resetServices();
+			return invoiceListFormatters.get(format);
 		} catch (Exception ee) {
 			ee.printStackTrace();
 		}

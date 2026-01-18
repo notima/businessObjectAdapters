@@ -20,6 +20,14 @@ public interface FormatterFactory {
 	public OrderListFormatter getFormatter(String format);
 	
 	/**
+	 * Returns an invoice list formatter
+	 * 
+	 * @param format
+	 * @return
+	 */
+	public InvoiceListFormatter getInvoiceListFormatter(String format);	
+	
+	/**
 	 * Returns an invoice formatter for given format.
 	 * 
 	 * @param format		The format.
