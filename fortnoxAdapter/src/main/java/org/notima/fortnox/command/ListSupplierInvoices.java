@@ -127,38 +127,44 @@ public class ListSupplierInvoices extends FortnoxCommand implements Action {
 		
 		if (invoicesMap!=null) {
 			
-			Collection<InvoiceInterface> invoiceObjects = new ArrayList<InvoiceInterface>();
-			
 			for (Object o :	invoicesMap.values()) {
 				if (o instanceof InvoiceInterface) {
-					invoiceObjects.add((InvoiceInterface)o);
+					invoices.add((InvoiceInterface)o);
 				}
 			}
+
+		}
+		
+		SupplierInvoice inv = null;
+		SupplierInvoiceSubset invs = null;
+		List<InvoiceInterface> targetList = new ArrayList<InvoiceInterface>();
+		for (InvoiceInterface oo : invoices) {
 			
-			SupplierInvoice inv = null;
-			SupplierInvoiceSubset invs = null;
-			for (InvoiceInterface oo : invoiceObjects) {
-				
-				// Check date filter
-				if (!FortnoxUtil.isInDateRange(oo.getInvoiceDate(), fromDate, untilDate))
-					continue;
-				
-				if (oo instanceof SupplierInvoice) {
-					inv = (SupplierInvoice)oo;
-					if (!inv.isCancelled() || showCancelled) {
-						invoices.add(oo);
+			// Check date filter
+			if (!FortnoxUtil.isInDateRange(oo.getInvoiceDate(), fromDate, untilDate))
+				continue;
+			
+			if (oo instanceof SupplierInvoice) {
+				inv = (SupplierInvoice)oo;
+				if (!inv.isCancelled() || showCancelled) {
+					targetList.add(oo);
+				}
+			}
+			if (oo instanceof SupplierInvoiceSubset) {
+				invs = (SupplierInvoiceSubset)oo;
+				if (!invs.isCancelled() || showCancelled) {
+					if (enrich) {
+						inv = bf.getClient().getSupplierInvoice(invs.getGivenNumber());
+						targetList.add(inv);
+					} else {
+						targetList.add(oo);
 					}
 				}
-				if (oo instanceof SupplierInvoiceSubset) {
-					invs = (SupplierInvoiceSubset)oo;
-					if (!invs.isCancelled() || showCancelled) {
-						invoices.add(oo);
-					}
-				}
-				
 			}
 			
 		}
+		invoices = targetList;
+			
 	
 	}
 
