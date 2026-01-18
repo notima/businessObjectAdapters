@@ -20,8 +20,8 @@ import org.notima.api.fortnox.FortnoxCredentialsProvider;
 import org.notima.api.fortnox.FortnoxException;
 import org.notima.api.fortnox.FortnoxInvoiceException;
 import org.notima.api.fortnox.FortnoxScopeException;
+import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.LegacyTokenCredentialsProvider;
-import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxCredentials;
@@ -35,6 +35,7 @@ import org.notima.api.fortnox.entities3.CustomerSubset;
 import org.notima.api.fortnox.entities3.Customers;
 import org.notima.api.fortnox.entities3.EmailInformation;
 import org.notima.api.fortnox.entities3.FortnoxFile;
+import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.InvoiceRow;
 import org.notima.api.fortnox.entities3.InvoiceRows;
 import org.notima.api.fortnox.entities3.InvoiceSubset;
@@ -42,11 +43,13 @@ import org.notima.api.fortnox.entities3.Invoices;
 import org.notima.api.fortnox.entities3.OrderRow;
 import org.notima.api.fortnox.entities3.PreDefinedAccountSubset;
 import org.notima.api.fortnox.entities3.Supplier;
+import org.notima.api.fortnox.entities3.SupplierInvoice;
 import org.notima.api.fortnox.entities3.SupplierInvoiceSubset;
 import org.notima.api.fortnox.entities3.SupplierInvoices;
 import org.notima.api.fortnox.entities3.VatInfo;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherFileConnection;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.BasicBusinessObjectFactory;
 import org.notima.generic.businessobjects.BusinessPartner;
@@ -54,12 +57,12 @@ import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
+import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
 import org.notima.generic.businessobjects.OrderLine;
-import org.notima.generic.businessobjects.Location;
-import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.PaymentTerm;
 import org.notima.generic.businessobjects.Person;
 import org.notima.generic.businessobjects.PriceList;
@@ -1171,7 +1174,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	/**
 	 * Converts from a Fortnox Invoice to a generic business object that can be used when 
-	 * sending invoice to Svea Ekonomi
+	 * sending invoice to other systems.
 	 * 
 	 * @param src		The invoice to be converted
 	 * @return
@@ -1299,6 +1302,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return dst;
 		
 	}
+
 	
 	public static org.notima.generic.businessobjects.BusinessPartner<FortnoxClientInfo> convertToBusinessPartnerFromFortnoxClientInfo(FortnoxClientInfo src) {
 		
@@ -1550,12 +1554,38 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	public OrderInvoiceOperationResult readVendorInvoices(OrderInvoiceReaderOptions opts) throws Exception {
 		OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
 		
-		if (opts==null || (opts.isUnpostedOnly() && opts.isVendorOnly())) {
-			Map<Object,Invoice<?>> invoiceMap = lookupUnpostedSalesInvoicesSubset();
-			for (Invoice<?> inv : invoiceMap.values()) {
-				result.addAffectedInvoice(inv);
+		List<InvoiceInterface> invoices = new ArrayList<InvoiceInterface>();
+		boolean all = opts!=null && !(opts.isOpenOnly() || opts.isUnpostedOnly());
+		boolean unbooked = opts==null || opts.isUnpostedOnly();
+
+		Map<Object,Object> invoicesMap = new TreeMap<Object, Object>();
+		
+		if (!all) {
+			if (unbooked) {
+				invoicesMap = lookupList(FortnoxAdapter.LIST_UNPOSTED, false);
+			} else {
+				invoicesMap = lookupList(FortnoxAdapter.LIST_UNPAID, false);
 			}
+			for (Object o :	invoicesMap.values()) {
+				if (o instanceof InvoiceInterface) {
+					invoices.add((InvoiceInterface)o);
+				}
+			}
+			
+		} else {
+			
+			SupplierInvoices allInvoices = getClient().getAllSupplierInvoicesByDateRange(
+					LocalDateUtils.asDate(opts.getFromDate()), 
+					LocalDateUtils.asDate(opts.getUntilDate()));
+			if (allInvoices.getSupplierInvoiceSubset()!=null) {
+				invoices.addAll(allInvoices.getSupplierInvoiceSubset());
+			}
+			
 		}
+		
+		invoices = checkCancelledAndDateRange(invoices, opts);
+		
+		result.setAffectedInvoices(FortnoxConverter.convertListOfInvoiceInterface(invoices));
 		
 		// Set creditor
 		BusinessPartner<?> bp = lookupThisCompanyInformation();
@@ -1564,12 +1594,35 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return result;
 	}
 
-	public List<Invoice<?>> lookupSupplierInvoices() throws Exception {
-		
-		SupplierInvoices invoices = fortnoxClient.getSupplierInvoices(null);
-		// TODO: Implement lookup supplier invoices
-		return null;
-		
+	private List<InvoiceInterface> checkCancelledAndDateRange(List<InvoiceInterface> invoices, OrderInvoiceReaderOptions opts) throws Exception {
+			
+		org.notima.api.fortnox.entities3.SupplierInvoice inv = null;
+		SupplierInvoiceSubset invs = null;
+		List<InvoiceInterface> targetList = new ArrayList<InvoiceInterface>();
+		for (InvoiceInterface oo : invoices) {
+			
+			// Check date filter
+			if (!FortnoxUtil.isInDateRange(oo.getInvoiceDate(), 
+											LocalDateUtils.asDate(opts.getFromDate()), 
+											LocalDateUtils.asDate(opts.getUntilDate())))
+				continue;
+			
+			if (oo instanceof SupplierInvoice) {
+				inv = (org.notima.api.fortnox.entities3.SupplierInvoice)oo;
+				if (!inv.isCancelled() || opts.isShowCancelled()) {
+					targetList.add(oo);
+				}
+			}
+			if (oo instanceof SupplierInvoiceSubset) {
+				invs = (SupplierInvoiceSubset)oo;
+				if (!invs.isCancelled() || opts.isShowCancelled()) {
+					targetList.add(oo);
+				}
+			}
+			
+		}
+		return targetList;
+	
 	}
 	
 	@Override

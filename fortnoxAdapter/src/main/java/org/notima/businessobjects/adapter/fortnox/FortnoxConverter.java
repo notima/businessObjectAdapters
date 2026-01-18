@@ -12,8 +12,13 @@ import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.entities3.ArticleSubset;
 import org.notima.api.fortnox.entities3.Customer;
 import org.notima.api.fortnox.entities3.DefaultDeliveryTypes;
+import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.InvoicePayment;
 import org.notima.api.fortnox.entities3.Supplier;
+import org.notima.api.fortnox.entities3.SupplierInvoice;
+import org.notima.api.fortnox.entities3.SupplierInvoiceRow;
+import org.notima.api.fortnox.entities3.SupplierInvoiceRows;
+import org.notima.api.fortnox.entities3.SupplierInvoiceSubset;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherRow;
 import org.notima.api.fortnox.entities3.WriteOff;
@@ -24,9 +29,11 @@ import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.businessobjects.InvoiceList;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentWriteOff;
+import org.notima.generic.businessobjects.Person;
 import org.notima.generic.businessobjects.Product;
 import org.notima.generic.businessobjects.Tax;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
@@ -629,5 +636,136 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		return dst;
 		
 	}
+
+	public static InvoiceList convertListOfInvoiceInterface(List<InvoiceInterface> invoices) throws Exception {
+
+		InvoiceList result = new InvoiceList();
+		SupplierInvoice si;
+		SupplierInvoiceSubset sis;
+		
+		if (invoices!=null) {
+			
+			for (InvoiceInterface ii : invoices) {
+				
+				if (ii instanceof SupplierInvoice) {
+					si = (SupplierInvoice)ii;
+					result.addInvoice(convertToCanonicalSupplierInvoice(si));
+				}
+				if (ii instanceof SupplierInvoiceSubset) {
+					sis = (SupplierInvoiceSubset)ii;
+					result.addInvoice(convertToCanonicalSupplierInvoice(sis));
+				}
+				
+			}
+			
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Converts from a Fortnox Supplier Invoice to a generic business object that can be used when 
+	 * sending invoice to other systems.
+	 * 
+	 * @param src		The invoice to be converted
+	 * @return
+	 */
+	public static org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.SupplierInvoice> convertToCanonicalSupplierInvoice(org.notima.api.fortnox.entities3.SupplierInvoice src) throws Exception {
+	
+		org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.SupplierInvoice> dst = new org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.SupplierInvoice>();
+
+		dst.setNativeInvoice(src);
+		
+		dst.setDocumentKey(src.getDocumentNumber());
+		dst.setDocumentDate(FortnoxClient3.s_dfmt.parse(src.getInvoiceDate()));
+		dst.setGrandTotal(src.getTotal());
+		// Set open amount
+		dst.setOpenAmt(src.getBalance());
+		dst.setCurrency(src.getCurrency());
+		dst.setDueDate(FortnoxClient3.s_dfmt.parse(src.getDueDate()));
+		dst.setOcr(src.getOCR());
+		dst.setVatTotal(src.getVAT());
+		dst.setComment(src.getComments());
+		
+		// First create the business partner
+		BusinessPartner<?> dstBp = new BusinessPartner<Customer>();
+		dstBp.setName(src.getSupplierName());
+		dstBp.setIdentityNo(src.getSupplierNumber());
+		
+		dst.setBusinessPartner(dstBp);
+		
+		// Set bill person
+		if (src.getYourReference()!=null) {
+			Person billPerson = new Person(src.getYourReference());
+			dst.setBillPerson(billPerson);
+		}
+		
+		// Add invoice lines
+		SupplierInvoiceRows rows = src.getSupplierInvoiceRows();
+		for (SupplierInvoiceRow r : rows.getSupplierInvoiceRow()) {
+			dst.addInvoiceLine(convertSupplierInvoiceLine(r));
+		}
+		if(src.getRoundOff() != 0 ){
+			SupplierInvoiceRow ir = new SupplierInvoiceRow();
+			ir.setPrice(src.getRoundOff());
+			ir.setItemDescription("öresavrundning");
+			ir.setQuantity(1.0);
+			dst.addInvoiceLine(convertSupplierInvoiceLine(ir));
+		}
+		
+		return dst;
+		
+	}
+	
+	/**
+	 * Converts from a Fortnox Supplier Invoice Subset to a generic business object that can be used when 
+	 * sending invoice to other systems.
+	 * 
+	 * @param src		The invoice to be converted
+	 * @return
+	 */
+	public static org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.SupplierInvoiceSubset> convertToCanonicalSupplierInvoice(org.notima.api.fortnox.entities3.SupplierInvoiceSubset src) throws Exception {
+	
+		org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.SupplierInvoiceSubset> dst = new org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.SupplierInvoiceSubset>();
+
+		dst.setNativeInvoice(src);
+		
+		dst.setDocumentKey(src.getDocumentNumber());
+		dst.setDocumentDate(FortnoxClient3.s_dfmt.parse(src.getInvoiceDate()));
+		dst.setGrandTotal(src.getTotal());
+		// Set open amount
+		dst.setOpenAmt(src.getBalance());
+		dst.setCurrency(src.getCurrency());
+		dst.setDueDate(FortnoxClient3.s_dfmt.parse(src.getDueDate()));
+		
+		// First create the business partner
+		BusinessPartner<?> dstBp = new BusinessPartner<Customer>();
+		dstBp.setName(src.getSupplierName());
+		dstBp.setIdentityNo(src.getSupplierNumber());
+		
+		dst.setBusinessPartner(dstBp);
+		
+		return dst;
+		
+	}
+	
+	
+	
+	public static org.notima.generic.businessobjects.InvoiceLine convertSupplierInvoiceLine(org.notima.api.fortnox.entities3.SupplierInvoiceRow src) {
+		
+		org.notima.generic.businessobjects.InvoiceLine dst = new org.notima.generic.businessobjects.InvoiceLine();
+		
+		dst.setKey(src.getArticleNumber());
+		dst.setName(src.getItemDescription());
+		dst.setPriceActual(src.getPrice());
+		dst.setQtyEntered(src.getQuantity());
+		dst.setUOM(src.getUnit());
+		dst.setAccountNo(src.getAccount());
+		
+		return dst;
+		
+	}
+	
+
 	
 }

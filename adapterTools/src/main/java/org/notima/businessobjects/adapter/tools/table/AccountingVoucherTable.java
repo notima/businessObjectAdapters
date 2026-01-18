@@ -3,8 +3,6 @@ package org.notima.businessobjects.adapter.tools.table;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import org.notima.businessobjects.adapter.tools.table.GenericColumn;
-import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 

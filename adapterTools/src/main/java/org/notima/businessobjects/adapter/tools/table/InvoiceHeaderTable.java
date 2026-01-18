@@ -1,7 +1,5 @@
 package org.notima.businessobjects.adapter.tools.table;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -11,7 +9,6 @@ import org.notima.generic.businessobjects.Invoice;
 @SuppressWarnings("rawtypes")
 public class InvoiceHeaderTable extends GenericTable {
 
-	private NumberFormat nfmt = new DecimalFormat("#,##0.00");
 	private boolean includeAddress = false;
 	
 	class InvoiceComparator implements Comparator<Invoice<?>> {
@@ -82,7 +79,7 @@ public class InvoiceHeaderTable extends GenericTable {
 	private void addRow(Invoice<?> invoice) {
 
 		addRow().addContent(
-				invoice.getInvoiceDate(),
+				dfmt.format(invoice.getInvoiceDate()),
 				invoice.getDocumentKey(),
 				invoice.getBusinessPartner().getIdentityNo(),
 				getCustomerName(invoice),

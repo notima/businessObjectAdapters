@@ -1,10 +1,6 @@
 package org.notima.businessobjects.adapter.tools.table;
 
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,11 +11,8 @@ import org.notima.generic.businessobjects.exception.CurrencyMismatchException;
 import org.notima.generic.businessobjects.exception.DateMismatchException;
 
 public class PaymentBatchTable extends GenericTable {
-	
-    private static NumberFormat nfmt = new DecimalFormat("#,##0.00");
-    private static DateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd");
-    
-    private void initColumns(boolean detailed) {
+
+	private void initColumns(boolean detailed) {
     	addColumn("#", GenericColumn.ALIGNMENT_RIGHT);
 		if(detailed) {
 			addColumn("Date");

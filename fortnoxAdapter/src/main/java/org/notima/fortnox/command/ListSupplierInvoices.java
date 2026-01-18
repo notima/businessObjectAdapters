@@ -16,7 +16,6 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.FortnoxUtil;
-import org.notima.api.fortnox.entities3.Invoice;
 import org.notima.api.fortnox.entities3.InvoiceInterface;
 import org.notima.api.fortnox.entities3.SupplierInvoice;
 import org.notima.api.fortnox.entities3.SupplierInvoiceSubset;
@@ -28,7 +27,6 @@ import org.notima.businessobjects.adapter.tools.ReportFormatter;
 import org.notima.businessobjects.adapter.tools.command._NotimaCmdOptions;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
-import org.notima.fortnox.command.table.InvoiceHeaderTable;
 import org.notima.fortnox.command.table.SupplierInvoiceHeaderTable;
 
 @Command(scope = _FortnoxCommandNames.SCOPE, name = _FortnoxCommandNames.ListSupplierInvoices, description = "Lists supplier invoices in Fortnox")
@@ -137,7 +135,7 @@ public class ListSupplierInvoices extends FortnoxCommand implements Action {
 				}
 			}
 			
-			Invoice inv = null;
+			SupplierInvoice inv = null;
 			SupplierInvoiceSubset invs = null;
 			for (InvoiceInterface oo : invoiceObjects) {
 				
@@ -146,7 +144,7 @@ public class ListSupplierInvoices extends FortnoxCommand implements Action {
 					continue;
 				
 				if (oo instanceof SupplierInvoice) {
-					inv = (Invoice)oo;
+					inv = (SupplierInvoice)oo;
 					if (!inv.isCancelled() || showCancelled) {
 						invoices.add(oo);
 					}

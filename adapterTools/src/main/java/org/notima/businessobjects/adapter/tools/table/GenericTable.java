@@ -1,5 +1,9 @@
 package org.notima.businessobjects.adapter.tools.table;
 
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +54,9 @@ public class GenericTable {
     private List<GenericRow> rows = new ArrayList<GenericRow>();
 
     private String emptyTableText;
+
+    protected static DateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd");
+    protected static NumberFormat nfmt = new DecimalFormat("#,##0.00");
     
     private LanguageTranslator translator;
     private String			   lang;

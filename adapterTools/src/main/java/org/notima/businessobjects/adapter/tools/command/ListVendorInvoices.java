@@ -49,8 +49,8 @@ public class ListVendorInvoices extends AbstractAction {
 	private BusinessObjectFactory<?,?,?,?,?,?> adapter;
 	private OrderInvoiceReaderOptions readerOptions;
 	private OrderInvoiceOperationResult invoiceResult;
-	private boolean	unpostedOnly = true;
-	private boolean salesOnly = true;
+	private boolean	unpostedOnly = false;
+	private boolean salesOnly = false;
 	
 	private Date	fromDate;
 	private Date	untilDate;
@@ -87,6 +87,7 @@ public class ListVendorInvoices extends AbstractAction {
 		}
 
 		readerOptions.setSalesOnly(salesOnly);
+		readerOptions.setVendorOnly(true);
 		readerOptions.setUnpostedOnly(unpostedOnly);
 		
 	}
