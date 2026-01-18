@@ -91,6 +91,8 @@ public class Activator extends BaseActivator {
 				mgr = new FortnoxClientManager(fortnoxProperties.getFortnoxClientsFile());
 				mgr.setDefaultClientSecret(fortnoxProperties.getDefaultClientSecret());
 				mgr.setDefaultClientId(fortnoxProperties.getDefaultClientId());
+				mgr.setDefaultScopeString(fortnoxProperties.getDefaultScope());
+				
 			} catch (FileNotFoundException fne) {
 				
 				// Create the file

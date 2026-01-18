@@ -157,6 +157,7 @@
             fortnoxCredentialsFile = private/credentials.json
             defaultClientId=DONT_STORE_HERE
             defaultClientSecret=DONT_STORE_HERE
+            defaultScope=bookkeeping,companyinformation,currency,customer,inbox,invoice,article,order,payment,settings,supplier,supplierinvoice
         </config>
 
     </feature>

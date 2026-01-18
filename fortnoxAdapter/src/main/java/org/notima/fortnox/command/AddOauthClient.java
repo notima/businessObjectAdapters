@@ -9,6 +9,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.api.fortnox.Fortnox4jCLI;
 import org.notima.api.fortnox.FortnoxClient3;
+import org.notima.api.fortnox.FortnoxScope;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.businessobjects.adapter.fortnox.FortnoxAdapter;
@@ -30,11 +31,15 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     @Option(name = "--clientSecret", description = "The client secret for our Fortnox integration. If omitted, the default client secret is used (if set).", required = false, multiValued = false)
     private String clientSecret;
 	
+    @Option(name = "--scope", description = "The scope to be requested for this client. If omitted, the default scope is used (if set)", required = false, multiValued = false)
+    private String scopeString;
+    
     @Option(name = "--renew", description = "Renew from scratch, even if credentials/client exist")
     private boolean renew;
     
     private FortnoxClient3		fortnoxClient;
     private FortnoxClientManager	clientManager;
+    private FortnoxClientInfo	fortnoxClientInfo;
     private Fortnox4jCLI		creator;
     
     private boolean				existingClient = false;
@@ -68,6 +73,7 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     		bf = (FortnoxAdapter)selector.getFirstFactoryFor(FortnoxAdapter.SYSTEMNAME);
     	}
     	clientManager = bf.getClientManager();
+    	fortnoxClientInfo = clientManager.getClientInfoByOrgNo(orgNo);
     	
     }
 
@@ -84,6 +90,12 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     		sess.getConsole().println("Use: property-set -p FortnoxProperties defaultClientSecret [clientSecret]");
     		return false;
     	}
+
+    	if (!hasScope()) {
+    		sess.getConsole().println("No scope defined.");
+    		sess.getConsole().println("Use: property-set -p FortnoxProperties defaultScope [scope] or use parameter --scope");
+    		return false;
+    	}
     	
     	return true;
     }
@@ -94,7 +106,10 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     	}
     	// Check for default client Id
     	if (clientManager!=null) {
-    		clientId = clientManager.getDefaultClientId();
+    		if (fortnoxClientInfo!=null)
+    			clientId = fortnoxClientInfo.getClientId();
+    		if (clientId==null)
+    			clientId = clientManager.getDefaultClientId();
     	}
     	return clientId!=null;
     }
@@ -105,9 +120,27 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     	}
     	// Check for default client secret
     	if (clientManager!=null) {
-    		clientSecret = clientManager.getDefaultClientSecret();
+    		if (fortnoxClientInfo!=null)
+    			clientSecret = fortnoxClientInfo.getClientSecret();
+    		if (clientSecret==null)
+    			clientSecret = clientManager.getDefaultClientSecret();
     	}
     	return clientSecret!=null;
+    }
+    
+    private boolean hasScope() {
+    	if (scopeString!=null) {
+    		return true;
+    	}
+    	// Check for scope on client
+    	if (clientManager!=null) {
+    		if (fortnoxClientInfo!=null)
+    			scopeString = fortnoxClientInfo.getDefaultScope();
+    		if (scopeString==null) {
+    			scopeString = clientManager.getDefaultScopeString();
+    		}
+    	}
+    	return scopeString!=null;
     }
     
     private void printFortnoxClient() {
@@ -125,6 +158,7 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     	creator = new Fortnox4jCLI();
     	creator.setClientId(clientId);
     	creator.setClientSecret(clientSecret);
+   		creator.setScope(new FortnoxScope(scopeString));
     	
     	creator.setFortnoxClientManager(clientManager, orgNo);
     	if (creator.hasAuthenticationCode() && !renew) {
