@@ -16,7 +16,14 @@
 			<artifactId>commons-csv</artifactId>
 			<version>1.6</version>
 		</dependency>
-  
+
+		<dependency>
+			<groupId>
+				org.notima.generic.businessobjects.adapter
+			</groupId>
+			<artifactId>adapterTools</artifactId>
+			<version>${version}</version>
+		</dependency>
   </dependencies>
   
 	<build>
