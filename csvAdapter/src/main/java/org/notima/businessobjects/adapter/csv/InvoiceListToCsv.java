@@ -41,8 +41,8 @@ public class InvoiceListToCsv extends BasicReportFormatter {
 				invoice.getBusinessPartner().getIdentityNo(),
 				invoice.getBusinessPartner().getName(),
 				invoice.getDocumentKey(),
-				invoice.getInvoiceDate(),
-				invoice.getDueDate(),
+				dfmt.format(invoice.getInvoiceDate()),
+				dfmt.format(invoice.getDueDate()),
 				invoice.getOpenAmt(),
 				invoice.getCurrency(),
 				"AP",		// Accounts payable
