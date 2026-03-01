@@ -8,7 +8,8 @@ public class _NotimaCmdOptions {
 	
 	public static final String	ENRICH = "--enrich";
 	
-	public static final String	UNTIL_DATE = "--until-date";
+	public static final String	FROM_DATE = "--fromdate";
+	public static final String	UNTIL_DATE = "--untildate";
 	
 	public static final String	MANUAL_MAP = "--manual-map";
 	
