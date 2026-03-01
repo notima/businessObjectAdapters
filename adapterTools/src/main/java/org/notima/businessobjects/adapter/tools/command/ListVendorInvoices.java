@@ -43,12 +43,25 @@ public class ListVendorInvoices extends AbstractAction {
     @Option(name = "-co", aliases = { "--country-code" }, description = "Country code for the orgNo", required = false, multiValued = false)
     private String countryCode;
 	
-    @Option(name="--fromdate", description="From date", required = false, multiValued = false)
+    @Option(name=_NotimaCmdOptions.FROM_DATE, description="From date", required = false, multiValued = false)
     private String	fromDateStr;
 
-    @Option(name="--untildate", description="Until date", required = false, multiValued = false)
+    @Option(name=_NotimaCmdOptions.UNTIL_DATE, description="Until date", required = false, multiValued = false)
     private String	untilDateStr;
     
+	@Option(name = "-e", aliases = {
+	"--enrich" }, description = "Read the complete invoice, not just the subset", required = false, multiValued = false)
+	private boolean enrich;
+
+	@Option(name = "--all", description = "Show all invoices", required = false, multiValued = false)
+	private boolean all;
+    
+	@Option(name = "--unbooked", description = "Show unbooked invoices", required = false, multiValued = false)
+	private boolean unbooked;
+	
+	@Option(name = "--show-cancelled", description = "Show cancelled invoices", required = false, multiValued = false)
+	private boolean showCancelled = false;
+	
     @Option(name="-format", description="The format of match result file to be output", required = false, multiValued = false)
     private String format;
     
@@ -67,7 +80,6 @@ public class ListVendorInvoices extends AbstractAction {
 	private BusinessObjectFactory<?,?,?,?,?,?> adapter;
 	private OrderInvoiceReaderOptions readerOptions;
 	private OrderInvoiceOperationResult invoiceResult;
-	private boolean	unpostedOnly = false;
 	private boolean salesOnly = false;
 	
 	private Date	fromDate;
@@ -106,7 +118,8 @@ public class ListVendorInvoices extends AbstractAction {
 
 		readerOptions.setSalesOnly(salesOnly);
 		readerOptions.setVendorOnly(true);
-		readerOptions.setUnpostedOnly(unpostedOnly);
+		readerOptions.setUnpostedOnly(unbooked);
+		readerOptions.setOpenOnly(!all);
 		
 	}
 	
