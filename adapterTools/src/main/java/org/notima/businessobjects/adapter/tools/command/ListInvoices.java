@@ -30,10 +30,10 @@ public class ListInvoices extends AbstractAction {
     @Option(name = "-co", aliases = { "--country-code" }, description = "Country code for the orgNo", required = false, multiValued = false)
     private String countryCode;
 	
-    @Option(name="--from-date", description="From date", required = false, multiValued = false)
+    @Option(name=_NotimaCmdOptions.FROM_DATE, description="From date", required = false, multiValued = false)
     private String	fromDateStr;
 
-    @Option(name="--until-date", description="Until date", required = false, multiValued = false)
+    @Option(name=_NotimaCmdOptions.UNTIL_DATE, description="Until date", required = false, multiValued = false)
     private String	untilDateStr;
     
     @Option(name="-p", description="Prints the invoices to PDF and/or e-mail", required = false, multiValued = false)
