@@ -41,7 +41,9 @@ Object> {
 	
 	@Override
 	public List<AccountingVoucher> writeVouchers(List<AccountingVoucher> vouchers) throws Exception {
-		String destinationPath = this.getSetting(PROP_SIE_FILE_PATH);
+		String destinationPath = defaultExportFile;
+		if (destinationPath == null)
+			destinationPath = this.getSetting(PROP_SIE_FILE_PATH);
 		String filePrefix = this.getSetting(PROP_SIE_FILE_PREFIX);
 		if (filePrefix==null) {
 			filePrefix = "";
