@@ -71,6 +71,7 @@ public class ShowInvoice implements Action {
 				if (!outFile.endsWith(".xml")) {
 					outFile += ".xml";
 				}
+				invoice.setNativeInvoice(null);
 				JAXB.marshal(invoice, new File(outFile));
 				sess.getConsole().println("Invoice written to " + outFile);
 				
