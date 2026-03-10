@@ -29,8 +29,8 @@ public class TestUBL21Converter {
 
 			}
 		} catch (Exception ee) {
-			fail(ee.getMessage());
 			ee.printStackTrace();
+			fail(ee.toString());
 		}
 
 	}

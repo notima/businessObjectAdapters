@@ -296,7 +296,7 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		if (src.getPoDocumentNo()!=null && src.getPoDocumentNo().trim().length()>0) {
 			dst.setBuyerReference(src.getPoDocumentNo());
 		} else {
-			if (src.getBillPerson()!=null) {
+			if (src.getBillPerson()!=null && src.getBillPerson().getName()!=null && src.getBillPerson().getName().trim().length()>0) {
 				dst.setBuyerReference(src.getBillPerson().getName());
 			} else {
 				dst.setBuyerReference("-");
@@ -506,7 +506,7 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		if (src.getPoDocumentNo()!=null && src.getPoDocumentNo().trim().length()>0) {
 			dst.setBuyerReference(src.getPoDocumentNo());
 		} else {
-			if (src.getBillPerson()!=null) {
+			if (src.getBillPerson()!=null && src.getBillPerson().getName()!=null && src.getBillPerson().getName().trim().length()>0) {
 				dst.setBuyerReference(src.getBillPerson().getName());
 			} else {
 				dst.setBuyerReference("-");
@@ -610,15 +610,19 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 			
 			il = (InvoiceLine)oo;
 		
-			if (adjustment==null && il.getLineNo()>=10 && Math.abs(il.getLineNet())<1 && il.getTaxAmount()==0 && il.getQtyEntered()!=0) {
+			double effectiveNet = il.getLineNet() != 0 ? il.getLineNet()
+					: round(il.getPriceActual() * il.getQtyEntered(), roundingDecimals);
+			double effectiveTax = il.getTaxAmount() != 0 ? il.getTaxAmount()
+					: round(effectiveNet * il.getTaxPercent() / 100, roundingDecimals);
+			if (adjustment==null && il.getLineNo()>=10 && Math.abs(effectiveNet)<1 && il.getTaxAmount()==0 && il.getQtyEntered()!=0) {
 				// We have an adjustment line
 				adjustment = il;
 				continue;
 			}
-			
+
 			line = convertInvoiceLine(il, src.getCurrency(), tsm);
-			lineExtAmt += il.getLineNet();
-			taxAmt += il.getTaxAmount();
+			lineExtAmt += effectiveNet;
+			taxAmt += effectiveTax;
 			
 			dst.addInvoiceLine(line);
 			
@@ -680,14 +684,19 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 	}
 
 	public static InvoiceLineType convertInvoiceLine(InvoiceLine il, String currency, Map<Double,TaxSubtotalType> tsm) {
-		
+
+		double effectiveLineNet = il.getLineNet() != 0 ? il.getLineNet()
+				: round(il.getPriceActual() * il.getQtyEntered(), 2);
+		double effectiveTaxAmt = il.getTaxAmount() != 0 ? il.getTaxAmount()
+				: round(effectiveLineNet * il.getTaxPercent() / 100, 2);
+
 		InvoiceLineType line = new InvoiceLineType();
 		line.setID(Integer.toString(il.getLineNo()));
 		InvoicedQuantityType iqt = new InvoicedQuantityType();
-		iqt.setUnitCode(il.getUOM());
+		iqt.setUnitCode(mapUom(il.getUOM()));
 		iqt.setValue(BigDecimal.valueOf(il.getQtyEntered()));
 		line.setInvoicedQuantity(iqt);
-		line.setLineExtensionAmount(BigDecimal.valueOf(il.getLineNet())).setCurrencyID(currency);
+		line.setLineExtensionAmount(BigDecimal.valueOf(effectiveLineNet)).setCurrencyID(currency);
 		
 		ItemType item = new ItemType();
 		line.setItem(item);
@@ -729,28 +738,38 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 			taxSubtotal = createTaxSubtotal(currency, tct);
 			tsm.put(il.getTaxPercent(), taxSubtotal);
 		}
-		addTaxTotals(taxSubtotal, currency, il.getLineNet(), il.getTaxAmount());
-		
+		addTaxTotals(taxSubtotal, currency, effectiveLineNet, effectiveTaxAmt);
+
 		PriceAmountType pat = new PriceAmountType();
 		pat.setCurrencyID(currency);
-		pat.setValue(BigDecimal.valueOf(il.getPriceActual()));
+		// PriceAmount must satisfy: LineExtensionAmount = InvoicedQuantity * PriceAmount
+		// Use effectiveLineNet / qty as the net unit price when qty is non-zero
+		double netUnitPrice = (il.getQtyEntered() != 0)
+				? round(effectiveLineNet / il.getQtyEntered(), 4)
+				: il.getPriceActual();
+		pat.setValue(BigDecimal.valueOf(netUnitPrice));
 		PriceType priceType = new PriceType();
 		priceType.setPriceAmount(pat);
 		line.setPrice(priceType);
-		
+
 		return line;
-		
+
 	}
-	
+
 	public static CreditNoteLineType convertCreditNoteLine(InvoiceLine il, String currency, Map<Double,TaxSubtotalType> tsm) {
 		
+		double effectiveLineNet = il.getLineNet() != 0 ? il.getLineNet()
+				: round(il.getPriceActual() * il.getQtyEntered(), 2);
+		double effectiveTaxAmt = il.getTaxAmount() != 0 ? il.getTaxAmount()
+				: round(effectiveLineNet * il.getTaxPercent() / 100, 2);
+
 		CreditNoteLineType line = new CreditNoteLineType();
 		line.setID(Integer.toString(il.getLineNo()));
 		CreditedQuantityType iqt = new CreditedQuantityType();
-		iqt.setUnitCode(il.getUOM());
+		iqt.setUnitCode(mapUom(il.getUOM()));
 		iqt.setValue(BigDecimal.valueOf(il.getQtyEntered()));
 		line.setCreditedQuantity(iqt);
-		line.setLineExtensionAmount(BigDecimal.valueOf(il.getLineNet())).setCurrencyID(currency);
+		line.setLineExtensionAmount(BigDecimal.valueOf(effectiveLineNet)).setCurrencyID(currency);
 		
 		ItemType item = new ItemType();
 		line.setItem(item);
@@ -792,17 +811,21 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 			taxSubtotal = createTaxSubtotal(currency, tct);
 			tsm.put(il.getTaxPercent(), taxSubtotal);
 		}
-		addTaxTotals(taxSubtotal, currency, il.getLineNet(), il.getTaxAmount());
-		
+		addTaxTotals(taxSubtotal, currency, effectiveLineNet, effectiveTaxAmt);
+
 		PriceAmountType pat = new PriceAmountType();
 		pat.setCurrencyID(currency);
-		pat.setValue(BigDecimal.valueOf(il.getPriceActual()));
+		double netUnitPrice = (il.getQtyEntered() != 0)
+				? round(effectiveLineNet / il.getQtyEntered(), 4)
+				: il.getPriceActual();
+		pat.setValue(BigDecimal.valueOf(netUnitPrice));
 		PriceType priceType = new PriceType();
 		priceType.setPriceAmount(pat);
 		line.setPrice(priceType);
-		
+
 		return line;
-		
+
+
 	}
 	
 	
@@ -863,6 +886,21 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		
 	}
 	
+	/**
+	 * Maps a unit of measure code to a valid UN/ECE Recommendation 20 code.
+	 * Falls back to "EA" (Each) for unknown or empty codes.
+	 */
+	public static String mapUom(String uom) {
+		if (uom == null || uom.trim().length() == 0) return "EA";
+		switch (uom.trim().toLowerCase()) {
+			case "st":   return "EA";   // Swedish "styck" = each
+			case "tim":  return "HUR";  // Swedish "timme" = hour
+			case "mån":  return "MON";  // Swedish "månad" = month
+			case "dag":  return "DAY";  // Swedish "dag" = day
+			default:     return uom;
+		}
+	}
+
 	public static double round(double roundMe, int roundingDecimals) {
 		double multiplicator = Math.pow(10, (double)roundingDecimals);
 		double result = Math.round(roundMe*multiplicator) / multiplicator;

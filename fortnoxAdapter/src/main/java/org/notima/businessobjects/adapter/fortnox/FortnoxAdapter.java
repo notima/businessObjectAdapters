@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.fortnox;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.io.StringWriter;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -568,12 +569,15 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 
 	@Override
 	public Invoice<org.notima.api.fortnox.entities3.Invoice> lookupInvoice(String key) throws Exception {
-		
+
 		org.notima.api.fortnox.entities3.Invoice src = fortnoxClient.getInvoice(key);
 		Invoice<org.notima.api.fortnox.entities3.Invoice> dst = convertToCanonicalInvoice(src);
 		dst.setDocumentKey(key);
+		BusinessPartner<?> sender = lookupThisCompanyInformation();
+		sender.setNativeBusinessPartner(null);
+		dst.setSender(sender);
 		return dst;
-		
+
 	}
 
 	@Override
@@ -1235,7 +1239,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dstBp.setLanguage("sv_SE");
 		dstBp.setCompany(orgNo.startsWith("55"));
 		
-		dst.setBusinessPartner(dstBp);
+		dst.setBillBpartner(dstBp);
 		
 		// Set bill person
 		Person billPerson = new Person(src.getYourReference());
@@ -1298,7 +1302,25 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dst.setTaxIncludedInPrice(vatIncluded);
 		dst.setUOM(src.getUnit());
 		dst.setAccountNo(src.getAccountNumber());
-		
+
+		if (src.getTotal() != null) {
+			double vatRate = src.getVAT() != null ? src.getVAT() : 0.0;
+			double lineNet, taxAmt;
+			if (vatIncluded && vatRate != 0) {
+				lineNet = BigDecimal.valueOf(src.getTotal())
+						.divide(BigDecimal.valueOf(1 + vatRate / 100), 2, java.math.RoundingMode.HALF_UP)
+						.doubleValue();
+				taxAmt = BigDecimal.valueOf(src.getTotal() - lineNet)
+						.setScale(2, java.math.RoundingMode.HALF_UP).doubleValue();
+			} else {
+				lineNet = src.getTotal();
+				taxAmt = BigDecimal.valueOf(lineNet * vatRate / 100)
+						.setScale(2, java.math.RoundingMode.HALF_UP).doubleValue();
+			}
+			dst.setLineNet(lineNet);
+			dst.setTaxAmount(taxAmt);
+		}
+
 		return dst;
 		
 	}
