@@ -15,23 +15,24 @@ public class TestUBL21Converter {
 
 	@Test
 	public void testConvert() {
-		
+
 		try {
 			TestConfig.loadConfig();
-			
+
 			if (TestConfig.sampleBoInvoice!=null) {
-	
+
 				InvoiceType result = UBL21Converter.convert(TestConfig.sampleBoInvoice);
-				result = UBL21Converter.addPaymentMeansBankgiro(result, "51234567", result.getIDValue(), "The Fictive Company AB");
-				
-				UBL21Writer.invoice().write(result, new File("target/test-invoice.xml"));
-				
+				result = UBL21Converter.addPaymentMeansBankgiro(result, TestConfig.bankgiroNumber, result.getIDValue(), TestConfig.bankgiroAccountName);
+
+				String outFile = TestConfig.resultDir + File.separator + "invoice-" + result.getIDValue() + ".xml";
+				UBL21Writer.invoice().write(result, new File(outFile));
+
 			}
 		} catch (Exception ee) {
 			fail(ee.getMessage());
 			ee.printStackTrace();
 		}
-		
+
 	}
 
 }
