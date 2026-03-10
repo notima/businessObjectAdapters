@@ -116,7 +116,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		
 	/**
 	 * Available lists
-	 * @see lookupList(String)
+	 * @see #lookupList(String, boolean)
 	 */
 	public static final String LIST_EXTERNAL_INVOICE_REFERENCE1 = "InvoiceSubset-ExternalInvoiceReference1";	
 	public static final String LIST_EXTERNAL_INVOICE_REFERENCE2 = "InvoiceSubset-ExternalInvoiceReference2";

@@ -3,6 +3,7 @@ package org.notima.businessobjects.adapter.fortnox.junit;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.notima.api.fortnox.FortnoxUtil;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
@@ -25,9 +26,7 @@ public class FortnoxAdapterTestBase {
 		
 		URL configUrl = ClassLoader.getSystemResource("fortnoxClients.xml");
 		
-		if (configUrl==null) {
-			throw new Exception("No fortnoxClients.xml found");
-		}
+		Assume.assumeNotNull("Skipping: fortnoxClients.xml not found in classpath.", configUrl);
 
 		FortnoxClientList clientList = FortnoxUtil.readFortnoxClientListFromFile(configUrl.getFile());
 		
