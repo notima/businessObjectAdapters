@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>businessObjectAdapters</artifactId>
-	<version>1.10.0-SNAPSHOT</version>
+	<version>1.10.0</version>
 	<packaging>pom</packaging>
 
 	<distributionManagement>
@@ -20,10 +20,10 @@
 		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
 		<apache.poi.version>3.17</apache.poi.version>
 		<notima-util.version>1.0.2</notima-util.version>
-		<businessobjects.version>1.1.2-SNAPSHOT</businessobjects.version>
-		<fortnox4j.version>2.0.4-SNAPSHOT</fortnox4j.version>
+		<businessobjects.version>1.1.2</businessobjects.version>
+		<fortnox4j.version>2.0.4</fortnox4j.version>
 		<gson.version>2.11.0</gson.version>
-		<siefilelib.version>1.0.6-SNAPSHOT</siefilelib.version>
+		<siefilelib.version>1.0.6</siefilelib.version>
 		<commons-csv.version>1.6</commons-csv.version>
 		<swish4j.version>0.0.4</swish4j.version>
 
