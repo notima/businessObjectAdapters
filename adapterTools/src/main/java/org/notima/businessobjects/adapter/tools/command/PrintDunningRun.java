@@ -98,7 +98,7 @@ public class PrintDunningRun extends AbstractAction {
 				"/home/daniel/develop/notima-workspace/businessObjectAdapters/jasperReportAdapter/src/main/resources/reports/InvoiceReminder.jasper");
 		
 		if (outputDirectory==null) {
-			outputDirectory = new File(invoiceFile).getParent();
+			outputDirectory = new File(invoiceFile).getAbsoluteFile().getParent();
 		}
 		
 		props.setProperty("JasperOutputDir", outputDirectory);
