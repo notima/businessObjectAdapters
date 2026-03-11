@@ -1240,7 +1240,8 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		dstBp.setCompany(orgNo.startsWith("55"));
 		
 		dst.setBillBpartner(dstBp);
-		
+		dst.setBusinessPartner(dstBp);
+
 		// Set bill person
 		Person billPerson = new Person(src.getYourReference());
 		dst.setBillPerson(billPerson);

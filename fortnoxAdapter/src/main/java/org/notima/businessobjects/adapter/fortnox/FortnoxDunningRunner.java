@@ -61,6 +61,8 @@ public class FortnoxDunningRunner {
 				continue;
 			
 			selectDunningEntryFor((BusinessPartner<Customer>) invoice.getBusinessPartner());
+			if (dunningEntry==null)
+				continue;
 			invoice.setDescriptionKey(invoice.getLines().get(0).getName());
 			dunningEntry.addInvoice(invoice);
 			
@@ -87,9 +89,11 @@ public class FortnoxDunningRunner {
 	@SuppressWarnings("unchecked")
 	private void selectDunningEntryFor(BusinessPartner<Customer> bp) {
 		
-		if (bp==null) 
+		if (bp==null) {
 			dunningEntry = null;
-		
+			return;
+		}
+
 		DunningEntry<Customer, org.notima.api.fortnox.entities3.Invoice> entry = 
 				(DunningEntry<Customer, org.notima.api.fortnox.entities3.Invoice>) dunningRun.getFirstEntryForDebtor(bp);
 	
