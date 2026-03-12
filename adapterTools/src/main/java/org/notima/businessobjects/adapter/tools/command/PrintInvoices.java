@@ -97,7 +97,11 @@ public class PrintInvoices extends AbstractAction {
 		props.setProperty("JasperFile", 
 				"/home/daniel/develop/notima-workspace/businessObjectAdapters/jasperReportAdapter/src/main/resources/reports/InvoiceBasic.jasper");
 		
-		if (outputDirectory!=null) props.setProperty("JasperOutputDir", outputDirectory);
+		if (outputDirectory==null) {
+			outputDirectory = new File(invoiceFile).getAbsoluteFile().getParent();
+		}
+		
+		props.setProperty("JasperOutputDir", outputDirectory);
 		
 		if (sendByEmail) {
 			emailSender = getMessageSenderFactory().getMessageSender("email");
