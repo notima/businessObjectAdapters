@@ -9,6 +9,7 @@ import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
@@ -47,9 +48,11 @@ public interface CanonicalObjectFactory {
 	public Invoice<?> lookupCustomerInvoice(String adapterName, String orgNo, String countryCode, String invoiceNo) throws NoSuchTenantException;
 	
 	public PaymentBatchChannelFactory lookupFirstPaymentBatchChannelFactory();
-	
-	
-	
+
+	public TenantInformationFactory lookupFirstTenantInformationFactory();
+
+
+
 	/**
 	 * Converts a canonical invoice to a given adapter format.
 	 * 

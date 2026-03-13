@@ -10,6 +10,9 @@ import org.notima.generic.businessobjects.tax.BasicTaxRateProviderFI;
 import org.notima.generic.businessobjects.tax.BasicTaxRateProviderSE;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,14 +23,15 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(MessageSenderFactory.class),
 				@ProvideService(PaymentBatchProcessor.class),
 				@ProvideService(MappingServiceFactory.class),
-				@ProvideService(TaxRateProvider.class)
+				@ProvideService(TaxRateProvider.class),
+				@ProvideService(AdapterToolsSettings.class)
 		}
 )
 public class Activator extends BaseActivator {
 
 
-	private Logger log = LoggerFactory.getLogger(Activator.class);	
-	
+	private Logger log = LoggerFactory.getLogger(Activator.class);
+
 	@Override
 	public void doStart() {
 
@@ -76,7 +80,23 @@ public class Activator extends BaseActivator {
 		} catch (Exception e) {
 			log.error("Not able to start Basic FI Tax Rate Provider");
 		}
-		
+
+		AdapterToolsSettings settings = new AdapterToolsSettings();
+		try {
+			ServiceReference<ConfigurationAdmin> cmRef = bundleContext.getServiceReference(ConfigurationAdmin.class);
+			if (cmRef != null) {
+				ConfigurationAdmin cm = bundleContext.getService(cmRef);
+				Configuration cfg = cm.getConfiguration(AdapterToolsSettings.PID);
+				if (cfg != null && cfg.getProperties() != null) {
+					settings.setFromDictionary(cfg.getProperties());
+				}
+			}
+		} catch (Exception e) {
+			log.warn("Could not read {} config, using defaults: {}", AdapterToolsSettings.PID, e.getMessage());
+		}
+		register(AdapterToolsSettings.class, settings);
+		log.info("Registered AdapterToolsSettings (defaultCountryCode={})", settings.getDefaultCountryCode());
+
 	}
 	
 	

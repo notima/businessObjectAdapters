@@ -11,6 +11,7 @@ import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
@@ -46,7 +47,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, TaxRateProvider> taxRateProviders = new TreeMap<String, TaxRateProvider>();
 	
 	private Map<String, PaymentBatchChannelFactory> paymentBatchChannelFactories = new TreeMap<String, PaymentBatchChannelFactory>();
-	
+
+	private Map<String, TenantInformationFactory> tenantInformationFactories = new TreeMap<String, TenantInformationFactory>();
+
 	private BundleContext ctx;
 
 	public void setBundleContext(BundleContext c) {
@@ -570,6 +573,38 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		return null;
 	}
 
-	
-	
+	public void resetTenantInformationFactories() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+
+		Collection<ServiceReference<TenantInformationFactory>> references = ctx.getServiceReferences(TenantInformationFactory.class, null);
+
+		tenantInformationFactories.clear();
+
+		if (references!=null) {
+			TenantInformationFactory srv;
+			for (ServiceReference<TenantInformationFactory> sr : references) {
+				srv = ctx.getService(sr);
+				tenantInformationFactories.put(srv.getClass().getName(), srv);
+			}
+		}
+
+	}
+
+	@Override
+	public TenantInformationFactory lookupFirstTenantInformationFactory() {
+		try {
+			resetTenantInformationFactories();
+			if (!tenantInformationFactories.isEmpty()) {
+				return tenantInformationFactories.get(tenantInformationFactories.keySet().iterator().next());
+			}
+		} catch (InvalidSyntaxException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+
+
 }

@@ -61,14 +61,18 @@
 	</feature>
 
 	<feature name="notima-businessobjects" description="Notima Business Objects" version="${project.version}" install="manual">
-		<!-- 
+		<!--
         <feature prerequisite="true" dependency="false">wrap</feature>
          -->
         <feature>notima-common</feature>
 		<bundle>mvn:org.notima/notima-util/${notima-util.version}</bundle>
 		<bundle>mvn:org.notima.generic/businessobjects/${businessobjects.version}</bundle>
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/adapterTools/${project.version}</bundle>
-		
+
+		<config name="AdapterTools">
+			defaultCountryCode = SE
+		</config>
+
 	</feature>
 
 	<feature name="notima-persistence" description="Notima Persistence components" version="${project.version}" install="manual">
