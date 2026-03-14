@@ -8,12 +8,14 @@ public class JsonPropertyFile {
 	private String	customerFile;
 	private String	paymentBatchChannelFile;
 	private String	tenantsDirectory;
-	
+	private String	tenantInformationFile;
+
 	public void setFromDictionary(Dictionary<String, Object> properties) {
 	    tenantFile = (String)properties.get("tenantFile");
 		customerFile = (String)properties.get("customerFile");
 		paymentBatchChannelFile = (String)properties.get("paymentBatchChannelFile");
 		tenantsDirectory = (String)properties.get("tenantsDirectory");
+		tenantInformationFile = (String)properties.get("tenantInformationFile");
 	}
 	
 	public String getTenantFile() {
@@ -48,5 +50,13 @@ public class JsonPropertyFile {
 	public void setTenantsDirectory(String tenantsDirectory) {
 		this.tenantsDirectory = tenantsDirectory;
 	}
-	
+
+	public String getTenantInformationFile() {
+		return tenantInformationFile;
+	}
+
+	public void setTenantInformationFile(String tenantInformationFile) {
+		this.tenantInformationFile = tenantInformationFile;
+	}
+
 }

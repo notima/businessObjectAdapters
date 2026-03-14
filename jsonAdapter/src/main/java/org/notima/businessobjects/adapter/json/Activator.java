@@ -8,6 +8,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
@@ -18,7 +19,8 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(BusinessObjectFactory.class),
-				@ProvideService(PaymentBatchChannelFactory.class)
+				@ProvideService(PaymentBatchChannelFactory.class),
+				@ProvideService(TenantInformationFactory.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -44,6 +46,7 @@ public class Activator extends BaseActivator {
 		initConfiguration();
 		createAndRegisterAdapter();
 		createAndRegisterPaymentBatchChannelFactory();
+		createAndRegisterTenantInformationFactory();
 	}
 	
 	private void createAndRegisterAdapter() {
@@ -70,6 +73,19 @@ public class Activator extends BaseActivator {
 		
 	}
 	
+	private void createAndRegisterTenantInformationFactory() {
+
+		try {
+			TenantInformationFactory tenantInformationFactory = new JsonTenantInformationFactory(jsonProperties.getTenantInformationFile());
+			register(TenantInformationFactory.class, tenantInformationFactory, props);
+			log.info("Registered TenantInformationFactory for " + JsonAdapter.SYSTEM_NAME);
+		} catch (Exception ee) {
+			log.error(ee.getMessage());
+			ee.printStackTrace();
+		}
+
+	}
+
 	private void initConfiguration() throws IOException {
 		
 		props.put("SystemName", JsonAdapter.SYSTEM_NAME);
