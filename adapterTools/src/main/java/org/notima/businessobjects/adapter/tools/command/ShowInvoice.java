@@ -16,6 +16,8 @@ import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "show-canonical-invoice", description = "Show a specific invoice")
 @Service
@@ -31,6 +33,7 @@ public class ShowInvoice implements Action {
 	private String adapterName = "";
 	
 	@Argument(index = 1, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(OrgNoCompleter.class)
 	private String orgNo = "";
 
 	@Argument(index = 2, name = "invoiceNo", description ="The invoice no", required = true, multiValued = false)

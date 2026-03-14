@@ -12,6 +12,8 @@ import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.ReportFormatter;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 public abstract class AdapterCommand extends AbstractAction {
 
@@ -39,6 +41,7 @@ public abstract class AdapterCommand extends AbstractAction {
     protected String systemName;
 
     @Argument(index = 1, name = "orgNo", description = "The org no of the tenant", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     protected String orgNo;
 
     @SuppressWarnings("rawtypes")

@@ -10,6 +10,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "remove-tenant", description = "Removes tenant for given adapter")
 @Service
@@ -26,6 +28,7 @@ public class RemoveTenant implements Action {
     private String systemName;
     
     @Argument(index = 1, name = "orgNo", description = "The tenant to remove", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     private String orgNo;
 
     @Argument(index = 2, name = "countryCode", description = "The country code", required = true, multiValued = false)

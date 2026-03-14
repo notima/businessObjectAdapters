@@ -12,6 +12,8 @@ import org.notima.generic.businessobjects.BasicPaymentBatchChannel;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "add-payment-batch-channel", description = "Adds / modifies payment batch channels")
 @Service
@@ -28,6 +30,7 @@ public class AddPaymentBatchChannel implements Action {
 	private TaxSubjectIdentifier		tenant;
 	
     @Argument(index = 0, name = "orgNo", description = "The org number to show details for", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     private String orgNo;
     
     @Argument(index = 1, name = "destinationSystem", description = "The destination system of the payments", required = true, multiValued = false)

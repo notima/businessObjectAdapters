@@ -25,6 +25,7 @@ import org.notima.generic.businessobjects.tools.InvoiceListMerger;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.util.LocalDateUtils;
 import org.notima.util.json.JsonUtil;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "write-invoices", description = "Reads invoices from an XML-file and writes them to the destination adapter")
 @Service
@@ -61,6 +62,7 @@ public class WriteInvoices extends AbstractAction {
 	private String adapterName = "";
 
     @Argument(index = 1, name = "orgNo", description = "The org number of the tenant to write to", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     private String orgNo;
 	
 	@Argument(index = 2, name = "invoiceFile", description ="The canonical invoice file (xml-format)", required = true, multiValued = false)

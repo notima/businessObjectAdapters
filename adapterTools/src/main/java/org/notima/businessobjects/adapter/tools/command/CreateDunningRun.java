@@ -19,6 +19,8 @@ import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "create-dunning-run", description = "Create a dunning run file")
 @Service
@@ -36,6 +38,7 @@ public class CreateDunningRun implements Action {
 	private String adapterName = "";
 	
 	@Argument(index = 1, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(OrgNoCompleter.class)
 	private String orgNo = "";
 	
 	@Option(name = "--duedateuntil", description = "Select invoices with max this due date. (format yyyy-mm-dd)", required = false, multiValued = false)

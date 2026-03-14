@@ -18,6 +18,8 @@ import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.util.LocalDateUtils;
 import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "show-accounting-voucher", description = "Shows an accounting voucher")
 @Service
@@ -38,6 +40,7 @@ public class ShowAccountingVoucher implements Action {
 	private String untilDateStr;
 	
     @Argument(index = 0, name = "orgNo", description = "The org number to show details for", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     private String orgNo;
     
     @Argument(index = 1, name = "series", description = "The voucher series", required = true, multiValued = false)

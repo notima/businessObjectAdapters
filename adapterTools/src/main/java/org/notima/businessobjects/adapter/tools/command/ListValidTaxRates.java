@@ -17,6 +17,8 @@ import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.businessobjects.exception.TaxRatesNotAvailableException;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 import org.notima.util.SetUtil;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "list-valid-tax-rates", description = "List valid tax rates for a specific tenant")
 @Service
@@ -32,6 +34,7 @@ public class ListValidTaxRates implements Action {
 	private String adapterName = "";
 	
 	@Argument(index = 1, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)
+	@Completion(OrgNoCompleter.class)
 	private String orgNo = "";
 	
 	@Argument(index = 2, name = "taxDomicile", description = "Tax domicile", required = false, multiValued = false)

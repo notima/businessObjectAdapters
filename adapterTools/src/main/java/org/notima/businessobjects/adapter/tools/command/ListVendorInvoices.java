@@ -21,6 +21,8 @@ import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.util.LocalDateUtils;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "list-vendor-invoices", description = "Lists vendor invoices from an adapter.")
 @Service
@@ -75,6 +77,7 @@ public class ListVendorInvoices extends AbstractAction {
 	private String adapterName = "";
 
     @Argument(index = 1, name = "orgNo", description = "The org number of the tenant to read from", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     private String orgNo;
 	
 	private BusinessObjectFactory<?,?,?,?,?,?> adapter;

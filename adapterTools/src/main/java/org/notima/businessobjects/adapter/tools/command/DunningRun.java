@@ -20,6 +20,7 @@ import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.util.LocalDateUtils;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "dunning-run", description = "Creates a dunning run for given adapter and writes to xml-file")
 @Service
@@ -41,6 +42,7 @@ public class DunningRun extends AbstractAction {
 	private String adapterName = "";
 
     @Argument(index = 1, name = "orgNo", description = "The org number of the tenant to read from", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     private String orgNo;
 	
 	@Argument(index = 2, name = "dunningFile", description ="The canonical invoice to write to (xml-format)", required = true, multiValued = false)

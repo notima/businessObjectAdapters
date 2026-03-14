@@ -23,6 +23,8 @@ import org.notima.generic.businessobjects.BalanceSheetReport;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.util.LocalDateUtils;
 import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
+import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "show-balance-report", description = "Shows Balance Sheet Report")
 @Service
@@ -56,6 +58,7 @@ public class ShowBalanceReport implements Action {
 	private String untilDateStr;
 	
     @Argument(index = 0, name = "orgNo", description = "The org number to show report for", required = true, multiValued = false)
+    @Completion(OrgNoCompleter.class)
     private String orgNo;
 	
 	@Override
