@@ -10,10 +10,15 @@ import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 
 public class JsonTenantInformationFactory implements TenantInformationFactory {
 
+	public static final String DEFAULT_FILE = "jsonAdapter/tenantInformation.json";
+
 	private TenantInformationListImpl tenantList;
 
 	public JsonTenantInformationFactory(String pathToJsonFile) throws IOException {
-		tenantList = TenantInformationListImpl.createFromFile(new File(pathToJsonFile));
+		String path = (pathToJsonFile != null && !pathToJsonFile.trim().isEmpty())
+				? pathToJsonFile.trim()
+				: DEFAULT_FILE;
+		tenantList = TenantInformationListImpl.createFromFile(new File(path));
 	}
 
 	@Override
