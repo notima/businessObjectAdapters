@@ -136,7 +136,8 @@
             emailUser=
             emailPass=
             emailName=Unconfigured e-mail adapter
-            emailPort=25
+            emailPort=587
+            emailStartTls=true
             senderPrivateKey=
             senderPublicKey=
             senderPrivateKeyPassword=

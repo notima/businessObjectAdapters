@@ -51,6 +51,9 @@ public class Activator extends BaseActivator {
                     emailSender.setEmailPass((String)properties.get("emailPass"));
                     emailSender.setEmailPort((String)properties.get("emailPort"));
                     emailSender.setEmailName((String)properties.get("emailName"));
+                    String startTls = (String)properties.get("emailStartTls");
+                    // Default to true; only disable if explicitly set to "false"
+                    emailSender.setEmailStartTls(!"false".equalsIgnoreCase(startTls));
                     try{
                         emailSender.setSenderPublicKey(new File((String)properties.get("senderPublicKey")));
                         emailSender.setSenderPrivateKey(new File((String)properties.get("senderPrivateKey")));

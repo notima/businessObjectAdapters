@@ -18,14 +18,19 @@ import org.notima.businessobjects.adapter.tools.exception.MessageSenderException
 import org.notima.generic.businessobjects.Message;
 import org.notima.generic.businessobjects.PublicKey;
 import org.notima.generic.ifacebusinessobjects.KeyManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class EmailMessageSender implements MessageSender {
+
+    protected static final Logger log = LoggerFactory.getLogger(EmailMessageSender.class);
 
     protected String emailHost;
     protected String emailUser;
     protected String emailPass;
     protected String emailPort = "25";
     protected String emailName;
+    protected boolean emailStartTls = true;
     protected File senderPublicKey;
     protected File senderPrivateKey;
     protected String senderPrivateKeyPassword;
@@ -49,17 +54,33 @@ public abstract class EmailMessageSender implements MessageSender {
         if (emailUser==null) {
         	throw new NullPointerException("Missing property emailUser");
         }
-        
-        properties.setProperty("mail.smtp.host", emailHost); 
-        properties.setProperty("mail.smtp.port", emailPort == null ? "25" : emailPort); 
-        
-        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {  
-            protected PasswordAuthentication getPasswordAuthentication() {  
-                   return new PasswordAuthentication(emailUser, emailPass);
-            }  
-        });
 
-        return session;
+        properties.setProperty("mail.smtp.host", emailHost);
+        properties.setProperty("mail.smtp.port", emailPort == null ? "25" : emailPort);
+
+        boolean hasPassword = emailPass != null && !emailPass.trim().isEmpty();
+
+        if (emailStartTls) {
+            properties.setProperty("mail.smtp.starttls.enable", "true");
+        }
+
+        if (hasPassword) {
+            if (!emailStartTls) {
+                log.warn("Authentication is configured for user '{}' on host '{}' but emailStartTls is false. "
+                        + "Most SMTP servers require STARTTLS before accepting credentials — relay may be denied.",
+                        emailUser, emailHost);
+            }
+            properties.setProperty("mail.smtp.auth", "true");
+            return Session.getInstance(properties, new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(emailUser, emailPass);
+                }
+            });
+        } else {
+            log.warn("No email password configured for user '{}' on host '{}' — connecting without authentication.",
+                    emailUser, emailHost);
+            return Session.getInstance(properties);
+        }
     }
     
     /**
@@ -216,5 +237,13 @@ public abstract class EmailMessageSender implements MessageSender {
 	public void setKeyManager(KeyManager keyManager) {
 		this.keyManager = keyManager;
 	}
-	
+
+	public boolean isEmailStartTls() {
+		return emailStartTls;
+	}
+
+	public void setEmailStartTls(boolean emailStartTls) {
+		this.emailStartTls = emailStartTls;
+	}
+
 }
