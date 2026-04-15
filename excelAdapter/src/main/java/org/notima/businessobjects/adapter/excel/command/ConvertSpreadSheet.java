@@ -42,7 +42,7 @@ public class ConvertSpreadSheet implements Action {
 	@Option(name = "--taxPercent", description = "Used in conjunction with --price-includes-tax", required = false, multiValued = false)
 	private double taxPercent;
 	
-	@Option(name = "--taxExemptArticle", description = "Used in conjunction with --price-includes-tax", required = false, multiValued = false)
+	@Option(name = "--taxExemptArticles", description = "Used in conjunction with --price-includes-tax. Multiple articles are comma separated", required = false, multiValued = false)
 	private String taxExemptArticle;
 	
 	@Option(name = "--skip-lines-with-zero-amount", description = "Don't include lines with zero amount", required = false, multiValued = false)
@@ -135,9 +135,7 @@ public class ConvertSpreadSheet implements Action {
 		eti.setPriceIncludesTaxGlobal(priceIncludesTax);
 		eti.setTaxPercentGlobal(taxPercent);
 		
-		if (taxExemptArticle!=null) {
-			eti.addTaxExemptArticle(taxExemptArticle);
-		}
+		parseTaxExcemptArticles();
 		
 		if (skipLinesWithZeroAmount) {
 			createLineValidator();
@@ -145,6 +143,20 @@ public class ConvertSpreadSheet implements Action {
 		
 	}
 
+	private void parseTaxExcemptArticles() {
+		
+		if (taxExemptArticle==null) return;
+		
+		// Try split with comma.
+		String[] articleList = taxExemptArticle.split(",");
+		if (articleList!=null && articleList.length>0) {
+			for (String s : articleList) {
+				eti.addTaxExemptArticle(s);
+			}
+		}
+		
+	}
+	
 	private void createLineValidator() {
 
 		OrderInvoiceLineValidator skipZeroAmountValidator = new OrderInvoiceLineValidator() {

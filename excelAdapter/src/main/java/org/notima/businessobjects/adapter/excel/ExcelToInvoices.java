@@ -70,6 +70,10 @@ public class ExcelToInvoices {
 	public void addTaxExemptArticle(String articleNo) {
 		taxExemptArticles.add(articleNo);
 	}
+
+	public Set<String> getTaxExemptArticles() {
+		return taxExemptArticles;
+	}
 	
 	public OrderInvoiceLineValidator getInvoiceLineValidator() {
 		return invoiceLineValidator;
@@ -414,7 +418,10 @@ public class ExcelToInvoices {
 				
 			case 4:
 				il.setPriceActual(Math.round(cell.getNumericCellValue()*100.0)/100.0);
-				if (priceIncludesTaxGlobal) {
+				if (il.getProductKey()!=null && priceIncludesTaxGlobal && taxExemptArticles.contains(il.getProductKey())) {
+					il.setTaxIncludedInPrice(true);
+					il.setTaxPercent(0);
+				} else if (priceIncludesTaxGlobal) {
 					il.setTaxIncludedInPrice(true);
 					il.setTaxPercent(taxPercentGlobal);
 					il.calculateLineTotalIncTax(2);
