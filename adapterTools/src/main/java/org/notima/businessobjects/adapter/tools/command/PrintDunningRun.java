@@ -94,9 +94,6 @@ public class PrintDunningRun extends AbstractAction {
 
 		parseInvoiceFile();
 		
-		props.setProperty("JasperFile", 
-				"/home/daniel/develop/notima-workspace/businessObjectAdapters/jasperReportAdapter/src/main/resources/reports/InvoiceReminder.jasper");
-		
 		if (outputDirectory==null) {
 			outputDirectory = new File(invoiceFile).getAbsoluteFile().getParent();
 		}
@@ -190,9 +187,15 @@ public class PrintDunningRun extends AbstractAction {
 	}
 	
 	private String getFileNameForEntry(DunningEntry<?,?> de) {
-		
+
 		StringBuffer buf = new StringBuffer();
 		buf.append(de.getLetterNo());
+		for (org.notima.generic.businessobjects.Invoice<?> inv : de.getInvoices()) {
+			String key = inv.getDocumentKey();
+			if (key != null && !key.equals(de.getLetterNo())) {
+				buf.append("-").append(key);
+			}
+		}
 		String email = getEmail(de);
 		if (email!=null && de.getDebtor().isEmailInvoice()) {
 			buf.append("-email");
