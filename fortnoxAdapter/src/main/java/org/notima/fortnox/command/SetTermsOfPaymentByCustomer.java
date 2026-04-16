@@ -137,7 +137,7 @@ public class SetTermsOfPaymentByCustomer extends FortnoxCommand implements Actio
 					nativeInvoice = invoice.getNativeInvoice();
 					nativeInvoice.setTermsOfPayment(term);
 					fc.setInvoice(nativeInvoice);
-					sess.getConsole().println("Changed payment term on invoice " + is.getDocumentNumber() + " to AG");
+					sess.getConsole().println("Changed payment term on invoice " + is.getDocumentNumber() + " to " + term);
 				}
 			}
 
