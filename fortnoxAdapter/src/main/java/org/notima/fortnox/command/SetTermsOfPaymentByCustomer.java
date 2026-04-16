@@ -87,10 +87,33 @@ public class SetTermsOfPaymentByCustomer extends FortnoxCommand implements Actio
 		// Read filename as a list of customer ids
 		BufferedReader fr = new BufferedReader(new FileReader(new File(fileName)));
 		String line = null;
+		String customerId;
 		while((line = fr.readLine())!=null) {
-			customerIds.add(line.trim());
+			customerId = isolateCustomerId(line);
+			if (customerId!=null)
+				customerIds.add(customerId.trim());
 		}
 		fr.close();
+		
+	}
+	
+	/**
+	 * 
+	 * @param line
+	 * @return		A proper customer id if found, otherwise null.
+	 */
+	private String isolateCustomerId(String line) {
+		
+		if (line==null) return null;
+		if (line.startsWith("#")) {
+			// Comment
+			return null;
+		}
+		String[] splitLines = line.split(",");
+		if (splitLines.length>0) {
+			return splitLines[0];
+		}
+		return null;
 		
 	}
 	
