@@ -50,9 +50,9 @@ public class JasperOrderListFormatter extends JasperBasePdfFormatter implements 
 
 		if ("pdf".equalsIgnoreCase(format) || format==null) {
 			return formatReportAsPdf(
-					data, 
-					null, 
-					jpc, 
+					data,
+					(String) null,
+					jpc,
 					props);
 		} else {
 			

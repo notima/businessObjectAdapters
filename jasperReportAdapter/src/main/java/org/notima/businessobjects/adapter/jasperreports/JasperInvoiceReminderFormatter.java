@@ -19,28 +19,22 @@ public class JasperInvoiceReminderFormatter extends JasperBasePdfFormatter imple
 		}
 		
 		String jasperFile = props.getProperty(JASPER_FILE);
-		if (jasperFile==null) {
-			jasperFile = "reports/InvoiceReminder.jasper";
-			// Lookup default jasper file as a resource
-			URL url = this.getClass().getClassLoader().getResource(jasperFile);
-			if (url!=null) {
-				jasperFile = url.getFile();
-			} else {
-				throw new Exception("The property " + JASPER_FILE + " must be set.");
-			}
-		}
-		
+
 		Object[] data = new Object[1];
 		data[0] = dunningEntry;
 
 		JasperParameterCallback jpc = null;
 
 		if ("pdf".equalsIgnoreCase(format) || format==null) {
-			return formatReportAsPdf(
-					data, 
-					jasperFile, 
-					jpc, 
-					props);
+			if (jasperFile == null) {
+				// Load from bundle resources — use URL to avoid OSGI bundle-path issues
+				URL url = this.getClass().getClassLoader().getResource("reports/InvoiceReminder.jasper");
+				if (url == null) {
+					throw new Exception("reports/InvoiceReminder.jasper not found in bundle; set the " + JASPER_FILE + " property to override.");
+				}
+				return formatReportAsPdf(data, url, jpc, props);
+			}
+			return formatReportAsPdf(data, jasperFile, jpc, props);
 		} else {
 			return null;
 		}

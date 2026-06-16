@@ -123,6 +123,66 @@ public abstract class JasperBasePdfFormatter {
 	}
 
 	/**
+	 * Formats a report as a PDF-file using a URL to the jasper resource.
+	 * Use this in OSGI environments where classloader resources live inside a bundle
+	 * and cannot be resolved to a plain filesystem path via url.getFile().
+	 *
+	 * @param data				The data that should be sent to the report.
+	 * @param jasperUrl			URL of the jasper resource (e.g. from getClass().getClassLoader().getResource(...))
+	 * @param jpc				A callback with additional properties.
+	 * @param props				Properties for this call.
+	 * @return					The absolute file name of the PDF created.
+	 * @throws Exception		Exception if something goes wrong.
+	 */
+	public String formatReportAsPdf(Object[] data, URL jasperUrl, JasperParameterCallback jpc, Properties props) throws Exception {
+
+		if (data == null) {
+			throw new Exception("Data can't be null");
+		}
+		if (jasperUrl == null) {
+			throw new Exception("jasperUrl can't be null");
+		}
+
+		String outputDir = null;
+		String jasperLang = null;
+		String jasperReportName = null;
+		String jasperOutputFilename = null;
+
+		if (props != null) {
+			outputDir = props.getProperty(JASPER_OUTPUT_DIR);
+			jasperLang = props.getProperty(JASPER_LANG);
+			jasperReportName = props.getProperty(JASPER_REPORT_NAME);
+			jasperOutputFilename = props.getProperty(JASPER_OUTPUT_FILENAME);
+		}
+
+		if (outputDir == null) {
+			outputDir = System.getenv("user.home");
+		}
+		if (jasperOutputFilename == null) {
+			jasperOutputFilename = "JasperReport";
+		}
+
+		// Derive SUBREPORT_DIR from the URL so subreports in the same directory resolve correctly
+		String urlStr = jasperUrl.toString();
+		String subreportDir = urlStr.substring(0, urlStr.lastIndexOf('/') + 1);
+
+		HashMap<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("SUBREPORT_DIR", subreportDir);
+		parameters.put(JASPER_REPORT_NAME, jasperReportName);
+		if (jasperLang != null) {
+			parameters.put("CURRENT_LANG", jasperLang);
+		}
+		if (jpc != null && jpc.getExtraProperties() != null) {
+			addAdditionalJasperParameters(parameters, jpc.getExtraProperties());
+		}
+
+		InputStream is = jasperUrl.openStream();
+		JasperPrint print = JasperFillManager.fillReport(is, parameters, new JRBeanArrayDataSource(data));
+		File resultPdf = createPdfFile(print, outputDir, null, jasperOutputFilename);
+		return resultPdf.getAbsolutePath();
+	}
+
+	/**
 	 * Creates a file from the PDF and saves it
 	 * 
 	 * @param print						The print
