@@ -121,6 +121,10 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 			channelOptions.setGeneralLedgerFeeAccount(props.getProperty("generalLedgerFeeAccount"));
 			channelOptions.setGeneralLedgerUnknownTrxAccount(props.getProperty("generalLedgerUnknownTrxAccount"));
 			channelOptions.setVoucherSeries(props.getProperty("voucherSeries"));
+			channelOptions.setSourceReference(props.getProperty("sourceReference"));
+			channelOptions.setSourceReferenceRegex(props.getProperty("sourceReferenceRegex"));
+			channelOptions.setDestinationReference(props.getProperty("destinationReference"));
+			channelOptions.setDestinationReferenceRegex(props.getProperty("destinationReferenceRegex"));
 			logRetrievedProperties();
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -40,7 +40,9 @@ public class AdyenDirectoryToPaymentBatch extends DirectoryPaymentBatchFactory {
 		
 		AdyenReport ratepayReport = AdyenReportParser.createFromFile(channelOptions.getDirectory() + File.separator + file);
 		ratepayReport.setCurrency(channelOptions.getDefaultCurrency());
-		AdyenReportToPaymentBatch converter = AdyenReportToPaymentBatch.buildFromReport(ratepayReport);
+		AdyenReportToPaymentBatch converter = AdyenReportToPaymentBatch.buildFromReport(ratepayReport,
+				channelOptions.getDestinationReference(), channelOptions.getDestinationReferenceRegex(),
+				channelOptions.getSourceReferenceRegex());
 		PaymentBatch result = converter.getPaymentBatch();
 		result.setBatchOwner(channelOptions.getTaxIdentifier());
 		result.setPaymentType(PaymentType.RECEIVABLE);

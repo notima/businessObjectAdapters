@@ -21,18 +21,57 @@ import org.notima.util.LocalDateUtils;
  */
 public class AdyenReportToPaymentBatch {
 
+	// Preserves the previous hardcoded behaviour for channels that don't yet configure
+	// destinationReference / destinationReferenceRegex in their adyen.properties file.
+	private static final String DEFAULT_DESTINATION_REFERENCE_FIELD = "ExternalInvoiceReference2";
+	private static final String DEFAULT_DESTINATION_REFERENCE_REGEX = "^.*?\\.(.*)$";
+
 	private List<PaymentReportRow> rows;
 	private PaymentBatch batch;
 	private AdyenReport	report;
-	
+	private String destinationReferenceField;
+	private String destinationReferenceRegex;
+	private String sourceReferenceRegex;
+
 	public static AdyenReportToPaymentBatch buildFromReport(AdyenReport report) {
-		
+		return buildFromReport(report, null, null);
+	}
+
+	/**
+	 * @param destinationReferenceField Name of the {@code FortnoxExtendedClient.ReferenceField} to match
+	 *        against (e.g. "order", "ExternalInvoiceReference2"). Falls back to the previous hardcoded
+	 *        default if {@code null}.
+	 * @param destinationReferenceRegex Regex applied to the destination reference before matching.
+	 *        Falls back to the previous hardcoded default if {@code null}.
+	 */
+	public static AdyenReportToPaymentBatch buildFromReport(AdyenReport report, String destinationReferenceField,
+			String destinationReferenceRegex) {
+		return buildFromReport(report, destinationReferenceField, destinationReferenceRegex, null);
+	}
+
+	/**
+	 * @param destinationReferenceField Name of the {@code FortnoxExtendedClient.ReferenceField} to match
+	 *        against (e.g. "order", "ExternalInvoiceReference2"). Falls back to the previous hardcoded
+	 *        default if {@code null}.
+	 * @param destinationReferenceRegex Regex applied to the destination reference before matching.
+	 *        Falls back to the previous hardcoded default if {@code null}.
+	 * @param sourceReferenceRegex Regex applied to the source (Adyen) reference before matching, e.g. to
+	 *        strip a prefix. No effect if {@code null}.
+	 */
+	public static AdyenReportToPaymentBatch buildFromReport(AdyenReport report, String destinationReferenceField,
+			String destinationReferenceRegex, String sourceReferenceRegex) {
+
 		AdyenReportToPaymentBatch adyenPaymentBatch = new AdyenReportToPaymentBatch();
 		adyenPaymentBatch.rows = report.getReportRows();
-		adyenPaymentBatch.report = report; 
+		adyenPaymentBatch.report = report;
+		adyenPaymentBatch.destinationReferenceField = destinationReferenceField != null
+				? destinationReferenceField : DEFAULT_DESTINATION_REFERENCE_FIELD;
+		adyenPaymentBatch.destinationReferenceRegex = destinationReferenceRegex != null
+				? destinationReferenceRegex : DEFAULT_DESTINATION_REFERENCE_REGEX;
+		adyenPaymentBatch.sourceReferenceRegex = sourceReferenceRegex;
 		adyenPaymentBatch.build();
 		return adyenPaymentBatch;
-		
+
 	}
 	
 	public PaymentBatch getPaymentBatch() {
@@ -84,13 +123,13 @@ public class AdyenReportToPaymentBatch {
 		dst.setOrderNo(src.getMerchantReference());
 		dst.setComment(src.getModificationReference());
 		
-		dst.setDestinationSystemReferenceField("ExternalInvoiceReference2");
-		dst.setDestinationSystemReferenceRegex("^.*?\\.(.*)$");
+		dst.setDestinationSystemReferenceField(destinationReferenceField);
+		dst.setDestinationSystemReferenceRegex(destinationReferenceRegex);
 		dst.setDestinationSystemReference(src.getPspReference());
-		
-		
-//		dst.setDestinationSystemReference(src.getMerchantReference());
-// 		dst.setDestinationSystemReferenceField("order");
+		if (sourceReferenceRegex != null) {
+			dst.setPreMatchDestinationSystemReferenceRegex(sourceReferenceRegex);
+		}
+
 		dst.setClientOrderNo(src.getMerchantReference());
 		if (report.getCurrency()!=null) {
 			dst.setCurrency(report.getCurrency());
