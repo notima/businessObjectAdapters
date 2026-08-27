@@ -317,10 +317,11 @@ public class FortnoxPaymentBatchRunner {
  		if (payment.getMatchedInvoiceNo()!=null) {
  			inv = extendedClient.getFortnoxInvoice(payment.getMatchedInvoiceNo());
  		}
- 		
+ 		String referenceToMatch; // Good to have for debugging purpose
  		if (inv==null) {
+ 			referenceToMatch = payment.getDestinationSystemReference();
 			inv = extendedClient.getInvoiceToPay(
-			payment.getDestinationSystemReference(), 
+			referenceToMatch, 
 			ReferenceField.valueOf(payment.getDestinationSystemReferenceField()), 
 			payment.getPaymentDate(),
 			null);
