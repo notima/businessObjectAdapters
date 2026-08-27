@@ -20,7 +20,7 @@ public class TaxRatesFI {
 		t.setTaxDebtAccount(new AccountElement("2690"));
 		taxRates.add(t);
 		
-		t = new Tax("14", countryCode, 14, "MP5_KUND", "OUTVAT_MP5_KUND", "INVAT");		
+		t = new Tax("14", countryCode, 13.5, "MP5_KUND", "OUTVAT_MP5_KUND", "INVAT");		
 		t.setDefaultRevenueAccount(new AccountElement("3152"));
 		t.setTaxDebtAccount(new AccountElement("2691"));
 		taxRates.add(t);
