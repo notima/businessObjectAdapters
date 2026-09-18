@@ -11,6 +11,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchGenerator;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
@@ -32,7 +33,9 @@ public interface CanonicalObjectFactory {
 	public PaymentFactory lookupPaymentFactory(String systemName);
 	
 	public PaymentBatchFactory lookupPaymentBatchFactory(String systemName);
-	
+
+	public PaymentBatchGenerator lookupPaymentBatchGenerator(String systemName);
+
 	public Collection<PaymentFactory> listPaymentFactories();
 	
 	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName);

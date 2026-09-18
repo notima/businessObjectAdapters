@@ -13,6 +13,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
+import org.notima.generic.ifacebusinessobjects.PaymentBatchGenerator;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
@@ -39,7 +40,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, PaymentFactory> paymentFactories = new TreeMap<String, PaymentFactory>();
 
 	private Map<String, PaymentBatchFactory> paymentBatchFactories = new TreeMap<String, PaymentBatchFactory>();
-	
+
+	private Map<String, PaymentBatchGenerator> paymentBatchGenerators = new TreeMap<String, PaymentBatchGenerator>();
+
 	private Map<String, TimeRecordServiceFactory> timeRecordServiceFactories = new TreeMap<String, TimeRecordServiceFactory>();
 	
 	private Map<String, PaymentBatchProcessor> paymentBatchProcessors = new TreeMap<String, PaymentBatchProcessor>();
@@ -179,8 +182,32 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
-	
-	
+
+	/**
+	 * Resets the services by re-reading the service references for PaymentBatchGenerators
+	 *
+	 * @throws InvalidSyntaxException
+	 */
+	public void resetPaymentBatchGenerators() throws InvalidSyntaxException {
+
+		if (ctx==null)
+			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
+
+		Collection<ServiceReference<PaymentBatchGenerator>> references = ctx.getServiceReferences(PaymentBatchGenerator.class, null);
+
+		paymentBatchGenerators.clear();
+
+		if (references!=null) {
+			PaymentBatchGenerator srv;
+			for (ServiceReference<PaymentBatchGenerator> sr : references) {
+				srv = ctx.getService(sr);
+				paymentBatchGenerators.put(srv.getSystemName(), srv);
+			}
+		}
+
+	}
+
+
 	/**
 	 * Resets the services by re-reading the service references for TimeRecordServices
 	 * 
@@ -467,12 +494,37 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		if (pp==null)
 			log.warn("Payment Batch Factory {} not found.", systemName);
-		
+
 		return pp;
-		
+
 	}
-	
-	
+
+
+	public PaymentBatchGenerator lookupPaymentBatchGenerator(String systemName) {
+
+		try {
+			resetPaymentBatchGenerators();
+		} catch (Exception e) {
+			// This should not happen.
+			e.printStackTrace();
+			return null;
+		}
+
+		PaymentBatchGenerator pp = null;
+
+		if (systemName==null) {
+			return null;
+		} else {
+			pp = paymentBatchGenerators.get(systemName);
+		}
+		if (pp==null)
+			log.warn("Payment Batch Generator {} not found.", systemName);
+
+		return pp;
+
+	}
+
+
 	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName) {
 		
 		try {
