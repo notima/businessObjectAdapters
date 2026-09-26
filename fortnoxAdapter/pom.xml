@@ -48,6 +48,9 @@
 
 		<resources>
 			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
 				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>fortnoxClients.xml</exclude>
@@ -81,6 +84,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Include-Resource>{maven-resources}</Include-Resource>
 						<Bundle-Activator>org.notima.businessobjects.adapter.fortnox.Activator</Bundle-Activator>
 						<Export-Package>org.notima.businessobjects.adapter.fortnox.*,
 										org.notima.businessobjects.adapter.fortnox.exception.*,	
