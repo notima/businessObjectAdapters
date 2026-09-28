@@ -38,6 +38,9 @@
 
 		<resources>
 			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
 				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>log4j.xml</exclude>
@@ -70,6 +73,7 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+						<Include-Resource>{maven-resources}</Include-Resource>
 						<Bundle-Activator>org.notima.generic.adempiere.factory.Activator</Bundle-Activator>
 						<Export-Package>org.notima.generic.adempiere,
 										org.notima.generic.adempiere.factory,

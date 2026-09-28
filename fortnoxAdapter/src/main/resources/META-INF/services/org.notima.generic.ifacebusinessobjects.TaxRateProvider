@@ -1,0 +1,3 @@
+# FortnoxTaxRateProvider implements BundleActivator and cannot be loaded by SPI outside OSGi.
+# It is registered as an OSGi service via Activator.java instead.
+# When fortnoxAdapterSPI is extracted as a separate module, a clean TaxRateProvider can be added here.
