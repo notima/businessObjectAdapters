@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.notima.generic.businessobjects.BankAccountDetail;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
@@ -33,6 +34,21 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 	public abstract String getPropertyFile();
 	
 	public abstract PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception;
+	
+	/**
+	 * Creates the payment batches from a file. A file can result in more than one batch,
+	 * for instance one per currency. All batches have the file as source.
+	 * 
+	 * Default implementation returns the batch from {@link #createPaymentBatchFromFile(String)}.
+	 * 
+	 * @param file	The file name (in the source directory).
+	 * @return	The batches.
+	 */
+	public List<PaymentBatch> createPaymentBatchesFromFile(String file) throws IOException, Exception {
+		List<PaymentBatch> result = new ArrayList<PaymentBatch>();
+		result.add(createPaymentBatchFromFile(file));
+		return result;
+	}
 	
 	public abstract String[] getFilteredFiles();
 	
@@ -65,6 +81,26 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 		channelOptions.setDefaultCurrency(defaultCurrency);
 	}
 
+	/**
+	 * Sets the bank account and general ledger accounts of the batch using the
+	 * channel's accounts for given currency.
+	 * 
+	 * @param batch		The batch to update.
+	 * @param currency	The currency of the batch. If null, the default currency is used.
+	 * @throws org.notima.generic.businessobjects.UnknownCurrencyAccountException	If the channel has no account defined for the currency.
+	 */
+	protected void setAccountsForCurrency(PaymentBatch batch, String currency) {
+		String c = currency!=null ? currency : channelOptions.getDefaultCurrency();
+		BankAccountDetail bad = new BankAccountDetail();
+		bad.setCurrency(c);
+		bad.setGeneralLedgerBankAccount(channelOptions.getGeneralLedgerBankAccount(c));
+		bad.setGeneralLedgerInTransitAccount(channelOptions.getGeneralLedgerInTransitAccount(c));
+		bad.setGeneralLedgerReconciliationAccount(channelOptions.getGeneralLedgerReconciliationAccount(c));
+		bad.setGeneralLedgerFeeAccount(channelOptions.getGeneralLedgerFeeAccount(c));
+		batch.setBankAccount(bad);
+		batch.setGeneralLedgerUnknownTrxAccount(channelOptions.getGeneralLedgerUnknownTrxAccount(c));
+	}
+	
 	private void checkDirectoryValid() throws FileNotFoundException {
 		File f = new File(channelOptions.getDirectory());
 		if (!f.isDirectory()) {
@@ -96,7 +132,7 @@ public abstract class DirectoryPaymentBatchFactory implements PaymentBatchFactor
 		String[] filesToRead = getFilteredFiles();
 		for (String file : filesToRead) {
 			try {
-				result.add(createPaymentBatchFromFile(file));
+				result.addAll(createPaymentBatchesFromFile(file));
 			} catch (Exception ee) {
 				ee.printStackTrace();
 			}

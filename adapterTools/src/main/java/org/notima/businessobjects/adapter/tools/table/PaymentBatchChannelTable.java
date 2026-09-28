@@ -7,9 +7,20 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 public class PaymentBatchChannelTable extends GenericTable {
 
 	private List<PaymentBatchChannel> list;
-	
+	private boolean showActiveFlag;
 	
 	public PaymentBatchChannelTable(List<PaymentBatchChannel> bpl) {
+		this(bpl, false);
+	}
+	
+	/**
+	 * 
+	 * @param bpl				The channels to show.
+	 * @param showActiveFlag	If true, a column flagging inactive channels is added.
+	 */
+	public PaymentBatchChannelTable(List<PaymentBatchChannel> bpl, boolean showActiveFlag) {
+
+		this.showActiveFlag = showActiveFlag;
 
 		addColumn("ChannelID");
 		addColumn("Tenant");
@@ -18,6 +29,9 @@ public class PaymentBatchChannelTable extends GenericTable {
 		addColumn("Description");
 		addColumn("Source dir");
 		addColumn("R. until");
+		if (showActiveFlag) {
+			addColumn("Active");
+		}
 		
 		if (bpl==null || bpl.size()==0) {
 			setEmptyTableText("No channels");
@@ -37,7 +51,8 @@ public class PaymentBatchChannelTable extends GenericTable {
 		if (list==null) return;
 		
 		for (PaymentBatchChannel p : list) {
-			addRow().addContent(
+			GenericRow row = addRow();
+			row.addContent(
 					p.getChannelId(), 
 					p.getTenant().toString(), 
 					p.getSourceSystem(),
@@ -46,8 +61,18 @@ public class PaymentBatchChannelTable extends GenericTable {
 					getSourceDirectory(p),
 					getReconciledUntilString(p)
 					);
+			if (showActiveFlag) {
+				row.addContent(isActive(p) ? "Yes" : "NO");
+			}
 		}
 		
+	}
+
+	/**
+	 * A channel without status is considered active.
+	 */
+	public static boolean isActive(PaymentBatchChannel p) {
+		return p.getStatus()==null || p.getStatus().isActive();
 	}
 
 	private String getSourceDirectory(PaymentBatchChannel p) {

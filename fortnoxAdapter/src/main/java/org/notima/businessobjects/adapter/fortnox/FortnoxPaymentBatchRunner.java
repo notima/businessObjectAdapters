@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.fortnox;
 
 import java.io.StringWriter;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import org.notima.generic.businessobjects.PaymentProcessResult.ResultCode;
 import org.notima.generic.businessobjects.PaymentWriteOff;
 import org.notima.generic.businessobjects.PayoutLine;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.util.LocalDateUtils;
 
 public class FortnoxPaymentBatchRunner {
 
@@ -65,6 +67,9 @@ public class FortnoxPaymentBatchRunner {
 	
 	public void setPaymentBatch(PaymentBatch paymentBatch) throws Exception {
 		this.paymentBatch = paymentBatch;
+		// The runner is reused for batches of the same tenant. Start with a new result for each batch.
+		paymentBatchProcessResult = new PaymentBatchProcessResult();
+		paymentBatchProcessResult.setDryRun(dryRun);
 		// TODO - Compare tax subject
 		determineModeOfPayment();
 
@@ -130,10 +135,16 @@ public class FortnoxPaymentBatchRunner {
 		av.balanceWithLine(AccountingType.ROUNDING);
 		
 		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
+		prepareVoucherForResult(av, payout.getCurrency());
 		
 		if (!dryRun && !processOptions.isDryRun() && !processOptions.isDraftPaymentsIfPossible()) {
-			extendedClient.accountFortnoxVoucher(fortnoxVoucher, payout.getCurrency(), payout.getCurrencyRateToAccountingCurrency());
+			Voucher created = extendedClient.accountFortnoxVoucher(fortnoxVoucher, payout.getCurrency(), payout.getCurrencyRateToAccountingCurrency());
+			setVoucherNumber(av, created);
+			paymentBatchProcessResult.addVoucher(av);
 		} else {
+			if (processOptions.isDryRun() || dryRun) {
+				paymentBatchProcessResult.addVoucher(av);
+			}
 			StringWriter buf = new StringWriter();
 			JAXB.marshal(fortnoxVoucher, buf);
 			Log.info("Would have accounted voucher: " + buf.toString()); 
@@ -207,14 +218,21 @@ public class FortnoxPaymentBatchRunner {
 		av.balanceWithLine(AccountingType.ROUNDING);
 		
 		Voucher fortnoxVoucher = fortnoxConverter.mapFromBusinessObjectVoucher(extendedClient.getCurrentFortnoxAdapter(), voucherSeries, av);
+		prepareVoucherForResult(av, payment.getCurrency());
 		
 		if (!dryRun) {
-			extendedClient.accountFortnoxVoucher(fortnoxVoucher, payment.getCurrency(), FortnoxConstants.GET_RATE_FROM_FORTNOX);
+			Voucher created = extendedClient.accountFortnoxVoucher(fortnoxVoucher, payment.getCurrency(), FortnoxConstants.GET_RATE_FROM_FORTNOX);
+			setVoucherNumber(av, created);
 		} else {
 			Log.info("Would have accounted voucher: " + fortnoxVoucher.toString());
 		}
 		
+		paymentBatchProcessResult.addVoucher(av);
+		
 		PaymentProcessResult result = new PaymentProcessResult(PaymentProcessResult.ResultCode.OK_WITH_WARNING);
+		setPaymentDetails(result, payment);
+		result.setModeOfPayment(modeOfPrepayment);
+		result.appendNote("Not matched. Accounted as prepayment");
 		return result;
 	}
 	
@@ -238,6 +256,9 @@ public class FortnoxPaymentBatchRunner {
 		
 		InvoicePayment invoicePayment = null;
 		Exception paymentException = null;
+		PaymentProcessResult details = new PaymentProcessResult();
+		setPaymentDetails(details, payment);
+		details.setInvoiceNo(inv.getDocumentNumber());
 		
 		try {
 			invoicePayment = extendedClient.payCustomerInvoice(
@@ -248,24 +269,84 @@ public class FortnoxPaymentBatchRunner {
 					bookkeepPayment, 
 					processOptions.isFeesPerPayment(), 
 					payment,
-					dryRun);
+					dryRun,
+					details);
 		} catch (Exception ee) {
 			paymentException = ee;
 		}
 		
-		if (invoicePayment!=null && invoicePayment.getNumber()!=null && invoicePayment.getNumber()>0) {
-			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.OK);
-			ppr.setResultingPayment(FortnoxConverter.updatePaymentFromInvoicePayment(invoicePayment, payment));
-			return ppr;
-		} else {
-			PaymentProcessResult ppr = new PaymentProcessResult(ResultCode.FAILED);
-			if (paymentException!=null) {
-				ppr.setException(paymentException);
-				ppr.setTextResultFromException();
-			}
-			return ppr;
+		if (invoicePayment!=null) {
+			updateFromInvoicePayment(details, invoicePayment);
+		}
+		if (details.getVoucher()!=null) {
+			paymentBatchProcessResult.addVoucher(details.getVoucher());
 		}
 		
+		if (invoicePayment!=null && invoicePayment.getNumber()!=null && invoicePayment.getNumber()>0) {
+			details.setResultCode(ResultCode.OK);
+			details.setResultingPayment(FortnoxConverter.updatePaymentFromInvoicePayment(invoicePayment, payment));
+			return details;
+		} else {
+			details.setResultCode(ResultCode.FAILED);
+			if (paymentException!=null) {
+				details.setException(paymentException);
+				details.appendNote(paymentException.getMessage());
+			}
+			return details;
+		}
+		
+	}
+	
+	/**
+	 * Sets the amount, currency, date and reference of the payment on the result.
+	 */
+	private void setPaymentDetails(PaymentProcessResult result, Payment<?> payment) {
+		result.setSourceReference(payment.getClientOrderNo()!=null ? payment.getClientOrderNo() : payment.getDestinationSystemReference());
+		result.setPaymentDate(LocalDateUtils.asLocalDate(payment.getPaymentDate()));
+		result.setAmount(payment.getAmount()!=null ? payment.getAmount() : 0d);
+		result.setCurrency(payment.getCurrency());
+	}
+	
+	/**
+	 * Updates the result with what was (or would be) registered in Fortnox.
+	 */
+	private void updateFromInvoicePayment(PaymentProcessResult result, InvoicePayment pmt) {
+		if (pmt.getInvoiceNumber()!=null) {
+			result.setInvoiceNo(pmt.getInvoiceNumber().toString());
+		}
+		if (pmt.getPaymentDate()!=null) {
+			result.setPaymentDate(LocalDate.parse(pmt.getPaymentDate()));
+		}
+		result.setModeOfPayment(pmt.getModeOfPayment());
+		result.setWriteOffAmount(pmt.getWriteOffAmount());
+		// A non accounting currency payment has been converted to accounting currency
+		String currency = result.getCurrency();
+		if (currency!=null && !currency.equalsIgnoreCase(FortnoxConstants.DEFAULT_ACCOUNTING_CURRENCY) && pmt.getAmount()!=null) {
+			result.setAcctAmount(pmt.getAmount());
+		}
+		if (!dryRun && pmt.getNumber()!=null && pmt.getNumber()>0) {
+			result.setDestinationPaymentId(pmt.getNumber().toString());
+		}
+	}
+	
+	/**
+	 * Sets voucher series and currency on a voucher that is added to the result.
+	 */
+	private void prepareVoucherForResult(AccountingVoucher av, String currency) {
+		av.setVoucherSeries(voucherSeries);
+		if (currency!=null) {
+			av.setSourceCurrency(currency);
+			if (!currency.equalsIgnoreCase(FortnoxConstants.DEFAULT_ACCOUNTING_CURRENCY)) {
+				av.setComments("Amounts in " + currency + ", converted to " + FortnoxConstants.DEFAULT_ACCOUNTING_CURRENCY + " when accounted");
+			}
+		}
+	}
+	
+	private void setVoucherNumber(AccountingVoucher av, Voucher created) {
+		if (created!=null && created.getVoucherNumber()!=null) {
+			av.setVoucherSeries(created.getVoucherSeries());
+			av.setVoucherNo(created.getVoucherNumber().toString());
+		}
 	}
 	
 	public PaymentBatchProcessResult getPaymentBatchProcessResult() {

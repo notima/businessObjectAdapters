@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,8 +19,10 @@ import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.ReportFormatter;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
+import org.notima.businessobjects.adapter.tools.table.PaymentProcessResultTable;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
+import org.notima.generic.businessobjects.PaymentBatchProcessResult;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.PaymentFactory;
 
@@ -45,7 +48,7 @@ public class ProcessPaymentBatch implements Action {
     @Option(name = "--draft-payments", description = "Only creates drafts of the payments, if supported by the destination adapter", required = false, multiValued = false)
     private boolean	draftPayments;
     
-    @Option(name = "-d", aliases = { "--dry-run" }, description = "Let's you know what would be done, but doesn't do it", required = false, multiValued = false)
+    @Option(name = "-d", aliases = { "--dry-run" }, description = "Shows the payments and vouchers that would be created, without creating them. Invoice balances are not reduced between payments in a dry run.", required = false, multiValued = false)
     private boolean dryRun;
     
     @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
@@ -77,6 +80,7 @@ public class ProcessPaymentBatch implements Action {
 	PaymentFactory paymentFactory;
 	PaymentBatchProcessor paymentProcessor;
 	PaymentBatchProcessOptions processOptions;
+	private List<PaymentBatchProcessResult> processResults = new ArrayList<PaymentBatchProcessResult>();
 	
 	@Override
 	public Object execute() throws Exception {
@@ -99,6 +103,8 @@ public class ProcessPaymentBatch implements Action {
 			processAndPrint(pb);
 		}
 		
+		PaymentProcessResultTable.printResults(processResults, paymentProcessor.getSystemName(), sess.getConsole());
+		
 		return null;
 	}
 	
@@ -107,7 +113,7 @@ public class ProcessPaymentBatch implements Action {
 		if (matchOnly) {
 			paymentProcessor.lookupInvoiceReferences(pb, processOptions);
 		} else {
-			paymentProcessor.processPaymentBatch(pb, processOptions);
+			processResults.add(paymentProcessor.processPaymentBatch(pb, processOptions));
 		}
 		
 		formatReport(pb);

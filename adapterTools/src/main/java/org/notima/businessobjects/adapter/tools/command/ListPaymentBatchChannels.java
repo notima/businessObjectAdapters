@@ -1,10 +1,12 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
@@ -34,6 +36,9 @@ public class ListPaymentBatchChannels implements Action {
     @Argument(index = 0, name = "orgNo", description = "The org number to show details for", required = true, multiValued = false)
     @Completion(OrgNoCompleter.class)
     private String orgNo;
+
+    @Option(name = "-a", aliases = { "--all" }, description = "Show all channels, including inactive ones", required = false, multiValued = false)
+    private boolean showAll;
 	
 	@Override
 	public Object execute() throws Exception {
@@ -59,10 +64,24 @@ public class ListPaymentBatchChannels implements Action {
 		factory.populateUnprocessedEntries(true);
 		
 		List<PaymentBatchChannel> result = factory.listChannelsForTenant(tenant);
+		if (!showAll) {
+			result = filterActive(result);
+		}
 		
-		PaymentBatchChannelTable table = new PaymentBatchChannelTable(result);
+		PaymentBatchChannelTable table = new PaymentBatchChannelTable(result, showAll);
 		table.getShellTable().print(sess.getConsole());
 		
+	}
+
+	private List<PaymentBatchChannel> filterActive(List<PaymentBatchChannel> channels) {
+		List<PaymentBatchChannel> activeChannels = new ArrayList<PaymentBatchChannel>();
+		if (channels==null) return activeChannels;
+		for (PaymentBatchChannel ch : channels) {
+			if (PaymentBatchChannelTable.isActive(ch)) {
+				activeChannels.add(ch);
+			}
+		}
+		return activeChannels;
 	}
 	
 }

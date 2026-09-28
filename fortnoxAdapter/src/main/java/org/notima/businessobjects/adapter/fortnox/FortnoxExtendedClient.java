@@ -36,6 +36,7 @@ import org.notima.api.fortnox.entities3.WriteOffs;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
 import org.notima.generic.businessobjects.Payment;
+import org.notima.generic.businessobjects.PaymentProcessResult;
 import org.notima.util.LocalDateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -700,6 +701,26 @@ public class FortnoxExtendedClient {
 			boolean includeWriteOffs,
 			Payment<?> payment,
 			boolean dryRun) throws Exception {
+		return payCustomerInvoice(modeOfPayment, modeOfPrepayment, voucherSeries, invoice, 
+				bookkeepPayment, includeWriteOffs, payment, dryRun, null);
+	}
+	
+	/**
+	 * Pays a customer invoice and records what was done (or would have been done in a dry run).
+	 * 
+	 * @param details			If not null, notes and any prepayment voucher are recorded here.
+	 * @see #payCustomerInvoice(String, String, String, Invoice, boolean, boolean, Payment, boolean)
+	 */
+	public InvoicePayment payCustomerInvoice(
+			String modeOfPayment,
+			String modeOfPrepayment,
+			String voucherSeries,
+			Invoice invoice,
+			boolean bookkeepPayment,
+			boolean includeWriteOffs,
+			Payment<?> payment,
+			boolean dryRun,
+			PaymentProcessResult details) throws Exception {
 		
 		// TODO: Use FortnoxClient3.payCustomerInvoice to avoid duplicating code
 		
@@ -749,14 +770,17 @@ public class FortnoxExtendedClient {
 			if (!dryRun) {
 				log.debug("Bookkeeping invoice # " + pmt.getInvoiceNumber());
 				bof.getClient().performAction(true, "invoice", Integer.toString(pmt.getInvoiceNumber()), FortnoxConstants.ACTION_INVOICE_BOOKKEEP);
+				if (details!=null) details.appendNote("Invoice bookkept");
 			} else {
 				log.info("Would have booked invoice " + pmt.getInvoiceNumber());
+				if (details!=null) details.appendNote("Invoice would be bookkept");
 			}
 		}
 		
 		// Make sure the payment isn't empty
 		if (pmt.getAmount()==0d && (pmt.getWriteOffs()==null || pmt.getWriteOffs().getWriteOff()==null || pmt.getWriteOffs().getWriteOff().isEmpty())) {
 			log.info("Payment for invoice " + pmt.getInvoiceNumber() + " is empty. Not processing.");
+			if (details!=null) details.appendNote("Empty payment. Not processed");
 			return pmt;
 		}
 		
@@ -796,6 +820,10 @@ public class FortnoxExtendedClient {
 			}
 			
 			pmt.setPaymentDate(FortnoxClient3.s_dfmt.format(invoiceDate));
+			if (details!=null) {
+				details.appendNote("Payment date moved to invoice date " + invoice.getInvoiceDate()
+						+ (prepaymentVoucher!=null ? " (prepayment voucher)" : ""));
+			}
 
 		}
 
@@ -821,12 +849,22 @@ public class FortnoxExtendedClient {
 				log.debug("Accounting pre-payment voucher for " + pmt.getInvoiceNumber());
 				FortnoxConverter conv = new FortnoxConverter();
 				Voucher voucher = conv.mapFromBusinessObjectVoucher(bof, voucherSeries, prepaymentVoucher);
-				accountFortnoxVoucher(voucher, prepaymentVoucher.getSourceCurrency(), pmt.getCurrencyRate());
+				voucher = accountFortnoxVoucher(voucher, prepaymentVoucher.getSourceCurrency(), pmt.getCurrencyRate());
+				if (details!=null) {
+					if (voucher!=null && voucher.getVoucherNumber()!=null) {
+						prepaymentVoucher.setVoucherSeries(voucher.getVoucherSeries());
+						prepaymentVoucher.setVoucherNo(voucher.getVoucherNumber().toString());
+					}
+					details.setVoucher(prepaymentVoucher);
+				}
 			}
 			
 		} else {
 			if (prepaymentVoucher!=null) {
 				log.info("Would have accounted pre-payment for invoice # " + pmt.getInvoiceNumber() + " on " + prepaymentVoucher.getAcctDate());
+				if (details!=null && bookkeepPayment) {
+					details.setVoucher(prepaymentVoucher);
+				}
 			}
 			log.info("Would have paid invoice # " + pmt.getInvoiceNumber() + " with " + pmt.getAmount());
 			// Set number to one to mark it as successful

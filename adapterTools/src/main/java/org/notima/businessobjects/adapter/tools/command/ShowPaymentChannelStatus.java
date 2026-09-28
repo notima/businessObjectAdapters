@@ -22,7 +22,7 @@ public class ShowPaymentChannelStatus implements Action {
 	@Reference
 	private Session sess;
 	
-	@Argument(index = 0, name = "channelId", description ="The payment channel", required = true, multiValued = false)
+	@Argument(index = 0, name = "channelId", description ="The payment channel. Could also be description (if unique)", required = true, multiValued = false)
 	private String channelId = "";
 	
 	private PaymentBatchChannelFactory channelFactory;
@@ -53,8 +53,8 @@ public class ShowPaymentChannelStatus implements Action {
 		channelFactory = cof.lookupFirstPaymentBatchChannelFactory();
 		if (channelFactory==null) throw new Exception("No channel factories defined.");
 		
-		channel = channelFactory.findChannelWithId(channelId);
-		if (channel==null) throw new Exception("No channel with ID [" + channelId + "] found.");
+		channel = channelFactory.findChannelWithIdOrDescription(channelId);
+		if (channel==null) throw new Exception("No channel with ID or description [" + channelId + "] found.");
 		
 		paymentBatchFactory = cof.lookupPaymentBatchFactory(channel.getSourceSystem());	
 		paymentBatchFactory.setSource(channel.getOptions().getSourceDirectory());

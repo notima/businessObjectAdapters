@@ -9,7 +9,6 @@ import java.util.List;
 import org.notima.adyen.AdyenReport;
 import org.notima.adyen.AdyenReportParser;
 import org.notima.businessobjects.adapter.paymentbatch.DirectoryPaymentBatchFactory;
-import org.notima.generic.businessobjects.BankAccountDetail;
 import org.notima.generic.businessobjects.Payment.PaymentType;
 import org.notima.generic.businessobjects.PaymentBatch;
 
@@ -38,24 +37,19 @@ public class AdyenDirectoryToPaymentBatch extends DirectoryPaymentBatchFactory {
 	
 	public PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
 		
-		AdyenReport ratepayReport = AdyenReportParser.createFromFile(channelOptions.getDirectory() + File.separator + file);
-		ratepayReport.setCurrency(channelOptions.getDefaultCurrency());
-		AdyenReportToPaymentBatch converter = AdyenReportToPaymentBatch.buildFromReport(ratepayReport,
+		AdyenReport adyenReport = AdyenReportParser.createFromFile(channelOptions.getDirectory() + File.separator + file);
+		if (adyenReport.getCurrency()==null) {
+			adyenReport.setCurrency(channelOptions.getDefaultCurrency());
+		}
+		AdyenReportToPaymentBatch converter = AdyenReportToPaymentBatch.buildFromReport(adyenReport,
 				channelOptions.getDestinationReference(), channelOptions.getDestinationReferenceRegex(),
 				channelOptions.getSourceReferenceRegex());
 		PaymentBatch result = converter.getPaymentBatch();
 		result.setBatchOwner(channelOptions.getTaxIdentifier());
 		result.setPaymentType(PaymentType.RECEIVABLE);
-		BankAccountDetail bad = new BankAccountDetail();
-		bad.setCurrency(channelOptions.getDefaultCurrency());
-		bad.setGeneralLedgerBankAccount(channelOptions.getGeneralLedgerBankAccount());
-		bad.setGeneralLedgerInTransitAccount(channelOptions.getGeneralLedgerInTransitAccount());
-		bad.setGeneralLedgerReconciliationAccount(channelOptions.getGeneralLedgerReconciliationAccount());
-		bad.setGeneralLedgerFeeAccount(channelOptions.getGeneralLedgerFeeAccount());
+		setAccountsForCurrency(result, adyenReport.getCurrency());
 		result.setVoucherSeries(channelOptions.getVoucherSeries());
-		result.setBankAccount(bad);
 		result.setSource(file);
-		result.setGeneralLedgerUnknownTrxAccount(channelOptions.getGeneralLedgerUnknownTrxAccount());
 		return result;
 		
 	}

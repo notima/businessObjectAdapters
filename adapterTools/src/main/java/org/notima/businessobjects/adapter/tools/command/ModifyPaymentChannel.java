@@ -12,6 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
+import org.notima.generic.businessobjects.PaymentBatchChannelStatus;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 
@@ -34,7 +35,13 @@ public class ModifyPaymentChannel implements Action {
     @Option(name = "--set-description", description = "Sets description", required = false, multiValued = false)
     private String description;
 
-	@Argument(index = 0, name = "channelId", description ="The payment channel to run", required = true, multiValued = false)
+    @Option(name = "--activate", description = "Sets the channel as active", required = false, multiValued = false)
+    private boolean activate;
+
+    @Option(name = "--deactivate", description = "Sets the channel as inactive", required = false, multiValued = false)
+    private boolean deactivate;
+
+	@Argument(index = 0, name = "channelId", description ="The payment channel to modify. Could also be description (if unique)", required = true, multiValued = false)
 	private String channelId = "";
 	
 	private PaymentBatchChannelFactory channelFactory;
@@ -45,11 +52,13 @@ public class ModifyPaymentChannel implements Action {
 
 	private void initParameters() throws Exception {
 
+		if (activate && deactivate) throw new Exception("--activate and --deactivate can't be used together.");
+
 		channelFactory = cof.lookupFirstPaymentBatchChannelFactory();
 		if (channelFactory==null) throw new Exception("No channel factories defined.");
 		
-		channel = channelFactory.findChannelWithId(channelId);
-		if (channel==null) throw new Exception("No channel with ID [" + channelId + "] found.");
+		channel = channelFactory.findChannelWithIdOrDescription(channelId);
+		if (channel==null) throw new Exception("No channel with ID or description [" + channelId + "] found.");
 		
 		options = channel.getOptions();
 		
@@ -84,6 +93,16 @@ public class ModifyPaymentChannel implements Action {
 				channel.setPaymentBatchChannelOptions(options);
 			}
 			options.setSourceFileFilter(sourceFileFilter);
+			updated = true;
+		}
+
+		if (activate || deactivate) {
+			PaymentBatchChannelStatus status = channel.getStatus();
+			if (status==null) {
+				status = new PaymentBatchChannelStatus();
+				channel.setStatus(status);
+			}
+			status.setActive(activate);
 			updated = true;
 		}
 

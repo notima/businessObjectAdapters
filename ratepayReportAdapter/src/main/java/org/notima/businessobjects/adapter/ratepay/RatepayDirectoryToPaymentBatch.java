@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.notima.businessobjects.adapter.paymentbatch.DirectoryPaymentBatchFactory;
-import org.notima.generic.businessobjects.BankAccountDetail;
 import org.notima.generic.businessobjects.Payment.PaymentType;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
@@ -69,21 +68,16 @@ public class RatepayDirectoryToPaymentBatch extends DirectoryPaymentBatchFactory
 	public PaymentBatch createPaymentBatchFromFile(String file) throws IOException, Exception {
 		
 		RatepayReport ratepayReport = RatepayReportParser.createFromFile(channelOptions.getDirectory() + File.separator + file);
-		ratepayReport.setCurrency(channelOptions.getDefaultCurrency());
+		if (ratepayReport.getCurrency()==null) {
+			ratepayReport.setCurrency(channelOptions.getDefaultCurrency());
+		}
 		RatepayToPaymentBatch converter = RatepayToPaymentBatch.buildFromReport(ratepayReport);
 		PaymentBatch result = converter.getPaymentBatch();
 		result.setBatchOwner(channelOptions.getTaxIdentifier());
 		result.setPaymentType(PaymentType.RECEIVABLE);
-		BankAccountDetail bad = new BankAccountDetail();
-		bad.setCurrency(channelOptions.getDefaultCurrency());
-		bad.setGeneralLedgerBankAccount(channelOptions.getGeneralLedgerBankAccount());
-		bad.setGeneralLedgerInTransitAccount(channelOptions.getGeneralLedgerInTransitAccount());
-		bad.setGeneralLedgerReconciliationAccount(channelOptions.getGeneralLedgerReconciliationAccount());
-		bad.setGeneralLedgerFeeAccount(channelOptions.getGeneralLedgerFeeAccount());
+		setAccountsForCurrency(result, ratepayReport.getCurrency());
 		result.setVoucherSeries(channelOptions.getVoucherSeries());
-		result.setBankAccount(bad);
 		result.setSource(file);
-		result.setGeneralLedgerUnknownTrxAccount(channelOptions.getGeneralLedgerUnknownTrxAccount());
 		return result;
 		
 	}

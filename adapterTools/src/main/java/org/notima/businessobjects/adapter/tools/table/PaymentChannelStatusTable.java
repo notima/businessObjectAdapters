@@ -41,11 +41,11 @@ public class PaymentChannelStatusTable extends GenericTable {
 		addRow().addContent("Flow", getFlow());
 		addRow().addContent("Source dir", getSourceDirectory());
 		addRow().addContent("Currency", opts.getDefaultCurrency());
-		addRow().addContent("Bank.acct", opts.getGeneralLedgerBankAccount());
-		addRow().addContent("Reconc.acct", opts.getGeneralLedgerReconciliationAccount());
-		addRow().addContent("Intransit acct", opts.getGeneralLedgerInTransitAccount());
-		addRow().addContent("Fee acct", opts.getGeneralLedgerFeeAccount());
-		addRow().addContent("Unknown acct", opts.getGeneralLedgerUnknownTrxAccount());
+		addRow().addContent("Bank.acct", opts.getGeneralLedgerBankAccountDefinition());
+		addRow().addContent("Reconc.acct", opts.getGeneralLedgerReconciliationAccountDefinition());
+		addRow().addContent("Intransit acct", opts.getGeneralLedgerInTransitAccountDefinition());
+		addRow().addContent("Fee acct", opts.getGeneralLedgerFeeAccountDefinition());
+		addRow().addContent("Unknown acct", opts.getGeneralLedgerUnknownTrxAccountDefinition());
 		if (opts.hasSourceReference()) {
 			addRow().addContent("Source ref", opts.getSourceReference());
 		}

@@ -106,12 +106,9 @@ public class GeneratePaymentBatch implements Action {
 	 * Finds channel by ID first and then description
 	 */
 	private void findChannel() throws Exception {
-		channel = channelFactory.findChannelWithId(channelId);
-		if (channel == null) {
-			channel = channelFactory.findChannelByDescription(channelId);
-		}
+		channel = channelFactory.findChannelWithIdOrDescription(channelId);
 		if (channel == null)
-			throw new Exception("No channel with ID [" + channelId + "] found.");
+			throw new Exception("No channel with ID or description [" + channelId + "] found.");
 	}
 
 	private File resolveConfigDirectory() throws Exception {

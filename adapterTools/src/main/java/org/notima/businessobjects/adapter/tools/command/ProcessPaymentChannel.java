@@ -5,7 +5,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -21,9 +23,11 @@ import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.ReportFormatter;
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
+import org.notima.businessobjects.adapter.tools.table.PaymentProcessResultTable;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
+import org.notima.generic.businessobjects.PaymentBatchProcessResult;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
@@ -55,7 +59,7 @@ public class ProcessPaymentChannel implements Action {
     @Option(name = "--non-matched-as-prepayments", description = "Account non matched as prepayments.", required = false, multiValued = false)
     private boolean nonMatchedAsPrepayments;
     
-    @Option(name = "-d", aliases = { "--dry-run" }, description = "Let's you know what would be done, but doesn't do it", required = false, multiValued = false)
+    @Option(name = "-d", aliases = { "--dry-run" }, description = "Shows the payments and vouchers that would be created, without creating them. Invoice balances are not reduced between payments in a dry run.", required = false, multiValued = false)
     private boolean dryRun;
     
     @Option(name = _NotimaCmdOptions.UNTIL_DATE, description = "Only process until this date yyyy-MM-dd", required = false)
@@ -93,6 +97,7 @@ public class ProcessPaymentChannel implements Action {
 	private PaymentBatchProcessOptions processOptions;
 	
 	private List<PaymentBatch>	listOfBatches = null;
+	private List<PaymentBatchProcessResult>	processResults = new ArrayList<PaymentBatchProcessResult>();
 	private boolean				allBatchesProcessed = false;
 	
 	private SimpleDateFormat	dfmt = new SimpleDateFormat("YYMMdd"); 
@@ -110,6 +115,8 @@ public class ProcessPaymentChannel implements Action {
 		processChannel();
 		
 		printAllBatches();
+		
+		PaymentProcessResultTable.printResults(processResults, destinationPaymentProcessor.getSystemName(), sess.getConsole());
 		
 		return null;
 	}
@@ -153,12 +160,9 @@ public class ProcessPaymentChannel implements Action {
 	 */
 	private void findChannel() throws Exception {
 
-		channel = channelFactory.findChannelWithId(channelId);
-		if (channel==null) {
-			channel = channelFactory.findChannelByDescription(channelId);
-		}
+		channel = channelFactory.findChannelWithIdOrDescription(channelId);
 		if (channel==null)
-			throw new Exception("No channel with ID [" + channelId + "] found.");
+			throw new Exception("No channel with ID or description [" + channelId + "] found.");
 		
 	}
 	
@@ -179,48 +183,87 @@ public class ProcessPaymentChannel implements Action {
 		
 		listOfBatches = new ArrayList<PaymentBatch>();
 		
-		for (PaymentBatch pb : batches) {
-			processAndPrint(pb);
+		for (List<PaymentBatch> fileBatches : groupBySource(batches).values()) {
+			processFile(fileBatches);
 		}
 		allBatchesProcessed = true;
 		
 	}
 	
-	private void processAndPrint(PaymentBatch pb) throws Exception {
+	/**
+	 * Groups batches by source (file). A file can result in more than one batch (ie one per currency).
+	 */
+	private Map<String, List<PaymentBatch>> groupBySource(List<PaymentBatch> batches) {
+		Map<String, List<PaymentBatch>> result = new LinkedHashMap<String, List<PaymentBatch>>();
+		for (PaymentBatch pb : batches) {
+			List<PaymentBatch> fileBatches = result.get(pb.getSource());
+			if (fileBatches==null) {
+				fileBatches = new ArrayList<PaymentBatch>();
+				result.put(pb.getSource(), fileBatches);
+			}
+			fileBatches.add(pb);
+		}
+		return result;
+	}
+	
+	/**
+	 * Processes all batches from one source file. The file is moved to the done directory
+	 * when all its batches are processed.
+	 * 
+	 * @param fileBatches	Batches with the same source.
+	 * @throws Exception
+	 */
+	private void processFile(List<PaymentBatch> fileBatches) throws Exception {
 
-		if (!shouldProcess(pb)) {
+		LocalDate firstPaymentDate = getFirstPaymentDate(fileBatches);
+		if (!shouldProcess(firstPaymentDate)) {
 			return;
 		}
 		
-		if (matchOnly) {
-			destinationPaymentProcessor.lookupInvoiceReferences(pb, processOptions);
-		} else {
-			destinationPaymentProcessor.processPaymentBatch(pb, processOptions);
-			if (!dryRun) {
-				// Update processed date
-				channel.setReconciledUntil(LocalDateUtils.asLocalDate(pb.getFirstPaymentDate()));
-				channel.setLastProcessedBatch(pb.getSource());
-				channelFactory.persistChannel(channel);
-				FileUtils.moveFileToNewDirectory(
-						channel.getOptions().getSourceProperties().get("directory") + File.separator + pb.getSource(),
-						DONE_DIR);
+		for (PaymentBatch pb : fileBatches) {
+			if (matchOnly) {
+				destinationPaymentProcessor.lookupInvoiceReferences(pb, processOptions);
+			} else {
+				processResults.add(destinationPaymentProcessor.processPaymentBatch(pb, processOptions));
 			}
+			formatReport(pb);
 		}
 		
-		formatReport(pb);
+		if (!matchOnly && !dryRun) {
+			String source = fileBatches.get(0).getSource();
+			// Update processed date
+			channel.setReconciledUntil(firstPaymentDate);
+			channel.setLastProcessedBatch(source);
+			channelFactory.persistChannel(channel);
+			FileUtils.moveFileToNewDirectory(
+					channel.getOptions().getSourceProperties().get("directory") + File.separator + source,
+					DONE_DIR);
+		}
 		
+	}
+	
+	/**
+	 * @return	The earliest first payment date of the batches, or null if none have payments.
+	 */
+	private LocalDate getFirstPaymentDate(List<PaymentBatch> batches) {
+		LocalDate result = null;
+		for (PaymentBatch pb : batches) {
+			LocalDate d = LocalDateUtils.asLocalDate(pb.getFirstPaymentDate());
+			if (d!=null && (result==null || d.isBefore(result))) {
+				result = d;
+			}
+		}
+		return result;
 	}
 	
 	/**
 	 * Checks until date to see if this should be processed.
 	 * 
-	 * @param pb
+	 * @param firstPaymentDate
 	 * @return
 	 */
-	private boolean shouldProcess(PaymentBatch pb) {
+	private boolean shouldProcess(LocalDate firstPaymentDate) {
 		if (untilDate==null) return true;
-		
-		LocalDate firstPaymentDate = LocalDateUtils.asLocalDate(pb.getFirstPaymentDate());
 		
 		if (firstPaymentDate!=null && firstPaymentDate.isAfter(untilDate)) {
 			return false;
