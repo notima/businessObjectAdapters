@@ -16,13 +16,14 @@ public class PaymentBatchTable extends GenericTable {
     	addColumn("#", GenericColumn.ALIGNMENT_RIGHT);
 		if(detailed) {
 			addColumn("Date");
-			addColumn("Invoice Id");
+			addColumn("Inv Id");
 			addColumn("Order Id");
-			addColumn("Dest reference"); 
+			addColumn("Dest ref"); 
 			addColumn("Payer Name");
 			addColumn("Client Order");
 			addColumn("Paid amt", GenericColumn.ALIGNMENT_RIGHT);
 			addColumn("Orig amt", GenericColumn.ALIGNMENT_RIGHT);
+			addColumn("Curr");
 			addColumn("Matched invoice");
 			addColumn("Open amt", GenericColumn.ALIGNMENT_RIGHT);
 		}
@@ -179,6 +180,7 @@ public class PaymentBatchTable extends GenericTable {
 				d.getClientOrderNo(),
 				paidAmtCell,
 				originalAmtCell,
+				d.getCurrency(),
 				d.getMatchedInvoiceNo(),
 				openAmtCell
 				);
@@ -187,7 +189,7 @@ public class PaymentBatchTable extends GenericTable {
 		}
 			
 		row = new GenericRow();
-		row.addContent("=====","==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========");
+		row.addContent("=====","==========", "==========", "==========", "==========", "==========", "==========", "==========", "==========", "====", "==========", "==========");
 		rows.add(row);
 
 		row = new GenericRow();
@@ -200,11 +202,11 @@ public class PaymentBatchTable extends GenericTable {
 		totalOpenAmtCell = new GenericCell(nfmt.format(totalOpenAmount));
 		totalOpenAmtCell.setOriginalData(totalOpenAmount);
 				
-		row.addContent("", "", "", "", "", "", "TOTAL", totalPaidAmtCell, totalOriginalAmtCell, "", totalOpenAmtCell);
+		row.addContent("", "", "", "", "", "", "TOTAL", totalPaidAmtCell, totalOriginalAmtCell, "","", totalOpenAmtCell);
 		rows.add(row);
 
 		row = new GenericRow();
-		row.addContent("", "", "", "", "", "", "", "", "", "", "");
+		row.addContent("", "", "", "", "", "", "", "", "", "", "","");
 		rows.add(row);
     	
     	return rows; 
