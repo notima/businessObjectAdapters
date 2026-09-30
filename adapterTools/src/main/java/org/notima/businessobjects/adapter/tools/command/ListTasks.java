@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -14,7 +15,9 @@ import org.notima.businessobjects.adapter.tools.task.TaskLockManager;
 @Service
 public class ListTasks implements Action {
 
-//	@Reference (depends on persistence which dependency we're not ready for yet)
+	private final SimpleDateFormat dfmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+	@Reference(optional = true)
 	private TaskLockManager taskLockManager;
 	
 	@Reference 
@@ -27,8 +30,13 @@ public class ListTasks implements Action {
 			sess.getConsole().println("No tasklock manager found");
 		} else {
 			List<TaskLock> locks = taskLockManager.getLocks();
+			if (locks.isEmpty()) {
+				sess.getConsole().println("No task locks");
+			}
 			for (TaskLock l : locks) {
-				sess.getConsole().println("Lock " + l.getLockId());
+				sess.getConsole().println("Lock " + l.getLockId() + "  " + l.getTaskId() 
+						+ (l.getDate()!=null ? "  since " + dfmt.format(l.getDate()) : "")
+						+ (l.getMetaData()!=null ? "  " + l.getMetaData() : ""));
 			}
 		}
 		

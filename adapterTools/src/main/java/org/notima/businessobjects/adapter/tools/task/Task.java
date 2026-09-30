@@ -69,15 +69,24 @@ public abstract class Task {
 		return null;
     }
 	
+	/**
+	 * @return	The task lock manager service, or null if it isn't available.
+	 */
 	protected TaskLockManager getTaskLockManager() {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		if (bundle==null || bundle.getBundleContext()==null) return null;
 		BundleContext ctx = bundle.getBundleContext();
 		ServiceReference<TaskLockManager> reference = ctx.getServiceReference(TaskLockManager.class);
+		if (reference==null) return null;
 		return (TaskLockManager) ctx.getService(reference);
 	}
 	
 	public Object execute() throws Exception {
 		TaskLockManager taskLockManager = getTaskLockManager();
+		if (taskLockManager==null) {
+			log.warn("No task lock manager available. Running task {} without lock.", getTaskId());
+			return onExecute();
+		}
 		if(taskLockManager.isTaskLocked(getTaskId())){
 			Exception e = new Exception("Attempted to execute a locked task (" + getTaskId() + ")");
 			log.error("Attempted to execute a locked task", e);
@@ -111,9 +120,10 @@ public abstract class Task {
 	 * @param metaData
 	 */
 	protected void updateLockMetaData(String metaData) {
-		if(!testRun)
-			getTaskLockManager().updateMetaData(getLockId(), metaData);
-		else 
+		TaskLockManager taskLockManager = testRun ? null : getTaskLockManager();
+		if (taskLockManager!=null)
+			taskLockManager.updateMetaData(getLockId(), metaData);
+		else if (testRun)
 			System.out.printf("New Lock meta data: %s\n", metaData);
 	}
 

@@ -6,10 +6,13 @@ import java.util.Hashtable;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.businessobjects.adapter.tools.task.FileTaskLockManager;
+import org.notima.businessobjects.adapter.tools.task.TaskLockManager;
 import org.notima.generic.businessobjects.tax.BasicTaxRateProviderFI;
 import org.notima.generic.businessobjects.tax.BasicTaxRateProviderSE;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -24,7 +27,8 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(PaymentBatchProcessor.class),
 				@ProvideService(MappingServiceFactory.class),
 				@ProvideService(TaxRateProvider.class),
-				@ProvideService(AdapterToolsSettings.class)
+				@ProvideService(AdapterToolsSettings.class),
+				@ProvideService(TaskLockManager.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -96,6 +100,13 @@ public class Activator extends BaseActivator {
 		}
 		register(AdapterToolsSettings.class, settings);
 		log.info("Registered AdapterToolsSettings (defaultCountryCode={})", settings.getDefaultCountryCode());
+
+		// File based task locks. Ranked above other task lock managers (ie the database based one in adapterPersistence).
+		FileTaskLockManager taskLockManager = new FileTaskLockManager();
+		Hashtable<String, Object> lockProps = new Hashtable<String, Object>();
+		lockProps.put(Constants.SERVICE_RANKING, Integer.valueOf(100));
+		register(TaskLockManager.class, taskLockManager, lockProps);
+		log.info("Registered file based TaskLockManager in {}", taskLockManager.getLockDirectory());
 
 	}
 	
