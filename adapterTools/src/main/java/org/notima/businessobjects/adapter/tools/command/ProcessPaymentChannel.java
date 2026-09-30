@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -191,7 +190,7 @@ public class ProcessPaymentChannel implements Action {
 		
 		listOfBatches = new ArrayList<PaymentBatch>();
 		
-		for (List<PaymentBatch> fileBatches : groupBySource(batches).values()) {
+		for (List<PaymentBatch> fileBatches : PaymentChannelReportWriter.groupBySource(batches).values()) {
 			processFile(fileBatches);
 			if (stopped) break;
 		}
@@ -199,21 +198,6 @@ public class ProcessPaymentChannel implements Action {
 		
 	}
 	
-	/**
-	 * Groups batches by source (file). A file can result in more than one batch (ie one per currency).
-	 */
-	private Map<String, List<PaymentBatch>> groupBySource(List<PaymentBatch> batches) {
-		Map<String, List<PaymentBatch>> result = new LinkedHashMap<String, List<PaymentBatch>>();
-		for (PaymentBatch pb : batches) {
-			List<PaymentBatch> fileBatches = result.get(pb.getSource());
-			if (fileBatches==null) {
-				fileBatches = new ArrayList<PaymentBatch>();
-				result.put(pb.getSource(), fileBatches);
-			}
-			fileBatches.add(pb);
-		}
-		return result;
-	}
 	
 	/**
 	 * Processes all batches from one source file. The file is moved to the done directory

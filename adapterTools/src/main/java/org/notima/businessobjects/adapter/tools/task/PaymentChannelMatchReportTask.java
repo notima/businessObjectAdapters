@@ -2,8 +2,12 @@ package org.notima.businessobjects.adapter.tools.task;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import org.notima.businessobjects.adapter.paymentbatch.BasicPaymentBatchChannelFactory;
 import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
@@ -12,8 +16,10 @@ import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.PaymentChannelReportWriter;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentBatchChannelThresholds;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.ThresholdCheckResult;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
@@ -201,6 +207,9 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 			processor.lookupInvoiceReferences(pb, options);
 		}
 
+		// Before merging, since the thresholds are checked per report file
+		reportMatchResult(channel, batches);
+		
 		PaymentBatch merged = PaymentChannelReportWriter.mergeBatches(batches);
 		if (merged==null || merged.isEmpty()) {
 			progress(channelName(channel) + ": no pending payments");
@@ -218,6 +227,69 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 
 	}
 
+	/**
+	 * Reports the matching result of the channel's pending files and checks them against the
+	 * channel's thresholds, the same way process-payment-channel does (per report file).
+	 */
+	private void reportMatchResult(PaymentBatchChannel channel, List<PaymentBatch> batches) {
+		
+		String name = channelName(channel);
+		
+		// Totals over all pending files, counted with the same rules as the thresholds
+		ThresholdCheckResult total = new PaymentBatchChannelThresholds().evaluate(batches);
+		if (total.getPaymentCount()==0) return;
+		StringBuilder result = new StringBuilder(name + ": " + total.getPaymentCount() + (total.getPaymentCount()==1 ? " payment, " : " payments, ") 
+				+ (total.getPaymentCount() - total.getUnmatchedCount()) + " matched, " 
+				+ total.getUnmatchedCount() + " unmatched (" + formatNumber(total.getUnmatchedPercent()) + " %)");
+		if (!total.getUnmatchedAmountPerCurrency().isEmpty()) {
+			result.append(", unmatched amount");
+			String separator = " ";
+			for (Map.Entry<String, Double> e : total.getUnmatchedAmountPerCurrency().entrySet()) {
+				result.append(separator).append(e.getKey()).append(" ").append(formatAmount(e.getValue()));
+				separator = ", ";
+			}
+		}
+		progress(result.toString());
+		
+		PaymentBatchChannelThresholds thresholds = channel.getOptions()!=null ? channel.getOptions().getThresholds() : null;
+		if (thresholds==null || !thresholds.hasLimits()) {
+			progress(name + ": thresholds: none");
+			return;
+		}
+		progress(name + ": thresholds: " + describe(thresholds));
+		for (Map.Entry<String, List<PaymentBatch>> file : PaymentChannelReportWriter.groupBySource(batches).entrySet()) {
+			ThresholdCheckResult check = thresholds.evaluate(file.getValue());
+			if (check.isBreached()) {
+				progress(name + ": processing would stop at " + file.getKey() + ": " + String.join("; ", check.getBreaches()));
+				return;
+			}
+		}
+		progress(name + ": all files within thresholds");
+		
+	}
+	
+	private static String describe(PaymentBatchChannelThresholds t) {
+		List<String> parts = new ArrayList<String>();
+		if (t.getMaxUnmatchedCount()!=null) {
+			parts.add("max unmatched " + t.getMaxUnmatchedCount());
+		}
+		if (t.getMaxUnmatchedPercent()!=null) {
+			parts.add("max unmatched " + formatNumber(t.getMaxUnmatchedPercent()) + " %");
+		}
+		if (t.getMaxUnmatchedAmount()!=null) {
+			parts.add("max unmatched amount " + t.getMaxUnmatchedAmount());
+		}
+		return String.join(", ", parts);
+	}
+	
+	private static String formatNumber(double d) {
+		return new DecimalFormat("0.##", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(d);
+	}
+	
+	private static String formatAmount(double d) {
+		return new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(d);
+	}
+	
 	private static boolean isActive(PaymentBatchChannel channel) {
 		return channel.getStatus()==null || channel.getStatus().isActive();
 	}

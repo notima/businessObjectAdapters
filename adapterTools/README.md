@@ -143,8 +143,13 @@ The task can be run manually from the Karaf shell. It uses the same task lock as
 	run-match-report [orgNo]
 	run-match-report -co SE --report-dir /tmp/reports -format xls [orgNo]
 
+	ZaverSE: 3 payments, 1 matched, 2 unmatched (66.67 %), unmatched amount SEK 325.00
+	ZaverSE: thresholds: max unmatched 40 %, max unmatched amount 5000,{500:EUR}
+	ZaverSE: processing would stop at 2026-09-28.json: 50.00 % unmatched payments (1 of 2), limit 40.00 %
 	ZaverSE: report written to /path/to/reports/tenant/ZaverSE_2026-09-28.json_260929.xls
 	1 active channels, 1 reports written to /path/to/reports/tenant
+
+For each channel the task states the matching result (unmatched means no invoice found, the invoice is already paid or couldn't be looked up), the channel's thresholds, and whether `process-payment-channel` would stop at one of the pending files (thresholds are checked per report file). From the shell this is printed to the console; when scheduled or run from a route it's written to the log.
 
 Properties that can be set on the bean (the command's options set the same):
 

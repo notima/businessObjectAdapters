@@ -2,7 +2,9 @@ package org.notima.businessobjects.adapter.tools;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.notima.businessobjects.adapter.tools.table.GenericTable;
@@ -43,6 +45,25 @@ public class PaymentChannelReportWriter {
 
 	}
 
+	/**
+	 * Groups batches by source (file). A file can result in more than one batch (ie one per currency).
+	 * 
+	 * @return	The batches per source, in the order they were given.
+	 */
+	public static Map<String, List<PaymentBatch>> groupBySource(List<PaymentBatch> batches) {
+		Map<String, List<PaymentBatch>> result = new LinkedHashMap<String, List<PaymentBatch>>();
+		if (batches==null) return result;
+		for (PaymentBatch pb : batches) {
+			List<PaymentBatch> fileBatches = result.get(pb.getSource());
+			if (fileBatches==null) {
+				fileBatches = new ArrayList<PaymentBatch>();
+				result.put(pb.getSource(), fileBatches);
+			}
+			fileBatches.add(pb);
+		}
+		return result;
+	}
+	
 	/**
 	 * Creates the report's file name: channel description (or source system), the batch's source
 	 * and, if the payments span several dates, the last payment date.
