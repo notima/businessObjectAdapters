@@ -110,3 +110,77 @@ The rows `Max unmatched`, `Max unmatched %` and `Max unmatched amt` show the thr
 - `process-payment-channel --force [channelId]` ignores the thresholds for this run, ie after checking the report.
 
 A channel without thresholds is processed as before, without the extra lookup.
+
+### Report directory per tenant
+
+Reports are written to the tenant's report directory, which is stored in the tenant information:
+
+	set-tenant-info [orgNo] reportDirectory /path/to/reports/tenant
+	show-tenant-info [orgNo]
+
+If `reportDirectory` isn't set, the tenant's `defaultOutputDirectory` is used. The tenant is identified by org number and country code (default from the AdapterTools settings, or `-co`). Channels stored without country code belong to the tenant with the same org number.
+
+`process-payment-channel -format xls` writes its report to the tenant's report directory, unless an output file is given with `-of`. If the tenant has no report directory, the file is written relative to Karaf's working directory as before.
+
+### Match report task
+
+`PaymentChannelMatchReportTask` matches the pending report files of a tenant's **active** channels against their destination systems, the same way as `process-payment-channel --match-only`, and writes one report per channel to the tenant's report directory. Nothing is booked, no files are moved and the channels aren't changed.
+
+- The task is created for one tenant (org number). Create one task per tenant.
+- One report per channel with pending payments, named like the `-format` output of `process-payment-channel`, ie `ZaverSE_2026-09-28.json_260929.xls`. A run with the same pending files overwrites the previous report.
+- Channels without pending payments, without source directory or with a missing adapter are skipped (and logged). A failing channel doesn't stop the others.
+- If the tenant has no report directory, the task fails with a message telling how to set it. The directory is created if it doesn't exist.
+- The format is `xls` by default (requires the excelAdapter).
+- The task is locked per tenant, so the same tenant's task doesn't run twice at the same time. The locks are files in `${karaf.data}/task-locks`. A lock left by a Karaf process that no longer runs (ie after a restart) is ignored and removed.
+
+Show and remove task locks:
+
+	list-task-locks
+	unlock-task payment-channel-match-report-556677-8899
+
+The task can be run manually from the Karaf shell. It uses the same task lock as a scheduled run and prints its progress:
+
+	run-match-report [orgNo]
+	run-match-report -co SE --report-dir /tmp/reports -format xls [orgNo]
+
+	ZaverSE: report written to /path/to/reports/tenant/ZaverSE_2026-09-28.json_260929.xls
+	1 active channels, 1 reports written to /path/to/reports/tenant
+
+Properties that can be set on the bean (the command's options set the same):
+
+| Property | Default |
+|---|---|
+| `countryCode` | The default country code in the AdapterTools settings |
+| `reportDirectory` | The tenant's report directory (overrides it if set) |
+| `format` | `xls` |
+
+The task is created in a Blueprint file in Karaf's `deploy` directory and can be triggered either by a Camel route or by the Karaf scheduler.
+
+Triggered by a Camel route, ie once a day:
+
+	<bean id="matchReportTask" class="org.notima.businessobjects.adapter.tools.task.PaymentChannelMatchReportTask">
+		<argument value="555555-5555"/>
+	</bean>
+
+	<camelContext id="payment-channel-match-report" xmlns="http://camel.apache.org/schema/blueprint">
+		<route id="payment-channel-match-report">
+			<from uri="timer://matchReport?delay=60000&amp;period=86400000"/>
+			<to uri="bean:matchReportTask?method=run"/>
+		</route>
+	</camelContext>
+
+Triggered by the Karaf scheduler (feature `scheduler`), ie every weekday at 07:00:
+
+	<bean id="matchReportTask" class="org.notima.businessobjects.adapter.tools.task.PaymentChannelMatchReportTask">
+		<argument value="555555-5555"/>
+	</bean>
+
+	<service ref="matchReportTask" interface="java.lang.Runnable">
+		<service-properties>
+			<entry key="scheduler.name" value="payment-channel-match-report-555555-5555"/>
+			<entry key="scheduler.expression" value="0 0 7 ? * MON-FRI"/>
+			<entry key="scheduler.concurrent" value="false"/>
+		</service-properties>
+	</service>
+
+The format can be changed with `<property name="format" value="..."/>` on the bean, for any format a report formatter supports. Note that the excelAdapter always writes the xls format, also when asked for xlsx.

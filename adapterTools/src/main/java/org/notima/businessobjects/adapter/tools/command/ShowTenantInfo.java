@@ -100,6 +100,9 @@ public class ShowTenantInfo extends AbstractAction {
 		}
 		String outDir = ti.getDefaultOutputDirectory();
 		sess.getConsole().println("  Default Output Dir: " + (outDir != null ? outDir : "(not set)"));
+		String reportDir = ti.getReportDirectory();
+		sess.getConsole().println("  Report Dir        : " + (reportDir != null ? reportDir 
+				: (outDir != null ? "(not set, uses default output dir)" : "(not set)")));
 	}
 
 	private void printBusinessPartner(BusinessPartner<?> bp) {

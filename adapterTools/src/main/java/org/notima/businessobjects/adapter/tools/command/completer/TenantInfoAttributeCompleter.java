@@ -23,6 +23,7 @@ public class TenantInfoAttributeCompleter implements Completer {
 		"countryCode",
 		"legalName",
 		"defaultOutputDirectory",
+		"reportDirectory",
 	};
 
 	@Override

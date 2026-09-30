@@ -31,7 +31,7 @@ public class SetTenantInfo extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
 
-	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory)", required = true, multiValued = false)
+	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory)", required = true, multiValued = false)
 	@Completion(TenantInfoAttributeCompleter.class)
 	private String attribute;
 
@@ -74,9 +74,12 @@ public class SetTenantInfo extends AbstractAction {
 			case "defaultOutputDirectory":
 				ti.setDefaultOutputDirectory(value);
 				break;
+			case "reportDirectory":
+				ti.setReportDirectory(value);
+				break;
 			default:
 				sess.getConsole().println("Unknown attribute: " + attribute);
-				sess.getConsole().println("Available attributes: taxId, countryCode, legalName, defaultOutputDirectory");
+				sess.getConsole().println("Available attributes: taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory");
 				return null;
 		}
 

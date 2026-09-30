@@ -1,7 +1,6 @@
 package org.notima.businessobjects.adapter.tools.command;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.apache.karaf.shell.api.action.Action;
 import org.apache.karaf.shell.api.action.Argument;
@@ -18,11 +16,10 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
-import org.notima.businessobjects.adapter.tools.BasicReportFormatter;
+import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
+import org.notima.businessobjects.adapter.tools.PaymentChannelReportWriter;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
-import org.notima.businessobjects.adapter.tools.ReportFormatter;
-import org.notima.businessobjects.adapter.tools.table.GenericTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentProcessResultTable;
 import org.notima.generic.businessobjects.Payment;
@@ -47,6 +44,9 @@ public class ProcessPaymentChannel implements Action {
 	
 	@Reference
 	private CanonicalObjectFactory cof;
+	
+	@Reference
+	private AdapterToolsSettings settings;
 	
 	private static final String		DONE_DIR = "done";
 	
@@ -83,7 +83,7 @@ public class ProcessPaymentChannel implements Action {
     @Option(name="-of", description="Output match result to file name", required = false, multiValued = false)
     private String	outFile;
     
-    @Option(name="-format", description="The format of match result file to be output", required = false, multiValued = false)
+    @Option(name="-format", description="The format of match result file to be output. Without -of, the file is written to the tenant's report directory (set-tenant-info)", required = false, multiValued = false)
     private String format;
 
 	@Argument(index = 0, name = "channelId", description ="The payment channel to run. Could also be description (if unique)", required = true, multiValued = false)
@@ -92,7 +92,6 @@ public class ProcessPaymentChannel implements Action {
 	private String paymentSource;
 	
 	private PaymentBatchTable paymentBatchTable;
-	private ReportFormatter<GenericTable> rf;
 	
 	private LocalDate	untilDate;
 	
@@ -108,7 +107,6 @@ public class ProcessPaymentChannel implements Action {
 	private boolean				stopped = false;
 	private List<String>		thresholdMessages = new ArrayList<String>();
 	
-	private SimpleDateFormat	dfmt = new SimpleDateFormat("YYMMdd"); 
 
 	
 	@Override
@@ -385,20 +383,6 @@ public class ProcessPaymentChannel implements Action {
 
 	
 	
-	private void constructOutFile(PaymentBatch pb) {
-		if (format!=null && outFile==null && rf!=null) {
-			// We need to construct an outfile.
-			String filePrefix = 
-					(channel.getChannelDescription()!=null && channel.getChannelDescription().trim().length()>0 ? channel.getChannelDescription() : channel.getSourceSystem());
-
-			if (!pb.isDateRange()) {
-				outFile = filePrefix + "_" + pb.getSource() + "." + format;
-			} else {
-				outFile = filePrefix + "_" + pb.getSource() + "_" + dfmt.format(pb.getLastPaymentDate()) + "." + format;
-			}
-		}
-	}
-	
 	private void formatReport(PaymentBatch pb) throws Exception {
 
 		paymentBatchTable = new PaymentBatchTable(pb, true);
@@ -412,23 +396,22 @@ public class ProcessPaymentChannel implements Action {
 
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void writeToFormat(PaymentBatch pb) throws Exception {
 
 		if (format!=null && !pb.isEmpty()) {
-			
-			// Try to find a report formatter
-			rf = (ReportFormatter<GenericTable>) formatterFactory.getReportFormatter(GenericTable.class, format);
-			
-			if (rf!=null) {
-				Properties props = new Properties();
-				constructOutFile(pb);
-				props.setProperty(BasicReportFormatter.OUTPUT_FILENAME, outFile);
-				
-				String of = rf.formatReport((GenericTable)paymentBatchTable, format, props);
+			String fileName = outFile!=null ? outFile : PaymentChannelReportWriter.buildFileName(channel, pb, format);
+			// Without an explicit out file, the report goes to the tenant's report directory (if set)
+			String outputDir = null;
+			if (outFile==null) {
+				outputDir = PaymentChannelReportWriter.resolveReportDirectory(cof, channel.getTenant(), 
+						settings!=null ? settings.getDefaultCountryCode() : null);
+				if (outputDir!=null) {
+					new File(outputDir).mkdirs();
+				}
+			}
+			String of = PaymentChannelReportWriter.writeReport(formatterFactory, paymentBatchTable, format, outputDir, fileName);
+			if (of!=null) {
 				sess.getConsole().println("Output file to: " + of);
-				// Reset outfile for another run
-				outFile = null;
 			} else {
 				sess.getConsole().println("Can't find formatter for " + format);
 			}
@@ -438,22 +421,8 @@ public class ProcessPaymentChannel implements Action {
 	
 	private void printAllBatches() throws Exception {
 
-		if (listOfBatches.size()==0) return;
-		PaymentBatch pb = listOfBatches.get(0);
-		// Check if pb has payments.
-		if (pb.getPayments()==null) {
-			List<Payment<?>> list = new ArrayList<Payment<?>>();
-			pb.setPayments(list);
-		}
-		
-		PaymentBatch add;
-		
-		for (int i = 1 ; i<listOfBatches.size(); i++) {
-			add = listOfBatches.get(i);
-			if (!add.isEmpty()) {
-				pb.getPayments().addAll(add.getPayments());
-			}
-		}
+		PaymentBatch pb = PaymentChannelReportWriter.mergeBatches(listOfBatches);
+		if (pb==null) return;
 
 		paymentBatchTable = new PaymentBatchTable(pb, true);
 		paymentBatchTable.getShellTable().print(sess.getConsole());
