@@ -3,6 +3,7 @@ package org.notima.businessobjects.adapter.tools.table;
 import java.util.ArrayList;
 
 import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
+import org.notima.generic.businessobjects.PaymentBatchChannelThresholds;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
@@ -58,6 +59,10 @@ public class PaymentChannelStatusTable extends GenericTable {
 		addRow().addContent("R. until", getReconciledUntilString());
 		addRow().addContent("First unproc.", ch.getUnprocessedFromDate()!=null ? ch.getUnprocessedFromDate().toString() : "-");
 		addRow().addContent("Last unproc.", ch.getUnprocessedUntilDate()!=null ? ch.getUnprocessedUntilDate().toString() : "-");
+		PaymentBatchChannelThresholds th = ch.getOptions()!=null ? ch.getOptions().getThresholds() : null;
+		addRow().addContent("Max unmatched", th!=null && th.getMaxUnmatchedCount()!=null ? th.getMaxUnmatchedCount().toString() : "-");
+		addRow().addContent("Max unmatched %", th!=null && th.getMaxUnmatchedPercent()!=null ? th.getMaxUnmatchedPercent().toString() : "-");
+		addRow().addContent("Max unmatched amt", th!=null && th.getMaxUnmatchedAmount()!=null ? th.getMaxUnmatchedAmount() : "-");
 		
 		int fileCounter = 1;
 		for (String s : (ch.getUnprocessedEntries()!=null ? ch.getUnprocessedEntries() : new ArrayList<String>())) {

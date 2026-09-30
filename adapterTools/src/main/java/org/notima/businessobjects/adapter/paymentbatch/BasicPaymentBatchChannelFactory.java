@@ -90,6 +90,13 @@ public abstract class BasicPaymentBatchChannelFactory implements PaymentBatchCha
 					if (b.getSource()!=null && !entries.contains(b.getSource())) {
 						entries.add(b.getSource());
 					}
+					// The period the report covers counts even if there are no payments
+					if (b.getPeriodFrom()!=null && (fromDate==null || b.getPeriodFrom().isBefore(fromDate))) {
+						fromDate = b.getPeriodFrom();
+					}
+					if (b.getPeriodTo()!=null && (untilDate==null || b.getPeriodTo().isAfter(untilDate))) {
+						untilDate = b.getPeriodTo();
+					}
 					if (b.getPayments()==null) continue;
 					for (Payment<?> p : b.getPayments()) {
 						LocalDate d = LocalDateUtils.asLocalDate(p.getPaymentDate());

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +27,10 @@ import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentProcessResultTable;
 import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
+import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
 import org.notima.generic.businessobjects.PaymentBatchProcessOptions;
 import org.notima.generic.businessobjects.PaymentBatchProcessResult;
+import org.notima.generic.businessobjects.ThresholdCheckResult;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
@@ -62,12 +65,15 @@ public class ProcessPaymentChannel implements Action {
     @Option(name = "-d", aliases = { "--dry-run" }, description = "Shows the payments and vouchers that would be created, without creating them. Invoice balances are not reduced between payments in a dry run.", required = false, multiValued = false)
     private boolean dryRun;
     
-    @Option(name = _NotimaCmdOptions.UNTIL_DATE, description = "Only process until this date yyyy-MM-dd", required = false)
+    @Option(name = _NotimaCmdOptions.UNTIL_DATE, description = "Only process files dated until this date yyyy-MM-dd. Files after it, or without a known date, are left in the directory.", required = false)
     private String untilDateStr;
 
     @Option(name = _NotimaCmdOptions.MANUAL_MAP, description = "Manual mapping. Example \"Ref=InvoiceNo,Ref=InvoiceNo\"", required = false)
     private String	manualMapStr;
     
+    @Option(name = "--force", description = "Process even if a report file exceeds the channel's thresholds (unmatched payments).", required = false, multiValued = false)
+    private boolean force;
+
     @Option(name = "--fees-per-payment", description = "Creates fees for each payment (instead of a lump sum).", required = false, multiValued = false)
     private boolean feesPerPayment;
 	
@@ -99,6 +105,8 @@ public class ProcessPaymentChannel implements Action {
 	private List<PaymentBatch>	listOfBatches = null;
 	private List<PaymentBatchProcessResult>	processResults = new ArrayList<PaymentBatchProcessResult>();
 	private boolean				allBatchesProcessed = false;
+	private boolean				stopped = false;
+	private List<String>		thresholdMessages = new ArrayList<String>();
 	
 	private SimpleDateFormat	dfmt = new SimpleDateFormat("YYMMdd"); 
 
@@ -117,6 +125,8 @@ public class ProcessPaymentChannel implements Action {
 		printAllBatches();
 		
 		PaymentProcessResultTable.printResults(processResults, destinationPaymentProcessor.getSystemName(), sess.getConsole());
+		
+		printThresholdMessages();
 		
 		return null;
 	}
@@ -185,6 +195,7 @@ public class ProcessPaymentChannel implements Action {
 		
 		for (List<PaymentBatch> fileBatches : groupBySource(batches).values()) {
 			processFile(fileBatches);
+			if (stopped) break;
 		}
 		allBatchesProcessed = true;
 		
@@ -215,8 +226,11 @@ public class ProcessPaymentChannel implements Action {
 	 */
 	private void processFile(List<PaymentBatch> fileBatches) throws Exception {
 
-		LocalDate firstPaymentDate = getFirstPaymentDate(fileBatches);
-		if (!shouldProcess(firstPaymentDate)) {
+		if (!shouldProcess(getFileStartDate(fileBatches))) {
+			return;
+		}
+		
+		if (!checkThresholds(fileBatches)) {
 			return;
 		}
 		
@@ -231,8 +245,7 @@ public class ProcessPaymentChannel implements Action {
 		
 		if (!matchOnly && !dryRun) {
 			String source = fileBatches.get(0).getSource();
-			// Update processed date
-			channel.setReconciledUntil(firstPaymentDate);
+			updateReconciledUntil(getReconciledDate(fileBatches));
 			channel.setLastProcessedBatch(source);
 			channelFactory.persistChannel(channel);
 			FileUtils.moveFileToNewDirectory(
@@ -243,34 +256,133 @@ public class ProcessPaymentChannel implements Action {
 	}
 	
 	/**
+	 * Matches the file's payments against the destination (read only) and checks the channel's
+	 * thresholds. If a threshold is exceeded, the channel is stopped at this file, except in a
+	 * dry run where it's only reported.
+	 * 
+	 * @param fileBatches	Batches with the same source.
+	 * @return	True if the file should be processed.
+	 * @throws Exception
+	 */
+	private boolean checkThresholds(List<PaymentBatch> fileBatches) throws Exception {
+		
+		if (matchOnly || force) return true;
+		PaymentBatchChannelOptions opts = channel.getOptions();
+		if (opts==null || !opts.hasThresholds()) return true;
+		
+		// Remember the match fields so that processing works exactly as without the check.
+		Map<Payment<?>, Object[]> savedMatches = new IdentityHashMap<Payment<?>, Object[]>();
+		for (PaymentBatch pb : fileBatches) {
+			if (!pb.hasPayments()) continue;
+			for (Payment<?> p : pb.getPayments()) {
+				savedMatches.put(p, new Object[] { p.getMatchedInvoiceNo(), p.getMatchedInvoiceOpenAmount() });
+			}
+		}
+		
+		for (PaymentBatch pb : fileBatches) {
+			destinationPaymentProcessor.lookupInvoiceReferences(pb, processOptions);
+		}
+		ThresholdCheckResult check = opts.getThresholds().evaluate(fileBatches);
+		String source = fileBatches.get(0).getSource();
+		String breaches = String.join("; ", check.getBreaches());
+		
+		if (check.isBreached() && !dryRun) {
+			// Keep the matches so the report shows which payments were matched.
+			for (PaymentBatch pb : fileBatches) {
+				formatReport(pb);
+			}
+			thresholdMessages.add("Channel stopped at " + source + ": " + breaches);
+			thresholdMessages.add("The file and any later files were not processed. Use --force to process anyway.");
+			stopped = true;
+			return false;
+		}
+		
+		for (Map.Entry<Payment<?>, Object[]> e : savedMatches.entrySet()) {
+			e.getKey().setMatchedInvoiceNo((String)e.getValue()[0]);
+			e.getKey().setMatchedInvoiceOpenAmount((Double)e.getValue()[1]);
+		}
+		if (check.isBreached()) {
+			thresholdMessages.add("DRY RUN - the channel would stop at " + source + ": " + breaches);
+		}
+		return true;
+		
+	}
+	
+	private void printThresholdMessages() {
+		if (thresholdMessages.isEmpty()) return;
+		sess.getConsole().println();
+		for (String msg : thresholdMessages) {
+			sess.getConsole().println(msg);
+		}
+	}
+	
+	/**
 	 * @return	The earliest first payment date of the batches, or null if none have payments.
 	 */
 	private LocalDate getFirstPaymentDate(List<PaymentBatch> batches) {
 		LocalDate result = null;
 		for (PaymentBatch pb : batches) {
-			LocalDate d = LocalDateUtils.asLocalDate(pb.getFirstPaymentDate());
-			if (d!=null && (result==null || d.isBefore(result))) {
-				result = d;
-			}
+			result = earliest(result, LocalDateUtils.asLocalDate(pb.getFirstPaymentDate()));
 		}
 		return result;
 	}
 	
 	/**
-	 * Checks until date to see if this should be processed.
+	 * @return	The first date of the file: the start of the period the report covers, or the first
+	 * 			payment date, whichever is earlier. Null if neither is known.
+	 */
+	private LocalDate getFileStartDate(List<PaymentBatch> batches) {
+		LocalDate result = getFirstPaymentDate(batches);
+		for (PaymentBatch pb : batches) {
+			result = earliest(result, pb.getPeriodFrom());
+		}
+		return result;
+	}
+	
+	/**
+	 * @return	The date the channel is reconciled until when the file is processed: the end of the
+	 * 			period the report covers if known, otherwise the first payment date.
+	 * 			Null if neither is known (ie an empty report without period).
+	 */
+	private LocalDate getReconciledDate(List<PaymentBatch> batches) {
+		LocalDate periodTo = null;
+		for (PaymentBatch pb : batches) {
+			if (pb.getPeriodTo()!=null && (periodTo==null || pb.getPeriodTo().isAfter(periodTo))) {
+				periodTo = pb.getPeriodTo();
+			}
+		}
+		return periodTo!=null ? periodTo : getFirstPaymentDate(batches);
+	}
+	
+	/**
+	 * Moves the channel's reconciled until date forward. It's never cleared or moved backwards.
+	 */
+	private void updateReconciledUntil(LocalDate date) {
+		if (date==null) return;
+		LocalDate current = channel.getStatus()!=null ? channel.getStatus().getReconciledUntil() : null;
+		if (current==null || date.isAfter(current)) {
+			channel.setReconciledUntil(date);
+		}
+	}
+	
+	private static LocalDate earliest(LocalDate a, LocalDate b) {
+		if (a==null) return b;
+		if (b==null) return a;
+		return b.isBefore(a) ? b : a;
+	}
+	
+	/**
+	 * Checks the until date to see if this file should be processed. With an until date, a file
+	 * is only processed (and moved) if its date is known and not after the until date.
 	 * 
-	 * @param firstPaymentDate
+	 * @param fileStartDate		The first date of the file. Null if unknown.
 	 * @return
 	 */
-	private boolean shouldProcess(LocalDate firstPaymentDate) {
+	private boolean shouldProcess(LocalDate fileStartDate) {
 		if (untilDate==null) return true;
-		
-		if (firstPaymentDate!=null && firstPaymentDate.isAfter(untilDate)) {
-			return false;
-		}
-		return true;
-		
+		return fileStartDate!=null && !fileStartDate.isAfter(untilDate);
 	}
+
 	
 	
 	private void constructOutFile(PaymentBatch pb) {
