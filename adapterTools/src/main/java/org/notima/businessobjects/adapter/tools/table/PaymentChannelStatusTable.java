@@ -1,5 +1,7 @@
 package org.notima.businessobjects.adapter.tools.table;
 
+import java.util.ArrayList;
+
 import org.notima.generic.businessobjects.PaymentBatchChannelOptions;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
@@ -54,9 +56,11 @@ public class PaymentChannelStatusTable extends GenericTable {
 		}
 		addRow().addContent("Last batch", getLastBatch());
 		addRow().addContent("R. until", getReconciledUntilString());
+		addRow().addContent("First unproc.", ch.getUnprocessedFromDate()!=null ? ch.getUnprocessedFromDate().toString() : "-");
+		addRow().addContent("Last unproc.", ch.getUnprocessedUntilDate()!=null ? ch.getUnprocessedUntilDate().toString() : "-");
 		
 		int fileCounter = 1;
-		for (String s : ch.getUnprocessedEntries()) {
+		for (String s : (ch.getUnprocessedEntries()!=null ? ch.getUnprocessedEntries() : new ArrayList<String>())) {
 			addRow().addContent(Integer.toString(fileCounter), s);
 			fileCounter++;
 		}

@@ -6,6 +6,7 @@ import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.businessobjects.adapter.paymentbatch.BasicPaymentBatchChannelFactory;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.table.PaymentChannelStatusTable;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
@@ -55,6 +56,13 @@ public class ShowPaymentChannelStatus implements Action {
 		
 		channel = channelFactory.findChannelWithIdOrDescription(channelId);
 		if (channel==null) throw new Exception("No channel with ID or description [" + channelId + "] found.");
+		
+		// Read the source directory now so the files and dates are current
+		if (channelFactory instanceof BasicPaymentBatchChannelFactory) {
+			BasicPaymentBatchChannelFactory basicFactory = (BasicPaymentBatchChannelFactory)channelFactory;
+			basicFactory.setCanonicalObjectFactory(cof);
+			basicFactory.refreshUnprocessedEntries(channel);
+		}
 		
 		paymentBatchFactory = cof.lookupPaymentBatchFactory(channel.getSourceSystem());	
 		paymentBatchFactory.setSource(channel.getOptions().getSourceDirectory());

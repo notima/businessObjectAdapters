@@ -57,15 +57,18 @@ public class ListPaymentBatchChannels implements Action {
 
 		factory = cof.lookupFirstPaymentBatchChannelFactory();
 		
-		if (factory instanceof BasicPaymentBatchChannelFactory) {
-			((BasicPaymentBatchChannelFactory)factory).setCanonicalObjectFactory(cof);
-		}
-
-		factory.populateUnprocessedEntries(true);
-		
 		List<PaymentBatchChannel> result = factory.listChannelsForTenant(tenant);
 		if (!showAll) {
 			result = filterActive(result);
+		}
+		
+		// Read the source directories now so the files and dates are current
+		if (factory instanceof BasicPaymentBatchChannelFactory) {
+			BasicPaymentBatchChannelFactory basicFactory = (BasicPaymentBatchChannelFactory)factory;
+			basicFactory.setCanonicalObjectFactory(cof);
+			for (PaymentBatchChannel ch : result) {
+				basicFactory.refreshUnprocessedEntries(ch);
+			}
 		}
 		
 		PaymentBatchChannelTable table = new PaymentBatchChannelTable(result, showAll);

@@ -1,15 +1,20 @@
 package org.notima.businessobjects.adapter.paymentbatch;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
+import org.notima.generic.businessobjects.Payment;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelList;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
+import org.notima.util.LocalDateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -18,6 +23,8 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
  * 
  */
 public abstract class BasicPaymentBatchChannelFactory implements PaymentBatchChannelFactory {
+
+	private static final Logger log = LoggerFactory.getLogger(BasicPaymentBatchChannelFactory.class);
 
 	protected CanonicalObjectFactory	cof;
 	
@@ -46,7 +53,7 @@ public abstract class BasicPaymentBatchChannelFactory implements PaymentBatchCha
 		
 		if (populateUnProcessedEntries) {
 			for (PaymentBatchChannel ch : list) {
-				populateUnProcessedEntries(ch);
+				refreshUnprocessedEntries(ch);
 			}
 		}
 		
@@ -55,36 +62,65 @@ public abstract class BasicPaymentBatchChannelFactory implements PaymentBatchCha
 	}
 
 	/**
-	 * Looks for unprocessed entries for this given channel.
+	 * Reads the channel's source directory and updates the channel's unprocessed entries 
+	 * (one per source file) and the date range of their payments.
 	 * 
-	 * @param pbc
-	 * @return
+	 * The result is only kept in memory. Call this whenever current information is needed.
+	 * 
+	 * @param pbc	The channel to refresh.
+	 * @return	The channel.
 	 */
-	protected PaymentBatchChannel populateUnProcessedEntries(PaymentBatchChannel pbc) {
+	public PaymentBatchChannel refreshUnprocessedEntries(PaymentBatchChannel pbc) {
 
-		PaymentBatchFactory paymentFactory;
+		List<String> entries = new ArrayList<String>();
+		LocalDate fromDate = null;
+		LocalDate untilDate = null;
 		
-		if (cof!=null) {
+		if (cof!=null && pbc.getOptions()!=null && pbc.getOptions().getSourceDirectory()!=null) {
 
-			paymentFactory = cof.lookupPaymentBatchFactory(pbc.getSourceSystem());
+			PaymentBatchFactory paymentFactory = cof.lookupPaymentBatchFactory(pbc.getSourceSystem());
 
 			try {
 				paymentFactory.setSource(pbc.getOptions().getSourceDirectory());
 
 				List<PaymentBatch> batches = paymentFactory.readPaymentBatches(); 
 				
-				List<String> entries = new ArrayList<String>();
 				for (PaymentBatch b : batches) {
-					entries.add(b.getSource());
+					// A file can result in several batches (ie one per currency)
+					if (b.getSource()!=null && !entries.contains(b.getSource())) {
+						entries.add(b.getSource());
+					}
+					if (b.getPayments()==null) continue;
+					for (Payment<?> p : b.getPayments()) {
+						LocalDate d = LocalDateUtils.asLocalDate(p.getPaymentDate());
+						if (d==null) continue;
+						if (fromDate==null || d.isBefore(fromDate)) {
+							fromDate = d;
+						}
+						if (untilDate==null || d.isAfter(untilDate)) {
+							untilDate = d;
+						}
+					}
 				}
-				pbc.setUnprocessedEntries(entries);
 			} catch (Exception ee) {
-				
+				log.warn("Unable to read unprocessed entries for channel {}: {}", pbc.getChannelId(), ee.getMessage());
 			}
 			
 		}
 		
+		pbc.setUnprocessedEntries(entries);
+		pbc.setUnprocessedFromDate(fromDate);
+		pbc.setUnprocessedUntilDate(untilDate);
+		
 		return pbc;
+	}
+	
+	/**
+	 * @deprecated	Use {@link #refreshUnprocessedEntries(PaymentBatchChannel)}
+	 */
+	@Deprecated
+	protected PaymentBatchChannel populateUnProcessedEntries(PaymentBatchChannel pbc) {
+		return refreshUnprocessedEntries(pbc);
 	}
 	
 }

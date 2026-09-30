@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.table;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
@@ -29,6 +30,8 @@ public class PaymentBatchChannelTable extends GenericTable {
 		addColumn("Description");
 		addColumn("Source dir");
 		addColumn("R. until");
+		addColumn("First");
+		addColumn("Last");
 		if (showActiveFlag) {
 			addColumn("Active");
 		}
@@ -59,7 +62,9 @@ public class PaymentBatchChannelTable extends GenericTable {
 					p.getDestinationSystem(),
 					p.getChannelDescription(),
 					getSourceDirectory(p),
-					getReconciledUntilString(p)
+					getReconciledUntilString(p),
+					dateString(p.getUnprocessedFromDate()),
+					dateString(p.getUnprocessedUntilDate())
 					);
 			if (showActiveFlag) {
 				row.addContent(isActive(p) ? "Yes" : "NO");
@@ -87,6 +92,10 @@ public class PaymentBatchChannelTable extends GenericTable {
 			str.append("(" + p.getUnprocessedEntries().size() + ")");
 		}
 		return str.toString();
+	}
+	
+	private static String dateString(LocalDate d) {
+		return d!=null ? d.toString() : "";
 	}
 	
 	private String getReconciledUntilString(PaymentBatchChannel p) {
