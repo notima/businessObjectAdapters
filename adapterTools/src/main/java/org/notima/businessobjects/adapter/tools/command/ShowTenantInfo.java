@@ -103,6 +103,14 @@ public class ShowTenantInfo extends AbstractAction {
 		String reportDir = ti.getReportDirectory();
 		sess.getConsole().println("  Report Dir        : " + (reportDir != null ? reportDir 
 				: (outDir != null ? "(not set, uses default output dir)" : "(not set)")));
+		if (ti.hasPaymentInformation() || ti.getRemitToBIC() != null) {
+			sess.getConsole().println("  Remit To Account  : " + (ti.getRemitToAccount() != null ? ti.getRemitToAccount() : "(not set)")
+					+ (ti.getRemitToAccountType() != null ? " (" + ti.getRemitToAccountType() + ")" : ""));
+			sess.getConsole().println("  Remit To IBAN     : " + (ti.getRemitToIBAN() != null ? ti.getRemitToIBAN() : "(not set)"));
+			sess.getConsole().println("  Remit To BIC      : " + (ti.getRemitToBIC() != null ? ti.getRemitToBIC() : "(not set)"));
+		} else {
+			sess.getConsole().println("  Payment info      : (not set)");
+		}
 	}
 
 	private void printBusinessPartner(BusinessPartner<?> bp) {

@@ -24,6 +24,10 @@ public class TenantInfoAttributeCompleter implements Completer {
 		"legalName",
 		"defaultOutputDirectory",
 		"reportDirectory",
+		"remitToAccount",
+		"remitToAccountType",
+		"remitToIBAN",
+		"remitToBIC",
 	};
 
 	@Override
