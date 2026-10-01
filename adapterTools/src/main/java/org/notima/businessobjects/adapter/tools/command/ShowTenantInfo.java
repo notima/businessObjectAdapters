@@ -47,7 +47,7 @@ public class ShowTenantInfo extends AbstractAction {
 				? countryCode.trim()
 				: settings.getDefaultCountryCode();
 
-		TenantInformationFactory tif = cof.lookupFirstTenantInformationFactory();
+		TenantInformationFactory tif = cof.lookupTenantInformationFactory();
 
 		if (orgNo != null && !orgNo.trim().isEmpty()) {
 			TaxSubjectIdentifier tenantId = new TaxSubjectIdentifier(orgNo.trim(), effectiveCountryCode);

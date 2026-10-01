@@ -71,6 +71,8 @@
 
 		<config name="AdapterTools">
 			defaultCountryCode = SE
+			# SystemName of the adapter that stores TenantInformation, if more than one provides it (ie Json)
+			# tenantInformationAdapter = Json
 		</config>
 
 	</feature>

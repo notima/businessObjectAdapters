@@ -41,9 +41,14 @@ public class SetTenantInfo extends AbstractAction {
 	@Override
 	protected Object onExecute() throws Exception {
 
-		TenantInformationFactory tif = cof.lookupFirstTenantInformationFactory();
+		TenantInformationFactory tif = cof.lookupTenantInformationFactory();
 		if (tif == null) {
-			sess.getConsole().println("No TenantInformationFactory registered. Is the notima-json feature installed?");
+			if (settings.getTenantInformationAdapter() != null) {
+				sess.getConsole().println("No TenantInformationFactory registered for configured tenantInformationAdapter " + settings.getTenantInformationAdapter() 
+					+ ". Available: " + cof.listTenantInformationFactoryNames());
+			} else {
+				sess.getConsole().println("No TenantInformationFactory registered. Is the notima-json feature installed?");
+			}
 			return null;
 		}
 

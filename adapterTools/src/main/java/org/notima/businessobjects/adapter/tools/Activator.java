@@ -39,6 +39,20 @@ public class Activator extends BaseActivator {
 	@Override
 	public void doStart() {
 
+		AdapterToolsSettings settings = new AdapterToolsSettings();
+		try {
+			ServiceReference<ConfigurationAdmin> cmRef = bundleContext.getServiceReference(ConfigurationAdmin.class);
+			if (cmRef != null) {
+				ConfigurationAdmin cm = bundleContext.getService(cmRef);
+				Configuration cfg = cm.getConfiguration(AdapterToolsSettings.PID);
+				if (cfg != null && cfg.getProperties() != null) {
+					settings.setFromDictionary(cfg.getProperties());
+				}
+			}
+		} catch (Exception e) {
+			log.warn("Could not read {} config, using defaults: {}", AdapterToolsSettings.PID, e.getMessage());
+		}
+
 		FormatterFactory formatterFactory = new FormatterFactoryImpl();
 		log.info("Created FormatterFactory");
 		((FormatterFactoryImpl)formatterFactory).setBundleContext(bundleContext);
@@ -46,6 +60,7 @@ public class Activator extends BaseActivator {
 		
 		CanonicalObjectFactory cof = new CanonicalObjectFactoryImpl();
 		((CanonicalObjectFactoryImpl)cof).setBundleContext(bundleContext);
+		((CanonicalObjectFactoryImpl)cof).setSettings(settings);
 		log.info("Created Canonical Object Factory");
 		register(CanonicalObjectFactory.class, cof);
 
@@ -85,21 +100,8 @@ public class Activator extends BaseActivator {
 			log.error("Not able to start Basic FI Tax Rate Provider");
 		}
 
-		AdapterToolsSettings settings = new AdapterToolsSettings();
-		try {
-			ServiceReference<ConfigurationAdmin> cmRef = bundleContext.getServiceReference(ConfigurationAdmin.class);
-			if (cmRef != null) {
-				ConfigurationAdmin cm = bundleContext.getService(cmRef);
-				Configuration cfg = cm.getConfiguration(AdapterToolsSettings.PID);
-				if (cfg != null && cfg.getProperties() != null) {
-					settings.setFromDictionary(cfg.getProperties());
-				}
-			}
-		} catch (Exception e) {
-			log.warn("Could not read {} config, using defaults: {}", AdapterToolsSettings.PID, e.getMessage());
-		}
 		register(AdapterToolsSettings.class, settings);
-		log.info("Registered AdapterToolsSettings (defaultCountryCode={})", settings.getDefaultCountryCode());
+		log.info("Registered AdapterToolsSettings (defaultCountryCode={}, tenantInformationAdapter={})", settings.getDefaultCountryCode(), settings.getTenantInformationAdapter());
 
 		// File based task locks. Ranked above other task lock managers (ie the database based one in adapterPersistence).
 		FileTaskLockManager taskLockManager = new FileTaskLockManager();

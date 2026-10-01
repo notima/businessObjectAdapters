@@ -55,8 +55,14 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 	private BundleContext ctx;
 
+	private AdapterToolsSettings settings;
+
 	public void setBundleContext(BundleContext c) {
 		ctx = c;
+	}
+
+	public void setSettings(AdapterToolsSettings settings) {
+		this.settings = settings;
 	}
 	
 	/**
@@ -636,25 +642,59 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 		if (references!=null) {
 			TenantInformationFactory srv;
+			Object systemName;
 			for (ServiceReference<TenantInformationFactory> sr : references) {
 				srv = ctx.getService(sr);
-				tenantInformationFactories.put(srv.getClass().getName(), srv);
+				systemName = sr.getProperty("SystemName");
+				tenantInformationFactories.put(systemName!=null ? systemName.toString() : srv.getClass().getName(), srv);
 			}
 		}
 
 	}
 
 	@Override
-	public TenantInformationFactory lookupFirstTenantInformationFactory() {
+	public TenantInformationFactory lookupTenantInformationFactory() {
+		String configured = settings!=null ? settings.getTenantInformationAdapter() : null;
+		if (configured!=null) {
+			TenantInformationFactory tif = lookupTenantInformationFactory(configured);
+			if (tif==null) {
+				log.warn("Configured tenantInformationAdapter {} has no registered TenantInformationFactory. Available: {}", configured, tenantInformationFactories.keySet());
+			}
+			return tif;
+		}
 		try {
 			resetTenantInformationFactories();
 			if (!tenantInformationFactories.isEmpty()) {
+				if (tenantInformationFactories.size()>1) {
+					log.warn("Several TenantInformationFactories registered {}. Using {}. Set tenantInformationAdapter in {}.cfg to choose.", 
+							tenantInformationFactories.keySet(), tenantInformationFactories.keySet().iterator().next(), AdapterToolsSettings.PID);
+				}
 				return tenantInformationFactories.get(tenantInformationFactories.keySet().iterator().next());
 			}
 		} catch (InvalidSyntaxException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	@Override
+	public TenantInformationFactory lookupTenantInformationFactory(String systemName) {
+		try {
+			resetTenantInformationFactories();
+		} catch (InvalidSyntaxException e) {
+			e.printStackTrace();
+		}
+		return tenantInformationFactories.get(systemName);
+	}
+
+	@Override
+	public Collection<String> listTenantInformationFactoryNames() {
+		try {
+			resetTenantInformationFactories();
+		} catch (InvalidSyntaxException e) {
+			e.printStackTrace();
+		}
+		return tenantInformationFactories.keySet();
 	}
 
 

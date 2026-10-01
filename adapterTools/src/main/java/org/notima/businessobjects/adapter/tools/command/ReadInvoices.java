@@ -128,7 +128,7 @@ public class ReadInvoices extends AbstractAction {
 			return invoiceFile;
 		}
 		TaxSubjectIdentifier tenantId = new TaxSubjectIdentifier(orgNo, countryCode);
-		TenantInformationFactory tif = cof.lookupFirstTenantInformationFactory();
+		TenantInformationFactory tif = cof.lookupTenantInformationFactory();
 		if (tif != null) {
 			TenantInformation ti = tif.getTenantInformation(tenantId);
 			if (ti != null && ti.getDefaultOutputDirectory() != null && ti.getDefaultOutputDirectory().trim().length() > 0) {

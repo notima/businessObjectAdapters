@@ -52,7 +52,18 @@ public interface CanonicalObjectFactory {
 	
 	public PaymentBatchChannelFactory lookupFirstPaymentBatchChannelFactory();
 
-	public TenantInformationFactory lookupFirstTenantInformationFactory();
+	/**
+	 * Returns the TenantInformationFactory to use. If tenantInformationAdapter is set
+	 * in the AdapterTools config, the factory registered with that SystemName is returned.
+	 * Otherwise the first registered factory (by SystemName) is returned.
+	 * 
+	 * @return	The factory, or null if none (or not the configured one) is registered.
+	 */
+	public TenantInformationFactory lookupTenantInformationFactory();
+
+	public TenantInformationFactory lookupTenantInformationFactory(String systemName);
+
+	public Collection<String> listTenantInformationFactoryNames();
 
 
 

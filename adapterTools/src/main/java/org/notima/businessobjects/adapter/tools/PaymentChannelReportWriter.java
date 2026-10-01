@@ -137,7 +137,7 @@ public class PaymentChannelReportWriter {
 	public static String resolveReportDirectory(CanonicalObjectFactory cof, TaxSubjectIdentifier tenant, String defaultCountryCode) {
 		
 		if (cof==null || tenant==null || !tenant.hasTaxId()) return null;
-		TenantInformationFactory tif = cof.lookupFirstTenantInformationFactory();
+		TenantInformationFactory tif = cof.lookupTenantInformationFactory();
 		if (tif==null) return null;
 		
 		TenantInformation ti = null;
