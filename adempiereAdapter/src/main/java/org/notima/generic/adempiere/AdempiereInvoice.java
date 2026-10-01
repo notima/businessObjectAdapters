@@ -251,6 +251,8 @@ public class AdempiereInvoice {
 		dst.setRoundingDecimals(pl!=null ? pl.getPricePrecision() : 2);
 		
 		dst.setBillBpartner(bpartner);
+		// The invoice's customer is also the one billed
+		dst.setBusinessPartner(bpartner);
 		
 		BusinessPartner sender = AdempiereBusinessPartner.loadOrgBp(aInvoice.getAdOrgId(), conn);
 		dst.setSender(sender);
