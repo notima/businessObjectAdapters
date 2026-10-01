@@ -43,4 +43,6 @@ The adapters contained in this repository are meant to be OSGI-plugins in a Kara
 
 Every adapter exposes its services in the Activator class.
 
+The [adapterTools](adapterTools/README.md) module contains the Karaf commands and services shared by all adapters, ie listing adapters and tenants, tenant information (`set-tenant-info` / `show-tenant-info`), reading and showing invoices, and payment batches and channels. It also contains the Karaf features (`adapterTools/src/main/resources/feature.xml`).
+
 To be consequent about where loggers are placed, put them in the *Adapter class(es) of the module.

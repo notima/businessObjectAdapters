@@ -19,9 +19,66 @@ To list all customers for a specific adapter
 Copy tenant information from one adapter to another
 
 	copy-tenant [srcAdapter] [dstAdapter] [orgNo of tenant]
-	
 
-	
+## Tenant information
+
+Tenant information is extra information about a tenant that isn't part of the tenant's adapter, ie where to write files and how the tenant gets paid. It's stored separately from the adapters, so a tenant in an adapter that can't store this kind of information (ie Adempiere) can still have it.
+
+### Where it's stored
+
+The tenant information is stored by a `TenantInformationFactory`. The jsonAdapter provides one (install the `notima-json` feature), which stores the information in `jsonAdapter/tenantInformation.json` in Karaf's home directory. The file can be changed with `tenantInformationFile` in `etc/jsonAdapterProperties.cfg`.
+
+If more than one adapter provides a `TenantInformationFactory`, choose which one to use with `tenantInformationAdapter` (the adapter's system name) in `etc/AdapterTools.cfg`:
+
+	tenantInformationAdapter = Json
+
+Without the setting, the first one (by system name) is used and a warning is logged. The setting is read when the adapterTools bundle starts.
+
+### Identifying the tenant
+
+A tenant is identified by org number and country code. If the country code isn't given with `-co`, the `defaultCountryCode` in `etc/AdapterTools.cfg` is used (`SE` by default). Information stored with one country code isn't found with another.
+
+### Setting tenant information
+
+	set-tenant-info [orgNo] [attribute] [value]
+	set-tenant-info -co SE 556745-6941 defaultOutputDirectory /home/user/karaf-output/notima
+
+The entry is created if it doesn't exist. One attribute is set per command (tab completes the attribute names):
+
+| Attribute | Description |
+|---|---|
+| `legalName` | The tenant's name, used in file names created by `read-invoices` |
+| `taxId` | The org number |
+| `countryCode` | The country code |
+| `defaultOutputDirectory` | Where files are written when no file is given, ie by `read-invoices` and `show-canonical-invoice -of default` |
+| `reportDirectory` | Where reports are written, ie payment channel match reports. If not set, `defaultOutputDirectory` is used |
+| `remitToAccount` | The account invoices are paid to, ie a bankgiro number |
+| `remitToAccountType` | The type of `remitToAccount`, ie `BG` (bankgiro) or `PG` (plusgiro) |
+| `remitToIBAN` | IBAN invoices are paid to |
+| `remitToBIC` | BIC for the IBAN |
+
+Note that changing `taxId` or `countryCode` changes how the entry is identified.
+
+### Showing tenant information
+
+	show-tenant-info [orgNo]
+	show-tenant-info -co SE 556745-6941
+
+Shows the stored information. If nothing is stored for the tenant, the registered adapters are searched for a tenant with the org number instead.
+
+To see the output and report directory of all tenants in the adapters:
+
+	list-tenants --with-info [adapter]
+
+`list-tenants` lists the tenants in the adapters. A tenant only stored in the tenant information isn't listed.
+
+### Where it's used
+
+- `read-invoices` writes to `defaultOutputDirectory` if no file is given, named `[legalName or orgNo]-[yyyyMMdd].xml`.
+- `show-canonical-invoice -of default` writes to `defaultOutputDirectory`, named `ar-invoice-[invoiceNo].xml` for sales invoices and `ap-invoice-[invoiceNo].xml` for vendor invoices.
+- `read-invoices` sets the payment information (`remitTo...`) on the creditor of sales invoices. If `remitToAccount` or `remitToIBAN` is set in the tenant information, the tenant information's payment information overrides whatever the adapter supplied. All four `remitTo...` values are taken from the tenant information, also the ones not set, so they're never mixed with the adapter's. If neither has any, a warning is printed.
+- Payment channel reports are written to `reportDirectory`, see [Report directory per tenant](#report-directory-per-tenant).
+
 ## Payment batches
 
 Payment batches are a concept for reconciling payments. A payment batch here is a canonical format to represent a collection of payments with associated fees and payment transfer.
