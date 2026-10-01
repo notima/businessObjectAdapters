@@ -13,8 +13,12 @@ import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.TenantInformation;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.apache.karaf.shell.api.action.Completion;
 import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
@@ -25,6 +29,9 @@ public class ShowInvoice implements Action {
 
 	@Reference
 	private CanonicalObjectFactory cof;
+	
+	@Reference
+	private AdapterToolsSettings settings;
 	
 	@Reference 
 	Session sess;
@@ -42,7 +49,7 @@ public class ShowInvoice implements Action {
     @Option(name = "-co", aliases = { "--country-code" }, description = "Country code for the orgNo", required = false, multiValued = false)
     private String countryCode;
     
-    @Option(name = "-of", aliases = { "--outfile" }, description = "Write the invoice to file", required = false, multiValued = false)
+    @Option(name = "-of", aliases = { "--outfile" }, description = "Write the invoice to file. 'default' writes ar-invoice-{invoiceNo}.xml (sales) or ap-invoice-{invoiceNo}.xml (vendor) to the tenant's default output directory", required = false, multiValued = false)
     private String outFile;
     
     @Option(name = "--destAdapter", description = "Destination adapter", required = false, multiValued = false)
@@ -67,6 +74,11 @@ public class ShowInvoice implements Action {
 			cv = cof.lookupConverter(destAdapter);
 		}
 		
+		if ("default".equalsIgnoreCase(outFile)) {
+			outFile = resolveDefaultOutFile(invoice);
+			if (outFile==null) return null;
+		}
+		
 		if (outFile!=null) {
 			
 			if (invoiceNative==null) {
@@ -83,6 +95,7 @@ public class ShowInvoice implements Action {
 				PrintWriter out = new PrintWriter(outFile);
 				out.println(cv.nativeInvoiceToString(invoiceNative));
 				out.close();
+				sess.getConsole().println("Invoice written to " + outFile);
 				
 			}
 		} else {
@@ -99,6 +112,31 @@ public class ShowInvoice implements Action {
 		
 		return null;
 	}
-	
+
+	/**
+	 * Returns the default file for the invoice in the tenant's default output directory.
+	 * 
+	 * @return	The path, or null (with a message printed) if no default output directory is set.
+	 */
+	private String resolveDefaultOutFile(Invoice<?> invoice) {
+		
+		String effectiveCountryCode = (countryCode != null && !countryCode.trim().isEmpty())
+				? countryCode.trim()
+				: settings.getDefaultCountryCode();
+		TaxSubjectIdentifier tenantId = new TaxSubjectIdentifier(orgNo.trim(), effectiveCountryCode);
+		
+		TenantInformationFactory tif = cof.lookupTenantInformationFactory();
+		TenantInformation ti = tif!=null ? tif.getTenantInformation(tenantId) : null;
+		if (ti==null || ti.getDefaultOutputDirectory()==null || ti.getDefaultOutputDirectory().trim().isEmpty()) {
+			sess.getConsole().println("No default output directory set for " + tenantId + ". Use set-tenant-info to set defaultOutputDirectory.");
+			return null;
+		}
+		
+		File dir = new File(ti.getDefaultOutputDirectory().trim());
+		dir.mkdirs();
+		String prefix = invoice.isSalesTransaction() ? "ar-invoice-" : "ap-invoice-";
+		String invoiceKey = invoice.getInvoiceKey()!=null ? invoice.getInvoiceKey() : invoiceNo;
+		return new File(dir, prefix + invoiceKey.replaceAll("[^a-zA-Z0-9_\\-]", "_") + ".xml").getPath();
+	}
 	
 }
