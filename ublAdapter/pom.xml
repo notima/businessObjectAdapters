@@ -48,6 +48,14 @@
 			<artifactId>jaxb-api</artifactId>
 			<version>2.3.1</version>
 		</dependency>
+
+		<!-- For InvoiceFormatter. Provided by the adapterTools bundle in Karaf, not embedded. -->
+		<dependency>
+			<groupId>org.notima.generic.businessobjects.adapter</groupId>
+			<artifactId>adapterTools</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
 		
 	</dependencies>
 
@@ -73,7 +81,11 @@
   										javax.activation;version="[1.2,2)",							
 										org.notima.bg*,
 										org.notima.generic.businessobjects*,
+										org.notima.generic.ifacebusinessobjects*,
+										org.notima.businessobjects.adapter.tools,
 										org.osgi.framework;version="[1.0,2)",
+										org.osgi.service.cm;version="[1.5,2)",
+										org.osgi.util.tracker;version="[1.5,2)",
 										!com.ibm*,
 										!com.sun.jdmk*,
 										!javax.jmdns*,
@@ -93,10 +105,14 @@
 										!org.glassfish.hk2.osgiresourcelocator,
 										!org.junit*,
 										!org.slf4j.impl*,
+										org.slf4j;version="[1.7,3)",
 										!org.mozilla.universalchardet,
-										!javax.annotation										
+										!javax.annotation,
+										javax.*;resolution:=optional,
+										org.w3c.*;resolution:=optional,
+										org.xml.sax*;resolution:=optional
 										</Import-Package>
-						<Embed-Dependency>!businessobjects|bankgiro-api,scope=compile|runtime</Embed-Dependency>
+						<Embed-Dependency>!businessobjects|bankgiro-api|slf4j-api,scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 					</instructions>
 				</configuration>

@@ -6,6 +6,7 @@ import java.util.Hashtable;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.businessobjects.adapter.tools.InvoiceFormatter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.osgi.framework.ServiceReference;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 		provides = {
 				@ProvideService(BusinessObjectFactory.class),
 				@ProvideService(BusinessObjectConverter.class),
+				@ProvideService(InvoiceFormatter.class),
 		}
 )
 public class Activator extends BaseActivator {
@@ -74,9 +76,14 @@ public class Activator extends BaseActivator {
 			
 			log.info("Created UBL21Converter with systemName " + adapter.getSystemName());
 			register(BusinessObjectConverter.class, converter, props);
+			
+			UBL21InvoiceFormatter invoiceFormatter = new UBL21InvoiceFormatter();
+			register(InvoiceFormatter.class, invoiceFormatter);
+			log.info("Registered UBL21InvoiceFormatter for format " + UBL21InvoiceFormatter.FORMAT_PEPPOL);
 				
-		} catch (Exception ee) {
-			log.error("Failed to create UBL21Adapter/converter", ee);
+		} catch (Throwable ee) {
+			// Throwable, since a missing class gives an Error
+			log.error("Failed to create UBL21Adapter/converter/invoice formatter", ee);
 		}
 		
 	}

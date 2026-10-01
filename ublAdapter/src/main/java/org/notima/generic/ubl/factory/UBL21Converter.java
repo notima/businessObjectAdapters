@@ -11,6 +11,7 @@ import java.util.TreeMap;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.notima.generic.businessobjects.BasicBusinessObjectConverter;
+import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceLine;
 import org.notima.generic.businessobjects.Location;
@@ -94,18 +95,67 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		return at;
 	}
 	
+	/**
+	 * Adds bankgiro as payment means. Peppol (SE-R-008) requires a numeric account,
+	 * so anything but digits (ie the dash in 123-4567) is removed.
+	 */
 	public static InvoiceType addPaymentMeansBankgiro(InvoiceType dst, String bgAccount, String ref, String accountName) {
 		
-		dst = addPaymentMeans(dst, "30", ref, bgAccount, "SE:BANKGIRO", accountName);
+		dst = addPaymentMeans(dst, "30", ref, digitsOnly(bgAccount), "SE:BANKGIRO", accountName);
 		
 		return dst;
 	}
 
+	/**
+	 * Adds plusgiro as payment means. Peppol requires a numeric account,
+	 * so anything but digits (ie the dash in 123456-7) is removed.
+	 */
 	public static InvoiceType addPaymentMeansPlusgiro(InvoiceType dst, String pgAccount, String ref, String accountName) {
 		
-		dst = addPaymentMeans(dst, "30", ref, pgAccount, "SE:PLUSGIRO", accountName);
+		dst = addPaymentMeans(dst, "30", ref, digitsOnly(pgAccount), "SE:PLUSGIRO", accountName);
 		
 		return dst;
+	}
+	
+	private static String digitsOnly(String s) {
+		return s!=null ? s.replaceAll("[^0-9]", "") : null;
+	}
+
+	/**
+	 * Adds payment means from the payee's payment information (remit to account and IBAN).
+	 * 
+	 * A remit to account of type BG is added as bankgiro and of type PG as plusgiro.
+	 * An IBAN is added as a credit transfer with the BIC as branch.
+	 * 
+	 * @param dst			The invoice
+	 * @param payee			The party to be paid, normally the sender of the invoice.
+	 * @param paymentRef	The payment reference, ie OCR or invoice number.
+	 * @return	True if any payment means were added.
+	 */
+	public static boolean addPaymentMeans(InvoiceType dst, BusinessPartner<?> payee, String paymentRef) {
+		
+		if (payee==null) return false;
+		
+		boolean added = false;
+		String account = payee.getRemitToAccount();
+		if (account!=null && account.trim().length()>0) {
+			if ("BG".equalsIgnoreCase(payee.getRemitToAccountType())) {
+				addPaymentMeansBankgiro(dst, account.trim(), paymentRef, payee.getName());
+				added = true;
+			} else if ("PG".equalsIgnoreCase(payee.getRemitToAccountType())) {
+				addPaymentMeansPlusgiro(dst, account.trim(), paymentRef, payee.getName());
+				added = true;
+			}
+		}
+		String iban = payee.getRemitToIBAN();
+		if (iban!=null && iban.trim().length()>0) {
+			String bic = payee.getRemitToBIC();
+			addPaymentMeans(dst, "30", paymentRef, iban.replaceAll("\\s", ""), 
+					bic!=null && bic.trim().length()>0 ? bic.trim() : null, payee.getName());
+			added = true;
+		}
+		
+		return added;
 	}
 	
 	
@@ -267,9 +317,11 @@ public class UBL21Converter extends BasicBusinessObjectConverter<Object, Invoice
 		FinancialAccountType pfa = new FinancialAccountType();
 		pfa.setID(idAccount);
 		pfa.setName(accountName);
-		BranchType bt = new BranchType();
-		bt.setID(financialInstitutionBranchId);
-		pfa.setFinancialInstitutionBranch(bt);
+		if (financialInstitutionBranchId!=null) {
+			BranchType bt = new BranchType();
+			bt.setID(financialInstitutionBranchId);
+			pfa.setFinancialInstitutionBranch(bt);
+		}
 		pmt.setPayeeFinancialAccount(pfa);
 		list.add(pmt);
 		
