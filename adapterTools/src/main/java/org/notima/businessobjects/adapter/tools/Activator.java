@@ -10,6 +10,8 @@ import org.notima.businessobjects.adapter.tools.task.FileTaskLockManager;
 import org.notima.businessobjects.adapter.tools.task.TaskLockManager;
 import org.notima.generic.businessobjects.tax.BasicTaxRateProviderFI;
 import org.notima.generic.businessobjects.tax.BasicTaxRateProviderSE;
+import org.notima.generic.ifacebusinessobjects.InvoiceDeliveryMethod;
+import org.notima.generic.ifacebusinessobjects.KeyManager;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 import org.osgi.framework.Constants;
@@ -24,6 +26,8 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(FormatterFactory.class),
 				@ProvideService(CanonicalObjectFactory.class),
 				@ProvideService(MessageSenderFactory.class),
+				@ProvideService(InvoiceDeliveryMethodFactory.class),
+				@ProvideService(InvoiceDeliveryMethod.class),
 				@ProvideService(PaymentBatchProcessor.class),
 				@ProvideService(MappingServiceFactory.class),
 				@ProvideService(TaxRateProvider.class),
@@ -69,6 +73,14 @@ public class Activator extends BaseActivator {
 		((MessageSenderFactoryImpl)messageSenderFactory).setBundleContext(bundleContext);
 		register(MessageSenderFactory.class, messageSenderFactory);
 		
+		InvoiceDeliveryMethodFactoryImpl deliveryMethodFactory = new InvoiceDeliveryMethodFactoryImpl();
+		deliveryMethodFactory.setBundleContext(bundleContext);
+		register(InvoiceDeliveryMethodFactory.class, deliveryMethodFactory);
+		
+		EmailInvoiceDelivery emailDelivery = new EmailInvoiceDelivery(messageSenderFactory, this::lookupKeyManager);
+		register(InvoiceDeliveryMethod.class, emailDelivery);
+		log.info("Registered invoice delivery method " + emailDelivery.getType());
+		
 		Dictionary<String, String> props = new Hashtable<String,String>();
 		props.put("SystemName", FilePaymentBatchProcessor.SystemName);
 		
@@ -112,6 +124,10 @@ public class Activator extends BaseActivator {
 
 	}
 	
+	private KeyManager lookupKeyManager() {
+		ServiceReference<KeyManager> ref = bundleContext.getServiceReference(KeyManager.class);
+		return ref!=null ? bundleContext.getService(ref) : null;
+	}
 	
 }
 	

@@ -83,20 +83,36 @@ To see the output and report directory of all tenants in the adapters:
 
 `print-invoices` formats the invoices in a file created by `read-invoices` (xml) or a json invoice list, one file per invoice:
 
-	print-invoices [-format pdf|peppol] [-od outputDirectory] [file]
+	print-invoices [-format pdf|peppol] [-od outputDirectory] [--delivery email|ekopost] [file]
 	print-invoices -format peppol /home/user/karaf-output/notima/556745-6941-20261001.xml
 
 Each file is named after the invoice's document key (with `-email` added for invoices sent by e-mail), and is written to `-od` or else the directory of the input file. The path of each file is printed.
 
 | Format | Output | Provided by feature |
 |---|---|---|
-| `pdf` (default) | PDF | `notima-jasperreport` |
+| `pdf` (default without delivery) | PDF | `notima-jasperreport` |
 | `peppol` | E-invoice, UBL 2.1 Peppol BIS Billing 3.0 (`.xml`) | `notima-ubl` |
 
 For `peppol`:
 - Invoices with a negative total are written as a UBL CreditNote, with positive amounts.
 - The seller is the invoice's sender. If the invoice has none, the creditor of the invoice list is used.
 - The payment means (bankgiro, plusgiro or IBAN/BIC) come from the creditor's payment information. `read-invoices` puts it on the creditor, from the adapter or from the tenant information (`remitTo...`, see [Setting tenant information](#setting-tenant-information)). The payment reference is the invoice's OCR, or the invoice number if there is no OCR. Without payment information the e-invoice has no payment means and a warning is logged.
+
+### Delivering invoices
+
+With `--delivery`, each formatted invoice is also delivered to the customer. Without `-format`, the delivery method's format is used.
+
+	print-invoices --delivery ekopost /home/user/karaf-output/notima/556745-6941-20261001.xml
+	print-invoices -s -a test@example.com [file]
+
+| Delivery | Format | Delivers | Provided by |
+|---|---|---|---|
+| `email` (also `-s`) | `pdf` | Sends each invoice right away to the customer's billing e-mail. Only customers that want e-mail invoices get one. `-a` sends all e-mails to that address instead (ie for testing). | adapterTools, using the e-mail message sender (`notima-email`) |
+| `ekopost` | `peppol` | Queues all invoices in the file and sends them to Ekopost (Peppol) in one batch at the end. Uses the `Ekopost` configuration. | `ekopost-api` (notima-integration) |
+
+For each invoice the result is printed (ie `sent to a@b.se`, `queued for Ekopost` or `not delivered by email`), and at the end the number of invoices delivered. An unknown delivery method gives an error listing the available ones.
+
+A delivery method is an `InvoiceDeliveryMethod` service (`getType()`, `getDefaultFormat()`, `startBatch(...)`). The interfaces `InvoiceDeliveryMethod` and `InvoiceDeliveryBatch` are in businessobjects (`org.notima.generic.ifacebusinessobjects`), so new methods (ie Kivra) can be added in their own bundle without depending on adapterTools or changing `print-invoices`.
 
 ## Payment batches
 
