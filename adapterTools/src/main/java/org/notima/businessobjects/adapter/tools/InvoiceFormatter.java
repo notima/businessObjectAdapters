@@ -12,6 +12,12 @@ import org.notima.generic.businessobjects.Invoice;
  */
 public interface InvoiceFormatter {
 
+	/** Property for the directory the formatted invoice is written to. */
+	public static final String OUTPUT_DIR = "OutputDir";
+	
+	/** Property for the file name (without extension) of the formatted invoice. */
+	public static final String OUTPUT_FILENAME = "OutputFilename";
+
 	/**
 	 * Formats an invoice
 	 * 

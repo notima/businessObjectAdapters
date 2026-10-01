@@ -22,6 +22,7 @@ import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.InvoiceFormatter;
 import org.notima.businessobjects.adapter.tools.MessageSender;
 import org.notima.businessobjects.adapter.tools.MessageSenderFactory;
+import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.InvoiceList;
 import org.notima.generic.businessobjects.Message;
@@ -44,6 +45,7 @@ public class PrintInvoices extends AbstractAction {
 	@Reference
 	private FormatterFactory	formatterFactory;
     
+    @Option(name = "-format", aliases = { "--format" }, description = "Output format, ie pdf or peppol. Default pdf", required = false, multiValued = false)
 	private String				format = "pdf";
 	
 	private InvoiceFormatter	formatter;
@@ -87,6 +89,9 @@ public class PrintInvoices extends AbstractAction {
 	private void initFormatterFactory() throws Exception {
 
 		formatter = formatterFactory.getInvoiceFormatter(format);
+		if (formatter==null) {
+			throw new Exception("No invoice formatter for format " + format + ". Is the adapter providing it installed?");
+		}
 		
 	}
 	
@@ -102,6 +107,7 @@ public class PrintInvoices extends AbstractAction {
 		}
 		
 		props.setProperty("JasperOutputDir", outputDirectory);
+		props.setProperty(InvoiceFormatter.OUTPUT_DIR, outputDirectory);
 		
 		if (sendByEmail) {
 			emailSender = getMessageSenderFactory().getMessageSender("email");
@@ -135,6 +141,9 @@ public class PrintInvoices extends AbstractAction {
 		String outputFilename = getFileNameForInvoice(invoice);
 		
 		props.setProperty("JasperOutputFilename", outputFilename);
+		props.setProperty(InvoiceFormatter.OUTPUT_FILENAME, outputFilename);
+		
+		addCreditorPaymentInformation(invoice);
 		
 		String path = formatter.formatInvoice(invoice, format, props);
 		sess.getConsole().println(path);
@@ -143,6 +152,34 @@ public class PrintInvoices extends AbstractAction {
 			sendByEmail(invoice, path);
 		}
 		
+	}
+	
+	/**
+	 * Puts the creditor on the invoice, since the formatter only gets the invoice.
+	 * If the invoice has no sender, the creditor is used as sender. Otherwise the
+	 * creditor's payment information (if any) is copied as a whole to the sender.
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void addCreditorPaymentInformation(Invoice invoice) {
+		
+		BusinessPartner<?> creditor = invoiceList.getCreditor();
+		if (creditor==null) return;
+		
+		BusinessPartner sender = invoice.getSender();
+		if (sender==null) {
+			invoice.setSender(creditor);
+			return;
+		}
+		if (!hasPaymentInformation(creditor)) return;
+		sender.setRemitToAccount(creditor.getRemitToAccount());
+		sender.setRemitToAccountType(creditor.getRemitToAccountType());
+		sender.setRemitToIBAN(creditor.getRemitToIBAN());
+		sender.setRemitToBIC(creditor.getRemitToBIC());
+	}
+	
+	private boolean hasPaymentInformation(BusinessPartner<?> bp) {
+		return (bp.getRemitToAccount() != null && bp.getRemitToAccount().trim().length() > 0)
+				|| (bp.getRemitToIBAN() != null && bp.getRemitToIBAN().trim().length() > 0);
 	}
 	
 	private void sendByEmail(Invoice<?> invoice, String path) throws Exception {

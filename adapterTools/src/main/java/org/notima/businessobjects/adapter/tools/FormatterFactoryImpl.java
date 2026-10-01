@@ -94,7 +94,7 @@ public class FormatterFactoryImpl implements FormatterFactory {
 		
 		invoiceFormatters.clear();
 		
-		if (irefs!=null) {
+		if (ifrefs!=null) {
 			InvoiceFormatter srv;
 			for (ServiceReference<InvoiceFormatter> sr : ifrefs) {
 				srv = ctx.getService(sr);

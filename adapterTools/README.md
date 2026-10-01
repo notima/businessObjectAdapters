@@ -79,6 +79,25 @@ To see the output and report directory of all tenants in the adapters:
 - `read-invoices` sets the payment information (`remitTo...`) on the creditor of sales invoices. If `remitToAccount` or `remitToIBAN` is set in the tenant information, the tenant information's payment information overrides whatever the adapter supplied. All four `remitTo...` values are taken from the tenant information, also the ones not set, so they're never mixed with the adapter's. If neither has any, a warning is printed.
 - Payment channel reports are written to `reportDirectory`, see [Report directory per tenant](#report-directory-per-tenant).
 
+## Printing invoices
+
+`print-invoices` formats the invoices in a file created by `read-invoices` (xml) or a json invoice list, one file per invoice:
+
+	print-invoices [-format pdf|peppol] [-od outputDirectory] [file]
+	print-invoices -format peppol /home/user/karaf-output/notima/556745-6941-20261001.xml
+
+Each file is named after the invoice's document key (with `-email` added for invoices sent by e-mail), and is written to `-od` or else the directory of the input file. The path of each file is printed.
+
+| Format | Output | Provided by feature |
+|---|---|---|
+| `pdf` (default) | PDF | `notima-jasperreport` |
+| `peppol` | E-invoice, UBL 2.1 Peppol BIS Billing 3.0 (`.xml`) | `notima-ubl` |
+
+For `peppol`:
+- Invoices with a negative total are written as a UBL CreditNote, with positive amounts.
+- The seller is the invoice's sender. If the invoice has none, the creditor of the invoice list is used.
+- The payment means (bankgiro, plusgiro or IBAN/BIC) come from the creditor's payment information. `read-invoices` puts it on the creditor, from the adapter or from the tenant information (`remitTo...`, see [Setting tenant information](#setting-tenant-information)). The payment reference is the invoice's OCR, or the invoice number if there is no OCR. Without payment information the e-invoice has no payment means and a warning is logged.
+
 ## Payment batches
 
 Payment batches are a concept for reconciling payments. A payment batch here is a canonical format to represent a collection of payments with associated fees and payment transfer.
