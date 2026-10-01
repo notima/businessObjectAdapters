@@ -1,5 +1,6 @@
 package org.notima.generic.ubl.test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
@@ -14,7 +15,11 @@ import org.notima.generic.businessobjects.Invoice;
 public class TestConfig {
 
 	private static final String PROPERTIES_FILE = "test.properties";
-	private static final String LOCAL_PROPERTIES_FILE = "my-test.properties";
+	/**
+	 * Local properties (not in git) overriding test.properties, ie with a real invoice and bankgiro.
+	 * Choose another file with -Dubl.test.properties=my-test-other.properties
+	 */
+	private static final String LOCAL_PROPERTIES_FILE = System.getProperty("ubl.test.properties", "my-test.properties");
 
 	public static String srcFile1 = "my-test.xml";
 	public static String resultDir = "target";
@@ -45,11 +50,18 @@ public class TestConfig {
 		bankgiroAccountName = props.getProperty("bankgiroAccountName");
 
 		try {
-			URL url = ClassLoader.getSystemResource(srcFile1);
-			if (url == null) {
-				throw new Exception(srcFile1 + " not found. The src/test/resources folder needs to be in classpath when running tests.");
+			// Try distinct file
+			FileReader reader;
+			File potentialFile = new File(srcFile1);
+			if (!potentialFile.exists()) {
+				URL url = ClassLoader.getSystemResource(srcFile1);
+				if (url == null) {
+					throw new Exception(srcFile1 + " not found. The src/test/resources folder needs to be in classpath when running tests.");
+				}
+				reader = new FileReader(url.getFile());
+			} else {
+				reader = new FileReader(potentialFile);
 			}
-			FileReader reader = new FileReader(url.getFile());
 
 			sampleBoInvoice = new Invoice<Object>();
 			JAXBContext ctx = JAXBContext.newInstance(Invoice.class);

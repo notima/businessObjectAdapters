@@ -16,21 +16,21 @@
         <emailInvoice>false</emailInvoice>
         <identityNo>341835</identityNo>
         <language>sv_SE</language>
-        <name>Notima System Integration AB</name>
+        <name>Kunden AB</name>
         <taxId>555555-5555</taxId>
         <bPartnerId>1179982</bPartnerId>
     </billBpartner>
     <billLocation>
-        <address1>LÄRJUNGEVÄGEN 6</address1>
-        <city>VENDELSÖ</city>
+        <address1>EXEMPELGATAN 1</address1>
+        <city>EXEMPELSTAD</city>
         <countryCode>SE</countryCode>
         <locationId>0</locationId>
-        <name>VENDELSÖ LÄRJUNGEVÄGEN 6</name>
-        <postal>13669</postal>
+        <name>EXEMPELSTAD EXEMPELGATAN 1</name>
+        <postal>12345</postal>
     </billLocation>
     <billPerson>
-        <email>daniel@nospam.com</email>
-        <name>Daniel Tamm</name>
+        <email>kontakt@example.com</email>
+        <name>Karin Kund</name>
         <personId>0</personId>
     </billPerson>
     <currency>SEK</currency>
