@@ -107,6 +107,58 @@ public class AdempiereBusinessPartner {
 	 * @return
 	 * @throws Exception
 	 */
+	/**
+	 * Sets payment information (remit to account, IBAN and BIC) on the business partner
+	 * from the organisation's own bank account. The default account is preferred, and an
+	 * account on the organisation is preferred over one on org 0.
+	 * 
+	 * Account numbers formatted as bankgiro (ie 123-4567 or 1234-5678) get account type BG,
+	 * and plusgiro (ie 123456-7) get PG.
+	 * 
+	 * @param bp			The business partner, ie the creditor.
+	 * @param adClientId	The client
+	 * @param adOrgId		The organisation
+	 * @param conn			Database connection
+	 * @return	True if a bank account was found.
+	 * @throws SQLException
+	 */
+	public static boolean addOwnBankAccount(BusinessPartner<?> bp, int adClientId, int adOrgId, Connection conn) throws SQLException {
+
+		String sql = "select ba.accountno, ba.iban, b.swiftcode from c_bankaccount ba " +
+					 "join c_bank b on (b.c_bank_id=ba.c_bank_id) " +
+					 "where ba.ad_client_id=? and ba.ad_org_id in (0,?) and ba.isactive='Y' and b.isownbank='Y' " +
+					 "order by ba.isdefault desc, ba.ad_org_id desc limit 1";
+
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setInt(1, adClientId);
+		ps.setInt(2, adOrgId);
+		ResultSet rs = ps.executeQuery();
+		boolean found = false;
+		if (rs.next()) {
+			found = true;
+			String accountNo = trimToNull(rs.getString(1));
+			String iban = trimToNull(rs.getString(2));
+			String bic = trimToNull(rs.getString(3));
+			if (accountNo!=null) {
+				bp.setRemitToAccount(accountNo);
+				if (accountNo.matches("\\d{3,4}-\\d{4}")) {
+					bp.setRemitToAccountType("BG");
+				} else if (accountNo.matches("\\d{1,7}-\\d")) {
+					bp.setRemitToAccountType("PG");
+				}
+			}
+			bp.setRemitToIBAN(iban);
+			bp.setRemitToBIC(bic);
+		}
+		rs.close();
+		ps.close();
+		return found;
+	}
+
+	private static String trimToNull(String s) {
+		return (s==null || s.trim().isEmpty()) ? null : s.trim();
+	}
+
 	public static BusinessPartner loadOrgBp(int orgNo, Connection conn) throws Exception {
 
 		String sql = "select o.name, oi.taxid, oi.email, oi.c_location_id from ad_org o " +

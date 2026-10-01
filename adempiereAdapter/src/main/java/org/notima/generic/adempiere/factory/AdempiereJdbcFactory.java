@@ -30,6 +30,8 @@ import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
+import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
+import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.PaymentTerm;
 import org.notima.generic.businessobjects.Person;
 import org.notima.generic.businessobjects.PriceList;
@@ -137,6 +139,49 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 		Invoice invoice = AdempiereInvoice.load(key, adClientId, adOrgId, m_conn);
 		
 		return invoice;
+	}
+
+	@Override
+	public Invoice lookupVendorInvoice(String key) throws Exception {
+		
+		return AdempiereInvoice.load(key, adClientId, adOrgId, Boolean.FALSE, m_conn);
+	}
+
+	@Override
+	public OrderInvoiceOperationResult readInvoices(OrderInvoiceReaderOptions opts) throws Exception {
+		
+		if (opts==null) {
+			opts = new OrderInvoiceReaderOptions();
+			opts.setSalesOnly(true);
+		}
+		return readInvoicesWithOptions(opts);
+	}
+
+	@Override
+	public OrderInvoiceOperationResult readVendorInvoices(OrderInvoiceReaderOptions opts) throws Exception {
+		
+		if (opts==null) {
+			opts = new OrderInvoiceReaderOptions();
+		}
+		opts.setSalesOnly(false);
+		opts.setVendorOnly(true);
+		return readInvoicesWithOptions(opts);
+	}
+	
+	private OrderInvoiceOperationResult readInvoicesWithOptions(OrderInvoiceReaderOptions opts) throws Exception {
+		
+		OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
+		
+		List<Invoice> invoices = AdempiereInvoice.find(adClientId, adOrgId, opts, m_conn);
+		for (Invoice inv : invoices) {
+			result.addAffectedInvoice(inv);
+		}
+		
+		// Set creditor
+		result.getAffectedInvoices().setCreditor(lookupThisCompanyInformation());
+		result.setSuccessful(true);
+		
+		return result;
 	}
 
 	public Order lookupOrder(String key) throws Exception {
@@ -535,8 +580,13 @@ public class AdempiereJdbcFactory extends BasicBusinessObjectFactory {
 
 	@Override
 	public BusinessPartner lookupThisCompanyInformation() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		BusinessPartner bp = AdempiereBusinessPartner.loadOrgBp(adOrgId, m_conn);
+		try {
+			AdempiereBusinessPartner.addOwnBankAccount(bp, adClientId, adOrgId, m_conn);
+		} catch (SQLException e) {
+			logger.warning("Could not read own bank account: " + e.getMessage());
+		}
+		return bp;
 	}
 
 	@Override

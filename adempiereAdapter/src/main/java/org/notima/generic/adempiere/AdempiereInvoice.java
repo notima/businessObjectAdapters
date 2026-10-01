@@ -5,11 +5,13 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
 import org.notima.generic.businessobjects.Person;
 import org.notima.generic.businessobjects.PriceList;
 
@@ -88,14 +90,35 @@ public class AdempiereInvoice {
 	 * @throws Exception
 	 */
 	public static Invoice load(String documentNo, int adClientId, int adOrgNo, Connection conn) throws Exception {
+		return load(documentNo, adClientId, adOrgNo, null, conn);
+	}
+
+	/**
+	 * Loads invoice using document number
+	 * 
+	 * @param documentNo
+	 * @param adClientId
+	 * @param adOrgNo
+	 * @param soTrx			True for sales invoices, false for vendor invoices. If null, a sales invoice
+	 * 						is preferred if both a sales and a vendor invoice has the document number.
+	 * @param conn
+	 * @return
+	 * @throws Exception
+	 */
+	public static Invoice load(String documentNo, int adClientId, int adOrgNo, Boolean soTrx, Connection conn) throws Exception {
 
 		PreparedStatement ps = conn.prepareStatement(
 				selectSql + " WHERE documentno=? and ad_client_id=? and (ad_org_id=0 or ad_org_id=?)"
+				+ (soTrx!=null ? " and issotrx=?" : "")
+				+ " ORDER BY issotrx DESC"
 			);
 		
 		ps.setString(1, documentNo);
 		ps.setInt(2, adClientId);
 		ps.setInt(3, adOrgNo);
+		if (soTrx!=null) {
+			ps.setString(4, soTrx ? "Y" : "N");
+		}
 		ResultSet rs = ps.executeQuery();
 		AdempiereInvoice aInvoice = null;
 		if (rs.next()) {
@@ -109,6 +132,85 @@ public class AdempiereInvoice {
 		
 		return enrichInvoice(aInvoice, conn);
 		
+	}
+	
+	/**
+	 * Finds invoices matching the reader options.
+	 * 
+	 * Only completed and closed invoices are included, unless showCancelled is set
+	 * in which case voided and reversed invoices are included too.
+	 * 
+	 * @param adClientId	The client
+	 * @param adOrgId		The org (invoices on org 0 are also included)
+	 * @param opts			Filter criterias. If null, all completed invoices are returned.
+	 * @param conn			Database connection
+	 * @return				The invoices found, ordered by invoice date and document no.
+	 * @throws Exception
+	 */
+	public static List<Invoice> find(int adClientId, int adOrgId, OrderInvoiceReaderOptions opts, Connection conn) throws Exception {
+		
+		StringBuffer sql = new StringBuffer(
+				"SELECT c_invoice_id FROM c_invoice i WHERE ad_client_id=? and (ad_org_id=0 or ad_org_id=?)");
+		List<Object> params = new ArrayList<Object>();
+		params.add(adClientId);
+		params.add(adOrgId);
+		
+		if (opts!=null && opts.isShowCancelled()) {
+			sql.append(" and docstatus in ('CO','CL','VO','RE')");
+		} else {
+			sql.append(" and docstatus in ('CO','CL')");
+		}
+		
+		if (opts!=null) {
+			if (opts.isSalesOnly()) {
+				sql.append(" and issotrx='Y'");
+			} else if (opts.isVendorOnly()) {
+				sql.append(" and issotrx='N'");
+			}
+			if (opts.isUnpostedOnly()) {
+				sql.append(" and posted<>'Y'");
+			}
+			if (opts.isOpenOnly()) {
+				sql.append(" and ispaid='N'");
+			}
+			if (opts.getFromDate()!=null) {
+				sql.append(" and dateinvoiced>=?");
+				params.add(Date.valueOf(opts.getFromDate()));
+			}
+			if (opts.getUntilDate()!=null) {
+				sql.append(" and dateinvoiced<=?");
+				params.add(Date.valueOf(opts.getUntilDate()));
+			}
+		}
+		
+		sql.append(" ORDER BY dateinvoiced, documentno");
+		
+		if (opts!=null && opts.getReadLimit()>0) {
+			sql.append(" LIMIT " + opts.getReadLimit());
+		}
+		
+		PreparedStatement ps = conn.prepareStatement(sql.toString());
+		for (int i=0; i<params.size(); i++) {
+			ps.setObject(i+1, params.get(i));
+		}
+		ResultSet rs = ps.executeQuery();
+		List<Integer> invoiceIds = new ArrayList<Integer>();
+		while (rs.next()) {
+			invoiceIds.add(rs.getInt(1));
+		}
+		rs.close();
+		ps.close();
+		
+		List<Invoice> result = new ArrayList<Invoice>();
+		Invoice invoice;
+		for (Integer invoiceId : invoiceIds) {
+			invoice = load(invoiceId, conn);
+			if (invoice!=null) {
+				result.add(invoice);
+			}
+		}
+		
+		return result;
 	}
 	
 	public AdempiereInvoice() {}
