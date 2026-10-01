@@ -46,7 +46,7 @@ public class AdempiereInvoice {
 			"poreference, (select iso_code from c_currency c where c.c_currency_id=i.c_currency_id), paymentrule, " + 
 			"c_paymentterm_id, " + 
 			"totallines, grandtotal, m_pricelist_id, " + 
-			"istaxincluded, ad_user_id, ocr FROM c_invoice i ";
+			"istaxincluded, ad_user_id, ocr, issotrx FROM c_invoice i ";
 
 	/**
 	 * Loads invoice from database
@@ -137,6 +137,7 @@ public class AdempiereInvoice {
 		taxIncluded = "Y".equalsIgnoreCase(rs.getString(c++));
 		userId = rs.getInt(c++);
 		ocr = rs.getString(c++);
+		soTrx = "Y".equalsIgnoreCase(rs.getString(c++));
 	}
 
 	public static Invoice enrichInvoice(AdempiereInvoice aInvoice, Connection conn) throws Exception {
@@ -156,6 +157,7 @@ public class AdempiereInvoice {
 		dst.setBillLocation(billAddress);
 		
 		dst.setInvoiceKey(aInvoice.getDocumentNo()); 		// DocumentNo
+		dst.setSalesTransaction(aInvoice.isSoTrx());
 		dst.setCurrency(aInvoice.getCurrency()); 		// Currency
 		dst.setInvoiceDate(aInvoice.getDateInvoiced());
 		dst.setDueDate(aInvoice.getDatePay());
