@@ -82,7 +82,8 @@ public class AdyenReportParser {
     
     private void readRowsFromExcelFile (String path) throws IOException, Exception {
 
-    	Workbook wb = WorkbookFactory.create(new File(path));
+    	// Read only, otherwise closing the workbook writes the file back
+    	Workbook wb = WorkbookFactory.create(new File(path), null, true);
 		lastWorkbook = wb;
 		evaluator = wb.getCreationHelper().createFormulaEvaluator();
 		evaluator.setIgnoreMissingWorkbooks(true);
