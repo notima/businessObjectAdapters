@@ -50,6 +50,9 @@ public class AdyenDirectoryToPaymentBatch extends DirectoryPaymentBatchFactory {
 		setAccountsForCurrency(result, adyenReport.getCurrency());
 		result.setVoucherSeries(channelOptions.getVoucherSeries());
 		result.setSource(file);
+		// The report covers its period even if it has no payments
+		result.setPeriodFrom(adyenReport.getPeriodFrom());
+		result.setPeriodTo(adyenReport.getPeriodTo());
 		return result;
 		
 	}
