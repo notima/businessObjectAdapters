@@ -241,6 +241,13 @@ The task can be run manually from the Karaf shell. It uses the same task lock as
 	ZaverSE: processing would stop at 2026-09-28.json: 50.00 % unmatched payments (1 of 2), limit 40.00 %
 	ZaverSE: report written to /path/to/reports/tenant/ZaverSE_2026-09-28.json_260929.xls
 	1 active channels, 1 reports written to /path/to/reports/tenant
+	Summary written to /path/to/reports/tenant/MatchSummary_556677-8899_260929.xls
+
+	Channel │ Payments │ Matched │ Unmatched │ Unmatched % │ Currency │ Unmatched amt
+	────────┼──────────┼─────────┼───────────┼─────────────┼──────────┼──────────────
+	ZaverSE │        3 │       1 │         2 │       66,67 │ SEK      │        325,00
+
+After the channel reports, a summary with one row per matched channel is written to the same directory (`MatchSummary_<orgNo>_<yyMMdd>.<format>`, replaced if the task runs again the same day). From the shell, the summary is also printed as a table.
 
 For each channel the task states the matching result (unmatched means no invoice found, the invoice is already paid or couldn't be looked up), the channel's thresholds, and whether `process-payment-channel` would stop at one of the pending files (thresholds are checked per report file). From the shell this is printed to the console; when scheduled or run from a route it's written to the log.
 

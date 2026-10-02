@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -15,6 +17,7 @@ import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.PaymentChannelReportWriter;
+import org.notima.businessobjects.adapter.tools.table.MatchReportSummaryTable;
 import org.notima.businessobjects.adapter.tools.table.PaymentBatchTable;
 import org.notima.generic.businessobjects.PaymentBatch;
 import org.notima.generic.businessobjects.PaymentBatchChannelThresholds;
@@ -52,6 +55,7 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 	private CanonicalObjectFactory	cof;
 	private FormatterFactory		formatterFactory;
 	private AdapterToolsSettings	settings;
+	private MatchReportSummaryTable	summary;
 
 	/**
 	 * @param orgNo		The org number (tax id) of the tenant whose channels are matched.
@@ -141,6 +145,7 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 		}
 
 		List<String> reports = new ArrayList<String>();
+		summary = new MatchReportSummaryTable();
 		int active = 0;
 		for (PaymentBatchChannel channel : listTenantChannels(channelFactory, tenant)) {
 			if (!isActive(channel)) continue;
@@ -160,9 +165,36 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 		}
 
 		progress(active + " active channels, " + reports.size() + " reports written to " + dirName);
+		writeSummary(formatterFactory, dirName);
+		if (outStream!=null) {
+			outStream.println();
+			summary.getShellTable().print(outStream);
+		}
 		return reports;
 	}
 	
+	/**
+	 * Writes the summary table (one row per matched channel) to the report directory.
+	 * A failure is reported but doesn't fail the task, since the channel reports are already written.
+	 */
+	private void writeSummary(FormatterFactory formatterFactory, String dirName) {
+		if (summary.isEmpty()) return;
+		String fileName = "MatchSummary_" + orgNo + "_" + new SimpleDateFormat("yyMMdd").format(new Date()) + "." + format;
+		try {
+			String path = PaymentChannelReportWriter.writeReport(formatterFactory, summary, format, dirName, fileName);
+			if (path==null) {
+				progress("Summary not written, no report formatter for format " + format);
+			} else {
+				progress("Summary written to " + path);
+			}
+		} catch (Exception e) {
+			log.error("Task " + getTaskId() + ": summary failed", e);
+			if (outStream!=null) {
+				outStream.println("Summary failed: " + e.getMessage());
+			}
+		}
+	}
+
 	/**
 	 * Lists the tenant's channels. Channels are often stored without country code, so channels
 	 * with the tenant's tax id and either no or the same country code are included.
@@ -239,6 +271,7 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 		
 		// Totals over all pending files, counted with the same rules as the thresholds
 		ThresholdCheckResult total = new PaymentBatchChannelThresholds().evaluate(batches);
+		summary.addChannel(name, total);
 		if (total.getPaymentCount()==0) return;
 		StringBuilder result = new StringBuilder(name + ": " + total.getPaymentCount() + (total.getPaymentCount()==1 ? " payment, " : " payments, ") 
 				+ (total.getPaymentCount() - total.getUnmatchedCount()) + " matched, " 
