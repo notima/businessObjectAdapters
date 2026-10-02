@@ -1,5 +1,8 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -38,6 +41,9 @@ public class RunMatchReport extends AbstractAction {
 	@Option(name = "-format", description = "The report format (default " + PaymentChannelMatchReportTask.DEFAULT_FORMAT + ")", required = false, multiValued = false)
 	private String format;
 
+	@Option(name = "--until", aliases = { _NotimaCmdOptions.UNTIL_DATE }, description = "Only match files dated until (and including) this date yyyy-MM-dd. Files after it, or without a known date, are skipped.", required = false, multiValued = false)
+	private String untilDateStr;
+
 	@Argument(index = 0, name = "orgNo", description = "The org number of the tenant", required = true, multiValued = false)
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
@@ -51,6 +57,9 @@ public class RunMatchReport extends AbstractAction {
 		task.setSettings(settings);
 		task.setCountryCode(countryCode);
 		task.setReportDirectory(reportDirectory);
+		if (untilDateStr!=null) {
+			task.setUntilDate(LocalDate.parse(untilDateStr.trim(), DateTimeFormatter.ISO_LOCAL_DATE));
+		}
 		if (format!=null && format.trim().length()>0) {
 			task.setFormat(format.trim());
 		}

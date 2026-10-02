@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.tools;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.TenantInformation;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchChannel;
 import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
+import org.notima.util.LocalDateUtils;
 
 /**
  * Writes the payments of a payment channel's batches as a report file, ie xls.
@@ -62,6 +64,55 @@ public class PaymentChannelReportWriter {
 			fileBatches.add(pb);
 		}
 		return result;
+	}
+	
+	/**
+	 * @return	The earliest first payment date of the batches, or null if none have payments.
+	 */
+	public static LocalDate getFirstPaymentDate(List<PaymentBatch> batches) {
+		LocalDate result = null;
+		for (PaymentBatch pb : batches) {
+			result = earliest(result, LocalDateUtils.asLocalDate(pb.getFirstPaymentDate()));
+		}
+		return result;
+	}
+	
+	/**
+	 * @return	The first date of the file: the start of the period the report covers, or the first
+	 * 			payment date, whichever is earlier. Null if neither is known.
+	 */
+	public static LocalDate getFileStartDate(List<PaymentBatch> batches) {
+		LocalDate result = getFirstPaymentDate(batches);
+		for (PaymentBatch pb : batches) {
+			result = earliest(result, pb.getPeriodFrom());
+		}
+		return result;
+	}
+	
+	/**
+	 * Keeps the batches of the files dated until (and including) the until date, the same rule
+	 * process-payment-channel uses. Files without a known date are left out.
+	 *
+	 * @param batches	The batches.
+	 * @param untilDate	The until date. If null, all batches are kept.
+	 * @return	The batches of the files to process.
+	 */
+	public static List<PaymentBatch> filterUntil(List<PaymentBatch> batches, LocalDate untilDate) {
+		if (untilDate==null || batches==null) return batches;
+		List<PaymentBatch> result = new ArrayList<PaymentBatch>();
+		for (List<PaymentBatch> fileBatches : groupBySource(batches).values()) {
+			LocalDate fileStartDate = getFileStartDate(fileBatches);
+			if (fileStartDate!=null && !fileStartDate.isAfter(untilDate)) {
+				result.addAll(fileBatches);
+			}
+		}
+		return result;
+	}
+	
+	private static LocalDate earliest(LocalDate a, LocalDate b) {
+		if (a==null) return b;
+		if (b==null) return a;
+		return b.isBefore(a) ? b : a;
 	}
 	
 	/**

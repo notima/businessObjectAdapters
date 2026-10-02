@@ -32,7 +32,6 @@ import org.notima.generic.ifacebusinessobjects.PaymentBatchChannelFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchFactory;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.util.FileUtils;
-import org.notima.util.LocalDateUtils;
 
 @Command(scope = "notima", name = "process-payment-channel", description = "Processes a payment channel")
 @Service
@@ -208,7 +207,7 @@ public class ProcessPaymentChannel implements Action {
 	 */
 	private void processFile(List<PaymentBatch> fileBatches) throws Exception {
 
-		if (!shouldProcess(getFileStartDate(fileBatches))) {
+		if (!shouldProcess(PaymentChannelReportWriter.getFileStartDate(fileBatches))) {
 			return;
 		}
 		
@@ -299,29 +298,6 @@ public class ProcessPaymentChannel implements Action {
 	}
 	
 	/**
-	 * @return	The earliest first payment date of the batches, or null if none have payments.
-	 */
-	private LocalDate getFirstPaymentDate(List<PaymentBatch> batches) {
-		LocalDate result = null;
-		for (PaymentBatch pb : batches) {
-			result = earliest(result, LocalDateUtils.asLocalDate(pb.getFirstPaymentDate()));
-		}
-		return result;
-	}
-	
-	/**
-	 * @return	The first date of the file: the start of the period the report covers, or the first
-	 * 			payment date, whichever is earlier. Null if neither is known.
-	 */
-	private LocalDate getFileStartDate(List<PaymentBatch> batches) {
-		LocalDate result = getFirstPaymentDate(batches);
-		for (PaymentBatch pb : batches) {
-			result = earliest(result, pb.getPeriodFrom());
-		}
-		return result;
-	}
-	
-	/**
 	 * @return	The date the channel is reconciled until when the file is processed: the end of the
 	 * 			period the report covers if known, otherwise the first payment date.
 	 * 			Null if neither is known (ie an empty report without period).
@@ -333,7 +309,7 @@ public class ProcessPaymentChannel implements Action {
 				periodTo = pb.getPeriodTo();
 			}
 		}
-		return periodTo!=null ? periodTo : getFirstPaymentDate(batches);
+		return periodTo!=null ? periodTo : PaymentChannelReportWriter.getFirstPaymentDate(batches);
 	}
 	
 	/**
@@ -345,12 +321,6 @@ public class ProcessPaymentChannel implements Action {
 		if (current==null || date.isAfter(current)) {
 			channel.setReconciledUntil(date);
 		}
-	}
-	
-	private static LocalDate earliest(LocalDate a, LocalDate b) {
-		if (a==null) return b;
-		if (b==null) return a;
-		return b.isBefore(a) ? b : a;
 	}
 	
 	/**

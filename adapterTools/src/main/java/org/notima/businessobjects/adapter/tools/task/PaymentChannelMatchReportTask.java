@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -47,6 +48,7 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 	private String			countryCode;
 	private String			reportDirectory;
 	private String			format = DEFAULT_FORMAT;
+	private LocalDate		untilDate;
 	private CanonicalObjectFactory	cof;
 	private FormatterFactory		formatterFactory;
 	private AdapterToolsSettings	settings;
@@ -201,7 +203,7 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 		}
 
 		sourceFactory.setSource(sourceDirectory);
-		List<PaymentBatch> batches = sourceFactory.readPaymentBatches();
+		List<PaymentBatch> batches = PaymentChannelReportWriter.filterUntil(sourceFactory.readPaymentBatches(), untilDate);
 		PaymentBatchProcessOptions options = new PaymentBatchProcessOptions();
 		for (PaymentBatch pb : batches) {
 			processor.lookupInvoiceReferences(pb, options);
@@ -334,6 +336,18 @@ public class PaymentChannelMatchReportTask extends Task implements Runnable {
 	 */
 	public void setFormat(String format) {
 		this.format = format;
+	}
+
+	public LocalDate getUntilDate() {
+		return untilDate;
+	}
+
+	/**
+	 * @param untilDate	Only files dated until (and including) this date are matched. Files after it,
+	 * 					or without a known date, are skipped. Null (default) matches all pending files.
+	 */
+	public void setUntilDate(LocalDate untilDate) {
+		this.untilDate = untilDate;
 	}
 
 	/**

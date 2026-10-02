@@ -234,6 +234,7 @@ The task can be run manually from the Karaf shell. It uses the same task lock as
 
 	run-match-report [orgNo]
 	run-match-report -co SE --report-dir /tmp/reports -format xls [orgNo]
+	run-match-report --until 2026-09-30 [orgNo]
 
 	ZaverSE: 3 payments, 1 matched, 2 unmatched (66.67 %), unmatched amount SEK 325.00
 	ZaverSE: thresholds: max unmatched 40 %, max unmatched amount 5000,{500:EUR}
@@ -250,6 +251,7 @@ Properties that can be set on the bean (the command's options set the same):
 | `countryCode` | The default country code in the AdapterTools settings |
 | `reportDirectory` | The tenant's report directory (overrides it if set) |
 | `format` | `xls` |
+| `untilDate` | None, all pending files are matched. With `--until yyyy-MM-dd`, only files dated until (and including) the date are matched, the same rule as `process-payment-channel --untildate` |
 
 The task is created in a Blueprint file in Karaf's `deploy` directory and can be triggered either by a Camel route or by the Karaf scheduler.
 
