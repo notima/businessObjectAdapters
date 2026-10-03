@@ -16,6 +16,7 @@ import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxPropertyFile;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.InvoiceFileImporter;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
 import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 import org.osgi.framework.ServiceReference;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 @Services(
 		provides = {
 				@ProvideService(BusinessObjectFactory.class),
+				@ProvideService(InvoiceFileImporter.class),
 				@ProvideService(PaymentBatchProcessor.class),
 				@ProvideService(TaxRateProvider.class)
 		}
@@ -70,6 +72,11 @@ public class Activator extends BaseActivator {
 		
 		Dictionary<String, String> props = new Hashtable<String,String>();
 		props.put("SystemName", "Fortnox");
+
+		// Report file importers don't need a Fortnox connection
+		register(InvoiceFileImporter.class, new FortnoxApReportImporter(), props);
+		register(InvoiceFileImporter.class, new FortnoxArReportImporter(), props);
+		log.info("Registered Fortnox AP / AR report importers");
 		
 		// This is only necessary if the configuration admin for some reason wan't loaded (JUnitTest situation).
 		if (fortnoxProperties.getFortnoxClientsFile()==null) {

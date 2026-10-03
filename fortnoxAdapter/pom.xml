@@ -69,6 +69,7 @@
 				<configuration>
 					<includes>
 						<include>**/AllTests.java</include>
+						<include>**/FortnoxReportInvoiceImporterTest.java</include>
 					</includes>
 					<!-- Below tests should only be run intentionally -->
 					<excludes>
