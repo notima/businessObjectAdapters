@@ -34,6 +34,7 @@
 				<configuration>
 					<includes>
 						<include>**/AllTests.java</include>
+						<include>**/*Test.java</include>
 					</includes>
 				</configuration>
 			</plugin>
