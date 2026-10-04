@@ -30,6 +30,12 @@
 			<artifactId>fortnox4j</artifactId>
 			<version>${fortnox4j.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>${commons-csv.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.notima</groupId>
 			<artifactId>notima-util</artifactId>
@@ -70,6 +76,7 @@
 					<includes>
 						<include>**/AllTests.java</include>
 						<include>**/FortnoxReportInvoiceImporterTest.java</include>
+						<include>**/FortnoxCustomerFileImporterTest.java</include>
 					</includes>
 					<!-- Below tests should only be run intentionally -->
 					<excludes>

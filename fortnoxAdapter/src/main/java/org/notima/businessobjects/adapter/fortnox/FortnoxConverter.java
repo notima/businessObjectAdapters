@@ -392,6 +392,10 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		loc.setAddress2(src.getAddress2());
 		loc.setPhone(src.getPhone1());
 		dst.setComments(src.getComments());
+		dst.setCurrency(src.getCurrency());
+		dst.setPaymentTermKey(src.getTermsOfPayment());
+		dst.setVatType(src.getVATType());
+		dst.setWebsite(src.getWWW());
 		
 		return dst;
 	}
@@ -483,6 +487,10 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		dst.setActive(src.getActive());
 		dst.setCompany("COMPANY".equalsIgnoreCase(src.getType()));
 		dst.setComments(src.getComments());
+		dst.setCurrency(src.getCurrency());
+		dst.setPaymentTermKey(src.getTermsOfPayment());
+		dst.setVatType(src.getVATType());
+		dst.setWebsite(src.getWWW());
 	
 		// Check default delivery type
 		DefaultDeliveryTypes ddt = src.getDefaultDeliveryTypes();
