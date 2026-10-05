@@ -5,16 +5,25 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JRBeanArrayDataSource;
+
+import org.notima.generic.ifacebusinessobjects.InvoiceFormatter;
 
 public abstract class JasperBasePdfFormatter {
 
@@ -28,8 +37,77 @@ public abstract class JasperBasePdfFormatter {
 	public final static String JASPER_OUTPUT_DIR = "JasperOutputDir";
 	public final static String JASPER_OUTPUT_FILENAME = "JasperOutputFilename";
 
+	/** Report directories extracted from jars, by jar URL + directory. */
+	private static final Map<String, Path> extractedReportDirs = new HashMap<String, Path>();
+
 	public String[] getFormats() {
 		return formats;
+	}
+
+	/**
+	 * Returns a bundled report resource as a file, so that it can be filled with
+	 * {@link #formatReportAsPdf(Object[], String, JasperParameterCallback, Properties)}.
+	 * <p>
+	 * A resource inside a jar is extracted, together with the rest of its directory
+	 * (subreports and images), to a temporary directory once per JVM. The bundled reports
+	 * build paths as {@code SUBREPORT_DIR + "name"} as well as {@code SUBREPORT_DIR + "/name"},
+	 * which only resolves on a file system.
+	 *
+	 * @param url		URL of the report resource.
+	 * @return			The report file, or null if the URL is neither a file nor in a jar
+	 * 					(e.g. an OSGi bundle URL).
+	 */
+	protected static synchronized File toReportFile(URL url) throws Exception {
+		if ("file".equals(url.getProtocol())) {
+			return new File(url.toURI());
+		}
+		if (!"jar".equals(url.getProtocol())) {
+			return null;
+		}
+		JarURLConnection conn = (JarURLConnection) url.openConnection();
+		String entryName = conn.getEntryName();
+		String dirPrefix = entryName.substring(0, entryName.lastIndexOf('/') + 1);
+		String key = conn.getJarFileURL() + "!/" + dirPrefix;
+
+		Path dir = extractedReportDirs.get(key);
+		if (dir == null) {
+			dir = Files.createTempDirectory("jasper-reports");
+			dir.toFile().deleteOnExit();
+			JarFile jar = conn.getJarFile();
+			Enumeration<JarEntry> entries = jar.entries();
+			while (entries.hasMoreElements()) {
+				JarEntry e = entries.nextElement();
+				if (e.isDirectory() || !e.getName().startsWith(dirPrefix)
+						|| e.getName().indexOf('/', dirPrefix.length()) >= 0) continue;
+				Path target = dir.resolve(e.getName().substring(dirPrefix.length()));
+				InputStream in = jar.getInputStream(e);
+				try {
+					Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+				} finally {
+					in.close();
+				}
+				target.toFile().deleteOnExit();
+			}
+			extractedReportDirs.put(key, dir);
+		}
+		return dir.resolve(entryName.substring(dirPrefix.length())).toFile();
+	}
+
+	/**
+	 * Output directory: {@link #JASPER_OUTPUT_DIR}, falling back to the generic
+	 * {@link InvoiceFormatter#OUTPUT_DIR} so callers that only know the formatter
+	 * interface can set it.
+	 */
+	protected String getOutputDir(Properties props) {
+		return props.getProperty(JASPER_OUTPUT_DIR, props.getProperty(InvoiceFormatter.OUTPUT_DIR));
+	}
+
+	/**
+	 * Output file name (without extension): {@link #JASPER_OUTPUT_FILENAME}, falling back
+	 * to the generic {@link InvoiceFormatter#OUTPUT_FILENAME}.
+	 */
+	protected String getOutputFilename(Properties props) {
+		return props.getProperty(JASPER_OUTPUT_FILENAME, props.getProperty(InvoiceFormatter.OUTPUT_FILENAME));
 	}
 
 	/**
@@ -74,14 +152,14 @@ public abstract class JasperBasePdfFormatter {
 		if (props!=null) {
 			if (jasperFile==null)
 				jasperFile = props.getProperty(JASPER_FILE);
-			outputDir = props.getProperty(JASPER_OUTPUT_DIR);
+			outputDir = getOutputDir(props);
 			jasperLang = props.getProperty(JASPER_LANG);
 			jasperReportName = props.getProperty(JASPER_REPORT_NAME);
-			jasperOutputFilename = props.getProperty(JASPER_OUTPUT_FILENAME);
+			jasperOutputFilename = getOutputFilename(props);
 		}
 		
 		if (outputDir==null) {
-			outputDir = System.getenv("user.home");
+			outputDir = System.getProperty("user.home");
 		}
 		if (jasperOutputFilename==null) {
 			jasperOutputFilename = "JasperReport";
@@ -149,14 +227,14 @@ public abstract class JasperBasePdfFormatter {
 		String jasperOutputFilename = null;
 
 		if (props != null) {
-			outputDir = props.getProperty(JASPER_OUTPUT_DIR);
+			outputDir = getOutputDir(props);
 			jasperLang = props.getProperty(JASPER_LANG);
 			jasperReportName = props.getProperty(JASPER_REPORT_NAME);
-			jasperOutputFilename = props.getProperty(JASPER_OUTPUT_FILENAME);
+			jasperOutputFilename = getOutputFilename(props);
 		}
 
 		if (outputDir == null) {
-			outputDir = System.getenv("user.home");
+			outputDir = System.getProperty("user.home");
 		}
 		if (jasperOutputFilename == null) {
 			jasperOutputFilename = "JasperReport";

@@ -1,15 +1,30 @@
 package org.notima.businessobjects.adapter.jasperreports;
 
+import java.io.File;
 import java.net.URL;
 import java.util.Properties;
 
+import org.notima.businessobjects.adapter.jasperreports.ds.InvoiceListXmlDataSource;
 import org.notima.businessobjects.adapter.tools.InvoiceFormatter;
 import org.notima.generic.businessobjects.Invoice;
 
+/**
+ * Formats an invoice as PDF using a Jasper report.
+ * <p>
+ * Uses the report given by {@link #JASPER_FILE}, or the bundled
+ * {@value #DEFAULT_INVOICE_REPORT} when not set. The report's creditor is the invoice's
+ * sender unless an invoice list file is configured (see {@link InvoiceListXmlDataSource}).
+ * Registered both as an OSGi service
+ * (see {@link Activator}) and through {@link java.util.ServiceLoader}.
+ */
+@SuppressWarnings("deprecation")
 public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements InvoiceFormatter {
-	
+
 	public final static String JASPER_COMPANY_NAME = "JasperCompanyName";
 	public final static String JASPER_TAX_ID = "JasperTaxId";
+
+	/** Classpath resource of the invoice report used when {@link #JASPER_FILE} isn't set. */
+	public final static String DEFAULT_INVOICE_REPORT = "reports/InvoiceBasic.jasper";
 
 	@Override
 	public String formatInvoice(Invoice<?> invoice, String format, Properties props) throws Exception {
@@ -17,35 +32,40 @@ public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements In
 		if (invoice==null) {
 			throw new Exception("Invoice entry can't be null");
 		}
-		
-		String jasperFile = props.getProperty(JASPER_FILE);
-		if (jasperFile==null) {
-			jasperFile = "reports/InvoiceBasic.jasper";
-			// Lookup default jasper file as a resource
-			URL url = this.getClass().getClassLoader().getResource(jasperFile);
-			if (url!=null) {
-				jasperFile = url.getFile();
-			} else {
-				throw new Exception("The property " + JASPER_FILE + " must be set.");
-			}
+		if (props==null) {
+			props = new Properties();
 		}
-		
+		if (format!=null && !"pdf".equalsIgnoreCase(format)) {
+			return null;
+		}
+
 		Object[] data = new Object[1];
 		data[0] = invoice;
 
 		JasperParameterCallback jpc = null;
 
-		if ("pdf".equalsIgnoreCase(format) || format==null) {
-			return formatReportAsPdf(
-					data, 
-					jasperFile, 
-					jpc, 
-					props);
-		} else {
-			return null;
+		InvoiceListXmlDataSource.setCurrentCreditor(invoice.getSender());
+		try {
+			String jasperFile = props.getProperty(JASPER_FILE);
+			if (jasperFile!=null) {
+				return formatReportAsPdf(data, jasperFile, jpc, props);
+			}
+
+			// Default report bundled in this jar
+			URL url = this.getClass().getClassLoader().getResource(DEFAULT_INVOICE_REPORT);
+			if (url==null) {
+				throw new Exception("The property " + JASPER_FILE + " must be set.");
+			}
+			File reportFile = toReportFile(url);
+			if (reportFile!=null) {
+				return formatReportAsPdf(data, reportFile.getAbsolutePath(), jpc, props);
+			}
+			return formatReportAsPdf(data, url, jpc, props);
+		} finally {
+			InvoiceListXmlDataSource.setCurrentCreditor(null);
 		}
 
 	}
 
-	
+
 }
