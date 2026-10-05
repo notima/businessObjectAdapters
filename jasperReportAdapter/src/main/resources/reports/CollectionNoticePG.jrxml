@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Inkassokrav" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="8dffd626-96da-4b46-8848-3d7aa92b2b18">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="151"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="DunningEntryXML_DS"/>
+	<import value="net.sf.jasperreport.engine.data.*"/>
+	<import value="net.sf.jasperreport.engine.*"/>
+	<import value="java.util.*"/>
+	<import value="org.notima.generic.businessobjects.*"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="bgAmount" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgAmount]]></fieldDescription>
+	</field>
+	<field name="bgAmountCheck" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgAmountCheck]]></fieldDescription>
+	</field>
+	<field name="bgAmountOre" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgAmountOre]]></fieldDescription>
+	</field>
+	<field name="bgNo" class="java.lang.String">
+		<fieldDescription><![CDATA[bgNo]]></fieldDescription>
+	</field>
+	<field name="bgNoDigitsOnly" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgNoDigitsOnly]]></fieldDescription>
+	</field>
+	<field name="class" class="java.lang.Class">
+		<fieldDescription><![CDATA[class]]></fieldDescription>
+	</field>
+	<field name="grandTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[grandTotal]]></fieldDescription>
+	</field>
+	<field name="invoices" class="java.util.ArrayList">
+		<fieldDescription><![CDATA[invoices]]></fieldDescription>
+	</field>
+	<field name="letterCurrency" class="java.lang.String">
+		<fieldDescription><![CDATA[letterCurrency]]></fieldDescription>
+	</field>
+	<field name="letterDate" class="java.util.Date">
+		<fieldDescription><![CDATA[letterDate]]></fieldDescription>
+	</field>
+	<field name="letterDueDate" class="java.util.Date">
+		<fieldDescription><![CDATA[letterDueDate]]></fieldDescription>
+	</field>
+	<field name="letterNo" class="java.lang.String">
+		<fieldDescription><![CDATA[letterNo]]></fieldDescription>
+	</field>
+	<field name="letterNoLengthCheck" class="java.lang.Integer">
+		<fieldDescription><![CDATA[letterNoLengthCheck]]></fieldDescription>
+	</field>
+	<field name="letterNoPrefix" class="java.lang.String">
+		<fieldDescription><![CDATA[letterNoPrefix]]></fieldDescription>
+	</field>
+	<field name="lineNo" class="java.lang.Integer">
+		<fieldDescription><![CDATA[lineNo]]></fieldDescription>
+	</field>
+	<field name="lineNoIncrement" class="java.lang.Integer">
+		<fieldDescription><![CDATA[lineNoIncrement]]></fieldDescription>
+	</field>
+	<field name="nextLineNo" class="java.lang.Integer">
+		<fieldDescription><![CDATA[nextLineNo]]></fieldDescription>
+	</field>
+	<field name="ocrNo" class="java.lang.String">
+		<fieldDescription><![CDATA[ocrNo]]></fieldDescription>
+	</field>
+	<field name="ocrNoPrefix" class="java.lang.String">
+		<fieldDescription><![CDATA[ocrNoPrefix]]></fieldDescription>
+	</field>
+	<field name="totalClaims" class="java.lang.Double">
+		<fieldDescription><![CDATA[totalClaims]]></fieldDescription>
+	</field>
+	<field name="totalInterest" class="java.lang.Double">
+		<fieldDescription><![CDATA[totalInterest]]></fieldDescription>
+	</field>
+	<field name="totalLegalCost" class="java.lang.Double">
+		<fieldDescription><![CDATA[totalLegalCost]]></fieldDescription>
+	</field>
+	<field name="creditor" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[creditor]]></fieldDescription>
+	</field>
+	<field name="debtor" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[debtor]]></fieldDescription>
+	</field>
+	<variable name="toPay" class="java.lang.Double" resetType="Column" calculation="System"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="841" splitType="Stretch">
+			<staticText>
+				<reportElement x="44" y="13" width="185" height="29" uuid="a6883931-03c8-4160-9ca9-bdac546cbbc0"/>
+				<textElement>
+					<font fontName="Arial" size="22" isBold="true"/>
+				</textElement>
+				<text><![CDATA[INKASSOKRAV]]></text>
+			</staticText>
+			<rectangle radius="10">
+				<reportElement x="324" y="40" width="226" height="45" uuid="fc71d386-bbaa-44a2-b0a8-03b6adeaf29f"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</rectangle>
+			<line>
+				<reportElement x="0" y="757" width="595" height="1" forecolor="#0060AA" uuid="7ea086e3-44e8-434c-9fb8-1fdcb0aa0be4"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="0" y="746" width="595" height="1" forecolor="#0060AA" uuid="2cc280a1-23f6-4317-bb43-0483042b9d6c"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="314" y="719" width="1" height="27" forecolor="#0060AA" uuid="0102b34d-a405-48bc-a76e-38886ccab31a"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="314" y="718" width="281" height="1" forecolor="#0060AA" uuid="e7c90651-d283-40f3-a018-38bcc3ab3b6d"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="394" y="719" width="1" height="8" forecolor="#0060AA" uuid="8911c387-82d1-40fb-b672-f7f203c8257f"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="317" y="720" width="62" height="9" forecolor="#0060AA" uuid="da65911a-5688-4964-ab66-3da88ff8234a"/>
+				<textElement>
+					<font fontName="Helvetica" size="6"/>
+				</textElement>
+				<text><![CDATA[Till PlusGirokonto]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="397" y="720" width="62" height="9" forecolor="#0060AA" uuid="bcdfd5c9-54e1-462f-b72b-7e69cebd0a23"/>
+				<textElement>
+					<font fontName="Helvetica" size="6"/>
+				</textElement>
+				<text><![CDATA[Betalningsmottagare]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="42" y="747" width="171" height="14" forecolor="#0060AA" uuid="5f292371-21d0-46d9-af0b-96711247b0b2"/>
+				<textElement>
+					<font fontName="Helvetica" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[VAR GOD GÖR INGA ÄNDRINGAR]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="213" y="747" width="224" height="14" forecolor="#0060AA" uuid="84c8875d-c863-4727-92ad-1a0b74aa6921"/>
+				<textElement>
+					<font fontName="Helvetica" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MEDDELANDEN KAN INTE LÄMNAS PÅ AVIN]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="441" y="747" width="139" height="14" forecolor="#0060AA" uuid="7592043b-9b8e-433c-80e8-bfb4ce2b707f"/>
+				<textElement>
+					<font fontName="Helvetica" size="9" isBold="true"/>
+				</textElement>
+				<text><![CDATA[DEN AVLÄSES MASKINELLT]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="760" width="62" height="9" forecolor="#0060AA" uuid="fdb26480-2bb0-4841-9459-79e56ed47b2f"/>
+				<textElement>
+					<font fontName="Helvetica" size="6"/>
+				</textElement>
+				<text><![CDATA[Referensnr]]></text>
+			</staticText>
+			<line>
+				<reportElement x="229" y="757" width="1" height="12" forecolor="#0060AA" uuid="912c9b52-5d0c-4186-aa71-a911624b3fb9"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="294" y="757" width="1" height="12" forecolor="#0060AA" uuid="3d511cbe-3dc6-4b6e-87f9-dd2afa5f3c3a"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="323" y="757" width="1" height="12" forecolor="#0060AA" uuid="dd899f0a-89d4-46dd-afa5-a2d2cbe36cfd"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="231" y="760" width="30" height="9" forecolor="#0060AA" uuid="2ab04d8c-49d4-45bc-b805-d42ed8ac061d"/>
+				<textElement>
+					<font fontName="Helvetica" size="6"/>
+				</textElement>
+				<text><![CDATA[Kronor]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="296" y="760" width="20" height="9" forecolor="#0060AA" uuid="0bf56c2c-432e-4411-9e39-5983e61c0156"/>
+				<textElement>
+					<font fontName="Helvetica" size="6"/>
+				</textElement>
+				<text><![CDATA[öre]]></text>
+			</staticText>
+			<line>
+				<reportElement x="57" y="574" width="538" height="1" forecolor="#0060AA" uuid="9e8e4816-9bea-4f54-a307-e2fca9ec48aa"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="380" y="601" width="215" height="1" forecolor="#0060AA" uuid="021bf250-f89a-4f36-b89f-450711f4134a"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="380" y="575" width="1" height="26" forecolor="#0060AA" uuid="8d645604-2c8d-42ae-afc8-db7a4a48506a"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="472" y="574" width="1" height="27" forecolor="#0060AA" uuid="c20faba7-daaf-4b70-a8ec-258da85b93e7"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</line>
+			<staticText>
+				<reportElement x="320" y="562" width="122" height="13" forecolor="#0060AA" uuid="1294cb0c-e4d4-4179-b516-1a7b754a9615"/>
+				<textElement>
+					<font fontName="Helvetica" size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[INBETALNING/GIRERING]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="451" y="562" width="21" height="13" forecolor="#0060AA" uuid="7f148fd2-99e5-4e65-a19e-1c37cee2090e"/>
+				<textElement>
+					<font fontName="Helvetica" size="10" isBold="false"/>
+				</textElement>
+				<text><![CDATA[AVI]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="382" y="576" width="90" height="9" forecolor="#0060AA" uuid="490577e3-9555-4221-bf0a-fd4b7645f8cc"/>
+				<textElement>
+					<font fontName="Helvetica" size="6"/>
+				</textElement>
+				<text><![CDATA[Inbet avgift (ifylls av banken)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="641" width="73" height="9" forecolor="#0060AA" uuid="8b7f1ad7-3264-45d6-a96d-94158e6540d4"/>
+				<textElement>
+					<font size="6"/>
+				</textElement>
+				<text><![CDATA[Betalningsavsändare]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="579" width="282" height="11" forecolor="#0060AA" uuid="82c30a59-3514-47e3-8f1b-e6424ddb566d"/>
+				<textElement>
+					<font fontName="Helvetica" size="8"/>
+				</textElement>
+				<text><![CDATA[När du betalar med Internettjänst eller Bankgirots]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="60" y="589" width="282" height="11" forecolor="#0060AA" uuid="cd421f48-f63b-43eb-8c41-2f213e30d052"/>
+				<textElement>
+					<font fontName="Helvetica" size="8"/>
+				</textElement>
+				<text><![CDATA[Leverantörsbetalningar (LB) ange nedanstående referensnr.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="47" y="43" width="75" height="12" uuid="1f76f8e0-b032-436b-8ced-7e3b3210ebd9"/>
+				<textElement>
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fordringsägare]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="112" width="35" height="12" uuid="1c3f7a99-d38f-4676-9df2-598f55896259"/>
+				<textElement>
+					<font fontName="Arial" size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Till]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="330" y="46" width="35" height="12" uuid="6a28cfb5-6ffb-4bcf-836a-a49bf25454be"/>
+				<textElement>
+					<font fontName="Arial" size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Datum]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="46" width="57" height="12" uuid="63781e20-c548-40de-9a94-709003b9db87"/>
+				<textElement>
+					<font fontName="Arial" size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Oss tillhanda]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="464" y="46" width="79" height="12" uuid="d366dd96-8ca7-44ae-9e94-01200d5ed8ac"/>
+				<textElement>
+					<font fontName="Arial" size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Ärendenummer]]></text>
+			</staticText>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="330" y="58" width="70" height="20" uuid="0c3caa1d-d06a-47c6-a989-b4054cc15499"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("yyyy-MM-dd").format($F{letterDate})]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="400" y="58" width="64" height="20" uuid="52432683-96d9-40fe-993b-219e02615056"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("yyyy-MM-dd").format($F{letterDueDate})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="464" y="58" width="79" height="20" uuid="a0bff5e1-12a5-47bf-a0d7-a6c893cbe23c"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{letterNo}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="496" y="567" width="71" height="43" forecolor="#0060AA" uuid="57360705-b49b-48eb-92f3-7e82a09d4d8d"/>
+				<textElement textAlignment="Center">
+					<font fontName="Helvetica-Black" size="27"/>
+				</textElement>
+				<text><![CDATA[OCR]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="459" y="782" width="78" height="14" uuid="31d2b079-8a39-44d7-8808-58f38565b44d"/>
+				<textElement textAlignment="Right">
+					<font fontName="OCRB"/>
+				</textElement>
+				<textFieldExpression><![CDATA[org.notima.bg.BgUtil.toDigitsOnly($F{bgNo})]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="537" y="782" width="32" height="14" uuid="27af3501-6a67-4dc5-abdc-026d96dfda2c"/>
+				<textElement>
+					<font fontName="OCRB"/>
+				</textElement>
+				<text><![CDATA[#14#]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="351" y="782" width="9" height="14" uuid="b39877cc-ec1a-4f7b-9dbd-f868976da54c"/>
+				<textElement>
+					<font fontName="OCRB"/>
+				</textElement>
+				<text><![CDATA[>]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="230" y="782" width="9" height="14" uuid="99928a3f-9a5c-4413-9fed-dd1f3c663394"/>
+				<textElement>
+					<font fontName="OCRB"/>
+				</textElement>
+				<text><![CDATA[#]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="27" y="782" width="9" height="14" uuid="9c74a0e1-147b-434b-b74b-8005d55bc074"/>
+				<textElement>
+					<font fontName="OCRB"/>
+				</textElement>
+				<text><![CDATA[#]]></text>
+			</staticText>
+			<textField evaluationTime="Column" pattern="###0">
+				<reportElement x="239" y="782" width="55" height="14" uuid="61d03d25-1889-4fb9-a524-6f0e304e9779"/>
+				<textElement textAlignment="Right">
+					<font fontName="OCRB"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{toPay}]]></textFieldExpression>
+			</textField>
+			<textField pattern="">
+				<reportElement x="296" y="782" width="21" height="14" uuid="d16fd82e-a65f-4270-8273-cecd59803746"/>
+				<textElement textAlignment="Right">
+					<font fontName="OCRB"/>
+				</textElement>
+				<textFieldExpression><![CDATA["00"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Column">
+				<reportElement x="329" y="782" width="15" height="14" uuid="2810dec9-25e1-4b91-9910-810f49863c93"/>
+				<textElement textAlignment="Right">
+					<font fontName="OCRB"/>
+				</textElement>
+				<textFieldExpression><![CDATA[org.notima.bg.BgUtil.getLuhnDigit((double)($V{toPay}))]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="47" y="782" width="175" height="14" uuid="7c20e1d2-1952-4fdd-9b0e-49cfc7b1aaf9"/>
+				<textElement textAlignment="Right">
+					<font fontName="OCRB"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ocrNo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="317" y="732" width="77" height="14" forecolor="#0060AA" uuid="01b3d05f-4133-494d-954c-f9df4c18dffa"/>
+				<textElement>
+					<font fontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{bgNo}]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="44" y="245" width="506" height="228" uuid="53f4bbfe-245f-4bc3-ac5f-0581e1237548"/>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{invoices})]]></dataSourceExpression>
+				<returnValue subreportVariable="grandTotal_1" toVariable="toPay"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "CollectionNotice_Detail.jasper"]]></subreportExpression>
+			</subreport>
+			<staticText>
+				<reportElement x="44" y="473" width="207" height="20" uuid="d763db3b-f3d1-4d9a-8603-2eb6ccd463c1"/>
+				<textElement>
+					<font fontName="Arial" size="13" isBold="true" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[KONTAKT I DETTA ÄRENDE]]></text>
+			</staticText>
+			<line>
+				<reportElement x="44" y="489" width="506" height="1" uuid="72ae063f-fd41-4f00-8831-d5ae7b13bdff"/>
+			</line>
+			<staticText>
+				<reportElement x="44" y="501" width="175" height="20" uuid="cc077b1c-9b44-426f-bfed-19581ec101a1"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[Vid frågor avseende detta ärende:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="44" y="190" width="506" height="14" uuid="e3a0042f-c15e-42da-b18f-30b9e258d351"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Betalning ska vara oss tillhanda senast " + new SimpleDateFormat("yyyy-MM-dd").format($F{letterDueDate}) + ". Skyldighet att betala ränta och inkassokostnad är reglerad i lag."]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="331" y="125" width="214" height="16" uuid="1b11b0d6-b768-4404-9fb1-1fee9b81f233"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{debtor}.getName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="48" y="87" width="214" height="16" uuid="59741976-6c92-4ba2-be6e-a04daa6bd1ae"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{creditor}.getAddressOfficial().getPostal() + " " + $F{creditor}.getAddressOfficial().getCity()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="331" y="141" width="214" height="16" uuid="cf86d527-8837-4570-823a-85627335d92e"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{debtor}.getAddressOfficial().getAddress1() +
+($F{debtor}.getAddressOfficial().getAddress2()!=null && $F{debtor}.getAddressOfficial().getAddress2().trim().length()>0 ? ", " + $F{debtor}.getAddressOfficial().getAddress2() : "")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="48" y="55" width="214" height="16" uuid="914bd48b-7f9c-4984-bb52-cbe919acbe92"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{creditor}.getName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="331" y="157" width="214" height="16" uuid="c11ddde9-1292-4d68-b69b-52d7f38c0404"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{debtor}.getAddressOfficial().getPostal() + " " + $F{debtor}.getAddressOfficial().getCity()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="48" y="71" width="214" height="16" uuid="0d224706-a5c9-417d-a318-1769018278dd"/>
+				<textElement>
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{creditor}.getAddressOfficial().getAddress1()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="397" y="732" width="170" height="14" forecolor="#0060AA" uuid="26889ed3-0f85-4a71-a5b5-97a68d68ff6a"/>
+				<textElement>
+					<font fontName="Helvetica"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{creditor}.getName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="60" y="666" width="214" height="14" uuid="941ce245-5683-4952-951a-5329533c0849"/>
+				<textElement>
+					<font fontName="OCRB"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{debtor}.getAddressOfficial().getAddress1().toUpperCase()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="60" y="652" width="214" height="14" uuid="a13ef7d4-dbdc-496e-84b1-b6a731728917"/>
+				<textElement>
+					<font fontName="OCRB" isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{debtor}.getName().toUpperCase()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="60" y="680" width="214" height="14" uuid="7e9bedd9-ce8c-4cc9-9902-8da146c6f8a2"/>
+				<textElement>
+					<font fontName="OCRB"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{debtor}.getAddressOfficial().getPostal().toUpperCase() + " " + $F{debtor}.getAddressOfficial().getCity().toUpperCase()]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="224" y="513" width="321" height="20" uuid="2ae53baa-bb77-47e9-ac88-1f65ea9551e3"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="13" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{creditor}.getAddressOfficial().getEmail()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="44" y="204" width="506" height="42" uuid="33e001ee-bdd8-40bc-bfcc-587fa350dcd0"/>
+				<textElement>
+					<font fontName="Arial" size="8"/>
+				</textElement>
+				<text><![CDATA[Senast inom 8 dagar emotser vi betalning eller att ni kontaktar oss för en uppgörelse. I annat fall kan rättsliga åtgärder i form av ansökan om betalningsföreläggande eller stämning komma att inges mot er.
+Den del av skulden som avser samfällighetsavgift är direkt utmätningsbar och går ej att bestrida, dvs inget betalningsföreläggande krävs för utmätning av samfällighetsavgiften.]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="224" y="493" width="321" height="20" uuid="6815d66a-e513-408e-843e-338171c7df40"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial" size="13" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{creditor}.getAddressOfficial().getPhone()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="60" y="560" width="122" height="13" forecolor="#0060AA" uuid="c82eea92-7474-4143-af0f-41fee59f8664"/>
+				<textElement>
+					<font fontName="Helvetica" size="10" isBold="true"/>
+				</textElement>
+				<text><![CDATA[PLUSGIRO]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>
