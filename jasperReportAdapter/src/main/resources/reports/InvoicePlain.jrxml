@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated from InvoiceBasic.jrxml. Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="InvoicePlain" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="c3f0ddcc-17e5-4f20-8e9c-8eccb71d11a0">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="11"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Invoice Samples DS"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="462"/>
+	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="529"/>
+	<parameter name="creditorContact" class="org.notima.generic.businessobjects.BusinessPartner" isForPrompting="false">
+		<defaultValueExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.ds.InvoiceListXmlDataSource.getCreditor()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["reports/"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="attributes" class="java.util.List">
+		<fieldDescription><![CDATA[attributes]]></fieldDescription>
+	</field>
+	<field name="bankAccountDetails" class="java.util.Map">
+		<fieldDescription><![CDATA[bankAccountDetails]]></fieldDescription>
+	</field>
+	<field name="billBpartner" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[billBpartner]]></fieldDescription>
+	</field>
+	<field name="billLocation" class="org.notima.generic.businessobjects.Location">
+		<fieldDescription><![CDATA[billLocation]]></fieldDescription>
+	</field>
+	<field name="billPerson" class="org.notima.generic.businessobjects.Person">
+		<fieldDescription><![CDATA[billPerson]]></fieldDescription>
+	</field>
+	<field name="businessPartner" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[businessPartner]]></fieldDescription>
+	</field>
+	<field name="creditNote" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[creditNote]]></fieldDescription>
+	</field>
+	<field name="currency" class="java.lang.String">
+		<fieldDescription><![CDATA[currency]]></fieldDescription>
+	</field>
+	<field name="documentDate" class="java.util.Date">
+		<fieldDescription><![CDATA[documentDate]]></fieldDescription>
+	</field>
+	<field name="documentKey" class="java.lang.String">
+		<fieldDescription><![CDATA[documentKey]]></fieldDescription>
+	</field>
+	<field name="dueDate" class="java.util.Date">
+		<fieldDescription><![CDATA[dueDate]]></fieldDescription>
+	</field>
+	<field name="factoringReservation" class="org.notima.generic.ifacebusinessobjects.FactoringReservation">
+		<fieldDescription><![CDATA[factoringReservation]]></fieldDescription>
+	</field>
+	<field name="freightAmount" class="java.lang.Double">
+		<fieldDescription><![CDATA[freightAmount]]></fieldDescription>
+	</field>
+	<field name="grandTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[grandTotal]]></fieldDescription>
+	</field>
+	<field name="invoice" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[invoice]]></fieldDescription>
+	</field>
+	<field name="invoiceDate" class="java.util.Date">
+		<fieldDescription><![CDATA[invoiceDate]]></fieldDescription>
+	</field>
+	<field name="invoiceKey" class="java.lang.String">
+		<fieldDescription><![CDATA[invoiceKey]]></fieldDescription>
+	</field>
+	<field name="lines" class="java.util.List">
+		<fieldDescription><![CDATA[lines]]></fieldDescription>
+	</field>
+	<field name="netTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[netTotal]]></fieldDescription>
+	</field>
+	<field name="ocr" class="java.lang.String">
+		<fieldDescription><![CDATA[ocr]]></fieldDescription>
+	</field>
+	<field name="openAmt" class="java.lang.Double">
+		<fieldDescription><![CDATA[openAmt]]></fieldDescription>
+	</field>
+	<field name="order" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[order]]></fieldDescription>
+	</field>
+	<field name="orderInvoiceLines" class="java.util.List">
+		<fieldDescription><![CDATA[orderInvoiceLines]]></fieldDescription>
+	</field>
+	<field name="orderKey" class="java.lang.String">
+		<fieldDescription><![CDATA[orderKey]]></fieldDescription>
+	</field>
+	<field name="ourCustomerNo" class="java.lang.String">
+		<fieldDescription><![CDATA[ourCustomerNo]]></fieldDescription>
+	</field>
+	<field name="ourReference" class="org.notima.generic.businessobjects.Person">
+		<fieldDescription><![CDATA[ourReference]]></fieldDescription>
+	</field>
+	<field name="paymentTermKey" class="java.lang.String">
+		<fieldDescription><![CDATA[paymentTermKey]]></fieldDescription>
+	</field>
+	<field name="poDocumentNo" class="java.lang.String">
+		<fieldDescription><![CDATA[poDocumentNo]]></fieldDescription>
+	</field>
+	<field name="pricelistId" class="java.lang.String">
+		<fieldDescription><![CDATA[pricelistId]]></fieldDescription>
+	</field>
+	<field name="roundingDecimals" class="java.lang.Integer">
+		<fieldDescription><![CDATA[roundingDecimals]]></fieldDescription>
+	</field>
+	<field name="sender" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[sender]]></fieldDescription>
+	</field>
+	<field name="shipLocation" class="org.notima.generic.businessobjects.Location">
+		<fieldDescription><![CDATA[shipLocation]]></fieldDescription>
+	</field>
+	<field name="shipmentNo" class="java.lang.String">
+		<fieldDescription><![CDATA[shipmentNo]]></fieldDescription>
+	</field>
+	<field name="status" class="java.lang.String">
+		<fieldDescription><![CDATA[status]]></fieldDescription>
+	</field>
+	<field name="vatTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[vatTotal]]></fieldDescription>
+	</field>
+	<field name="warehouseId" class="java.lang.String">
+		<fieldDescription><![CDATA[warehouseId]]></fieldDescription>
+	</field>
+	<field name="contractStartDate" class="java.util.Date"/>
+	<field name="contractEndDate" class="java.util.Date"/>
+	<field name="comment" class="java.lang.String">
+		<fieldDescription><![CDATA[comment]]></fieldDescription>
+	</field>
+	<variable name="amountStr" class="java.lang.String" resetType="Column">
+		<variableExpression><![CDATA[org.notima.bg.BgUtil.getAmountStr($F{grandTotal}.doubleValue())]]></variableExpression>
+	</variable>
+	<variable name="location" class="org.notima.generic.businessobjects.Location" resetType="Column">
+		<variableExpression><![CDATA[$F{billLocation}!=null ? $F{billLocation} : $F{businessPartner}.getAddressOfficial()]]></variableExpression>
+	</variable>
+	<variable name="dfmt" class="java.text.DateFormat">
+		<variableExpression><![CDATA[new java.text.SimpleDateFormat("yyyy-MM-dd")]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="841" splitType="Stretch">
+			<staticText>
+				<reportElement x="451" y="473" width="100" height="16" uuid="3d83e975-ce65-429f-b1ae-9ff094344724">
+					<printWhenExpression><![CDATA[$F{grandTotal}<0f]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ATT ERHÅLLA]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="54" y="12" width="200" height="21" uuid="f0f8836a-d67e-4df6-b809-64a938f33c85">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FAKTURA]]></text>
+			</staticText>
+			<rectangle radius="5">
+				<reportElement x="300" y="36" width="254" height="36" uuid="f42d8324-52f7-40ba-9ccc-f90487c326ef"/>
+				<graphicElement>
+					<pen lineWidth="0.5"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="330" y="112" width="35" height="12" uuid="16641508-646c-489d-ac1d-77effb60bcf8"/>
+				<textElement>
+					<font size="8" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Till]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="321" y="40" width="35" height="12" uuid="92da804a-352d-458c-8651-40ad484e9812"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Datum]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="405" y="40" width="57" height="12" uuid="b08400db-a17a-4563-82d3-14b4f44f3c01">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Förfallodag]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="487" y="40" width="57" height="12" uuid="70444756-2120-4d29-8add-20811316f8d3"/>
+				<textElement>
+					<font size="8" isBold="false"/>
+				</textElement>
+				<text><![CDATA[Fakturanr]]></text>
+			</staticText>
+			<textField pattern="">
+				<reportElement x="320" y="52" width="80" height="20" uuid="dc49942a-0f70-470f-a38c-caead9cf3d1c"/>
+				<textFieldExpression><![CDATA[$V{dfmt}.format($F{invoiceDate})]]></textFieldExpression>
+			</textField>
+			<textField pattern="yyyy-MM-dd">
+				<reportElement x="405" y="52" width="77" height="20" uuid="f6c9fd2c-ba31-4055-ad62-62d4a73aa647">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textFieldExpression><![CDATA[$V{dfmt}.format($F{dueDate})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="487" y="52" width="57" height="20" uuid="e5476356-66f2-4598-ade9-4b084f5c1f27"/>
+				<textFieldExpression><![CDATA[$F{documentKey}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="54" y="43" width="214" height="12" uuid="44af002e-38a5-4660-823c-2f047a1f6dc8"/>
+				<textFieldExpression><![CDATA[$P{creditorContact}.getName()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="54" y="55" width="214" height="12" uuid="b08c8a07-6734-44ec-9fb3-8d6e8c4f88cb"/>
+				<textFieldExpression><![CDATA[$P{creditorContact}.getAddressOfficial().getAddress1()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="54" y="67" width="214" height="12" uuid="dbe7b11a-f7c9-4dec-82f3-3d1f1d684e6c"/>
+				<textFieldExpression><![CDATA[$P{creditorContact}.getAddressOfficial().getPostal() + " " + $P{creditorContact}.getAddressOfficial().getCity()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="330" y="124" width="214" height="16" uuid="a39c3037-f654-4af7-8c26-2f1b4e7e8f58"/>
+				<textFieldExpression><![CDATA[new String($F{businessPartner}.getName().getBytes("UTF-8"))]]></textFieldExpression>
+			</textField>
+			<subreport>
+				<reportElement x="44" y="220" width="506" height="249" uuid="e4ce79d9-6848-4d14-a2d2-bfc60ca4d217"/>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{orderInvoiceLines})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "FakturaRader.jasper"]]></subreportExpression>
+			</subreport>
+			<line>
+				<reportElement x="27" y="540" width="568" height="1" uuid="f669bd0b-4aae-4757-a357-7ca6e19ec263"/>
+				<graphicElement>
+					<pen lineWidth="0.2"/>
+				</graphicElement>
+			</line>
+			<line>
+				<reportElement x="44" y="472" width="506" height="1" uuid="ae7d2a5c-2182-4af5-9caa-7857180aa5a0"/>
+			</line>
+			<line>
+				<reportElement x="44" y="509" width="506" height="1" uuid="fc28058a-9388-474c-828b-dd958937fb90"/>
+			</line>
+			<staticText>
+				<reportElement x="47" y="473" width="100" height="16" uuid="a743e2b3-efb8-4474-80d0-dbb53e5d3e99"/>
+				<text><![CDATA[Brutto]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="150" y="473" width="100" height="16" uuid="b410f13c-7034-439b-a3fa-4ed497d26e09"/>
+				<text><![CDATA[Exkl. moms]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="251" y="473" width="80" height="16" uuid="1051de71-0f15-4edf-9898-4c930e02451a"/>
+				<text><![CDATA[Moms]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="473" width="80" height="16" uuid="055e3579-5c33-4623-b85d-bac4fa7e85c8"/>
+				<text><![CDATA[Öresavr]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="451" y="473" width="100" height="16" uuid="fb274b47-ed5a-4aff-a648-db1f4333769d">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[ATT BETALA]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="412" y="490" width="37" height="16" uuid="e63b13ad-3858-4778-a181-1343ea28d812"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA[$F{currency}!=null ? $F{currency} : "SEK"]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="451" y="490" width="100" height="16" uuid="b6998919-d327-4a1e-9d16-d3f2305c1b2a"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{grandTotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="251" y="490" width="80" height="16" uuid="57330b7c-640e-4625-bcda-d054ba53f8a5"/>
+				<textFieldExpression><![CDATA[$F{vatTotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="150" y="490" width="100" height="16" uuid="0bc1250f-7aa6-4549-b1ba-2908f6b863ab"/>
+				<textFieldExpression><![CDATA[$F{netTotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="47" y="490" width="100" height="16" uuid="eebdf20b-9445-43d0-af21-447179a9c443"/>
+				<textFieldExpression><![CDATA[$F{grandTotal}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="178" width="72" height="16" uuid="64608db2-a252-45dd-8bcb-50a2354e8d1a"/>
+				<text><![CDATA[Vår referens]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="127" y="178" width="100" height="16" uuid="c9900a91-76ae-4443-a2ad-6258b82a5ecf"/>
+				<textFieldExpression class="java.lang.String"><![CDATA[$F{ourReference}!=null ? $F{ourReference}.getName() : null]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="412" y="194" width="131" height="16" uuid="db7326ee-0519-4d40-914b-f1b70c0f3e2c"/>
+				<textFieldExpression><![CDATA[$F{businessPartner}.getIdentityNo()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="331" y="194" width="78" height="16" uuid="0dad69d8-6a46-4181-ad44-cca719d5a374"/>
+				<text><![CDATA[Kundnr]]></text>
+			</staticText>
+			<line>
+				<reportElement x="44" y="215" width="506" height="1" uuid="acacf229-0a18-4aa5-b019-1bd63188342d"/>
+			</line>
+			<staticText>
+				<reportElement x="54" y="12" width="200" height="21" uuid="c70dc070-f217-4dd8-bd8e-510480b58bd7">
+					<printWhenExpression><![CDATA[$F{grandTotal}<0f]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="18" isBold="true"/>
+				</textElement>
+				<text><![CDATA[KREDITFAKTURA]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="120" y="516" width="89" height="12" uuid="3c371afb-ae8f-4ddb-8070-513e8a5ad802"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{creditorContact}.getTaxId()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="80" y="516" width="38" height="12" uuid="6d12cafa-397f-43de-96d1-9a540c25084c"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Org nr:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="216" y="516" width="38" height="12" uuid="c10098f8-7d4e-4047-a227-b07164847dd7"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[Telefon:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="352" y="516" width="38" height="12" uuid="9f715671-ac16-4a9c-a7c8-c7182f594b7c"/>
+				<textElement textAlignment="Right">
+					<font size="8"/>
+				</textElement>
+				<text><![CDATA[E-post:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="257" y="516" width="89" height="12" uuid="a1111cea-5738-487a-ba00-8dc123e88ac2"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{creditorContact}.getAddressOfficial().getPhone()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="394" y="516" width="143" height="12" uuid="28675e7b-b64c-4ae3-959a-6762950b28d5"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{creditorContact}.getAddressOfficial().getEmail()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="330" y="140" width="214" height="16" uuid="1b9cb61d-124d-41d9-a43d-422ac126d74a"/>
+				<textFieldExpression><![CDATA[$V{location}.getAddress1()]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="330" y="156" width="214" height="16" uuid="a365b652-33ba-45ba-9b52-b99e243cfd72"/>
+				<textFieldExpression><![CDATA[$V{location}.getPostal() + " " + $V{location}.getCity()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="50" y="196" width="72" height="17" uuid="91f1a6f9-3030-4398-bfc9-1aae738ff92b">
+					<printWhenExpression><![CDATA[$F{contractStartDate}!=null]]></printWhenExpression>
+				</reportElement>
+				<text><![CDATA[Period]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="127" y="196" width="160" height="17" uuid="dc58442a-6742-4312-86e6-c10127b2231b">
+					<printWhenExpression><![CDATA[$F{contractStartDate}!=null]]></printWhenExpression>
+				</reportElement>
+				<textFieldExpression><![CDATA[$V{dfmt}.format($F{contractStartDate}) + " - " + $V{dfmt}.format($F{contractEndDate})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="49" y="109" width="231" height="63" uuid="4c12a005-18af-46bd-8f9b-91580612f5fc"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="54" y="550" width="300" height="16" uuid="c356fd1b-5ce3-473f-b7d0-a5986d812fb4"/>
+				<textElement>
+					<font fontName="Helvetica" size="11" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Betalningsinformation]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="54" y="572" width="90" height="14" uuid="76cbd535-4b0e-4304-bf0a-42208111b8fc">
+					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToAccount()!=null && !$P{creditorContact}.getRemitToAccount().trim().isEmpty()]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Helvetica" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["PG".equals($P{creditorContact}.getRemitToAccountType()) ? "Plusgiro" : "Bankgiro"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="150" y="572" width="250" height="14" uuid="1a4beaff-dac8-4e60-b59d-74b36cc5d417">
+					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToAccount()!=null && !$P{creditorContact}.getRemitToAccount().trim().isEmpty()]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{creditorContact}.getRemitToAccount()]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="54" y="587" width="90" height="14" uuid="76c9315b-8b89-4b31-b909-d6d49ef3b078">
+					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()!=null && !$P{creditorContact}.getRemitToIBAN().trim().isEmpty()]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Helvetica" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["IBAN"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="150" y="587" width="250" height="14" uuid="61bdf046-430c-465e-97ed-86cb3221247f">
+					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()!=null && !$P{creditorContact}.getRemitToIBAN().trim().isEmpty()]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{creditorContact}.getRemitToIBAN()]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="54" y="602" width="90" height="14" uuid="796053f9-2de6-4256-8d34-eb39fca1c8e1">
+					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToBIC()!=null && !$P{creditorContact}.getRemitToBIC().trim().isEmpty()]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Helvetica" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["BIC"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="150" y="602" width="250" height="14" uuid="437c0087-a24a-436f-b88c-3153225dcdb6">
+					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToBIC()!=null && !$P{creditorContact}.getRemitToBIC().trim().isEmpty()]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[$P{creditorContact}.getRemitToBIC()]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="54" y="617" width="90" height="14" uuid="d3ffabba-3b05-4dca-8e20-a33c174c9e3f">
+					<printWhenExpression><![CDATA[!"AG".equals($F{paymentTermKey})]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Helvetica" isBold="true"/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA["Referens"]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="150" y="617" width="250" height="14" uuid="dc868401-0c8e-4677-af28-fd6ba73ac907">
+					<printWhenExpression><![CDATA[!"AG".equals($F{paymentTermKey})]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[($F{ocr}!=null && !$F{ocr}.trim().isEmpty()) ? $F{ocr} : $F{documentKey}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="54" y="632" width="90" height="14" uuid="c6184e34-d0b1-4683-9596-10386615f687">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Helvetica" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Förfallodag]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true" pattern="yyyy-MM-dd">
+				<reportElement x="150" y="632" width="250" height="14" uuid="197ee29e-e06e-4b38-a512-73f78e4fbca8">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font/>
+				</textElement>
+				<textFieldExpression class="java.util.Date"><![CDATA[$F{dueDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="54" y="647" width="90" height="14" uuid="975c60f3-d61f-4ac9-bf15-b18744495155">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font fontName="Helvetica" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Att betala]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="150" y="647" width="250" height="14" uuid="1f3345ff-d18c-46b2-a902-bffb1987f221">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font/>
+				</textElement>
+				<textFieldExpression class="java.lang.String"><![CDATA[new java.text.DecimalFormat("#,##0.00").format($F{grandTotal}) + " " + ($F{currency}!=null ? $F{currency} : "SEK")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="54" y="669" width="480" height="14" uuid="1c5adf00-0190-404c-afbf-a2c0b19b7eb3">
+					<printWhenExpression><![CDATA[$F{grandTotal}>=0f && !"AG".equals($F{paymentTermKey})]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Ange referensen vid betalning.]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="54" y="669" width="480" height="14" uuid="62e07686-7a9b-4b25-875d-ad592821a683">
+					<printWhenExpression><![CDATA["AG".equals($F{paymentTermKey})]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Beloppet dras via Autogiro.]]></text>
+			</staticText>
+		</band>
+	</detail>
+</jasperReport>

@@ -30,6 +30,21 @@ public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements In
 	/** Classpath resource of the invoice report used when {@link #JASPER_FILE} isn't set. */
 	public final static String DEFAULT_INVOICE_REPORT = "reports/InvoiceBasic.jasper";
 
+	/**
+	 * Built-in invoice reports, in {@code reports/<name>.jasper}:
+	 * <ul>
+	 * <li>InvoiceBasic: payment slip with OCR for bankgiro</li>
+	 * <li>InvoicePG: payment slip with OCR for plusgiro</li>
+	 * <li>InvoicePlain: no payment slip; payment details and reference (OCR or invoice number) as text</li>
+	 * </ul>
+	 */
+	public final static String[] TEMPLATES = { "InvoiceBasic", "InvoicePG", "InvoicePlain" };
+
+	@Override
+	public String[] getTemplates() {
+		return TEMPLATES.clone();
+	}
+
 	@Override
 	public String formatInvoice(Invoice<?> invoice, String format, Properties props) throws Exception {
 
@@ -52,12 +67,16 @@ public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements In
 		List<Runnable> restoreLines = fillLineFallbacks(invoice);
 		try {
 			String jasperFile = props.getProperty(JASPER_FILE, props.getProperty(TEMPLATE_FILE));
+			String resource = DEFAULT_INVOICE_REPORT;
 			if (jasperFile!=null) {
-				return formatReportAsPdf(data, jasperFile, jpc, props);
+				if (!isBuiltInTemplate(jasperFile)) {
+					return formatReportAsPdf(data, jasperFile, jpc, props);
+				}
+				resource = "reports/" + jasperFile + ".jasper";
 			}
 
-			// Default report bundled in this jar
-			URL url = this.getClass().getClassLoader().getResource(DEFAULT_INVOICE_REPORT);
+			// Report bundled in this jar
+			URL url = this.getClass().getClassLoader().getResource(resource);
 			if (url==null) {
 				throw new Exception("The property " + JASPER_FILE + " must be set.");
 			}
@@ -96,6 +115,13 @@ public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements In
 			}
 		}
 		return restore;
+	}
+
+	private static boolean isBuiltInTemplate(String name) {
+		for (String t : TEMPLATES) {
+			if (t.equals(name)) return true;
+		}
+		return false;
 	}
 
 	private static boolean isEmpty(String s) {
