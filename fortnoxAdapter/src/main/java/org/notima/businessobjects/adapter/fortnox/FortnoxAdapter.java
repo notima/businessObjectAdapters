@@ -1564,6 +1564,13 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			for (Invoice<?> inv : invoiceMap.values()) {
 				result.addAffectedInvoice(inv);
 			}
+		} else if (opts.isOpenOnly() && opts.isSalesOnly()) {
+			// Unpaid customer invoices, headers only (number, dates, balance, OCR, customer)
+			for (Object o : getFiltered(FortnoxConstants.FILTER_UNPAID, true).values()) {
+				InvoiceSubset is = (InvoiceSubset)o;
+				if (is.isCancelled()) continue;
+				result.addAffectedInvoice(FortnoxConverter.convertToCanonicalInvoiceHeader(is));
+			}
 		}
 		
 		// Set creditor

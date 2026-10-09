@@ -18,6 +18,7 @@ import org.notima.api.fortnox.entities3.Supplier;
 import org.notima.api.fortnox.entities3.SupplierInvoice;
 import org.notima.api.fortnox.entities3.SupplierInvoiceRow;
 import org.notima.api.fortnox.entities3.SupplierInvoiceRows;
+import org.notima.api.fortnox.entities3.InvoiceSubset;
 import org.notima.api.fortnox.entities3.SupplierInvoiceSubset;
 import org.notima.api.fortnox.entities3.Voucher;
 import org.notima.api.fortnox.entities3.VoucherRow;
@@ -645,6 +646,41 @@ public class FortnoxConverter extends BasicBusinessObjectConverter<Object, org.n
 		
 	}
 
+	/**
+	 * Converts an invoice subset (an invoice in a list of invoices) to a canonical invoice
+	 * with the header information the subset has: number, dates, total, open amount,
+	 * currency, OCR and customer. It has no lines.
+	 * 
+	 * @param src		The invoice subset to convert
+	 * @return	The canonical invoice
+	 */
+	public static org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> convertToCanonicalInvoiceHeader(InvoiceSubset src) throws Exception {
+		
+		org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice> dst = new org.notima.generic.businessobjects.Invoice<org.notima.api.fortnox.entities3.Invoice>();
+		
+		dst.setDocumentKey(src.getDocumentNumber());
+		if (src.getInvoiceDate()!=null) {
+			dst.setInvoiceDate(FortnoxClient3.s_dfmt.parse(src.getInvoiceDate()));
+			dst.setDocumentDate(dst.getInvoiceDate());
+		}
+		if (src.getDueDate()!=null) {
+			dst.setDueDate(FortnoxClient3.s_dfmt.parse(src.getDueDate()));
+		}
+		dst.setGrandTotal(src.getTotal());
+		dst.setOpenAmt(src.getBalance()!=null ? src.getBalance() : 0);
+		dst.setCurrency(src.getCurrency());
+		dst.setOcr(src.getOCR());
+		dst.setSalesTransaction(true);
+		
+		BusinessPartner<Customer> bp = new BusinessPartner<Customer>();
+		bp.setName(src.getCustomerName());
+		bp.setIdentityNo(src.getCustomerNumber());
+		dst.setBusinessPartner(bp);
+		
+		return dst;
+		
+	}
+	
 	public static InvoiceList convertListOfInvoiceInterface(List<InvoiceInterface> invoices) throws Exception {
 
 		InvoiceList result = new InvoiceList();
