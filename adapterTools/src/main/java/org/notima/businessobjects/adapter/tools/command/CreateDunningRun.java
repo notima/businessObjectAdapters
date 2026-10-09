@@ -19,6 +19,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
+import org.notima.businessobjects.adapter.tools.dunning.DunningRunFilter;
 import org.notima.businessobjects.adapter.tools.table.DunningRunTable;
 import org.notima.generic.businessobjects.DunningEntry;
 import org.notima.generic.businessobjects.DunningRun;
@@ -57,6 +58,9 @@ public class CreateDunningRun implements Action {
 	@Option(name = "--duedateuntil", description = "Select invoices with max this due date. (format yyyy-mm-dd)", required = false, multiValued = false)
 	private String dueDateUntilStr;
 	
+	@Option(name = "--duedatefrom", description = "Skip invoices due before this date, ie old invoices that are hard to collect. (format yyyy-mm-dd)", required = false, multiValued = false)
+	private String dueDateFromStr;
+	
     @Option(name = "-co", aliases = { "--country-code" }, description = "Country code for the orgNo", required = false, multiValued = false)
     private String countryCode = "SE";
 	
@@ -67,6 +71,11 @@ public class CreateDunningRun implements Action {
     private String reminderFeeStr;
     
     private Date dueDateUntil;
+    
+    private Date dueDateFrom;
+    
+    /** Invoices removed by --duedatefrom. */
+    private int excludedInvoices;
     
     private Double reminderFee;
     
@@ -103,6 +112,12 @@ public class CreateDunningRun implements Action {
 		
 		if (dueDateUntilStr!=null) {
 			dueDateUntil = s_dfmt.parse(dueDateUntilStr);
+		}
+		if (dueDateFromStr!=null) {
+			dueDateFrom = s_dfmt.parse(dueDateFromStr);
+		}
+		if (dueDateFrom!=null && dueDateUntil!=null && dueDateFrom.after(dueDateUntil)) {
+			throw new ParseException("--duedatefrom (" + dueDateFromStr + ") is after --duedateuntil (" + dueDateUntilStr + ")", 0);
 		}
 		
 	}
@@ -142,6 +157,7 @@ public class CreateDunningRun implements Action {
 	
 	private void createDunningRun() throws Exception {
 		dunningRun = bof.lookupDunningRun(null, dueDateUntil);
+		excludedInvoices = DunningRunFilter.excludeDueBefore(dunningRun, dueDateFrom);
 	}
 	
 	/**
@@ -213,6 +229,10 @@ public class CreateDunningRun implements Action {
 		if (!table.isEmpty()) {
 			sess.getConsole().println();
 			sess.getConsole().println(table.getSummary());
+		}
+		if (excludedInvoices > 0) {
+			sess.getConsole().println(excludedInvoices + (excludedInvoices==1 ? " invoice" : " invoices")
+					+ " due before " + dueDateFromStr + " not included");
 		}
 		
 	}
