@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FortnoxFakturaRader" pageWidth="505" pageHeight="842" columnWidth="505" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="b3ce79e7-7ce7-464d-ae3e-b05524b38a5c">
+	<property name="ireport.zoom" value="3.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="reminderFee" class="java.lang.Double" isForPrompting="false">
+		<defaultValueExpression><![CDATA[60.0]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="UOM" class="java.lang.String">
+		<fieldDescription><![CDATA[UOM]]></fieldDescription>
+	</field>
+	<field name="description" class="java.lang.String">
+		<fieldDescription><![CDATA[description]]></fieldDescription>
+	</field>
+	<field name="groupKey" class="java.lang.String">
+		<fieldDescription><![CDATA[groupKey]]></fieldDescription>
+	</field>
+	<field name="key" class="java.lang.String">
+		<fieldDescription><![CDATA[key]]></fieldDescription>
+	</field>
+	<field name="lineNet" class="java.lang.Double">
+		<fieldDescription><![CDATA[lineNet]]></fieldDescription>
+	</field>
+	<field name="lineNo" class="java.lang.Integer">
+		<fieldDescription><![CDATA[lineNo]]></fieldDescription>
+	</field>
+	<field name="name" class="java.lang.String">
+		<fieldDescription><![CDATA[name]]></fieldDescription>
+	</field>
+	<field name="poDocumentNo" class="java.lang.String">
+		<fieldDescription><![CDATA[poDocumentNo]]></fieldDescription>
+	</field>
+	<field name="poReference" class="java.lang.String">
+		<fieldDescription><![CDATA[poReference]]></fieldDescription>
+	</field>
+	<field name="priceActual" class="java.lang.Double">
+		<fieldDescription><![CDATA[priceActual]]></fieldDescription>
+	</field>
+	<field name="product" class="org.notima.generic.businessobjects.Product">
+		<fieldDescription><![CDATA[product]]></fieldDescription>
+	</field>
+	<field name="productKey" class="java.lang.String">
+		<fieldDescription><![CDATA[productKey]]></fieldDescription>
+	</field>
+	<field name="qtyEntered" class="java.lang.Double">
+		<fieldDescription><![CDATA[qtyEntered]]></fieldDescription>
+	</field>
+	<field name="taxAmount" class="java.lang.Double">
+		<fieldDescription><![CDATA[taxAmount]]></fieldDescription>
+	</field>
+	<field name="taxIncludedInPrice" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[taxIncludedInPrice]]></fieldDescription>
+	</field>
+	<field name="taxKey" class="java.lang.String">
+		<fieldDescription><![CDATA[taxKey]]></fieldDescription>
+	</field>
+	<field name="taxPercent" class="java.lang.Double">
+		<fieldDescription><![CDATA[taxPercent]]></fieldDescription>
+	</field>
+	<field name="theirTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[theirTotal]]></fieldDescription>
+	</field>
+	<field name="vendorProductNo" class="java.lang.String">
+		<fieldDescription><![CDATA[vendorProductNo]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band height="21" splitType="Stretch">
+			<staticText>
+				<reportElement x="10" y="0" width="46" height="20" uuid="14a2f088-0df9-44f6-97c6-762db9b0f662"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Artnr]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="56" y="0" width="229" height="20" uuid="6502151b-d31a-4d88-8dac-171067a7b9e7"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Benämning]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="304" y="0" width="35" height="20" uuid="0b58669e-04f7-4148-99d1-65d47b070a1e"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Antal]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="344" y="0" width="33" height="20" uuid="f94dfcce-045b-4fe9-8d19-9f632be70645"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Enhet]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="378" y="0" width="60" height="20" uuid="510ace28-aca4-4d83-b768-5147db433b2c"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[à pris]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="439" y="0" width="60" height="20" uuid="95dd0743-7c42-45c9-951f-e5bbd0902574"/>
+				<textElement textAlignment="Right">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Summa]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="14" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="10" y="0" width="46" height="12" uuid="45e70c97-c37d-4bff-a2c0-21eb3fd3d115"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{key}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement stretchType="RelativeToBandHeight" x="56" y="0" width="248" height="12" uuid="02f8c0e6-5f15-4422-bc0a-d27c6030a4bd"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+				<reportElement x="304" y="0" width="35" height="12" uuid="f6d3d80c-2d03-46af-8a6a-03ebfbfca033">
+					<printWhenExpression><![CDATA[$F{priceActual}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{qtyEntered}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="344" y="0" width="33" height="12" uuid="db52c6e9-1422-40ea-96b9-4b8687ccf087">
+					<printWhenExpression><![CDATA[$F{UOM}!=null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{UOM}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="378" y="0" width="60" height="12" uuid="8c2c79c3-f1b7-4a70-befb-36e432bc311e">
+					<printWhenExpression><![CDATA[$F{priceActual}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{priceActual}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+				<reportElement x="439" y="0" width="60" height="12" uuid="fc5f1fc4-efe5-4bba-8834-58397c02da21">
+					<printWhenExpression><![CDATA[$F{priceActual}!=0]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{priceActual}*$F{qtyEntered}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="22" splitType="Stretch">
+			<printWhenExpression><![CDATA[$P{reminderFee} != null && $P{reminderFee} > 0]]></printWhenExpression>
+			<staticText>
+				<reportElement x="56" y="0" width="248" height="20" uuid="1018fe9f-25ce-40bb-a8f5-75ff1d23ad9b"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[Påminnelseavgift]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="438" y="0" width="61" height="20" uuid="01b54893-6053-42a1-9973-1fe21b274da1"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{reminderFee}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="304" y="0" width="35" height="20" uuid="b82f047a-9e0f-442f-89d9-06427f952d32"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<text><![CDATA[1,00]]></text>
+			</staticText>
+			<textField pattern="#,##0.00;-#,##0.00">
+				<reportElement x="378" y="0" width="60" height="20" uuid="cefb6faa-a9f3-4a07-9204-174006ede480"/>
+				<textElement textAlignment="Right">
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{reminderFee}]]></textFieldExpression>
+			</textField>
+		</band>
+	</columnFooter>
+</jasperReport>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="FortnoxHyresavi" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="53d5b521-d3f1-4fe2-a14d-04b1dc67d34f">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="563"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="creditorContact" class="org.notima.generic.businessobjects.BusinessPartner" isForPrompting="false">
+		<defaultValueExpression><![CDATA[$F{creditor}]]></defaultValueExpression>
+	</parameter>
+	<queryString language="XPath">
+		<![CDATA[]]>
+	</queryString>
+	<field name="bgAmount" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgAmount]]></fieldDescription>
+	</field>
+	<field name="bgAmountCheck" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgAmountCheck]]></fieldDescription>
+	</field>
+	<field name="bgAmountOre" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgAmountOre]]></fieldDescription>
+	</field>
+	<field name="bgNo" class="java.lang.String">
+		<fieldDescription><![CDATA[bgNo]]></fieldDescription>
+	</field>
+	<field name="bgNoDigitsOnly" class="java.lang.Integer">
+		<fieldDescription><![CDATA[bgNoDigitsOnly]]></fieldDescription>
+	</field>
+	<field name="creditor" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[creditor]]></fieldDescription>
+	</field>
+	<field name="debtor" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[debtor]]></fieldDescription>
+	</field>
+	<field name="grandTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[grandTotal]]></fieldDescription>
+	</field>
+	<field name="invoices" class="java.util.ArrayList">
+		<fieldDescription><![CDATA[invoices]]></fieldDescription>
+	</field>
+	<field name="letterCurrency" class="java.lang.String">
+		<fieldDescription><![CDATA[letterCurrency]]></fieldDescription>
+	</field>
+	<field name="letterDate" class="java.util.Date">
+		<fieldDescription><![CDATA[letterDate]]></fieldDescription>
+	</field>
+	<field name="letterDueDate" class="java.util.Date">
+		<fieldDescription><![CDATA[letterDueDate]]></fieldDescription>
+	</field>
+	<field name="letterNo" class="java.lang.String">
+		<fieldDescription><![CDATA[letterNo]]></fieldDescription>
+	</field>
+	<field name="lineNo" class="java.lang.Integer">
+		<fieldDescription><![CDATA[lineNo]]></fieldDescription>
+	</field>
+	<field name="lineNoIncrement" class="java.lang.Integer">
+		<fieldDescription><![CDATA[lineNoIncrement]]></fieldDescription>
+	</field>
+	<field name="nextLineNo" class="java.lang.Integer">
+		<fieldDescription><![CDATA[nextLineNo]]></fieldDescription>
+	</field>
+	<field name="ocrNo" class="java.lang.String">
+		<fieldDescription><![CDATA[ocrNo]]></fieldDescription>
+	</field>
+	<field name="totalClaims" class="java.lang.Double">
+		<fieldDescription><![CDATA[totalClaims]]></fieldDescription>
+	</field>
+	<field name="totalInterest" class="java.lang.Double">
+		<fieldDescription><![CDATA[totalInterest]]></fieldDescription>
+	</field>
+	<field name="totalLegalCost" class="java.lang.Double">
+		<fieldDescription><![CDATA[totalLegalCost]]></fieldDescription>
+	</field>
+	<field name="reminderFee" class="java.lang.Double">
+		<fieldDescription><![CDATA[reminderFee]]></fieldDescription>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<detail>
+		<band height="841" splitType="Stretch">
+			<subreport>
+				<reportElement x="0" y="0" width="595" height="841" uuid="bb112233-4455-6677-8899-aabbccddeeff"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="creditor">
+					<subreportParameterExpression><![CDATA[$F{creditor}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="letterDate">
+					<subreportParameterExpression><![CDATA[$F{letterDate}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="letterDueDate">
+					<subreportParameterExpression><![CDATA[$F{letterDueDate}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="bgNo">
+					<subreportParameterExpression><![CDATA[$F{bgNo}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="entryGrandTotal">
+					<subreportParameterExpression><![CDATA[$F{grandTotal}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="plusgiro">
+					<subreportParameterExpression><![CDATA[$F{creditor} != null && "PG".equalsIgnoreCase($F{creditor}.getRemitToAccountType())]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="reminderFee">
+					<subreportParameterExpression><![CDATA[$F{reminderFee} != null ? $F{reminderFee} : Double.valueOf(60.0)]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{invoices})]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "InvoiceReminderEntry.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>
