@@ -62,6 +62,7 @@ public class SieConverter implements AccountingVoucherConverter<VerRec> {
 			tr.setKontoNr(al.getAcctNo());
 			tr.setTransText(al.getDescription());
 			tr.setObjektLista(getDimensions(src));
+			SieAccountingFileExporter.markCorrection(tr, al);
 			dst.addTransRec(tr);
 		}
 		

@@ -107,6 +107,10 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
         if (voucher.getAcctDate() != null) {
             ver.setVerDatum(java.sql.Date.valueOf(voucher.getAcctDate()));
         }
+        if (voucher.getRegDate() != null) {
+            ver.setRegDatum(java.sql.Date.valueOf(voucher.getRegDate().toLocalDate()));
+        }
+        ver.setSign(voucher.getRegBy());
         List<AccountingVoucherLine> lines = voucher.getLines();
         if (lines != null) {
             for (AccountingVoucherLine line : lines) {
@@ -118,10 +122,25 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
                 tr.setTransText(line.getDescription());
                 List<ObjRec> dims = buildDimensions(voucher, line, sieFile);
                 if (!dims.isEmpty()) tr.setObjektLista(dims);
+                markCorrection(tr, line);
                 ver.addTransRec(tr);
             }
         }
         return ver;
+    }
+
+    /**
+     * A line struck from the registered voucher is written as #BTRANS and a line added
+     * afterwards as #RTRANS, each signed by who made the change.
+     */
+    static void markCorrection(TransRec tr, AccountingVoucherLine line) {
+        if (Boolean.TRUE.equals(line.isDeleted())) {
+            tr.setType(TransRec.TransType.BTRANS);
+            tr.setSign(line.getDeletedBy());
+        } else if (Boolean.TRUE.equals(line.getAddedLater())) {
+            tr.setType(TransRec.TransType.RTRANS);
+            tr.setSign(line.getAddedBy());
+        }
     }
 
     private List<ObjRec> buildDimensions(AccountingVoucher voucher,

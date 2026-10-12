@@ -257,10 +257,10 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
         if (verRec.getRegDatum() != null) {
             voucher.setRegDate(LocalDateUtils.asLocalDateTime(verRec.getRegDatum()));
         }
+        voucher.setRegBy(normalizeText(verRec.getSign()));
 
         if (verRec.getTransList() != null) {
             for (TransRec transRec : verRec.getTransList()) {
-                // Skip #BTRANS / #RTRANS records — parser leaves kontoNr null for them
                 if (transRec.getKontoNr() == null) continue;
                 voucher.addVoucherLine(convertLine(transRec, sieFile));
             }
@@ -296,6 +296,16 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
                 if      (obj.getDimId() == DimRec.COSTCENTER_ID) line.setCostCenter(obj.getObjId());
                 else if (obj.getDimId() == DimRec.PROJECT_ID)    line.setProjectCode(obj.getObjId());
             }
+        }
+
+        // A transaction removed from (#BTRANS) or added to (#RTRANS) the registered voucher.
+        // SIE records who made the change, but not when.
+        if (transRec.isRemoved()) {
+            line.setDeleted(true);
+            line.setDeletedBy(normalizeText(transRec.getSign()));
+        } else if (transRec.isAdded()) {
+            line.setAddedLater(true);
+            line.setAddedBy(normalizeText(transRec.getSign()));
         }
 
         return line;
