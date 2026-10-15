@@ -71,4 +71,25 @@ class TestDunningRunFilter {
 		assertEquals(1, run.getEntries().size());
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	void remindersWithNothingOwedAreRemoved() {
+		DunningRun<Object,Object> run = new DunningRun<Object,Object>();
+		DunningEntry<Object,Object> overpaidOnly = entry(invoice("200", "2026-08-31", -150));
+		DunningEntry<Object,Object> creditExceedsDebt = entry(invoice("210", "2026-08-31", 100), invoice("211", "2026-09-01", -300));
+		DunningEntry<Object,Object> owes = entry(invoice("220", "2026-08-31", 0), invoice("221", "2026-09-15", 800),
+				invoice("222", "2026-09-20", -300));
+		run.addDunningEntry(overpaidOnly);
+		run.addDunningEntry(creditExceedsDebt);
+		run.addDunningEntry(owes);
+
+		int removed = DunningRunFilter.excludeNotOwed(run);
+
+		assertEquals(4, removed, "the paid invoice and the reminders where nothing is owed in total");
+		assertEquals(1, run.getEntries().size());
+		assertEquals(2, owes.getInvoices().size(), "the credit is kept when the customer owes more");
+		assertEquals("221", owes.getLetterNo(), "letter no from the first remaining invoice");
+		assertEquals("2210", owes.getOcrNo());
+	}
+
 }

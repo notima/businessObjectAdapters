@@ -72,6 +72,10 @@
 	<variable name="location" class="org.notima.generic.businessobjects.Location" resetType="Column">
 		<variableExpression><![CDATA[$F{billLocation}!=null ? $F{billLocation} : $F{businessPartner}.getAddressOfficial()]]></variableExpression>
 	</variable>
+	<!-- No reminder fee on what the customer has to receive (overpaid invoices and credit notes) -->
+	<variable name="fee" class="java.lang.Double">
+		<variableExpression><![CDATA[$F{openAmt} < 0 ? Double.valueOf(0.0) : $P{reminderFee}]]></variableExpression>
+	</variable>
 	<variable name="dfmt" class="java.text.DateFormat">
 		<variableExpression><![CDATA[new java.text.SimpleDateFormat("yyyy-MM-dd")]]></variableExpression>
 	</variable>
@@ -83,7 +87,7 @@
 		<band height="841" splitType="Prevent">
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="451" y="480" width="100" height="16" uuid="3d83e975-ce65-429f-b1ae-9ff094344724">
-					<printWhenExpression><![CDATA[$F{grandTotal}<0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}<0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font isBold="true"/>
@@ -92,7 +96,7 @@
 			</staticText>
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="239" y="782" width="55" height="14" uuid="862c893f-ed9d-4687-88c2-c38e16a860b6">
-					<printWhenExpression><![CDATA[$F{grandTotal}<0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}<0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="OCRB"/>
@@ -331,7 +335,7 @@
 			</staticText>
 			<staticText>
 				<reportElement x="405" y="40" width="77" height="12" uuid="b08400db-a17a-4563-82d3-14b4f44f3c01">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="7" isBold="false"/>
@@ -351,7 +355,7 @@
 			</textField>
 			<textField pattern="yyyy-MM-dd">
 				<reportElement x="405" y="52" width="77" height="20" uuid="f6c9fd2c-ba31-4055-ad62-62d4a73aa647">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[$V{dfmt}.format($F{dueDate})]]></textFieldExpression>
 			</textField>
@@ -436,30 +440,30 @@
 			</staticText>
 			<textField pattern="###0">
 				<reportElement positionType="FixRelativeToBottom" x="239" y="782" width="55" height="14" uuid="212797fd-4332-4469-8c1c-c798b622f554">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="OCRB"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{openAmt} + $P{reminderFee}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{openAmt} + $V{fee}]]></textFieldExpression>
 			</textField>
 			<textField pattern="00">
 				<reportElement positionType="FixRelativeToBottom" x="296" y="782" width="21" height="14" uuid="45d04140-62cb-4f80-8fee-cf453d840d1a">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="OCRB"/>
 				</textElement>
-				<textFieldExpression><![CDATA[(int)(Math.round(($F{openAmt} + $P{reminderFee}) * 100)) % 100]]></textFieldExpression>
+				<textFieldExpression><![CDATA[(int)(Math.round(($F{openAmt} + $V{fee}) * 100)) % 100]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement positionType="FixRelativeToBottom" x="329" y="782" width="15" height="14" uuid="678869b5-af2b-4fee-b2cf-811453835e24">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="OCRB"/>
 				</textElement>
-				<textFieldExpression><![CDATA[org.notima.bg.BgUtil.getLuhnDigit((double)($F{openAmt} + $P{reminderFee}))]]></textFieldExpression>
+				<textFieldExpression><![CDATA[org.notima.bg.BgUtil.getLuhnDigit((double)($F{openAmt} + $V{fee}))]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement positionType="FixRelativeToBottom" x="47" y="782" width="175" height="14" uuid="f91af1c6-9864-4023-846c-c0c8dd366ae9"/>
@@ -471,7 +475,7 @@
 			<subreport>
 				<reportElement x="44" y="273" width="506" height="203" uuid="e4ce79d9-6848-4d14-a2d2-bfc60ca4d217"/>
 				<subreportParameter name="reminderFee">
-					<subreportParameterExpression><![CDATA[$P{reminderFee}]]></subreportParameterExpression>
+					<subreportParameterExpression><![CDATA[$V{fee}]]></subreportParameterExpression>
 				</subreportParameter>
 				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{lines})]]></dataSourceExpression>
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "InvoiceReminderRows.jasper"]]></subreportExpression>
@@ -502,13 +506,13 @@
 			</staticText>
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="331" y="480" width="80" height="16" uuid="055e3579-5c33-4623-b85d-bac4fa7e85c8">
-					<printWhenExpression><![CDATA[$F{openAmt}!=$F{grandTotal}]]></printWhenExpression>
+					<printWhenExpression><![CDATA[Math.abs($F{grandTotal} - $F{openAmt}) >= 0.005]]></printWhenExpression>
 				</reportElement>
 				<text><![CDATA[Avgår betalt]]></text>
 			</staticText>
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="451" y="480" width="100" height="16" uuid="fb274b47-ed5a-4aff-a648-db1f4333769d">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font isBold="true"/>
@@ -520,22 +524,22 @@
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA[$F{currency}!=null ? $F{currency} : "SEK"]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00;-#,##0.00">
+			<textField pattern="#,##0.00;'-'#,##0.00">
 				<reportElement positionType="FixRelativeToBottom" x="451" y="497" width="100" height="16" uuid="b6998919-d327-4a1e-9d16-d3f2305c1b2a"/>
 				<textElement textAlignment="Right">
 					<font isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{openAmt} + $P{reminderFee}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{openAmt} + $V{fee}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+			<textField pattern="#,##0.00;'-'#,##0.00" isBlankWhenNull="true">
 				<reportElement positionType="FixRelativeToBottom" x="251" y="497" width="80" height="16" uuid="57330b7c-640e-4625-bcda-d054ba53f8a5"/>
 				<textFieldExpression><![CDATA[$F{vatTotal}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+			<textField pattern="#,##0.00;'-'#,##0.00" isBlankWhenNull="true">
 				<reportElement positionType="FixRelativeToBottom" x="150" y="497" width="100" height="16" uuid="0bc1250f-7aa6-4549-b1ba-2908f6b863ab"/>
 				<textFieldExpression><![CDATA[$F{netTotal}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+			<textField pattern="#,##0.00;'-'#,##0.00" isBlankWhenNull="true">
 				<reportElement positionType="FixRelativeToBottom" x="47" y="497" width="100" height="16" uuid="eebdf20b-9445-43d0-af21-447179a9c443"/>
 				<textFieldExpression><![CDATA[$F{grandTotal}]]></textFieldExpression>
 			</textField>
@@ -557,7 +561,7 @@
 			</staticText>
 			<textField pattern="yyyy-MM-dd">
 				<reportElement positionType="FixRelativeToBottom" x="135" y="614" width="96" height="14" uuid="358759ea-27a1-42ec-8b8b-5578f929b986">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="9"/>
@@ -566,7 +570,7 @@
 			</textField>
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="60" y="614" width="75" height="14" uuid="6c20c030-db42-4a03-8955-1262e473bdd6">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="9"/>
@@ -651,7 +655,7 @@
 			</staticText>
 			<staticText>
 				<reportElement x="405" y="72" width="77" height="12" uuid="ce0066b9-debc-4e1c-bd6c-f84145869c20">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -664,20 +668,22 @@
 			</textField>
 			<textField pattern="yyyy-MM-dd">
 				<reportElement x="405" y="85" width="77" height="17" uuid="350d6920-6cde-4955-9604-3a2fbc4c2283">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[$V{dfmt}.format($P{letterDueDate})]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="44" y="229" width="506" height="42" uuid="16b122e1-005d-44e4-b965-709ad7bbbe7a"/>
+				<reportElement x="44" y="229" width="506" height="42" uuid="16b122e1-005d-44e4-b965-709ad7bbbe7a">
+					<printWhenExpression><![CDATA[$F{openAmt}>=0f]]></printWhenExpression>
+				</reportElement>
 				<text><![CDATA[Denna fordran är förfallen till betalning. Dröjsmålsränta kommer att debiteras från förfallodagen. Om betalning inte sker omgående kommer kravhantering samt inkassoåtgärder vidtagas. Har betalning skett under de senaste dagarna ber vi er bortse från denna påminnelse.]]></text>
 			</staticText>
 			<line>
 				<reportElement x="317" y="68" width="164" height="1" uuid="6e509565-70c2-4bb3-9289-d1b31800e9b6"/>
 			</line>
-			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+			<textField pattern="#,##0.00;'-'#,##0.00" isBlankWhenNull="true">
 				<reportElement positionType="FixRelativeToBottom" x="331" y="497" width="80" height="16" uuid="91a67d79-3110-472e-8c40-7b2c4187c04e">
-					<printWhenExpression><![CDATA[$F{openAmt}!=$F{grandTotal}]]></printWhenExpression>
+					<printWhenExpression><![CDATA[Math.abs($F{grandTotal} - $F{openAmt}) >= 0.005]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[-($F{grandTotal}-$F{openAmt})]]></textFieldExpression>
 			</textField>

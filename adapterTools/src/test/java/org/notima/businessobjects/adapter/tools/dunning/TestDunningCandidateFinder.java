@@ -60,6 +60,27 @@ class TestDunningCandidateFinder {
 	}
 
 	@Test
+	void creditsAreDeductedPerCustomer() {
+		DunningCandidate c = summarize(1,
+				invoice("15", "2026-08-31", 1000.0, "SEK"),
+				invoice("15", "2026-12-31", -300.0, "SEK"),		// credit not due yet: deducted anyway
+				invoice("16", "2026-08-31", 500.0, "SEK"),
+				invoice("16", "2026-09-15", -500.0, "SEK"),		// overpaid: covers the debt
+				invoice("17", "2026-07-31", 200.0, "SEK"),
+				invoice("17", "2026-08-31", -900.0, "SEK"));	// credit exceeds the debt
+		assertEquals(DunningCandidate.Status.NEEDS_DUNNING, c.getStatus());
+		assertEquals(1, c.getOverdueInvoices());
+		assertEquals(1, c.getCustomers());
+		assertEquals(700.0, c.getOverdueAmount(), 0.001, "what the customer owes in total");
+		assertEquals(Date.valueOf("2026-08-31"), c.getOldestDueDate(), "only from customers that owe");
+
+		c = summarize(1,
+				invoice("16", "2026-08-31", 500.0, "SEK"),
+				invoice("16", "2026-09-15", -500.0, "SEK"));
+		assertEquals(DunningCandidate.Status.NOTHING_OVERDUE, c.getStatus(), "no false alarm when credits cover the debt");
+	}
+
+	@Test
 	void minDaysOverdueSkipsRecentlyDueInvoices() {
 		DunningCandidate c = summarize(10,
 				invoice("15", "2026-09-29", 100.0, "SEK"),		// 10 days overdue

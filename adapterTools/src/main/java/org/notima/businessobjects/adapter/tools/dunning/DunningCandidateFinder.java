@@ -26,7 +26,9 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
  * {@link BusinessObjectFactory#readInvoices(OrderInvoiceReaderOptions)} (open, sales only),
  * so it works with any adapter that supports reading open invoices. An invoice is overdue
  * when its open amount is positive and its due date is at least
- * {@link #setMinDaysOverdue(int) minDaysOverdue} days ago (by default: any day past due).</p>
+ * {@link #setMinDaysOverdue(int) minDaysOverdue} days ago (by default: any day past due).
+ * A customer's overpaid invoices and credit notes are deducted, so that only customers
+ * that owe something in total are counted.</p>
  *
  * <p>The result is a list of {@link DunningCandidate}s, one per tenant checked, for
  * presentation elsewhere.</p>
@@ -183,37 +185,79 @@ public class DunningCandidateFinder {
 
 	/**
 	 * Sets the overdue summary and status of {@code candidate} from the tenant's open invoices.
+	 * A customer is only counted when it owes something in total: its overpaid invoices and
+	 * credit notes (negative open amounts), due or not, are deducted from its overdue amount.
+	 * A customer whose credits cover the overdue invoices isn't reminded by create-dunning-run
+	 * and isn't counted here.
 	 */
 	void summarizeOverdue(DunningCandidate candidate, List<Invoice<?>> openInvoices) {
 
 		Date dueBefore = dueBefore();
-		Set<String> customers = new HashSet<String>();
-		Set<String> currencies = new HashSet<String>();
-		int count = 0;
-		double amount = 0;
-		Date oldest = null;
+		Map<String,CustomerBalance> balances = new LinkedHashMap<String,CustomerBalance>();
 
 		if (openInvoices != null) {
 			for (Invoice<?> inv : openInvoices) {
-				if (inv.getOpenAmt() <= 0 || inv.getDueDate() == null || !inv.getDueDate().before(dueBefore)) continue;
-				count++;
-				amount += inv.getOpenAmt();
-				if (inv.getCurrency() != null) currencies.add(inv.getCurrency());
-				BusinessPartner<?> bp = inv.getBusinessPartner();
-				customers.add(bp != null && bp.getIdentityNo() != null ? bp.getIdentityNo()
-						: bp != null && bp.getName() != null ? bp.getName() : "?");
-				if (oldest == null || inv.getDueDate().before(oldest)) oldest = inv.getDueDate();
+				double open = inv.getOpenAmt();
+				if (open < 0) {
+					balanceFor(balances, inv).credits += open;
+				} else if (open > 0 && inv.getDueDate() != null && inv.getDueDate().before(dueBefore)) {
+					balanceFor(balances, inv).addOverdue(inv);
+				}
 			}
 		}
 
+		Set<String> currencies = new HashSet<String>();
+		int count = 0;
+		int customers = 0;
+		double amount = 0;
+		Date oldest = null;
+
+		for (CustomerBalance b : balances.values()) {
+			double owed = b.overdue + b.credits;
+			if (b.invoices == 0 || owed < 0.005) continue;
+			customers++;
+			count += b.invoices;
+			amount += owed;
+			currencies.addAll(b.currencies);
+			if (oldest == null || b.oldest.before(oldest)) oldest = b.oldest;
+		}
+
 		candidate.setOverdueInvoices(count);
-		candidate.setCustomers(customers.size());
+		candidate.setCustomers(customers);
 		candidate.setOverdueAmount(Math.round(amount * 100) / 100.0);
 		candidate.setCurrency(currencies.isEmpty() ? null : currencies.size() == 1 ? currencies.iterator().next() : "*");
 		candidate.setOldestDueDate(oldest);
 		candidate.setMaxDaysOverdue(oldest != null ? (int) daysBetween(oldest, today) : 0);
 		candidate.setStatus(count > 0 ? DunningCandidate.Status.NEEDS_DUNNING : DunningCandidate.Status.NOTHING_OVERDUE);
 
+	}
+
+	/** A customer's overdue invoices and credits. */
+	private static class CustomerBalance {
+		double overdue;
+		double credits;
+		int invoices;
+		Date oldest;
+		Set<String> currencies = new HashSet<String>();
+
+		void addOverdue(Invoice<?> inv) {
+			overdue += inv.getOpenAmt();
+			invoices++;
+			if (inv.getCurrency() != null) currencies.add(inv.getCurrency());
+			if (oldest == null || inv.getDueDate().before(oldest)) oldest = inv.getDueDate();
+		}
+	}
+
+	private static CustomerBalance balanceFor(Map<String,CustomerBalance> balances, Invoice<?> inv) {
+		BusinessPartner<?> bp = inv.getBusinessPartner();
+		String key = bp != null && bp.getIdentityNo() != null ? bp.getIdentityNo()
+				: bp != null && bp.getName() != null ? bp.getName() : "?";
+		CustomerBalance b = balances.get(key);
+		if (b == null) {
+			b = new CustomerBalance();
+			balances.put(key, b);
+		}
+		return b;
 	}
 
 	/** Comparable form of a tax id: its letters and digits, upper case. */

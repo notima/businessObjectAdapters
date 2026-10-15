@@ -79,6 +79,9 @@ public class CreateDunningRun implements Action {
     /** Invoices removed by --duedatefrom. */
     private int excludedInvoices;
     
+    /** Invoices removed since nothing is owed on them or the customer doesn't owe anything in total. */
+    private int notOwedInvoices;
+    
     private Double reminderFee;
     
 	private BusinessObjectFactory<?,?,?,?,?,?> bof;
@@ -160,6 +163,8 @@ public class CreateDunningRun implements Action {
 	private void createDunningRun() throws Exception {
 		dunningRun = bof.lookupDunningRun(null, dueDateUntil);
 		excludedInvoices = DunningRunFilter.excludeDueBefore(dunningRun, dueDateFrom);
+		// After --duedatefrom, since what's owed is what's left to remind
+		notOwedInvoices = DunningRunFilter.excludeNotOwed(dunningRun);
 	}
 	
 	/**
@@ -235,6 +240,10 @@ public class CreateDunningRun implements Action {
 		if (excludedInvoices > 0) {
 			sess.getConsole().println(excludedInvoices + (excludedInvoices==1 ? " invoice" : " invoices")
 					+ " due before " + dueDateFromStr + " not included");
+		}
+		if (notOwedInvoices > 0) {
+			sess.getConsole().println(notOwedInvoices + (notOwedInvoices==1 ? " invoice" : " invoices")
+					+ " not included since nothing is owed (no open amount, or the customer's overpayments and credits exceed the debt)");
 		}
 		
 	}

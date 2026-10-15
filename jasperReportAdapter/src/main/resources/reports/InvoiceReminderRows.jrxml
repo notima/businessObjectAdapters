@@ -132,7 +132,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
 			</textField>
-			<textField pattern="###0.00;-###0.00" isBlankWhenNull="true">
+			<textField pattern="###0.00;'-'###0.00" isBlankWhenNull="true">
 				<reportElement x="304" y="0" width="35" height="12" uuid="f6d3d80c-2d03-46af-8a6a-03ebfbfca033">
 					<printWhenExpression><![CDATA[$F{priceActual}!=0]]></printWhenExpression>
 				</reportElement>
@@ -150,7 +150,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{UOM}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00;-#,##0.00">
+			<textField pattern="#,##0.00;'-'#,##0.00">
 				<reportElement x="378" y="0" width="60" height="12" uuid="8c2c79c3-f1b7-4a70-befb-36e432bc311e">
 					<printWhenExpression><![CDATA[$F{priceActual}!=0]]></printWhenExpression>
 				</reportElement>
@@ -159,7 +159,7 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{priceActual}]]></textFieldExpression>
 			</textField>
-			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
+			<textField pattern="#,##0.00;'-'#,##0.00" isBlankWhenNull="true">
 				<reportElement x="439" y="0" width="60" height="12" uuid="fc5f1fc4-efe5-4bba-8834-58397c02da21">
 					<printWhenExpression><![CDATA[$F{priceActual}!=0]]></printWhenExpression>
 				</reportElement>
@@ -180,7 +180,7 @@
 				</textElement>
 				<text><![CDATA[Påminnelseavgift]]></text>
 			</staticText>
-			<textField pattern="#,##0.00;-#,##0.00">
+			<textField pattern="#,##0.00;'-'#,##0.00">
 				<reportElement x="438" y="0" width="61" height="20" uuid="01b54893-6053-42a1-9973-1fe21b274da1"/>
 				<textElement textAlignment="Right">
 					<font size="9"/>
@@ -194,7 +194,7 @@
 				</textElement>
 				<text><![CDATA[1,00]]></text>
 			</staticText>
-			<textField pattern="#,##0.00;-#,##0.00">
+			<textField pattern="#,##0.00;'-'#,##0.00">
 				<reportElement x="378" y="0" width="60" height="20" uuid="cefb6faa-a9f3-4a07-9204-174006ede480"/>
 				<textElement textAlignment="Right">
 					<font size="9"/>
