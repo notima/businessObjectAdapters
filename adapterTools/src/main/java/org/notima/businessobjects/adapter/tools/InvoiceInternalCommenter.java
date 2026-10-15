@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.util.Collection;
 
 import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
 /**
@@ -16,6 +17,7 @@ public class InvoiceInternalCommenter {
 	private final BusinessObjectFactory adapter;
 	private final String comment;
 	private final PrintStream out;
+	private TaxSubjectIdentifier tenant;
 
 	/**
 	 * @param adapter	The adapter, with its tenant set.
@@ -35,6 +37,7 @@ public class InvoiceInternalCommenter {
 	 * @param cof			Used to look up the adapter.
 	 * @param adapterName	The adapter the invoices were read from.
 	 * @param orgNo			The tenant's org no, or null to use the creditor's.
+	 * @param defaultCountryCode	Country code used if the creditor has none.
 	 * @param creditor		The creditor of the invoices in the file.
 	 * @param comment		The comment to append.
 	 * @param out			Where the result for each invoice is printed.
@@ -42,7 +45,7 @@ public class InvoiceInternalCommenter {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static InvoiceInternalCommenter forFile(CanonicalObjectFactory cof, String adapterName, String orgNo,
-			BusinessPartner<?> creditor, String comment, PrintStream out) throws Exception {
+			String defaultCountryCode, BusinessPartner<?> creditor, String comment, PrintStream out) throws Exception {
 		
 		if (adapterName==null) {
 			throw new Exception("--internal-comment requires --adapter");
@@ -51,7 +54,8 @@ public class InvoiceInternalCommenter {
 		if (adapter==null) {
 			throw new Exception("No adapter " + adapterName);
 		}
-		String countryCode = creditor!=null ? creditor.getCountryCode() : null;
+		String countryCode = creditor!=null && creditor.getCountryCode()!=null && creditor.getCountryCode().trim().length()>0
+				? creditor.getCountryCode().trim() : defaultCountryCode;
 		if (orgNo==null && creditor!=null && creditor.getTaxId()!=null && creditor.getTaxId().trim().length()>0) {
 			orgNo = creditor.getTaxId().trim();
 		}
@@ -59,7 +63,16 @@ public class InvoiceInternalCommenter {
 			throw new Exception("The file has no creditor org no. Use --org-no to give the tenant for --internal-comment");
 		}
 		adapter.setTenant(orgNo, countryCode);
-		return new InvoiceInternalCommenter(adapter, comment, out);
+		InvoiceInternalCommenter commenter = new InvoiceInternalCommenter(adapter, comment, out);
+		commenter.tenant = new TaxSubjectIdentifier(orgNo, countryCode);
+		return commenter;
+	}
+	
+	/**
+	 * @return	The tenant of the invoices, if created by {@link #forFile}. Otherwise null.
+	 */
+	public TaxSubjectIdentifier getTenant() {
+		return tenant;
 	}
 	
 	/**

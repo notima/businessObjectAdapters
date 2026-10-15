@@ -12,6 +12,8 @@ import org.notima.businessobjects.adapter.tools.dunning.DunningCandidate;
 public class DunningCandidateTable extends GenericTable {
 
 	private int	needingDunning;
+	private int	recentlyDunned;
+	private int	dunningIntervalDays;
 	private int	errors;
 	private int	checked;
 
@@ -19,8 +21,11 @@ public class DunningCandidateTable extends GenericTable {
 	 * @param candidates	The tenants to show.
 	 * @param showAll		If false, only tenants that need a dunning run or couldn't be
 	 * 						checked are shown.
+	 * @param dunningIntervalDays	The dunning interval used, for the summary.
 	 */
-	public DunningCandidateTable(List<DunningCandidate> candidates, boolean showAll) {
+	public DunningCandidateTable(List<DunningCandidate> candidates, boolean showAll, int dunningIntervalDays) {
+
+		this.dunningIntervalDays = dunningIntervalDays;
 
 		addColumn("Adapter");
 		addColumn("Tax id");
@@ -43,7 +48,9 @@ public class DunningCandidateTable extends GenericTable {
 			checked++;
 			if (c.needsDunning()) needingDunning++;
 			if (c.getStatus() == DunningCandidate.Status.ERROR) errors++;
-			if (!showAll && c.getStatus() == DunningCandidate.Status.NOTHING_OVERDUE) continue;
+			if (c.getStatus() == DunningCandidate.Status.RECENTLY_DUNNED) recentlyDunned++;
+			if (!showAll && (c.getStatus() == DunningCandidate.Status.NOTHING_OVERDUE
+					|| c.getStatus() == DunningCandidate.Status.RECENTLY_DUNNED)) continue;
 			addRow(c);
 		}
 
@@ -51,7 +58,7 @@ public class DunningCandidateTable extends GenericTable {
 
 	private void addRow(DunningCandidate c) {
 
-		boolean overdue = c.needsDunning();
+		boolean overdue = c.needsDunning() || c.getStatus() == DunningCandidate.Status.RECENTLY_DUNNED;
 		addRow().addContent(
 				nvl(c.getAdapterName()),
 				nvl(c.getTaxId()),
@@ -69,6 +76,7 @@ public class DunningCandidateTable extends GenericTable {
 	private static String status(DunningCandidate c) {
 		switch (c.getStatus()) {
 			case NEEDS_DUNNING:		return "Needs dunning";
+			case RECENTLY_DUNNED:	return "Dunned at " + dfmt.format(c.getLastDunningDate());
 			case NOTHING_OVERDUE:	return "Nothing overdue";
 			default:				return "Error: " + nvl(c.getError());
 		}
@@ -80,6 +88,7 @@ public class DunningCandidateTable extends GenericTable {
 	public String getSummary() {
 		return needingDunning + " of " + checked + (checked == 1 ? " tenant " : " tenants ")
 				+ (needingDunning == 1 ? "needs" : "need") + " a dunning run"
+				+ (recentlyDunned > 0 ? " (" + recentlyDunned + " dunned within " + dunningIntervalDays + " days not included)" : "")
 				+ (errors > 0 ? " (" + errors + " couldn't be checked)" : "");
 	}
 

@@ -111,6 +111,7 @@ public class ShowTenantInfo extends AbstractAction {
 		} else {
 			sess.getConsole().println("  Payment info      : (not set)");
 		}
+		sess.getConsole().println("  Last Dunning Date : " + (ti.getLastDunningDate() != null ? dfmt.format(ti.getLastDunningDate()) : "(not set)"));
 	}
 
 	private void printBusinessPartner(BusinessPartner<?> bp) {

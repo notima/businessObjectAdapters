@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Properties;
@@ -20,6 +21,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.FileCompleter;
+import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.InvoiceInternalCommenter;
@@ -29,6 +31,9 @@ import org.notima.businessobjects.adapter.tools.MessageSenderFactory;
 import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.DunningEntry;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.TenantInformation;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Message;
 import org.notima.generic.businessobjects.Person;
@@ -52,6 +57,9 @@ public class PrintDunningRun extends AbstractAction {
 	
 	@Reference
 	private CanonicalObjectFactory cof;
+	
+	@Reference
+	private AdapterToolsSettings settings;
     
 	private String				format = "pdf";
 	
@@ -66,7 +74,7 @@ public class PrintDunningRun extends AbstractAction {
     @Option(name = "-e", aliases = { "--encrypt" }, description = "Send encrypted email.", required = false, multiValued = false)
     private boolean encrypt;
     
-    @Option(name="--internal-comment", description="Appends this internal comment to each invoice of the reminders in the adapter's system, ie \"NotimaReminded 261015\". With -s only the reminders sent. Requires --adapter", required = false, multiValued = false)
+    @Option(name="--internal-comment", description="Appends this internal comment to each invoice of the reminders in the adapter's system, ie \"NotimaReminded 261015\", whether sent by e-mail or not. Requires --adapter", required = false, multiValued = false)
     private String	internalComment;
     
     @Option(name="--adapter", description="The adapter the dunning run was created from. Used by --internal-comment", required = false, multiValued = false)
@@ -113,7 +121,34 @@ public class PrintDunningRun extends AbstractAction {
 	private void initInternalCommenter() throws Exception {
 		
 		if (internalComment==null) return;
-		internalCommenter = InvoiceInternalCommenter.forFile(cof, adapterName, orgNo, getCreditor(), internalComment, sess.getConsole());
+		internalCommenter = InvoiceInternalCommenter.forFile(cof, adapterName, orgNo, settings.getDefaultCountryCode(), getCreditor(), internalComment, sess.getConsole());
+	}
+	
+	/**
+	 * Records today as the tenant's last dunning date, so that list-dunning-candidates
+	 * doesn't show the tenant again until the dunning interval has passed.
+	 */
+	private void recordLastDunningDate() {
+		
+		TaxSubjectIdentifier tenant = internalCommenter.getTenant();
+		TenantInformationFactory tif = cof.lookupTenantInformationFactory();
+		if (tif==null) {
+			sess.getConsole().println("No tenant information store, last dunning date not recorded for " + tenant);
+			return;
+		}
+		try {
+			TenantInformation ti = tif.getTenantInformation(tenant);
+			if (ti==null) {
+				ti = new TenantInformation();
+				ti.setTenant(tenant);
+			}
+			ti.setLastDunningDate(new Date());
+			tif.persistTenantInformation(ti);
+			sess.getConsole().println("Last dunning date recorded for " + tenant);
+		} catch (Exception e) {
+			sess.getConsole().println("Couldn't record the last dunning date for " + tenant + ": " + e.getMessage());
+		}
+		
 	}
 	
 	private BusinessPartner<?> getCreditor() {
@@ -161,6 +196,7 @@ public class PrintDunningRun extends AbstractAction {
 		} finally {
 			// Also if sending fails half way, so that the reminders already sent are marked
 			if (internalCommenter!=null && !remindedInvoices.isEmpty()) {
+				recordLastDunningDate();
 				internalCommenter.appendTo(remindedInvoices);
 			}
 		}
@@ -178,11 +214,11 @@ public class PrintDunningRun extends AbstractAction {
 		String path = formatter.formatReminder(entry, format, props);
 		sess.getConsole().println(path);
 		
+		// Also reminders not sent by e-mail, since they are sent by other means
+		addRemindedInvoices(entry);
+		
 		if (sendByEmail) {
 			sendByEmail(entry, path);
-		} else {
-			// Printed to be sent by other means
-			addRemindedInvoices(entry);
 		}
 		
 	}
@@ -209,7 +245,6 @@ public class PrintDunningRun extends AbstractAction {
 
 		        sess.getConsole().println(subject + " sent successfully to "+ recipient + (encrypt ? " using PGP-encryption" : ""));
 		        
-		        addRemindedInvoices(entry);
 				
 				
 			}

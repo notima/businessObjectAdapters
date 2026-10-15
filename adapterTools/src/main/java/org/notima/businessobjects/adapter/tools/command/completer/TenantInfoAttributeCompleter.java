@@ -28,6 +28,7 @@ public class TenantInfoAttributeCompleter implements Completer {
 		"remitToAccountType",
 		"remitToIBAN",
 		"remitToBIC",
+		"lastDunningDate",
 	};
 
 	@Override

@@ -16,7 +16,10 @@ import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.businessobjects.OrderInvoiceReaderOptions;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.TenantInformation;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 
 /**
  * Finds the tenants that need a dunning run: tenants with open customer invoices that are
@@ -40,6 +43,9 @@ public class DunningCandidateFinder {
 		void checking(String adapterName, BusinessPartner<?> tenant, int index, int count);
 	}
 
+	/** By default, reminders aren't sent more often than this. */
+	public static final int DEFAULT_DUNNING_INTERVAL_DAYS = 7;
+
 	private final String defaultCountryCode;
 
 	private String	countryCode;
@@ -47,6 +53,8 @@ public class DunningCandidateFinder {
 	private Map<String,String> onlyTaxIds;
 
 	private int		minDaysOverdue = 1;
+	private int		dunningIntervalDays = DEFAULT_DUNNING_INTERVAL_DAYS;
+	private TenantInformationFactory tenantInformationFactory;
 	private Date	today = new Date();
 	private ProgressListener progressListener;
 
@@ -67,6 +75,27 @@ public class DunningCandidateFinder {
 
 	public int getMinDaysOverdue() {
 		return minDaysOverdue;
+	}
+
+	/**
+	 * @param days	Tenants reminded fewer days ago than this get status
+	 * 				{@link DunningCandidate.Status#RECENTLY_DUNNED} instead of
+	 * 				{@link DunningCandidate.Status#NEEDS_DUNNING}. 0 to ignore when tenants were reminded.
+	 */
+	public void setDunningIntervalDays(int days) {
+		this.dunningIntervalDays = days;
+	}
+
+	public int getDunningIntervalDays() {
+		return dunningIntervalDays;
+	}
+
+	/**
+	 * @param tif	Where the tenants' last dunning dates are read from. Null to ignore when
+	 * 				tenants were reminded.
+	 */
+	public void setTenantInformationFactory(TenantInformationFactory tif) {
+		this.tenantInformationFactory = tif;
 	}
 
 	/**
@@ -175,6 +204,7 @@ public class DunningCandidateFinder {
 			List<Invoice<?>> open = read != null && read.getAffectedInvoices() != null
 					? read.getAffectedInvoices().getInvoiceList() : null;
 			summarizeOverdue(candidate, open);
+			applyLastDunningDate(candidate);
 		} catch (Exception e) {
 			candidate.setStatus(DunningCandidate.Status.ERROR);
 			candidate.setError(e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName());
@@ -232,6 +262,35 @@ public class DunningCandidateFinder {
 
 	}
 
+	/**
+	 * Sets the tenant's last dunning date on {@code candidate}, and status
+	 * {@link DunningCandidate.Status#RECENTLY_DUNNED} if it needs dunning but was reminded
+	 * within the dunning interval.
+	 */
+	void applyLastDunningDate(DunningCandidate candidate) {
+
+		if (tenantInformationFactory == null) return;
+		TenantInformation ti = tenantInformationFactory.getTenantInformation(
+				new TaxSubjectIdentifier(candidate.getTaxId(), candidate.getCountryCode()));
+		if (ti == null || ti.getLastDunningDate() == null) return;
+		candidate.setLastDunningDate(ti.getLastDunningDate());
+		if (candidate.needsDunning()
+				&& calendarDaysBetween(ti.getLastDunningDate(), today) < dunningIntervalDays) {
+			candidate.setStatus(DunningCandidate.Status.RECENTLY_DUNNED);
+		}
+
+	}
+
+	private static Date startOfDay(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
+
 	/** A customer's overdue invoices and credits. */
 	private static class CustomerBalance {
 		double overdue;
@@ -268,17 +327,18 @@ public class DunningCandidateFinder {
 	/** Invoices due before this date are overdue enough to remind. */
 	private Date dueBefore() {
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(today);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
+		cal.setTime(startOfDay(today));
 		cal.add(Calendar.DATE, 1 - Math.max(minDaysOverdue, 1));
 		return cal.getTime();
 	}
 
 	private static long daysBetween(Date from, Date to) {
 		return TimeUnit.MILLISECONDS.toDays(to.getTime() - from.getTime());
+	}
+
+	/** Calendar days between two dates; rounded, since a day can be 23 or 25 hours at daylight saving time changes. */
+	private static long calendarDaysBetween(Date from, Date to) {
+		return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / (double) TimeUnit.DAYS.toMillis(1));
 	}
 
 }

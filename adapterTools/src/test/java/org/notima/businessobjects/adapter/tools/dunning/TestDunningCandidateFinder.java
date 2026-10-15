@@ -15,7 +15,10 @@ import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.TenantInformation;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 
 class TestDunningCandidateFinder {
 
@@ -78,6 +81,43 @@ class TestDunningCandidateFinder {
 				invoice("16", "2026-08-31", 500.0, "SEK"),
 				invoice("16", "2026-09-15", -500.0, "SEK"));
 		assertEquals(DunningCandidate.Status.NOTHING_OVERDUE, c.getStatus(), "no false alarm when credits cover the debt");
+	}
+
+	/** Status of a tenant needing dunning, last reminded at {@code lastDunningDate} (null: never). */
+	private static DunningCandidate dunnedAt(String lastDunningDate, int intervalDays) {
+		DunningCandidateFinder finder = new DunningCandidateFinder("SE");
+		finder.setToday(java.sql.Timestamp.valueOf("2026-10-15 09:30:00"));
+		finder.setDunningIntervalDays(intervalDays);
+		finder.setTenantInformationFactory(new TenantInformationFactory() {
+			public TenantInformation getTenantInformation(TaxSubjectIdentifier tenant) {
+				if (!"716417-1147".equals(tenant.getTaxId()) || !"SE".equals(tenant.getCountryCode())) return null;
+				TenantInformation ti = new TenantInformation();
+				ti.setTenant(tenant);
+				ti.setLastDunningDate(lastDunningDate != null ? java.sql.Timestamp.valueOf(lastDunningDate + " 16:45:00") : null);
+				return ti;
+			}
+			public TenantInformation persistTenantInformation(TenantInformation ti) {
+				return ti;
+			}
+		});
+		DunningCandidate c = new DunningCandidate();
+		c.setTaxId("716417-1147");
+		c.setCountryCode("SE");
+		finder.summarizeOverdue(c, new ArrayList<Invoice<?>>(Arrays.asList(invoice("15", "2026-08-31", 1000.0, "SEK"))));
+		finder.applyLastDunningDate(c);
+		return c;
+	}
+
+	@Test
+	void recentlyDunnedTenantsAreNotReportedAsNeedingDunning() {
+		assertEquals(DunningCandidate.Status.RECENTLY_DUNNED, dunnedAt("2026-10-15", 7).getStatus(), "dunned today");
+		assertEquals(DunningCandidate.Status.RECENTLY_DUNNED, dunnedAt("2026-10-09", 7).getStatus(), "6 days ago");
+		assertEquals(DunningCandidate.Status.NEEDS_DUNNING, dunnedAt("2026-10-08", 7).getStatus(), "7 days ago");
+		assertEquals(DunningCandidate.Status.NEEDS_DUNNING, dunnedAt(null, 7).getStatus(), "never dunned");
+		assertEquals(DunningCandidate.Status.NEEDS_DUNNING, dunnedAt("2026-10-12", 3).getStatus(), "custom interval");
+		assertEquals(DunningCandidate.Status.NEEDS_DUNNING, dunnedAt("2026-10-15", 0).getStatus(), "interval 0 ignores it");
+		assertEquals(java.sql.Timestamp.valueOf("2026-10-08 16:45:00"), dunnedAt("2026-10-08", 7).getLastDunningDate(),
+				"shown also when no longer recent");
 	}
 
 	@Test

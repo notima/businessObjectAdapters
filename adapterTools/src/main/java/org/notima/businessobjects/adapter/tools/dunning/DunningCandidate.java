@@ -12,6 +12,8 @@ public class DunningCandidate {
 	public enum Status {
 		/** Has overdue invoices to remind. */
 		NEEDS_DUNNING,
+		/** Has overdue invoices, but was reminded within the dunning interval, see {@link DunningCandidate#getLastDunningDate()}. */
+		RECENTLY_DUNNED,
 		/** Has no overdue invoices to remind. */
 		NOTHING_OVERDUE,
 		/** Couldn't be checked, see {@link DunningCandidate#getError()}. */
@@ -33,6 +35,8 @@ public class DunningCandidate {
 	private String	currency;
 	private Date	oldestDueDate;
 	private int		maxDaysOverdue;
+	/** When reminders were last sent, from the tenant information; null if unknown. */
+	private Date	lastDunningDate;
 
 	public String getAdapterName() {
 		return adapterName;
@@ -113,6 +117,14 @@ public class DunningCandidate {
 	}
 	public void setMaxDaysOverdue(int maxDaysOverdue) {
 		this.maxDaysOverdue = maxDaysOverdue;
+	}
+
+	/** @return	When reminders were last sent, from the tenant information; null if unknown. */
+	public Date getLastDunningDate() {
+		return lastDunningDate;
+	}
+	public void setLastDunningDate(Date lastDunningDate) {
+		this.lastDunningDate = lastDunningDate;
 	}
 
 }

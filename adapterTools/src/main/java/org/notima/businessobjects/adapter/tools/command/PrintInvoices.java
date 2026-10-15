@@ -19,6 +19,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.FileCompleter;
+import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.EmailInvoiceDelivery;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
@@ -49,6 +50,9 @@ public class PrintInvoices extends AbstractAction {
 	
 	@Reference
 	private CanonicalObjectFactory cof;
+	
+	@Reference
+	private AdapterToolsSettings settings;
     
     @Option(name = "-format", aliases = { "--format" }, description = "Output format, ie pdf or peppol. Default is the delivery method's format, or pdf", required = false, multiValued = false)
 	private String				format;
@@ -67,7 +71,7 @@ public class PrintInvoices extends AbstractAction {
     @Option(name = "-e", aliases = { "--encrypt" }, description = "Send encrypted email.", required = false, multiValued = false)
     private boolean encrypt;
     
-    @Option(name="--internal-comment", description="Appends this internal comment to each invoice in the adapter's system, ie \"NotimaInvoiced 261015\". With a delivery method only the invoices delivered. Requires --adapter", required = false, multiValued = false)
+    @Option(name="--internal-comment", description="Appends this internal comment to each invoice in the adapter's system, ie \"NotimaInvoiced 261015\", whether delivered by the delivery method or not. Requires --adapter", required = false, multiValued = false)
     private String	internalComment;
     
     @Option(name="--adapter", description="The adapter the invoices were read from. Used by --internal-comment", required = false, multiValued = false)
@@ -91,7 +95,7 @@ public class PrintInvoices extends AbstractAction {
 	private InvoiceDeliveryBatch deliveryBatch;
 	
 	private InvoiceInternalCommenter internalCommenter;
-	private List<String> deliveredInvoices = new ArrayList<String>();
+	private List<String> printedInvoices = new ArrayList<String>();
 	
 	@Override
 	protected Object onExecute() throws Exception {
@@ -128,7 +132,7 @@ public class PrintInvoices extends AbstractAction {
 	private void initInternalCommenter() throws Exception {
 		
 		if (internalComment==null) return;
-		internalCommenter = InvoiceInternalCommenter.forFile(cof, adapterName, orgNo, invoiceList.getCreditor(), internalComment, sess.getConsole());
+		internalCommenter = InvoiceInternalCommenter.forFile(cof, adapterName, orgNo, settings.getDefaultCountryCode(), invoiceList.getCreditor(), internalComment, sess.getConsole());
 	}
 	
 	private void initFormatterFactory() throws Exception {
@@ -173,18 +177,21 @@ public class PrintInvoices extends AbstractAction {
 		
 		List<Invoice<?>> invoices = invoiceList.getInvoiceList();
 		
-		for (Invoice<?> ii : invoices) {
-			printInvoice(ii);
-		}
-		
-		if (deliveryBatch!=null) {
-			int sent = deliveryBatch.complete();
-			sess.getConsole().println(sent + " of " + invoices.size() + " invoice(s) delivered by " + deliveryMethod.getType());
-		}
-		
-		// After the batch is completed, since a batch may send the invoices first on completion
-		if (internalCommenter!=null && !deliveredInvoices.isEmpty()) {
-			internalCommenter.appendTo(deliveredInvoices);
+		try {
+			for (Invoice<?> ii : invoices) {
+				printInvoice(ii);
+			}
+			
+			if (deliveryBatch!=null) {
+				int sent = deliveryBatch.complete();
+				sess.getConsole().println(sent + " of " + invoices.size() + " invoice(s) delivered by " + deliveryMethod.getType());
+			}
+		} finally {
+			// After the batch is completed, and also if printing or delivery fails half way,
+			// so that the invoices already printed are marked
+			if (internalCommenter!=null && !printedInvoices.isEmpty()) {
+				internalCommenter.appendTo(printedInvoices);
+			}
 		}
 		
 	}
@@ -203,16 +210,13 @@ public class PrintInvoices extends AbstractAction {
 		String path = formatter.formatInvoice(invoice, format, props);
 		sess.getConsole().println(path);
 		
-		if (deliveryBatch==null) {
-			// Printed to be sent by other means
-			deliveredInvoices.add(invoice.getDocumentKey());
-		} else {
+		// Also invoices not delivered by the delivery method, since they are sent by other means
+		printedInvoices.add(invoice.getDocumentKey());
+		
+		if (deliveryBatch!=null) {
 			String result = deliveryBatch.deliver(invoice, new File(path));
 			sess.getConsole().println("  " + invoice.getDocumentKey() + ": " 
 					+ (result!=null ? result : "not delivered by " + deliveryMethod.getType()));
-			if (result!=null) {
-				deliveredInvoices.add(invoice.getDocumentKey());
-			}
 		}
 		
 	}

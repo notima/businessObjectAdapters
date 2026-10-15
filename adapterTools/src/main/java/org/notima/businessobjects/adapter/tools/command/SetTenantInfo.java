@@ -31,7 +31,7 @@ public class SetTenantInfo extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
 
-	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC)", required = true, multiValued = false)
+	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear))", required = true, multiValued = false)
 	@Completion(TenantInfoAttributeCompleter.class)
 	private String attribute;
 
@@ -93,6 +93,9 @@ public class SetTenantInfo extends AbstractAction {
 				break;
 			case "remitToBIC":
 				ti.setRemitToBIC(value);
+				break;
+			case "lastDunningDate":
+				ti.setLastDunningDate("none".equalsIgnoreCase(value.trim()) ? null : dfmt.parse(value.trim()));
 				break;
 			default:
 				sess.getConsole().println("Unknown attribute: " + attribute);

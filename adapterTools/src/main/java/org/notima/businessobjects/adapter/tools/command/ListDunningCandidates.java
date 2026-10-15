@@ -13,6 +13,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
+import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
 import org.notima.businessobjects.adapter.tools.dunning.DunningCandidate;
 import org.notima.businessobjects.adapter.tools.dunning.DunningCandidateFinder;
@@ -37,8 +38,15 @@ public class ListDunningCandidates implements Action {
 	@Reference
 	private AdapterToolsSettings settings;
 
+	@Reference
+	private CanonicalObjectFactory cof;
+
 	@Option(name = "-d", aliases = { "--days-overdue" }, description = "Minimum days past the due date for an invoice to be reminded (default 1, ie any overdue invoice)", required = false, multiValued = false)
 	private int minDaysOverdue = 1;
+
+	@Option(name = "--dunning-interval", description = "Days between reminders. Tenants reminded fewer days ago (print-dunning-run with --internal-comment) get status 'Dunned at' instead of 'Needs dunning' and are only shown with -a (default "
+			+ DunningCandidateFinder.DEFAULT_DUNNING_INTERVAL_DAYS + ", 0 to ignore)", required = false, multiValued = false)
+	private int dunningIntervalDays = DunningCandidateFinder.DEFAULT_DUNNING_INTERVAL_DAYS;
 
 	@Option(name = "--orgNo", description = "Only check these tenants: an org number, or several separated by commas (ie 556000-0000,716416-8515)", required = false, multiValued = false)
 	private String orgNos;
@@ -46,7 +54,7 @@ public class ListDunningCandidates implements Action {
 	@Option(name = "-co", aliases = { "--country-code" }, description = "Country code for all tenants checked (default: each tenant's own, else the default country code)", required = false, multiValued = false)
 	private String countryCode;
 
-	@Option(name = "-a", aliases = { "--all" }, description = "Also list tenants with nothing overdue", required = false, multiValued = false)
+	@Option(name = "-a", aliases = { "--all" }, description = "Also list tenants with nothing overdue or recently dunned", required = false, multiValued = false)
 	private boolean showAll;
 
 	@Argument(index = 0, name = "adapter", description = "Only check tenants of this adapter", required = false, multiValued = false)
@@ -73,6 +81,8 @@ public class ListDunningCandidates implements Action {
 		DunningCandidateFinder finder = new DunningCandidateFinder(settings.getDefaultCountryCode());
 		finder.setMinDaysOverdue(minDaysOverdue);
 		finder.setCountryCode(countryCode);
+		finder.setDunningIntervalDays(dunningIntervalDays);
+		finder.setTenantInformationFactory(cof.lookupTenantInformationFactory());
 		if (orgNos != null) {
 			finder.setOnlyTaxIds(Arrays.asList(orgNos.split(",")));
 		}
@@ -86,7 +96,7 @@ public class ListDunningCandidates implements Action {
 		List<DunningCandidate> candidates = finder.find(adapters);
 		sess.getConsole().print("\r\u001B[K");
 
-		DunningCandidateTable table = new DunningCandidateTable(candidates, showAll);
+		DunningCandidateTable table = new DunningCandidateTable(candidates, showAll, dunningIntervalDays);
 		table.getShellTable().print(sess.getConsole());
 		sess.getConsole().println();
 		sess.getConsole().println(table.getSummary()
