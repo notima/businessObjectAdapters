@@ -709,6 +709,19 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		return dst;
 	}
 	
+	@Override
+	public String appendInvoiceInternalComment(String invoiceKey, String comment) throws Exception {
+		
+		org.notima.api.fortnox.entities3.Invoice invoice = lookupNativeInvoice(invoiceKey);
+		if (invoice==null) return null;
+		
+		String existing = invoice.getComments();
+		invoice.setComments(existing!=null && existing.trim().length()>0 ? existing + "\n" + comment : comment);
+		invoice = fortnoxClient.setInvoice(invoice);
+		
+		return invoice!=null ? invoice.getComments() : null;
+	}
+	
 	public org.notima.generic.businessobjects.BusinessPartner<Customer> persistBusinessPartner(org.notima.generic.businessobjects.BusinessPartner<Customer> bpartner) throws Exception {
 		
 		if (!bpartner.getIsVendor()) {

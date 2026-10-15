@@ -31,6 +31,7 @@ import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 import org.notima.util.NotimaUtil;
 import org.apache.karaf.shell.api.action.Completion;
+import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
 import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 
 @Command(scope = "notima", name = "create-dunning-run", description = "Create a dunning run file")
@@ -49,6 +50,7 @@ public class CreateDunningRun implements Action {
 	Session sess;
 	
 	@Argument(index = 0, name = "adapterName", description ="The adapter name", required = true, multiValued = false)
+	@Completion(AdapterCompleter.class)
 	private String adapterName = "";
 	
 	@Argument(index = 1, name = "orgNo", description ="The orgno of the client", required = true, multiValued = false)

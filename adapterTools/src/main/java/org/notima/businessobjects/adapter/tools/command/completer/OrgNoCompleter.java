@@ -27,8 +27,11 @@ public class OrgNoCompleter implements Completer {
 		StringsCompleter delegate = new StringsCompleter();
 		TreeSet<String> orgNos = new TreeSet<String>();
 
+		String adapterName = getAdapterArgument(commandLine);
+
 		if (bofs != null) {
 			for (BusinessObjectFactory bf : bofs) {
+				if (adapterName != null && !adapterName.equals(bf.getSystemName())) continue;
 				BusinessPartnerList<Object> tenants = bf.listTenants();
 				if (tenants != null && tenants.getBusinessPartner() != null) {
 					for (BusinessPartner<Object> bp : tenants.getBusinessPartner()) {
@@ -43,6 +46,25 @@ public class OrgNoCompleter implements Completer {
 
 		delegate.getStrings().addAll(orgNos);
 		return delegate.complete(session, commandLine, candidates);
+	}
+
+	/**
+	 * Returns the first argument of the command line if it's the name of an adapter, so that
+	 * only that adapter's tenants are suggested.
+	 * 
+	 * @return	The adapter name, or null if the first argument isn't an adapter.
+	 */
+	@SuppressWarnings("rawtypes")
+	private String getAdapterArgument(CommandLine commandLine) {
+
+		String[] args = commandLine.getArguments();
+		if (bofs == null || args == null || args.length < 2 || commandLine.getCursorArgumentIndex() < 2) return null;
+		for (BusinessObjectFactory bf : bofs) {
+			if (args[1].equals(bf.getSystemName())) {
+				return args[1];
+			}
+		}
+		return null;
 	}
 
 }

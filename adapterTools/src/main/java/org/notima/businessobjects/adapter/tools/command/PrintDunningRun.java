@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Properties;
 
 import javax.xml.bind.JAXB;
@@ -18,10 +20,14 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
 import org.apache.karaf.shell.support.completers.FileCompleter;
+import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.FormatterFactory;
+import org.notima.businessobjects.adapter.tools.InvoiceInternalCommenter;
 import org.notima.businessobjects.adapter.tools.InvoiceReminderFormatter;
 import org.notima.businessobjects.adapter.tools.MessageSender;
 import org.notima.businessobjects.adapter.tools.MessageSenderFactory;
+import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
+import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.DunningEntry;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Message;
@@ -43,6 +49,9 @@ public class PrintDunningRun extends AbstractAction {
 	
 	@Reference
 	private FormatterFactory	formatterFactory;
+	
+	@Reference
+	private CanonicalObjectFactory cof;
     
 	private String				format = "pdf";
 	
@@ -56,6 +65,16 @@ public class PrintDunningRun extends AbstractAction {
     
     @Option(name = "-e", aliases = { "--encrypt" }, description = "Send encrypted email.", required = false, multiValued = false)
     private boolean encrypt;
+    
+    @Option(name="--internal-comment", description="Appends this internal comment to each invoice of the sent reminders in the adapter's system, ie \"NotimaReminded 261015\". Requires -s and --adapter", required = false, multiValued = false)
+    private String	internalComment;
+    
+    @Option(name="--adapter", description="The adapter the dunning run was created from. Used by --internal-comment", required = false, multiValued = false)
+    @Completion(AdapterCompleter.class)
+    private String	adapterName;
+    
+    @Option(name="--org-no", description="The tenant for --internal-comment. Default is the creditor's org no in the dunning run", required = false, multiValued = false)
+    private String	orgNo;
     
     @Option(name="-od", description="Output directory (where files are placed)", required = false, multiValued = false)
     private String	outputDirectory;
@@ -73,14 +92,37 @@ public class PrintDunningRun extends AbstractAction {
 	private String		  emailBody;
 	private String		  subject;
 	
+	private InvoiceInternalCommenter internalCommenter;
+	private Set<String> remindedInvoices = new LinkedHashSet<String>();
+	
 	@Override
 	protected Object onExecute() throws Exception {
 		
 		initFormatterFactory();
 		parseOptions();
+		initInternalCommenter();
 
 		printDunningRun();
 		
+		return null;
+	}
+	
+	/**
+	 * Checks the internal comment options before anything is sent.
+	 */
+	private void initInternalCommenter() throws Exception {
+		
+		if (internalComment==null) return;
+		if (!sendByEmail) {
+			throw new Exception("--internal-comment requires -s");
+		}
+		internalCommenter = InvoiceInternalCommenter.forFile(cof, adapterName, orgNo, getCreditor(), internalComment, sess.getConsole());
+	}
+	
+	private BusinessPartner<?> getCreditor() {
+		for (DunningEntry<?,?> entry : dunningRun.getEntries()) {
+			if (entry.getCreditor()!=null) return entry.getCreditor();
+		}
 		return null;
 	}
 	
@@ -115,8 +157,15 @@ public class PrintDunningRun extends AbstractAction {
 		
 		Collection<DunningEntry<?,?>> invoices = dunningRun.getEntries();
 		
-		for (DunningEntry<?,?> ii : invoices) {
-			printInvoice(ii);
+		try {
+			for (DunningEntry<?,?> ii : invoices) {
+				printInvoice(ii);
+			}
+		} finally {
+			// Also if sending fails half way, so that the reminders already sent are marked
+			if (internalCommenter!=null && !remindedInvoices.isEmpty()) {
+				internalCommenter.appendTo(remindedInvoices);
+			}
 		}
 		
 	}
@@ -159,6 +208,10 @@ public class PrintDunningRun extends AbstractAction {
 		        emailSender.send(message, getPGPService(), attachPublicKey);
 
 		        sess.getConsole().println(subject + " sent successfully to "+ recipient + (encrypt ? " using PGP-encryption" : ""));
+		        
+		        for (org.notima.generic.businessobjects.Invoice<?> inv : entry.getInvoices()) {
+		        	remindedInvoices.add(inv.getDocumentKey());
+		        }
 				
 				
 			}
