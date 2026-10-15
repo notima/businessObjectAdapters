@@ -67,7 +67,7 @@ public class PrintInvoices extends AbstractAction {
     @Option(name = "-e", aliases = { "--encrypt" }, description = "Send encrypted email.", required = false, multiValued = false)
     private boolean encrypt;
     
-    @Option(name="--internal-comment", description="Appends this internal comment to each delivered invoice in the adapter's system, ie \"NotimaInvoiced 261015\". Requires --adapter", required = false, multiValued = false)
+    @Option(name="--internal-comment", description="Appends this internal comment to each invoice in the adapter's system, ie \"NotimaInvoiced 261015\". With a delivery method only the invoices delivered. Requires --adapter", required = false, multiValued = false)
     private String	internalComment;
     
     @Option(name="--adapter", description="The adapter the invoices were read from. Used by --internal-comment", required = false, multiValued = false)
@@ -128,9 +128,6 @@ public class PrintInvoices extends AbstractAction {
 	private void initInternalCommenter() throws Exception {
 		
 		if (internalComment==null) return;
-		if (deliveryMethod==null) {
-			throw new Exception("--internal-comment requires a delivery method (-s or --delivery)");
-		}
 		internalCommenter = InvoiceInternalCommenter.forFile(cof, adapterName, orgNo, invoiceList.getCreditor(), internalComment, sess.getConsole());
 	}
 	
@@ -206,7 +203,10 @@ public class PrintInvoices extends AbstractAction {
 		String path = formatter.formatInvoice(invoice, format, props);
 		sess.getConsole().println(path);
 		
-		if (deliveryBatch!=null) {
+		if (deliveryBatch==null) {
+			// Printed to be sent by other means
+			deliveredInvoices.add(invoice.getDocumentKey());
+		} else {
 			String result = deliveryBatch.deliver(invoice, new File(path));
 			sess.getConsole().println("  " + invoice.getDocumentKey() + ": " 
 					+ (result!=null ? result : "not delivered by " + deliveryMethod.getType()));

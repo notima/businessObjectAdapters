@@ -66,7 +66,7 @@ public class PrintDunningRun extends AbstractAction {
     @Option(name = "-e", aliases = { "--encrypt" }, description = "Send encrypted email.", required = false, multiValued = false)
     private boolean encrypt;
     
-    @Option(name="--internal-comment", description="Appends this internal comment to each invoice of the sent reminders in the adapter's system, ie \"NotimaReminded 261015\". Requires -s and --adapter", required = false, multiValued = false)
+    @Option(name="--internal-comment", description="Appends this internal comment to each invoice of the reminders in the adapter's system, ie \"NotimaReminded 261015\". With -s only the reminders sent. Requires --adapter", required = false, multiValued = false)
     private String	internalComment;
     
     @Option(name="--adapter", description="The adapter the dunning run was created from. Used by --internal-comment", required = false, multiValued = false)
@@ -113,9 +113,6 @@ public class PrintDunningRun extends AbstractAction {
 	private void initInternalCommenter() throws Exception {
 		
 		if (internalComment==null) return;
-		if (!sendByEmail) {
-			throw new Exception("--internal-comment requires -s");
-		}
 		internalCommenter = InvoiceInternalCommenter.forFile(cof, adapterName, orgNo, getCreditor(), internalComment, sess.getConsole());
 	}
 	
@@ -183,6 +180,9 @@ public class PrintDunningRun extends AbstractAction {
 		
 		if (sendByEmail) {
 			sendByEmail(entry, path);
+		} else {
+			// Printed to be sent by other means
+			addRemindedInvoices(entry);
 		}
 		
 	}
@@ -209,15 +209,19 @@ public class PrintDunningRun extends AbstractAction {
 
 		        sess.getConsole().println(subject + " sent successfully to "+ recipient + (encrypt ? " using PGP-encryption" : ""));
 		        
-		        for (org.notima.generic.businessobjects.Invoice<?> inv : entry.getInvoices()) {
-		        	remindedInvoices.add(inv.getDocumentKey());
-		        }
+		        addRemindedInvoices(entry);
 				
 				
 			}
 			
 		}
 		
+	}
+	
+	private void addRemindedInvoices(DunningEntry<?,?> entry) {
+		for (org.notima.generic.businessobjects.Invoice<?> inv : entry.getInvoices()) {
+			remindedInvoices.add(inv.getDocumentKey());
+		}
 	}
 	
 	private String getEmail(DunningEntry<?,?> de) {
