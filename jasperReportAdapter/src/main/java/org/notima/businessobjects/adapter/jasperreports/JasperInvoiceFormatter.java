@@ -18,6 +18,11 @@ import org.notima.generic.businessobjects.InvoiceLine;
  * {@link org.notima.generic.ifacebusinessobjects.InvoiceFormatter#TEMPLATE_FILE}), or the bundled
  * {@value #DEFAULT_INVOICE_REPORT} when not set. The report's creditor is the invoice's
  * sender unless an invoice list file is configured (see {@link InvoiceListXmlDataSource}).
+ * <p>
+ * The invoice part of the bundled reports is written in the language given by
+ * {@link #JASPER_LANG} or {@link org.notima.generic.ifacebusinessobjects.InvoiceFormatter#LANGUAGE}
+ * (texts from {@code reports/invoice_<language>.properties}, Swedish by default); the
+ * bankgiro/plusgiro payment slip is always in Swedish.
  * Registered both as an OSGi service
  * (see {@link Activator}) and through {@link java.util.ServiceLoader}.
  */
@@ -39,6 +44,12 @@ public class JasperInvoiceFormatter extends JasperBasePdfFormatter implements In
 	 * </ul>
 	 */
 	public final static String[] TEMPLATES = { "InvoiceBasic", "InvoicePG", "InvoicePlain" };
+
+	/** Texts of the bundled invoice reports: {@code reports/invoice.properties} (Swedish) and translations. */
+	@Override
+	protected String getResourceBundleName() {
+		return "reports.invoice";
+	}
 
 	@Override
 	public String[] getTemplates() {

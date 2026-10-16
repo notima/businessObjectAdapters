@@ -74,6 +74,7 @@
 					<include>**/*.jasper</include>
 					<include>**/*.jpg</include>
 					<include>**/*.png</include>
+					<include>**/*.properties</include>
 					<include>META-INF/services/*</include>
 				</includes>
 			</resource>

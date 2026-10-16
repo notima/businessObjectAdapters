@@ -13,11 +13,14 @@ import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -42,6 +45,44 @@ public abstract class JasperBasePdfFormatter {
 
 	public String[] getFormats() {
 		return formats;
+	}
+
+	/**
+	 * Base name of the resource bundle with the report's texts ({@code $R{key}} in the
+	 * report), e.g. {@code "reports.invoice"}; null if the reports aren't translated.
+	 */
+	protected String getResourceBundleName() {
+		return null;
+	}
+
+	/**
+	 * The language to format in: {@link #JASPER_LANG}, falling back to the generic
+	 * {@link InvoiceFormatter#LANGUAGE}. A locale string such as {@code "sv_SE"},
+	 * {@code "en"} or {@code "en-US"}; null if not set.
+	 */
+	protected static Locale getLocale(Properties props) {
+		if (props==null) return null;
+		String lang = props.getProperty(JASPER_LANG, props.getProperty(InvoiceFormatter.LANGUAGE));
+		if (lang==null || lang.trim().isEmpty()) return null;
+		return Locale.forLanguageTag(lang.trim().replace('_', '-'));
+	}
+
+	/**
+	 * Adds the language parameters: {@code REPORT_LOCALE} when a language is given, and the
+	 * report's texts ({@code REPORT_RESOURCE_BUNDLE}) in that language. A language without
+	 * a translation gets the default texts, not those of the computer's language.
+	 */
+	protected void addLanguageParameters(HashMap<String, Object> parameters, Properties props) {
+		Locale locale = getLocale(props);
+		if (locale!=null) {
+			parameters.put(JRParameter.REPORT_LOCALE, locale);
+		}
+		String bundleName = getResourceBundleName();
+		if (bundleName!=null) {
+			parameters.put(JRParameter.REPORT_RESOURCE_BUNDLE, ResourceBundle.getBundle(bundleName,
+					locale!=null ? locale : Locale.ROOT, getClass().getClassLoader(),
+					ResourceBundle.Control.getNoFallbackControl(ResourceBundle.Control.FORMAT_PROPERTIES)));
+		}
 	}
 
 	/**
@@ -187,6 +228,7 @@ public abstract class JasperBasePdfFormatter {
 		if (jasperLang!=null) {
 			parameters.put("CURRENT_LANG", jasperLang);
 		}
+		addLanguageParameters(parameters, props);
 		if (jpc!=null && jpc.getExtraProperties()!=null) {
 			addAdditionalJasperParameters(parameters, jpc.getExtraProperties());
 		}
@@ -250,6 +292,7 @@ public abstract class JasperBasePdfFormatter {
 		if (jasperLang != null) {
 			parameters.put("CURRENT_LANG", jasperLang);
 		}
+		addLanguageParameters(parameters, props);
 		if (jpc != null && jpc.getExtraProperties() != null) {
 			addAdditionalJasperParameters(parameters, jpc.getExtraProperties());
 		}

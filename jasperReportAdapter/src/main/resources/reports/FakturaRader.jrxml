@@ -70,48 +70,48 @@
 	</background>
 	<columnHeader>
 		<band height="21" splitType="Stretch">
-			<staticText>
+			<textField>
 				<reportElement style="Arial" x="10" y="0" width="46" height="20" uuid="14a2f088-0df9-44f6-97c6-762db9b0f662"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Artnr]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{lines.artNo}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement style="Arial" x="56" y="0" width="229" height="20" uuid="6502151b-d31a-4d88-8dac-171067a7b9e7"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Benämning]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{lines.description}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement style="Arial" x="304" y="0" width="35" height="20" uuid="0b58669e-04f7-4148-99d1-65d47b070a1e"/>
 				<textElement textAlignment="Right">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Antal]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{lines.qty}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement style="Arial" x="344" y="0" width="33" height="20" uuid="f94dfcce-045b-4fe9-8d19-9f632be70645"/>
 				<textElement>
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Enhet]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{lines.unit}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement style="Arial" x="378" y="0" width="60" height="20" uuid="510ace28-aca4-4d83-b768-5147db433b2c"/>
 				<textElement textAlignment="Right">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[à pris]]></text>
-			</staticText>
-			<staticText>
+				<textFieldExpression><![CDATA[$R{lines.price}]]></textFieldExpression>
+			</textField>
+			<textField>
 				<reportElement style="Arial" x="439" y="0" width="60" height="20" uuid="95dd0743-7c42-45c9-951f-e5bbd0902574"/>
 				<textElement textAlignment="Right">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Summa]]></text>
-			</staticText>
+				<textFieldExpression><![CDATA[$R{lines.amount}]]></textFieldExpression>
+			</textField>
 		</band>
 	</columnHeader>
 	<detail>
