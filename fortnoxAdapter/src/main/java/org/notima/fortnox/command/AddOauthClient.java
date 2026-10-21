@@ -173,9 +173,16 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     		Thread.sleep(1000);
     	}
     	
-    	FortnoxClientInfo fc = creator.updateFortnoxClientInfo();
-    	sess.getConsole().println(fc.getOrgName() + " created.");
-    	
+    	// When all tokens are fetched, the client info is already updated by the login handler.
+    	FortnoxClientInfo fc = creator.getFortnoxClientInfo();
+    	if (fc==null || fc.getOrgName()==null) {
+    		fc = creator.updateFortnoxClientInfo();
+    	}
+    	if (fc==null) {
+    		sess.getConsole().println("Client " + orgNo + " could not be created.");
+    		return;
+    	}
+    	sess.getConsole().println((fc.getOrgName()!=null ? fc.getOrgName() : orgNo) + " created.");
     	
     }
 

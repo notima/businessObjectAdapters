@@ -11,6 +11,7 @@ public class _FortnoxCommandNames {
 	public static final String ListSupplierInvoices = "list-fortnox-supplier-invoices";
 	public static final String CopyCustomerToSupplier = "copy-customer-to-supplier";
 	public static final String AddOauthClient = "add-oauth-client";
+	public static final String SetClientName = "set-client-name";
 	
 	
 	
