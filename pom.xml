@@ -135,6 +135,16 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.9.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>central</publishingServerId>
+				</configuration>
+			</plugin>
+
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.2.1</version>
@@ -186,7 +196,7 @@
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
-						<phase>deploy</phase>
+						<phase>verify</phase>
 						<goals>
 							<goal>sign</goal>
 						</goals>
@@ -207,7 +217,7 @@ https://github.com/notima/businessobjects</description>
 	<scm>
 		<url>https://github.com/notima/businessObjectAdapters</url>
 		<connection>scm:git:git://github.com/notima/businessObjectAdapters.git</connection>
-		<developerConnection>Daniel Tamm</developerConnection>
+		<developerConnection>scm:git:https://github.com/notima/businessObjectAdapters.git</developerConnection>
 	</scm>
 	<issueManagement>
 		<url>https://github.com/notima/businessObjectAdapters/issues</url>
