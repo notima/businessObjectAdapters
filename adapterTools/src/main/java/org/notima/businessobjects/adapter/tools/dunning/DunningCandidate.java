@@ -2,12 +2,14 @@ package org.notima.businessobjects.adapter.tools.dunning;
 
 import java.util.Date;
 
+import org.notima.businessobjects.adapter.tools.tenant.TenantCandidate;
+
 /**
  * The dunning status of one tenant: whether it has overdue customer invoices to remind,
  * and a summary of them. Produced by {@link DunningCandidateFinder}; contains only data,
  * so it can be presented in any form (console table, file, e-mail).
  */
-public class DunningCandidate {
+public class DunningCandidate implements TenantCandidate {
 
 	public enum Status {
 		/** Has overdue invoices to remind. */
@@ -75,6 +77,11 @@ public class DunningCandidate {
 		return error;
 	}
 	public void setError(String error) {
+		this.error = error;
+	}
+	@Override
+	public void markError(String error) {
+		this.status = Status.ERROR;
 		this.error = error;
 	}
 	/** @return	The number of overdue invoices to remind. */
