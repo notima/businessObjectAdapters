@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.table;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -10,6 +11,8 @@ import org.notima.generic.businessobjects.Invoice;
 public class InvoiceHeaderTable extends GenericTable {
 
 	private boolean includeAddress = false;
+	private boolean showDueDate = false;
+	private boolean showReferences = true;
 	
 	class InvoiceComparator implements Comparator<Invoice<?>> {
 		
@@ -34,22 +37,40 @@ public class InvoiceHeaderTable extends GenericTable {
 		column("Invoice No");
 		column("Cust #");
 		column("Customer name");
-		column("Order #");
-		column("Your Order #");
-		column("Our reference");
-		column("ExtRef1");
-		column("ExtRef2");
+		if (showReferences) {
+			column("Order #");
+			column("Your Order #");
+			column("Our reference");
+			column("ExtRef1");
+			column("ExtRef2");
+		}
 		column("Grand total").alignRight();
 		column("Open amt").alignRight();
 		column("Curr");
+		if (showDueDate) {
+			column("Due date");
+		}
 		column("Ctry");
 		column("Pmt term");
 		
 	}
 	
 	public InvoiceHeaderTable(List<Invoice<?>> invoices, boolean includeAddress) {
+		this(invoices, includeAddress, false, true);
+	}
+
+	/**
+	 * @param invoices			The invoices to show.
+	 * @param includeAddress	Show the address after the customer name.
+	 * @param showDueDate		Show a due date column.
+	 * @param showReferences	Show the order and reference columns (Order #, Your Order #,
+	 * 							Our reference, ExtRef1, ExtRef2).
+	 */
+	public InvoiceHeaderTable(List<Invoice<?>> invoices, boolean includeAddress, boolean showDueDate, boolean showReferences) {
 
 		this.includeAddress = includeAddress;
+		this.showDueDate = showDueDate;
+		this.showReferences = showReferences;
 		initColumns();
 		
 		Collections.sort(invoices, new InvoiceComparator());
@@ -78,23 +99,28 @@ public class InvoiceHeaderTable extends GenericTable {
 	
 	private void addRow(Invoice<?> invoice) {
 
-		addRow().addContent(
-				dfmt.format(invoice.getInvoiceDate()),
-				invoice.getDocumentKey(),
-				invoice.getBusinessPartner().getIdentityNo(),
-				getCustomerName(invoice),
-				invoice.getOrderKey(),
-				invoice.getPoDocumentNo(),
-				invoice.getOurReference(),
-				invoice.getExternalReference1(),
-				invoice.getExternalReference2(),
-				nfmt.format(invoice.getGrandTotal()),
-				nfmt.format(invoice.getOpenAmt()),
-				invoice.getCurrency(),
-				invoice.getDeliveryCountry(),
-				invoice.getPaymentTermKey()
-				)
-				;
+		List<Object> content = new ArrayList<Object>();
+		content.add(dfmt.format(invoice.getInvoiceDate()));
+		content.add(invoice.getDocumentKey());
+		content.add(invoice.getBusinessPartner().getIdentityNo());
+		content.add(getCustomerName(invoice));
+		if (showReferences) {
+			content.add(invoice.getOrderKey());
+			content.add(invoice.getPoDocumentNo());
+			content.add(invoice.getOurReference());
+			content.add(invoice.getExternalReference1());
+			content.add(invoice.getExternalReference2());
+		}
+		content.add(nfmt.format(invoice.getGrandTotal()));
+		content.add(nfmt.format(invoice.getOpenAmt()));
+		content.add(invoice.getCurrency());
+		if (showDueDate) {
+			content.add(invoice.getDueDate()!=null ? dfmt.format(invoice.getDueDate()) : "");
+		}
+		content.add(invoice.getDeliveryCountry());
+		content.add(invoice.getPaymentTermKey());
+
+		addRow().addContent(content);
 		
 	}
 	

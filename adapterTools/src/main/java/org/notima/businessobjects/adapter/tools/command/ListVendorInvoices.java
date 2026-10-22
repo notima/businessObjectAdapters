@@ -61,6 +61,9 @@ public class ListVendorInvoices extends AbstractAction {
 	@Option(name = "--unbooked", description = "Show unbooked invoices", required = false, multiValued = false)
 	private boolean unbooked;
 	
+	@Option(name = "--show-references", description = "Show the order and reference columns (Order #, Your Order #, Our reference, ExtRef1, ExtRef2)", required = false, multiValued = false)
+	private boolean showReferences = false;
+	
 	@Option(name = "--show-cancelled", description = "Show cancelled invoices", required = false, multiValued = false)
 	private boolean showCancelled = false;
 	
@@ -135,7 +138,7 @@ public class ListVendorInvoices extends AbstractAction {
 	
 	private void printInvoices() throws Exception {
 		
-		InvoiceHeaderTable table = new InvoiceHeaderTable(invoiceResult.getAffectedInvoices().getInvoiceList(), false);
+		InvoiceHeaderTable table = new InvoiceHeaderTable(invoiceResult.getAffectedInvoices().getInvoiceList(), false, true, showReferences);
 		table.getShellTable().print(sess.getConsole());
 		
 		writeToFormat();
