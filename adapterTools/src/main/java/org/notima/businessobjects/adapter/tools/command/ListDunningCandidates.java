@@ -1,7 +1,5 @@
 package org.notima.businessobjects.adapter.tools.command;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.karaf.shell.api.action.Action;
@@ -15,6 +13,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.businessobjects.adapter.tools.dunning.DunningCandidate;
 import org.notima.businessobjects.adapter.tools.dunning.DunningCandidateFinder;
 import org.notima.businessobjects.adapter.tools.table.DunningCandidateTable;
@@ -48,9 +47,6 @@ public class ListDunningCandidates implements Action {
 			+ DunningCandidateFinder.DEFAULT_DUNNING_INTERVAL_DAYS + ", 0 to ignore)", required = false, multiValued = false)
 	private int dunningIntervalDays = DunningCandidateFinder.DEFAULT_DUNNING_INTERVAL_DAYS;
 
-	@Option(name = "--orgNo", description = "Only check these tenants: an org number, or several separated by commas (ie 556000-0000,716416-8515)", required = false, multiValued = false)
-	private String orgNos;
-
 	@Option(name = "-co", aliases = { "--country-code" }, description = "Country code for all tenants checked (default: each tenant's own, else the default country code)", required = false, multiValued = false)
 	private String countryCode;
 
@@ -61,40 +57,26 @@ public class ListDunningCandidates implements Action {
 	@Completion(AdapterCompleter.class)
 	private String systemName;
 
+	@Argument(index = 1, name = "orgNo", description = "Only check these tenants: one or more org numbers, separated by spaces or commas. All tenants if omitted", required = false, multiValued = true)
+	@Completion(OrgNoCompleter.class)
+	private List<String> orgNos;
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object execute() throws Exception {
 
-		List<BusinessObjectFactory> adapters = new ArrayList<BusinessObjectFactory>();
-		if (bofs != null) {
-			for (BusinessObjectFactory bf : bofs) {
-				if (systemName == null || systemName.equals(bf.getSystemName())) {
-					adapters.add(bf);
-				}
-			}
-		}
-		if (adapters.isEmpty()) {
-			sess.getConsole().println(systemName == null ? "No adapters registered" : "No adapter named " + systemName);
-			return null;
-		}
+		TenantQuerySupport.Selection selection = TenantQuerySupport.select(bofs, systemName, orgNos, sess);
+		if (selection == null) return null;
+		List<BusinessObjectFactory> adapters = selection.adapters;
 
 		DunningCandidateFinder finder = new DunningCandidateFinder(settings.getDefaultCountryCode());
 		finder.setMinDaysOverdue(minDaysOverdue);
-		finder.setCountryCode(countryCode);
 		finder.setDunningIntervalDays(dunningIntervalDays);
 		finder.setTenantInformationFactory(cof.lookupTenantInformationFactory());
-		if (orgNos != null) {
-			finder.setOnlyTaxIds(Arrays.asList(orgNos.split(",")));
-		}
-		finder.setProgressListener((adapterName, tenant, index, count) -> {
-			// Overwritten on the same line; cleared when done
-			sess.getConsole().print("\rChecking " + adapterName + " " + index + "/" + count + ": "
-					+ fit(tenant.getName(), 50) + "\u001B[K");
-			sess.getConsole().flush();
-		});
+		TenantQuerySupport.configure(finder, selection.orgNos, countryCode, sess);
 
 		List<DunningCandidate> candidates = finder.find(adapters);
-		sess.getConsole().print("\r\u001B[K");
+		TenantQuerySupport.clearProgress(sess);
 
 		DunningCandidateTable table = new DunningCandidateTable(candidates, showAll, dunningIntervalDays);
 		table.getShellTable().print(sess.getConsole());
@@ -105,9 +87,5 @@ public class ListDunningCandidates implements Action {
 		return null;
 	}
 
-	private static String fit(String s, int max) {
-		if (s == null) return "";
-		return s.length() <= max ? s : s.substring(0, max - 1) + "…";
-	}
 
 }

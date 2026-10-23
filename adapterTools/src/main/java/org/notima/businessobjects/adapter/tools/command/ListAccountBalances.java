@@ -17,6 +17,7 @@ import org.notima.businessobjects.adapter.tools.accounting.AccountBalanceFinder;
 import org.notima.businessobjects.adapter.tools.accounting.AccountBalances;
 import org.notima.businessobjects.adapter.tools.accounting.AccountingModelService;
 import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.businessobjects.adapter.tools.table.AccountBalanceTable;
 import org.notima.generic.businessobjects.AccountCategory;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
@@ -57,9 +58,6 @@ public class ListAccountBalances implements Action {
 	@Option(name = "--refresh", description = "Fetch the accounting from the accounting systems even if cached", required = false, multiValued = false)
 	private boolean refresh;
 
-	@Option(name = "--orgNo", description = "Only these tenants: an org number, or several separated by commas", required = false, multiValued = false)
-	private String orgNos;
-
 	@Option(name = "-co", aliases = { "--country-code" }, description = "Country code for all tenants (default: each tenant's own, else the default country code)", required = false, multiValued = false)
 	private String countryCode;
 
@@ -69,6 +67,10 @@ public class ListAccountBalances implements Action {
 	@Argument(index = 0, name = "adapter", description = "Only tenants of this adapter", required = false, multiValued = false)
 	@Completion(AdapterCompleter.class)
 	private String systemName;
+
+	@Argument(index = 1, name = "orgNo", description = "Only these tenants: one or more org numbers, separated by spaces or commas. All tenants if omitted", required = false, multiValued = true)
+	@Completion(OrgNoCompleter.class)
+	private List<String> orgNos;
 
 	@SuppressWarnings("rawtypes")
 	@Override
@@ -89,15 +91,16 @@ public class ListAccountBalances implements Action {
 			return null;
 		}
 
-		List<BusinessObjectFactory> adapters = TenantQuerySupport.adapters(bofs, systemName, sess);
-		if (adapters.isEmpty()) return null;
+		TenantQuerySupport.Selection selection = TenantQuerySupport.select(bofs, systemName, orgNos, sess);
+		if (selection == null) return null;
+		List<BusinessObjectFactory> adapters = selection.adapters;
 
 		AccountBalanceFinder finder = new AccountBalanceFinder(settings.getDefaultCountryCode(), accountingModels);
 		finder.setAccounts(accountList);
 		finder.setCategories(categoryList);
 		finder.setDate(TenantQuerySupport.parseDate(dateStr));
 		if (refresh) finder.setMaxAge(Duration.ZERO);
-		TenantQuerySupport.configure(finder, orgNos, countryCode, sess);
+		TenantQuerySupport.configure(finder, selection.orgNos, countryCode, sess);
 
 		List<AccountBalances> results = finder.find(adapters);
 		TenantQuerySupport.clearProgress(sess);

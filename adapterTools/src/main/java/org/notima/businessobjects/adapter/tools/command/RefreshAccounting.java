@@ -16,6 +16,7 @@ import org.notima.businessobjects.adapter.tools.accounting.AccountingModelServic
 import org.notima.businessobjects.adapter.tools.accounting.AccountingRefreshResult;
 import org.notima.businessobjects.adapter.tools.accounting.AccountingRefresher;
 import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
+import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.businessobjects.adapter.tools.table.AccountingRefreshTable;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 
@@ -49,9 +50,6 @@ public class RefreshAccounting implements Action {
 	@Option(name = "--max-age-hours", description = "Only refresh fiscal years cached more than this many hours ago (default 0, ie all)", required = false, multiValued = false)
 	private int maxAgeHours = 0;
 
-	@Option(name = "--orgNo", description = "Only these tenants: an org number, or several separated by commas", required = false, multiValued = false)
-	private String orgNos;
-
 	@Option(name = "-co", aliases = { "--country-code" }, description = "Country code for all tenants (default: each tenant's own, else the default country code)", required = false, multiValued = false)
 	private String countryCode;
 
@@ -62,18 +60,23 @@ public class RefreshAccounting implements Action {
 	@Completion(AdapterCompleter.class)
 	private String systemName;
 
+	@Argument(index = 1, name = "orgNo", description = "Only these tenants: one or more org numbers, separated by spaces or commas. All tenants if omitted", required = false, multiValued = true)
+	@Completion(OrgNoCompleter.class)
+	private List<String> orgNos;
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object execute() throws Exception {
 
-		List<BusinessObjectFactory> adapters = TenantQuerySupport.adapters(bofs, systemName, sess);
-		if (adapters.isEmpty()) return null;
+		TenantQuerySupport.Selection selection = TenantQuerySupport.select(bofs, systemName, orgNos, sess);
+		if (selection == null) return null;
+		List<BusinessObjectFactory> adapters = selection.adapters;
 
 		AccountingRefresher refresher = new AccountingRefresher(settings.getDefaultCountryCode(), accountingModels);
 		refresher.setDate(TenantQuerySupport.parseDate(dateStr));
 		refresher.setAllYears(allYears);
 		refresher.setMaxAge(Duration.ofHours(Math.max(maxAgeHours, 0)));
-		TenantQuerySupport.configure(refresher, orgNos, countryCode, sess);
+		TenantQuerySupport.configure(refresher, selection.orgNos, countryCode, sess);
 
 		List<AccountingRefreshResult> results = refresher.find(adapters);
 		TenantQuerySupport.clearProgress(sess);
