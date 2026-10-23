@@ -56,6 +56,12 @@ The entry is created if it doesn't exist. One attribute is set per command (tab 
 | `remitToAccountType` | The type of `remitToAccount`, ie `BG` (bankgiro) or `PG` (plusgiro) |
 | `remitToIBAN` | IBAN invoices are paid to |
 | `remitToBIC` | BIC for the IBAN |
+| `lastDunningDate` | When reminders were last sent (`yyyy-MM-dd`, `none` to clear). Set by `print-dunning-run --internal-comment` |
+| `suspenseAccounts.UNIDENTIFIED` | Suspense accounts for amounts we don't know what they are (OBS accounts, ie `1799,2999`) |
+| `suspenseAccounts.IDENTIFIED` | Suspense accounts for amounts we believe we know what they are, ie double payments (ie `1684`) |
+| `suspenseAccounts.OWNER_SETTLEMENT` | Settlement with the owner (ie `2893`) |
+
+The suspense accounts are given separated by commas, `none` removes them. See [Suspense accounts](#suspense-accounts).
 
 Note that changing `taxId` or `countryCode` changes how the entry is identified.
 
@@ -78,6 +84,114 @@ To see the output and report directory of all tenants in the adapters:
 - `show-canonical-invoice -of default` writes to `defaultOutputDirectory`, named `ar-invoice-[invoiceNo].xml` for sales invoices and `ap-invoice-[invoiceNo].xml` for vendor invoices.
 - `read-invoices` sets the payment information (`remitTo...`) on the creditor of sales invoices. If `remitToAccount` or `remitToIBAN` is set in the tenant information, the tenant information's payment information overrides whatever the adapter supplied. All four `remitTo...` values are taken from the tenant information, also the ones not set, so they're never mixed with the adapter's. If neither has any, a warning is printed.
 - Payment channel reports are written to `reportDirectory`, see [Report directory per tenant](#report-directory-per-tenant).
+- `list-dunning-candidates` shows `lastDunningDate`, see [Queries over tenants](#queries-over-tenants).
+- `list-suspense-balances` checks the `suspenseAccounts`, see [Suspense accounts](#suspense-accounts).
+
+## Queries over tenants
+
+These commands check many tenants at once and show one or more rows per tenant. They all take the arguments `[adapter] [orgNo...]`:
+
+- Without arguments, all tenants of all adapters are checked.
+- `adapter` limits the check to that adapter's tenants. If it isn't the name of an adapter but contains digits, it's taken as an org number, so the adapter can be left out.
+- `orgNo` limits the check to these tenants: one or more org numbers, separated by spaces or commas. A requested org number that no adapter has is shown as `Not a tenant`.
+
+Both arguments are tab completed (the org numbers of the given adapter's tenants). The other settings are options. `-co` sets the country code of all tenants checked (default: each tenant's own, else the default country code), and `-a` also shows the tenants with nothing to report. The progress is shown on one line while the tenants are checked, and a summary is printed after the table.
+
+| Command | Shows |
+|---|---|
+| `list-dunning-candidates` | Tenants with overdue customer invoices, that need a dunning run. `-d` minimum days overdue, `--dunning-interval` days between reminders (tenants reminded more recently are only shown with `-a`) |
+| `list-vendor-payment-candidates` | Tenants with vendor invoices to pay: overdue, or due within `-d` days (default 7) or by `--untildate`. Credit notes are deducted per supplier. Unbooked invoices are counted and shown in a column of their own; `--exclude-unbooked` and `--exclude-overdue` leave them out |
+| `list-accounting-summary` | Revenue and result of the fiscal year until the date, equity, cash and bank, see [Accounting](#accounting) |
+| `list-account-balances` | Balances of accounts or account categories, see [Accounting](#accounting) |
+| `list-suspense-balances` | Suspense accounts that aren't zero, see [Suspense accounts](#suspense-accounts) |
+| `refresh-accounting` | Fetches the accounting into the cache, see [Accounting](#accounting) |
+
+	list-dunning-candidates Fortnox
+	list-vendor-payment-candidates Fortnox 559169-1042 556000-0000 -d 14
+	list-vendor-payment-candidates --untildate 2026-10-31
+
+To see one tenant's open vendor invoices, with their due dates (`--show-references` also shows the order and reference columns):
+
+	list-vendor-invoices [adapter] [orgNo]
+
+## Accounting
+
+The accounting of tenants (chart of accounts with balances, and vouchers) can be read from their accounting systems and queried, whatever the system. The model is format-neutral, from businessobjects (`AccountingFileData`), and balances and reports are calculated with businessobjects' `LedgerCalculator`, the same way as in accounting-analyzer.
+
+### Where the accounting comes from
+
+The accounting of a tenant is given by an `AccountingModelProvider` of its adapter's system:
+
+| System | Provider | Requires |
+|---|---|---|
+| Fortnox | Reads the financial years of the client, and per year a SIE 4 export from Fortnox | The `notima-sie` feature, whose SIE importer reads the export |
+
+### Accounts are classified by country
+
+What an account is (asset, cash and bank, equity, revenue and so on) is its `AccountCategory`. The categories are set by the rules of the tenant's country (`CountryRuleSet`, for Sweden the BAS chart of accounts, ie 19xx is `ASSET_CASH`). The country is the one of the accounting data, else the tenant's, else the default country code. All queries go by the categories and never by account numbers, so that other countries' charts of accounts work once their rules are added.
+
+The categories are `ASSET_LONG`, `ASSET_SHORT`, `ASSET_CASH`, `UNTAXED_RESERVE`, `LIABILITY_LONG`, `LIABILITY_SHORT`, `EQUITY`, `VAT_CLAIM`, `VAT_LIABILITY`, `TAX_LIABILITY`, `REVENUE`, `REVENUE_OTHER`, `COGS`, `OPERATING_EXPENSE`, `SALARY`, `IMPAIRMENTS`, `DEPRECIATIONS`, `OTHER_OPEX`, `FINANCIAL_INCOME`, `FINANCIAL_EXPENSE`, `TAX_EXPENSE` and `OTHER`.
+
+### The cache
+
+The accounting is cached, one file per system, tenant and fiscal year, in `${karaf.data}/accounting/cache/<system>/<orgNo>/<start of fiscal year>.json` (with `fiscal-years.json` for the list of fiscal years). A cached fiscal year is used for 24 hours before it's fetched again; change it with `accountingCacheMaxAgeHours` in `etc/AdapterTools.cfg` (`0` always fetches):
+
+	accountingCacheMaxAgeHours = 12
+
+The queries take `--refresh` to fetch the accounting even if it's cached. To fill or renew the cache, ie at night:
+
+	refresh-accounting [adapter] [orgNo...]
+	refresh-accounting Fortnox --all-years
+	refresh-accounting Fortnox 559169-1042 --date 2025-12-31
+	refresh-accounting --max-age-hours 20
+
+By default the fiscal year that contains `--date` (today) is fetched; `--all-years` fetches all fiscal years. With `--max-age-hours`, fiscal years cached more recently are left as they are.
+
+### Queries
+
+A query reads the fiscal year that contains `--date` (default today), from its start until the date.
+
+	list-accounting-summary [adapter] [orgNo...] [--date yyyy-MM-dd]
+
+Per tenant: revenue and result of the year until the date, booked equity (without the result of the year until it's booked), cash and bank (`ASSET_CASH`), and the number and last date of the vouchers.
+
+	list-account-balances [adapter] [orgNo...] --account 1930,19* [--date yyyy-MM-dd] [--non-zero]
+	list-account-balances Fortnox --category ASSET_CASH,EQUITY
+
+The balances of accounts (`--account`, a prefix ending with `*` sums the accounts starting with it) or categories (`--category`), one row per tenant and account, as booked (debit positive). The balance of a P&L account is its result from the start of the fiscal year. `--non-zero` only shows the balances that aren't zero.
+
+### Reports per tenant
+
+The report commands work for every tenant whose accounting a provider has, from the same cache:
+
+	show-balance-report [orgNo] [--fromdate yyyy-MM-dd] [--untildate yyyy-MM-dd]
+	show-pl-report [orgNo] [--fromdate yyyy-MM-dd] [--untildate yyyy-MM-dd]
+	show-gl-details [orgNo] [accountNo] [--fromdate yyyy-MM-dd] [--untildate yyyy-MM-dd] [--orderbyamount]
+	list-accounting-vouchers [orgNo] [series] [--fromdate yyyy-MM-dd] [--untildate yyyy-MM-dd]
+	show-accounting-voucher [orgNo] [series] [voucherNo]
+
+A report covers one fiscal year, the one that contains the end of the period asked for (else its start, else today). A missing start or end is the start or end of that fiscal year.
+
+### Suspense accounts
+
+Suspense accounts are accounts where amounts are booked temporarily, that should normally be zero. Which accounts they are varies between companies, so they're set per tenant in the tenant information, in three types:
+
+| Type | Used for | Swedish example |
+|---|---|---|
+| `UNIDENTIFIED` | Amounts we don't know what they are (OBS account) | 1799, 2999 |
+| `IDENTIFIED` | Amounts we believe we know what they are, but that aren't settled, ie double payments | 1684 |
+| `OWNER_SETTLEMENT` | Settlement with the owner | 2893 |
+
+	set-tenant-info 559169-1042 suspenseAccounts.UNIDENTIFIED 1799,2999
+	set-tenant-info 559169-1042 suspenseAccounts.IDENTIFIED 1684
+	set-tenant-info 559169-1042 suspenseAccounts.OWNER_SETTLEMENT 2893
+	set-tenant-info 559169-1042 suspenseAccounts.IDENTIFIED none
+
+They're stored in the tenant information file as `"suspenseAccounts": {"UNIDENTIFIED": ["1799", "2999"], ...}` and shown by `show-tenant-info`. To see the suspense accounts that aren't zero:
+
+	list-suspense-balances [adapter] [orgNo...] [--type UNIDENTIFIED,OWNER_SETTLEMENT] [--date yyyy-MM-dd] [--include-zero]
+
+One row per tenant and suspense account that isn't zero (rounded to cents), as booked (debit positive). Without `--type` all types are checked. Tenants without suspense accounts (of the types asked for) aren't read, and are only shown with `-a`, as `Not configured`. `--include-zero` also shows the accounts that are zero, and accounts that aren't in the tenant's chart of accounts.
 
 ## Printing invoices
 
@@ -219,7 +333,7 @@ If `reportDirectory` isn't set, the tenant's `defaultOutputDirectory` is used. T
 `PaymentChannelMatchReportTask` matches the pending report files of a tenant's **active** channels against their destination systems, the same way as `process-payment-channel --match-only`, and writes one report per channel to the tenant's report directory. Nothing is booked, no files are moved and the channels aren't changed.
 
 - The task is created for one tenant (org number). Create one task per tenant.
-- One report per channel with pending payments, named like the `-format` output of `process-payment-channel`, ie `ZaverSE_2026-09-28.json_260929.xls`. A run with the same pending files overwrites the previous report.
+- One report per channel with pending payments, named like the `-format` output of `process-payment-channel`, ie `AdyenSE_2026-09-28.json_260929.xls`. A run with the same pending files overwrites the previous report.
 - Channels without pending payments, without source directory or with a missing adapter are skipped (and logged). A failing channel doesn't stop the others.
 - If the tenant has no report directory, the task fails with a message telling how to set it. The directory is created if it doesn't exist.
 - The format is `xls` by default (requires the excelAdapter).
@@ -236,16 +350,16 @@ The task can be run manually from the Karaf shell. It uses the same task lock as
 	run-match-report -co SE --report-dir /tmp/reports -format xls [orgNo]
 	run-match-report --until 2026-09-30 [orgNo]
 
-	ZaverSE: 3 payments, 1 matched, 2 unmatched (66.67 %), unmatched amount SEK 325.00
-	ZaverSE: thresholds: max unmatched 40 %, max unmatched amount 5000,{500:EUR}
-	ZaverSE: processing would stop at 2026-09-28.json: 50.00 % unmatched payments (1 of 2), limit 40.00 %
-	ZaverSE: report written to /path/to/reports/tenant/ZaverSE_2026-09-28.json_260929.xls
+	AdyenSE: 3 payments, 1 matched, 2 unmatched (66.67 %), unmatched amount SEK 325.00
+	AdyenSE: thresholds: max unmatched 40 %, max unmatched amount 5000,{500:EUR}
+	AdyenSE: processing would stop at 2026-09-28.json: 50.00 % unmatched payments (1 of 2), limit 40.00 %
+	AdyenSE: report written to /path/to/reports/tenant/AdyenSE_2026-09-28.json_260929.xls
 	1 active channels, 1 reports written to /path/to/reports/tenant
 	Summary written to /path/to/reports/tenant/MatchSummary_556677-8899_260929.xls
 
 	Channel │ Payments │ Matched │ Unmatched │ Unmatched % │ Currency │ Unmatched amt
 	────────┼──────────┼─────────┼───────────┼─────────────┼──────────┼──────────────
-	ZaverSE │        3 │       1 │         2 │       66,67 │ SEK      │        325,00
+	AdyenSE │        3 │       1 │         2 │       66,67 │ SEK      │        325,00
 
 After the channel reports, a summary with one row per matched channel is written to the same directory (`MatchSummary_<orgNo>_<yyMMdd>.<format>`, replaced if the task runs again the same day). From the shell, the summary is also printed as a table.
 

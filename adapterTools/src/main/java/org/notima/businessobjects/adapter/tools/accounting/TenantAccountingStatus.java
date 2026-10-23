@@ -8,6 +8,8 @@ public enum TenantAccountingStatus {
 	NO_ACCOUNTING,
 	/** The tenant has no fiscal year for the date asked for. */
 	NO_FISCAL_YEAR,
+	/** The tenant lacks the configuration the query needs, ie its suspense accounts. */
+	NOT_CONFIGURED,
 	/** The accounting couldn't be read, see the error. */
 	ERROR
 }

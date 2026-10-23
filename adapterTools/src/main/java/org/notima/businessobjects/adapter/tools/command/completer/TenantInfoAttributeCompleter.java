@@ -29,6 +29,9 @@ public class TenantInfoAttributeCompleter implements Completer {
 		"remitToIBAN",
 		"remitToBIC",
 		"lastDunningDate",
+		"suspenseAccounts.UNIDENTIFIED",
+		"suspenseAccounts.IDENTIFIED",
+		"suspenseAccounts.OWNER_SETTLEMENT",
 	};
 
 	@Override

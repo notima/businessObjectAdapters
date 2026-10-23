@@ -72,6 +72,7 @@ public abstract class AbstractAccountingCandidate implements TenantCandidate {
 			case OK:				return "OK";
 			case NO_ACCOUNTING:		return "No accounting";
 			case NO_FISCAL_YEAR:	return "No fiscal year";
+			case NOT_CONFIGURED:	return "Not configured";
 			default:				return "Error: " + (error != null ? error : "");
 		}
 	}

@@ -1,5 +1,9 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
@@ -10,6 +14,7 @@ import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.businessobjects.adapter.tools.command.completer.TenantInfoAttributeCompleter;
+import org.notima.generic.businessobjects.SuspenseAccountType;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.TenantInformation;
 import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
@@ -17,6 +22,8 @@ import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 @Command(scope = "notima", name = "set-tenant-info", description = "Sets an attribute on a tenant's stored TenantInformation entry. Creates the entry if it does not exist.")
 @Service
 public class SetTenantInfo extends AbstractAction {
+
+	static final String SUSPENSE_ACCOUNTS_PREFIX = "suspenseAccounts.";
 
 	@Reference
 	private CanonicalObjectFactory cof;
@@ -31,7 +38,7 @@ public class SetTenantInfo extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
 
-	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear))", required = true, multiValued = false)
+	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear))", required = true, multiValued = false)
 	@Completion(TenantInfoAttributeCompleter.class)
 	private String attribute;
 
@@ -63,6 +70,26 @@ public class SetTenantInfo extends AbstractAction {
 		if (ti == null) {
 			ti = new TenantInformation();
 			ti.setTenant(tenantId);
+		}
+
+		// Suspense accounts of a type, ie suspenseAccounts.UNIDENTIFIED 1799,2999
+		if (attribute.trim().startsWith(SUSPENSE_ACCOUNTS_PREFIX)) {
+			SuspenseAccountType type = SuspenseAccountType.parse(attribute.trim().substring(SUSPENSE_ACCOUNTS_PREFIX.length()));
+			if (type == null) {
+				sess.getConsole().println("Unknown suspense account type in " + attribute + ". Types: " + Arrays.toString(SuspenseAccountType.values()));
+				return null;
+			}
+			List<String> accounts = new ArrayList<String>();
+			if (!"none".equalsIgnoreCase(value.trim())) {
+				for (String a : value.split(",")) {
+					if (!a.trim().isEmpty()) accounts.add(a.trim());
+				}
+			}
+			ti.setSuspenseAccounts(type, accounts);
+			tif.persistTenantInformation(ti);
+			sess.getConsole().println("Suspense accounts " + type + " of " + tenantId + ": "
+					+ (accounts.isEmpty() ? "(none)" : String.join(", ", accounts)));
+			return null;
 		}
 
 		// Apply the requested attribute change

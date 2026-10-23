@@ -13,6 +13,7 @@ import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
+import org.notima.generic.businessobjects.SuspenseAccountType;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.TenantInformation;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
@@ -112,6 +113,16 @@ public class ShowTenantInfo extends AbstractAction {
 			sess.getConsole().println("  Payment info      : (not set)");
 		}
 		sess.getConsole().println("  Last Dunning Date : " + (ti.getLastDunningDate() != null ? dfmt.format(ti.getLastDunningDate()) : "(not set)"));
+		if (ti.hasSuspenseAccounts()) {
+			for (SuspenseAccountType type : SuspenseAccountType.values()) {
+				List<String> accounts = ti.getSuspenseAccounts(type);
+				if (!accounts.isEmpty()) {
+					sess.getConsole().println("  Suspense " + type + " : " + String.join(", ", accounts));
+				}
+			}
+		} else {
+			sess.getConsole().println("  Suspense accounts : (not set)");
+		}
 	}
 
 	private void printBusinessPartner(BusinessPartner<?> bp) {

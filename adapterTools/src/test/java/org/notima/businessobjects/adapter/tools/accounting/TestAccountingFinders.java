@@ -11,17 +11,23 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.notima.businessobjects.adapter.tools.table.AccountBalanceTable;
 import org.notima.businessobjects.adapter.tools.table.AccountingSummaryTable;
+import org.notima.businessobjects.adapter.tools.table.SuspenseBalanceTable;
 import org.notima.generic.businessobjects.AccountCategory;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
+import org.notima.generic.businessobjects.SuspenseAccountType;
+import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.TenantInformation;
 import org.notima.generic.ifacebusinessobjects.AccountingModelProvider;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
+import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 
 class TestAccountingFinders {
 
@@ -120,6 +126,44 @@ class TestAccountingFinders {
 		summary.setDate(LocalDate.of(2025, 12, 31));
 		assertTrue(summary.find(adapters()).get(0).isOk());
 		assertEquals(2, provider.fetched);
+	}
+
+	@Test
+	void suspenseAccounts(@TempDir Path dir) throws Exception {
+		TestAccountingModelService.FakeProvider provider = new TestAccountingModelService.FakeProvider();
+		TenantInformation ti = new TenantInformation();
+		ti.setTenant(new TaxSubjectIdentifier("556000-0000", "SE"));
+		ti.setSuspenseAccounts(SuspenseAccountType.UNIDENTIFIED, Arrays.asList("1930"));
+		ti.setSuspenseAccounts(SuspenseAccountType.OWNER_SETTLEMENT, Arrays.asList("2893"));
+		TenantInformationFactory tif = new TenantInformationFactory() {
+			public TenantInformation getTenantInformation(TaxSubjectIdentifier tenant) {
+				return "556000-0000".equals(tenant.getTaxId()) ? ti : null;
+			}
+			public TenantInformation persistTenantInformation(TenantInformation info) {
+				return info;
+			}
+		};
+
+		SuspenseAccountFinder finder = new SuspenseAccountFinder("SE", service(provider, dir), tif);
+		List<SuspenseBalances> result = finder.find(adapters());
+		assertEquals(2, result.size());
+		SuspenseBalances b = result.get(0);
+		assertTrue(b.isOk());
+		assertTrue(b.hasNonZero());
+		assertEquals(2, b.getBalances().size());
+		assertEquals(1750.0, b.getBalances().get(0).getBalance(), 0.001);
+		assertFalse(b.getBalances().get(1).isFound(), "2893 isn't in the chart of accounts");
+		assertEquals(TenantAccountingStatus.NOT_CONFIGURED, result.get(1).getStatus());
+		assertEquals(1, provider.fetched, "accounting not read for a tenant without suspense accounts");
+
+		SuspenseBalanceTable table = new SuspenseBalanceTable(result, false, false);
+		assertEquals(1, table.getRows().size(), "only the non-zero account");
+		assertEquals("1 of 1 tenant has suspense accounts that aren't zero (1 without suspense accounts)", table.getSummary());
+
+		finder.setTypes(EnumSet.of(SuspenseAccountType.OWNER_SETTLEMENT));
+		b = finder.find(adapters()).get(0);
+		assertEquals(1, b.getBalances().size());
+		assertFalse(b.hasNonZero());
 	}
 
 }
