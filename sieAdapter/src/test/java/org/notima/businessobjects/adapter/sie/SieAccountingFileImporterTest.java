@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.time.LocalDate;
@@ -20,6 +21,11 @@ import org.notima.generic.businessobjects.AccountingPeriodData;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.accounting.LedgerCalculator;
+import org.notima.generic.businessobjects.accounting.rule.CountryRuleSetRegistry;
+import org.notima.util.json.JsonUtil;
+
+import com.google.gson.Gson;
 
 public class SieAccountingFileImporterTest {
 
@@ -50,6 +56,34 @@ public class SieAccountingFileImporterTest {
 		assertNotNull(acct1120);
 		assertEquals(1545382.79, acct1120.getOpeningBalance(), 0.001);
 		assertEquals(792, periods.get(0).getChartOfAccounts().size());
+	}
+
+	/**
+	 * Imported from a stream (as from an accounting system), the data survives a round trip
+	 * through JSON (the format accounting models are cached in) with the same balances.
+	 */
+	@Test
+	public void testImportStreamAndJsonRoundTrip() throws Exception {
+		AccountingFileData imported;
+		try (InputStream in = getClass().getResourceAsStream(SAMPLE_SIE)) {
+			imported = new SieAccountingFileImporter().importStream(in, "sample.se");
+		}
+		CountryRuleSetRegistry.withDefaults().applyTo(imported.getCountryCode(), imported.getPeriods());
+
+		Gson gson = JsonUtil.buildGson();
+		AccountingFileData copy = gson.fromJson(gson.toJson(imported), AccountingFileData.class);
+
+		assertEquals(imported.getCompany().getName(), copy.getCompany().getName());
+		assertEquals(imported.getPeriods().size(), copy.getPeriods().size());
+		for (int i = 0; i < imported.getPeriods().size(); i++) {
+			AccountingPeriodData a = imported.getPeriods().get(i);
+			AccountingPeriodData b = copy.getPeriods().get(i);
+			assertEquals(a.getPeriodStart(), b.getPeriodStart());
+			assertEquals(a.getVouchers().size(), b.getVouchers().size());
+			assertEquals(LedgerCalculator.endingBalances(a), LedgerCalculator.endingBalances(b));
+			assertEquals(LedgerCalculator.summarize(a, null, null, null).total().getResult(),
+					LedgerCalculator.summarize(b, null, null, null).total().getResult(), 0.001);
+		}
 	}
 
 	@Test

@@ -15,6 +15,8 @@ import org.notima.api.fortnox.oauth2.CredentialsFile;
 import org.notima.api.fortnox.clients.FortnoxClientList;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
 import org.notima.api.fortnox.clients.FortnoxPropertyFile;
+import org.notima.generic.ifacebusinessobjects.AccountingFileImporter;
+import org.notima.generic.ifacebusinessobjects.AccountingModelProvider;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
 import org.notima.generic.ifacebusinessobjects.BusinessPartnerFileImporter;
 import org.notima.generic.ifacebusinessobjects.InvoiceFileImporter;
@@ -32,7 +34,8 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(InvoiceFileImporter.class),
 				@ProvideService(BusinessPartnerFileImporter.class),
 				@ProvideService(PaymentBatchProcessor.class),
-				@ProvideService(TaxRateProvider.class)
+				@ProvideService(TaxRateProvider.class),
+				@ProvideService(AccountingModelProvider.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -133,6 +136,10 @@ public class Activator extends BaseActivator {
 			register(PaymentBatchProcessor.class, fpbp, props);
 			log.info("Registered FortnoxPaymentBatchProcessor.");
 			
+			// The accounting of the clients, read from SIE exports by the SIE adapter's importer
+			register(AccountingModelProvider.class, new FortnoxAccountingModelProvider(mgr, this::lookupSieImporter), props);
+			log.info("Registered Fortnox accounting model provider");
+
 			TaxRateProvider trp = new FortnoxTaxRateProvider();
 			register(TaxRateProvider.class, trp, props);
 			try {
@@ -146,5 +153,23 @@ public class Activator extends BaseActivator {
 		
 	}
 
+	/**
+	 * @return	The registered SIE 4 importer; null if none is registered (ie the SIE adapter
+	 * 			isn't installed).
+	 */
+	private AccountingFileImporter lookupSieImporter() {
+		try {
+			for (ServiceReference<AccountingFileImporter> ref : bundleContext.getServiceReferences(AccountingFileImporter.class, null)) {
+				AccountingFileImporter importer = bundleContext.getService(ref);
+				if (importer != null && FortnoxAccountingModelProvider.SIE_FORMAT.equalsIgnoreCase(importer.getFormatName())) {
+					return importer;
+				}
+				bundleContext.ungetService(ref);
+			}
+		} catch (Exception e) {
+			log.warn("Can't look up the SIE importer: " + e.getMessage());
+		}
+		return null;
+	}
 
 }

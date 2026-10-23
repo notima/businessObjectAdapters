@@ -1,15 +1,24 @@
 package org.notima.businessobjects.adapter.tools;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.notima.businessobjects.adapter.tools.accounting.AccountingModelCache;
+import org.notima.businessobjects.adapter.tools.accounting.AccountingModelService;
+import org.notima.businessobjects.adapter.tools.accounting.ModelAccountingReportProvider;
 import org.notima.businessobjects.adapter.tools.task.FileTaskLockManager;
 import org.notima.businessobjects.adapter.tools.task.TaskLockManager;
 import org.notima.generic.businessobjects.tax.BasicTaxRateProviderFI;
 import org.notima.generic.businessobjects.tax.BasicTaxRateProviderSE;
+import org.notima.generic.ifacebusinessobjects.AccountingModelProvider;
+import org.notima.generic.ifacebusinessobjects.AccountingReportProvider;
 import org.notima.generic.ifacebusinessobjects.InvoiceDeliveryMethod;
 import org.notima.generic.ifacebusinessobjects.KeyManager;
 import org.notima.generic.ifacebusinessobjects.PaymentBatchProcessor;
@@ -32,7 +41,9 @@ import org.slf4j.LoggerFactory;
 				@ProvideService(MappingServiceFactory.class),
 				@ProvideService(TaxRateProvider.class),
 				@ProvideService(AdapterToolsSettings.class),
-				@ProvideService(TaskLockManager.class)
+				@ProvideService(TaskLockManager.class),
+				@ProvideService(AccountingModelService.class),
+				@ProvideService(AccountingReportProvider.class)
 		}
 )
 public class Activator extends BaseActivator {
@@ -122,8 +133,30 @@ public class Activator extends BaseActivator {
 		register(TaskLockManager.class, taskLockManager, lockProps);
 		log.info("Registered file based TaskLockManager in {}", taskLockManager.getLockDirectory());
 
+		// The accounting of tenants, from the accounting model providers of their systems, cached
+		AccountingModelService accountingModels = new AccountingModelService(this::lookupAccountingModelProviders, new AccountingModelCache(),
+				settings.getDefaultCountryCode());
+		accountingModels.setMaxAge(Duration.ofHours(settings.getAccountingCacheMaxAgeHours()));
+		register(AccountingModelService.class, accountingModels);
+		register(AccountingReportProvider.class, new ModelAccountingReportProvider(accountingModels));
+		log.info("Registered AccountingModelService (cache {}) and its AccountingReportProvider", accountingModels.getCache().getBaseDirectory());
+
 	}
 	
+	/** @return	The accounting model providers registered now. */
+	private Collection<AccountingModelProvider> lookupAccountingModelProviders() {
+		List<AccountingModelProvider> result = new ArrayList<AccountingModelProvider>();
+		try {
+			for (ServiceReference<AccountingModelProvider> ref : bundleContext.getServiceReferences(AccountingModelProvider.class, null)) {
+				AccountingModelProvider p = bundleContext.getService(ref);
+				if (p != null) result.add(p);
+			}
+		} catch (Exception e) {
+			log.warn("Can't look up accounting model providers: {}", e.getMessage());
+		}
+		return result;
+	}
+
 	private KeyManager lookupKeyManager() {
 		ServiceReference<KeyManager> ref = bundleContext.getServiceReference(KeyManager.class);
 		return ref!=null ? bundleContext.getService(ref) : null;
