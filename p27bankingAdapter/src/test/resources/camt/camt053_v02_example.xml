@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- Fictional example data in the structure of a Swedish bank's camt.053.001.02 -->
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.02" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>900000001</MsgId>
+      <CreDtTm>2026-10-22T04:12:00+01:00</CreDtTm>
+    </GrpHdr>
+    <Stmt>
+      <Id>STMT0001</Id>
+      <ElctrncSeqNb>12</ElctrncSeqNb>
+      <LglSeqNb>12</LglSeqNb>
+      <CreDtTm>2026-10-22T04:09:10+01:00</CreDtTm>
+      <FrToDt>
+        <FrDtTm>2026-10-21T00:00:00+01:00</FrDtTm>
+        <ToDtTm>2026-10-21T23:59:59+01:00</ToDtTm>
+      </FrToDt>
+      <Acct>
+        <Id><Othr><Id>12345678901</Id><SchmeNm><Cd>BBAN</Cd></SchmeNm></Othr></Id>
+        <Ccy>SEK</Ccy>
+        <Ownr>
+          <Nm>EXEMPELBOLAGET AB</Nm>
+          <Id><OrgId><Othr><Id>5560000001</Id><SchmeNm><Cd>BANK</Cd></SchmeNm></Othr></OrgId></Id>
+        </Ownr>
+        <Svcr><FinInstnId><BIC>EXAMSESSXXX</BIC></FinInstnId></Svcr>
+      </Acct>
+      <Bal>
+        <Tp><CdOrPrtry><Cd>OPBD</Cd></CdOrPrtry></Tp>
+        <Amt Ccy="SEK">100000.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt><Dt>2026-10-21</Dt></Dt>
+      </Bal>
+      <Bal>
+        <Tp><CdOrPrtry><Cd>CLBD</Cd></CdOrPrtry></Tp>
+        <Amt Ccy="SEK">125334.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt><Dt>2026-10-21</Dt></Dt>
+      </Bal>
+      <TxsSummry>
+        <TtlCdtNtries><NbOfNtries>2</NbOfNtries><Sum>30400.00</Sum></TtlCdtNtries>
+        <TtlDbtNtries><NbOfNtries>1</NbOfNtries><Sum>5066.00</Sum></TtlDbtNtries>
+      </TxsSummry>
+      <Ntry>
+        <NtryRef>LBE1234-5678-0000001</NtryRef>
+        <Amt Ccy="SEK">5066.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt><Dt>2026-10-21</Dt></BookgDt>
+        <ValDt><Dt>2026-10-21</Dt></ValDt>
+        <AcctSvcrRef>ENTRY-REF-0001</AcctSvcrRef>
+        <BkTxCd>
+          <Domn><Cd>PMNT</Cd><Fmly><Cd>ICDT</Cd><SubFmlyCd>ATXN</SubFmlyCd></Fmly></Domn>
+          <Prtry><Cd>TRF</Cd><Issr>SWIFT</Issr></Prtry>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <MsgId>100035</MsgId>
+              <AcctSvcrRef>TX-REF-0001</AcctSvcrRef>
+              <PmtInfId>100035/3</PmtInfId>
+              <InstrId>100035/3/1</InstrId>
+              <EndToEndId>100035/3/1</EndToEndId>
+            </Refs>
+            <AmtDtls><TxAmt><Amt Ccy="SEK">3013.00</Amt></TxAmt></AmtDtls>
+            <RltdPties>
+              <Dbtr><Nm>EXEMPELBOLAGET AB</Nm></Dbtr>
+              <DbtrAcct><Id><Othr><Id>12345678</Id><SchmeNm><Prtry>BGNR</Prtry></SchmeNm></Othr></Id></DbtrAcct>
+              <Cdtr><Nm>Leverantör Ett AB</Nm></Cdtr>
+              <CdtrAcct><Id><Othr><Id>1111111</Id><SchmeNm><Prtry>BGNR</Prtry></SchmeNm><Issr>BGC</Issr></Othr></Id></CdtrAcct>
+            </RltdPties>
+            <RltdAgts><DbtrAgt><FinInstnId><Nm>Exempelbanken</Nm></FinInstnId></DbtrAgt></RltdAgts>
+            <RmtInf>
+              <Strd>
+                <RfrdDocAmt><RmtdAmt Ccy="SEK">3013.00</RmtdAmt></RfrdDocAmt>
+                <CdtrRefInf><Tp><CdOrPrtry><Cd>SCOR</Cd></CdOrPrtry></Tp><Ref>8741054725</Ref></CdtrRefInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+          <TxDtls>
+            <Refs>
+              <MsgId>100040</MsgId>
+              <AcctSvcrRef>TX-REF-0002</AcctSvcrRef>
+              <PmtInfId>100040/9</PmtInfId>
+              <InstrId>100040/9/1</InstrId>
+              <EndToEndId>100040/9/1</EndToEndId>
+            </Refs>
+            <AmtDtls><TxAmt><Amt Ccy="SEK">2053.00</Amt></TxAmt></AmtDtls>
+            <RltdPties>
+              <Dbtr><Nm>EXEMPELBOLAGET AB</Nm></Dbtr>
+              <Cdtr><Nm>Leverantör Två AB</Nm></Cdtr>
+              <CdtrAcct><Id><Othr><Id>2222222</Id><SchmeNm><Prtry>BGNR</Prtry></SchmeNm></Othr></Id></CdtrAcct>
+            </RltdPties>
+            <RmtInf>
+              <Strd>
+                <RfrdDocAmt><RmtdAmt Ccy="SEK">2053.00</RmtdAmt></RfrdDocAmt>
+                <CdtrRefInf><Tp><CdOrPrtry><Cd>SCOR</Cd></CdOrPrtry></Tp><Ref>RT708500</Ref></CdtrRefInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <Ntry>
+        <NtryRef>BG 1234-5678</NtryRef>
+        <Amt Ccy="SEK">3400.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt><Dt>2026-10-21</Dt></BookgDt>
+        <ValDt><Dt>2026-10-21</Dt></ValDt>
+        <AcctSvcrRef>ENTRY-REF-0002</AcctSvcrRef>
+        <BkTxCd>
+          <Domn><Cd>PMNT</Cd><Fmly><Cd>RCDT</Cd><SubFmlyCd>ATXN</SubFmlyCd></Fmly></Domn>
+          <Prtry><Cd>TRF</Cd><Issr>SWIFT</Issr></Prtry>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <MsgId>M20261021BGABSESSXXXB00000000000001</MsgId>
+              <AcctSvcrRef>TX-REF-0003</AcctSvcrRef>
+              <EndToEndId>2777565202610201312340001</EndToEndId>
+            </Refs>
+            <AmtDtls><TxAmt><Amt Ccy="SEK">3400.00</Amt></TxAmt></AmtDtls>
+            <RltdPties>
+              <Dbtr>
+                <Nm>Kund Ett AB</Nm>
+                <PstlAdr><StrtNm>Storgatan 1</StrtNm><PstCd>111 22</PstCd><TwnNm>Småstad</TwnNm></PstlAdr>
+              </Dbtr>
+              <Cdtr><Nm>EXEMPELBOLAGET AB</Nm></Cdtr>
+              <CdtrAcct><Id><Othr><Id>12345678</Id><SchmeNm><Prtry>BGNR</Prtry></SchmeNm></Othr></Id></CdtrAcct>
+            </RltdPties>
+            <RltdAgts>
+              <DbtrAgt><FinInstnId><BIC>OTHRSESS</BIC></FinInstnId></DbtrAgt>
+              <CdtrAgt><FinInstnId><BIC>EXAMSESS</BIC></FinInstnId></CdtrAgt>
+            </RltdAgts>
+            <RmtInf>
+              <Ustrd>107208,</Ustrd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+      <Ntry>
+        <NtryRef>BG12345678 00377-0000003</NtryRef>
+        <Amt Ccy="SEK">27000.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts>BOOK</Sts>
+        <BookgDt><Dt>2026-10-21</Dt></BookgDt>
+        <ValDt><Dt>2026-10-21</Dt></ValDt>
+        <AcctSvcrRef>ENTRY-REF-0003</AcctSvcrRef>
+        <BkTxCd>
+          <Domn><Cd>PMNT</Cd><Fmly><Cd>RCDT</Cd><SubFmlyCd>ATXN</SubFmlyCd></Fmly></Domn>
+          <Prtry><Cd>TRF</Cd><Issr>SWIFT</Issr></Prtry>
+        </BkTxCd>
+        <NtryDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>TX-REF-0004</AcctSvcrRef>
+              <InstrId>107204</InstrId>
+            </Refs>
+            <AmtDtls><TxAmt><Amt Ccy="SEK">20000.00</Amt></TxAmt></AmtDtls>
+            <RltdPties>
+              <Dbtr>
+                <Nm>KUND TVÅ &amp; SÖNER AB</Nm>
+                <PstlAdr><StrtNm>INDUSTRIVÄGEN 6</StrtNm><PstCd>222 33</PstCd><TwnNm>MELLANSTAD</TwnNm></PstlAdr>
+              </Dbtr>
+              <Cdtr><Nm>EXEMPELBOLAGET AB</Nm></Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Strd>
+                <RfrdDocInf><Tp><CdOrPrtry><Cd>CINV</Cd></CdOrPrtry></Tp><Nb>107204</Nb></RfrdDocInf>
+                <RfrdDocAmt><RmtdAmt Ccy="SEK">20000.00</RmtdAmt></RfrdDocAmt>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+          <TxDtls>
+            <Refs>
+              <AcctSvcrRef>TX-REF-0005</AcctSvcrRef>
+              <InstrId>107193</InstrId>
+            </Refs>
+            <AmtDtls><TxAmt><Amt Ccy="SEK">7000.00</Amt></TxAmt></AmtDtls>
+            <RltdPties>
+              <Dbtr><Nm>KUND TRE AB</Nm></Dbtr>
+              <Cdtr><Nm>EXEMPELBOLAGET AB</Nm></Cdtr>
+            </RltdPties>
+            <RmtInf>
+              <Strd>
+                <RfrdDocInf><Tp><CdOrPrtry><Cd>CINV</Cd></CdOrPrtry></Tp><Nb>107193 5000.00</Nb></RfrdDocInf>
+                <RfrdDocAmt><RmtdAmt Ccy="SEK">5000.00</RmtdAmt></RfrdDocAmt>
+              </Strd>
+              <Strd>
+                <RfrdDocInf><Tp><CdOrPrtry><Cd>CINV</Cd></CdOrPrtry></Tp><Nb>107194</Nb></RfrdDocInf>
+                <RfrdDocAmt><RmtdAmt Ccy="SEK">2000.00</RmtdAmt></RfrdDocAmt>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>

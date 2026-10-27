@@ -201,6 +201,12 @@
 		<bundle>mvn:org.notima.generic.businessobjects.adapter/sieAdapter/${project.version}</bundle>
 	</feature>
     
+	<feature name="notima-p27" description="Notima P27 / ISO 20022 Banking Adapter" version="${project.version}" install="manual">
+		<feature>notima-businessobjects</feature>
+		<bundle>mvn:org.notima/iso20022lib/${iso20022lib.version}</bundle>
+		<bundle>mvn:org.notima.generic.businessobjects.adapter/p27bankingAdapter/${project.version}</bundle>
+	</feature>
+    
     <feature name="notima-adempiere" description="Notima ADempiere Adapter" version="${project.version}" install="manual">
 
     	<feature>notima-businessobjects</feature>

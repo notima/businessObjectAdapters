@@ -24,6 +24,7 @@
 		<fortnox4j.version>2.1.0-SNAPSHOT</fortnox4j.version>
 		<gson.version>2.11.0</gson.version>
 		<siefilelib.version>1.0.7-SNAPSHOT</siefilelib.version>
+		<iso20022lib.version>1.0.0-SNAPSHOT</iso20022lib.version>
 		<commons-csv.version>1.6</commons-csv.version>
 
 	</properties>
