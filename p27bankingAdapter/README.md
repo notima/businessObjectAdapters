@@ -28,6 +28,8 @@ To list the payments as they are read from the files, without matching them agai
 list-payments-in-batch P27 /path/to/bankfiles
 ```
 
+Add `-format xls` (requires the Excel adapter) to also write all payments to one file. The file includes the source file and payment type of each payment. The file name is given with `-of`, and defaults to the source with the format as suffix.
+
 To process the payments in Fortnox:
 
 ```
