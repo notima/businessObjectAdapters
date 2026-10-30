@@ -8,7 +8,7 @@ Supported messages, all schema versions (001.02 up to the 2019 versions, 001.08 
 - camt.054 – debit / credit notification
 - camt.052 – account report (intraday)
 
-The files are read with [iso20022lib](https://github.com/notima/iso20022lib), a library that is shared with the iDempiere plugin.
+The files are read with iso20022lib (`org.notima:iso20022lib` on Maven Central, source on Notima's internal git server `git@code:repos/iso20022lib`), a library that is shared with the iDempiere plugin.
 
 ## Installation
 

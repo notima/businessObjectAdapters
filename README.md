@@ -25,6 +25,8 @@ https://github.com/sveawebpay/webpayadminreports
 
 https://github.com/notima/swish4j
 
+iso20022lib (Notima's internal git server, `git@code:repos/iso20022lib`)
+
 If the project is a release version, you'll only have to checkout and compile the project itself.
 
 ## Installation in Karaf (fortnox adapter)
