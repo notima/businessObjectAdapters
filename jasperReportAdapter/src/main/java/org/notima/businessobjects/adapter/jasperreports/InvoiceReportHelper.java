@@ -95,6 +95,81 @@ public class InvoiceReportHelper {
 	}
 
 	/**
+	 * The customer's organisation number as printed on the invoice.
+	 *
+	 * @return	The tax id of {@code bp}, or null if there's none or it's the personal
+	 * 			identity number of a private person.
+	 */
+	public static String customerTaxId(BusinessPartner<?> bp) {
+		String taxId = taxId(bp);
+		return taxId==null || isPrivatePerson(bp) ? null : taxId;
+	}
+
+	/**
+	 * The customer's VAT number as printed on the invoice.
+	 *
+	 * @return	The VAT number of {@code bp}, or one derived from the tax id of a Swedish
+	 * 			company (a partner without country is taken as Swedish), or null.
+	 */
+	public static String customerVatNo(BusinessPartner<?> bp) {
+		if (bp==null) return null;
+		if (bp.hasVatNo()) return bp.getVatNo().trim();
+		if (isPrivatePerson(bp) || !isSwedish(bp)) return null;
+		return vatNo(bp);
+	}
+
+	/**
+	 * A Swedish personal identity number has a month in the third digit's place (0 or 1)
+	 * of its ten digits, an organisation number 2 or higher. A sole trader is a company
+	 * with a personal identity number as its organisation number.
+	 */
+	private static boolean isPrivatePerson(BusinessPartner<?> bp) {
+		if (bp.isCompany() || !isSwedish(bp) || isEmpty(bp.getTaxId())) return false;
+		String digits = bp.getTaxId().replaceAll("[^0-9]", "");
+		if (digits.length()==12) digits = digits.substring(2);
+		return digits.length()==10 && digits.charAt(2)<'2';
+	}
+
+	private static boolean isSwedish(BusinessPartner<?> bp) {
+		String country = bp.getCountryCode();
+		if (isEmpty(country) && bp.getAddressOfficial()!=null) country = bp.getAddressOfficial().getCountryCode();
+		return isEmpty(country) || "SE".equalsIgnoreCase(country.trim());
+	}
+
+	/**
+	 * The seller's organisation number and tax registration on one line, as printed in
+	 * the footer of InvoicePlain.
+	 *
+	 * @param texts	The report's texts; null or a missing key gives the Swedish text.
+	 * @return	The text, or null if there is nothing to print.
+	 * @see #taxRegistration(BusinessPartner, ResourceBundle)
+	 */
+	public static String sellerRegistration(BusinessPartner<?> bp, ResourceBundle texts) {
+		String taxId = taxId(bp);
+		String registration = taxRegistration(bp, texts);
+		return join(taxId!=null ? text(texts, "invoice.orgNo", "Org nr:") + " " + taxId : null, registration);
+	}
+
+	/**
+	 * The seller's phone number and e-mail address on one line, as printed in the footer
+	 * of InvoicePlain.
+	 *
+	 * @param texts	The report's texts; null or a missing key gives the Swedish text.
+	 * @return	The text, or null if there is nothing to print.
+	 */
+	public static String sellerContact(BusinessPartner<?> bp, ResourceBundle texts) {
+		String phone = phone(bp);
+		String email = email(bp);
+		return join(phone!=null ? text(texts, "invoice.phone", "Telefon:") + " " + phone : null,
+				email!=null ? text(texts, "invoice.email", "E-post:") + " " + email : null);
+	}
+
+	private static String join(String first, String second) {
+		if (first==null) return second;
+		return second==null ? first : first + "     " + second;
+	}
+
+	/**
 	 * The seller's tax registration as printed in the invoice footer, in Swedish.
 	 *
 	 * @see #taxRegistration(BusinessPartner, ResourceBundle)

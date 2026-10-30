@@ -144,7 +144,7 @@
 	<detail>
 		<band height="841" splitType="Stretch">
 			<textField>
-				<reportElement x="451" y="593" width="100" height="16" uuid="3d83e975-ce65-429f-b1ae-9ff094344724">
+				<reportElement x="451" y="663" width="100" height="16" uuid="3d83e975-ce65-429f-b1ae-9ff094344724">
 					<printWhenExpression><![CDATA[$F{grandTotal}<0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -162,27 +162,27 @@
 				<textFieldExpression><![CDATA[$R{invoice.title}]]></textFieldExpression>
 			</textField>
 			<rectangle radius="5">
-				<reportElement x="300" y="36" width="254" height="36" uuid="f42d8324-52f7-40ba-9ccc-f90487c326ef"/>
+				<reportElement x="300" y="36" width="251" height="36" uuid="f42d8324-52f7-40ba-9ccc-f90487c326ef"/>
 				<graphicElement>
 					<pen lineWidth="0.5"/>
 				</graphicElement>
 			</rectangle>
 			<textField>
-				<reportElement x="330" y="112" width="35" height="12" uuid="16641508-646c-489d-ac1d-77effb60bcf8"/>
+				<reportElement x="312" y="112" width="35" height="12" uuid="16641508-646c-489d-ac1d-77effb60bcf8"/>
 				<textElement>
 					<font size="8" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.to}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="321" y="40" width="35" height="12" uuid="92da804a-352d-458c-8651-40ad484e9812"/>
+				<reportElement x="312" y="40" width="35" height="12" uuid="92da804a-352d-458c-8651-40ad484e9812"/>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.date}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="405" y="40" width="57" height="12" uuid="b08400db-a17a-4563-82d3-14b4f44f3c01">
+				<reportElement x="400" y="40" width="57" height="12" uuid="b08400db-a17a-4563-82d3-14b4f44f3c01">
 					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement>
@@ -191,24 +191,24 @@
 				<textFieldExpression><![CDATA[$R{invoice.dueDate}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="487" y="40" width="57" height="12" uuid="70444756-2120-4d29-8add-20811316f8d3"/>
+				<reportElement x="480" y="40" width="65" height="12" uuid="70444756-2120-4d29-8add-20811316f8d3"/>
 				<textElement>
 					<font size="8" isBold="false"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.invoiceNo}]]></textFieldExpression>
 			</textField>
 			<textField pattern="">
-				<reportElement x="320" y="52" width="80" height="20" uuid="dc49942a-0f70-470f-a38c-caead9cf3d1c"/>
+				<reportElement x="312" y="52" width="85" height="20" uuid="dc49942a-0f70-470f-a38c-caead9cf3d1c"/>
 				<textFieldExpression><![CDATA[$V{dfmt}.format($F{invoiceDate})]]></textFieldExpression>
 			</textField>
 			<textField pattern="yyyy-MM-dd">
-				<reportElement x="405" y="52" width="77" height="20" uuid="f6c9fd2c-ba31-4055-ad62-62d4a73aa647">
+				<reportElement x="400" y="52" width="77" height="20" uuid="f6c9fd2c-ba31-4055-ad62-62d4a73aa647">
 					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[$V{dfmt}.format($F{dueDate})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="487" y="52" width="57" height="20" uuid="e5476356-66f2-4598-ade9-4b084f5c1f27"/>
+				<reportElement x="480" y="52" width="65" height="20" uuid="e5476356-66f2-4598-ade9-4b084f5c1f27"/>
 				<textFieldExpression><![CDATA[$F{documentKey}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
@@ -216,18 +216,18 @@
 				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.nameAndAddress($P{creditorContact})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="330" y="124" width="214" height="16" uuid="a39c3037-f654-4af7-8c26-2f1b4e7e8f58"/>
+				<reportElement x="312" y="124" width="239" height="16" uuid="a39c3037-f654-4af7-8c26-2f1b4e7e8f58"/>
 				<textFieldExpression><![CDATA[new String($F{businessPartner}.getName().getBytes("UTF-8"))]]></textFieldExpression>
 			</textField>
 			<subreport>
-				<reportElement x="44" y="220" width="506" height="369" uuid="e4ce79d9-6848-4d14-a2d2-bfc60ca4d217"/>
+				<reportElement x="44" y="235" width="507" height="425" uuid="e4ce79d9-6848-4d14-a2d2-bfc60ca4d217"/>
 				<subreportParameter name="REPORT_LOCALE"><subreportParameterExpression><![CDATA[$P{REPORT_LOCALE}]]></subreportParameterExpression></subreportParameter>
 				<subreportParameter name="REPORT_RESOURCE_BUNDLE"><subreportParameterExpression><![CDATA[$P{REPORT_RESOURCE_BUNDLE}]]></subreportParameterExpression></subreportParameter>
 				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{orderInvoiceLines})]]></dataSourceExpression>
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "FakturaRader.jasper"]]></subreportExpression>
 			</subreport>
 			<line>
-				<reportElement x="44" y="686" width="507" height="1" uuid="f669bd0b-4aae-4757-a357-7ca6e19ec263">
+				<reportElement x="44" y="714" width="507" height="1" uuid="f669bd0b-4aae-4757-a357-7ca6e19ec263">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<graphicElement>
@@ -235,29 +235,25 @@
 				</graphicElement>
 			</line>
 			<line>
-				<reportElement x="44" y="592" width="506" height="1" uuid="ae7d2a5c-2182-4af5-9caa-7857180aa5a0"/>
+				<reportElement x="44" y="662" width="507" height="1" uuid="ae7d2a5c-2182-4af5-9caa-7857180aa5a0"/>
 			</line>
 			<line>
-				<reportElement x="44" y="629" width="506" height="1" uuid="fc28058a-9388-474c-828b-dd958937fb90"/>
+				<reportElement x="44" y="695" width="507" height="1" uuid="fc28058a-9388-474c-828b-dd958937fb90"/>
 			</line>
 			<textField>
-				<reportElement x="47" y="593" width="100" height="16" uuid="a743e2b3-efb8-4474-80d0-dbb53e5d3e99"/>
+				<reportElement x="54" y="663" width="100" height="16" uuid="a743e2b3-efb8-4474-80d0-dbb53e5d3e99"/>
 				<textFieldExpression><![CDATA[$R{invoice.gross}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="150" y="593" width="100" height="16" uuid="b410f13c-7034-439b-a3fa-4ed497d26e09"/>
+				<reportElement x="150" y="663" width="100" height="16" uuid="b410f13c-7034-439b-a3fa-4ed497d26e09"/>
 				<textFieldExpression><![CDATA[$R{invoice.net}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="251" y="593" width="80" height="16" uuid="1051de71-0f15-4edf-9898-4c930e02451a"/>
+				<reportElement x="251" y="663" width="80" height="16" uuid="1051de71-0f15-4edf-9898-4c930e02451a"/>
 				<textFieldExpression><![CDATA[$R{invoice.vat}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="331" y="593" width="80" height="16" uuid="055e3579-5c33-4623-b85d-bac4fa7e85c8"/>
-				<textFieldExpression><![CDATA[$R{invoice.rounding}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="451" y="593" width="100" height="16" uuid="fb274b47-ed5a-4aff-a648-db1f4333769d">
+				<reportElement x="451" y="663" width="100" height="16" uuid="fb274b47-ed5a-4aff-a648-db1f4333769d">
 					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -266,63 +262,105 @@
 				<textFieldExpression><![CDATA[$R{invoice.toPay}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="412" y="610" width="37" height="16" uuid="e63b13ad-3858-4778-a181-1343ea28d812"/>
+				<reportElement x="412" y="678" width="37" height="16" uuid="e63b13ad-3858-4778-a181-1343ea28d812"/>
 				<textElement textAlignment="Right"/>
 				<textFieldExpression><![CDATA[$F{currency}!=null ? $F{currency} : "SEK"]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="451" y="610" width="100" height="16" uuid="b6998919-d327-4a1e-9d16-d3f2305c1b2a"/>
+				<reportElement x="451" y="678" width="100" height="16" uuid="b6998919-d327-4a1e-9d16-d3f2305c1b2a"/>
 				<textElement textAlignment="Right">
 					<font fontName="Helvetica" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.formatAmount($F{grandTotal}, $P{REPORT_LOCALE})]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
-				<reportElement x="251" y="610" width="80" height="16" uuid="57330b7c-640e-4625-bcda-d054ba53f8a5"/>
+				<reportElement x="251" y="678" width="80" height="16" uuid="57330b7c-640e-4625-bcda-d054ba53f8a5"/>
 				<textFieldExpression><![CDATA[$F{vatTotal}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
-				<reportElement x="150" y="610" width="100" height="16" uuid="0bc1250f-7aa6-4549-b1ba-2908f6b863ab"/>
+				<reportElement x="150" y="678" width="100" height="16" uuid="0bc1250f-7aa6-4549-b1ba-2908f6b863ab"/>
 				<textFieldExpression><![CDATA[$F{netTotal}]]></textFieldExpression>
 			</textField>
 			<textField pattern="#,##0.00;-#,##0.00" isBlankWhenNull="true">
-				<reportElement x="47" y="610" width="100" height="16" uuid="eebdf20b-9445-43d0-af21-447179a9c443"/>
+				<reportElement x="54" y="678" width="100" height="16" uuid="eebdf20b-9445-43d0-af21-447179a9c443"/>
 				<textFieldExpression><![CDATA[$F{grandTotal}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="50" y="174" width="72" height="13" uuid="8b2d4f61-3a5c-4e7d-9f10-2b3c4d5e6f11">
+				<reportElement x="54" y="174" width="72" height="13" uuid="8b2d4f61-3a5c-4e7d-9f10-2b3c4d5e6f11">
 					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.personName($F{billPerson})!=null]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[$R{invoice.yourRef}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="127" y="174" width="200" height="13" uuid="8b2d4f61-3a5c-4e7d-9f10-2b3c4d5e6f12">
+				<reportElement x="130" y="174" width="200" height="13" uuid="8b2d4f61-3a5c-4e7d-9f10-2b3c4d5e6f12">
 					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.personName($F{billPerson})!=null]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.personName($F{billPerson})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="50" y="187" width="72" height="13" uuid="64608db2-a252-45dd-8bcb-50a2354e8d1a">
+				<reportElement x="54" y="187" width="72" height="13" uuid="64608db2-a252-45dd-8bcb-50a2354e8d1a">
 					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.personName($F{ourReference})!=null]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[$R{invoice.ourRef}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="127" y="187" width="200" height="13" uuid="c9900a91-76ae-4443-a2ad-6258b82a5ecf">
+				<reportElement x="130" y="187" width="200" height="13" uuid="c9900a91-76ae-4443-a2ad-6258b82a5ecf">
 					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.personName($F{ourReference})!=null]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.personName($F{ourReference})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="412" y="194" width="131" height="16" uuid="db7326ee-0519-4d40-914b-f1b70c0f3e2c"/>
+				<reportElement x="392" y="192" width="159" height="12" uuid="db7326ee-0519-4d40-914b-f1b70c0f3e2c"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$F{businessPartner}.getIdentityNo()]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="331" y="194" width="78" height="16" uuid="0dad69d8-6a46-4181-ad44-cca719d5a374"/>
+				<reportElement x="312" y="192" width="78" height="12" uuid="0dad69d8-6a46-4181-ad44-cca719d5a374"/>
+				<textElement>
+					<font size="9"/>
+				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.customerNo}]]></textFieldExpression>
 			</textField>
+			<textField>
+				<reportElement x="312" y="204" width="78" height="12" uuid="2f6d1c84-5a3e-4b7f-8c21-9d0e4a6b7c01">
+					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.customerTaxId($F{businessPartner})!=null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{invoice.orgNo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="392" y="204" width="159" height="12" uuid="2f6d1c84-5a3e-4b7f-8c21-9d0e4a6b7c02">
+					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.customerTaxId($F{businessPartner})!=null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.customerTaxId($F{businessPartner})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="312" y="216" width="78" height="12" uuid="2f6d1c84-5a3e-4b7f-8c21-9d0e4a6b7d01">
+					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.customerVatNo($F{businessPartner})!=null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$R{invoice.vatRegNo}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="392" y="216" width="159" height="12" uuid="2f6d1c84-5a3e-4b7f-8c21-9d0e4a6b7d02">
+					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.customerVatNo($F{businessPartner})!=null]]></printWhenExpression>
+				</reportElement>
+				<textElement>
+					<font size="9"/>
+				</textElement>
+				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.customerVatNo($F{businessPartner})]]></textFieldExpression>
+			</textField>
 			<line>
-				<reportElement x="44" y="215" width="506" height="1" uuid="acacf229-0a18-4aa5-b019-1bd63188342d"/>
+				<reportElement x="44" y="230" width="507" height="1" uuid="acacf229-0a18-4aa5-b019-1bd63188342d"/>
 			</line>
 			<textField>
 				<reportElement x="54" y="12" width="200" height="21" uuid="c70dc070-f217-4dd8-bd8e-510480b58bd7">
@@ -333,88 +371,34 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.creditTitle}]]></textFieldExpression>
 			</textField>
-			<textField>
-				<reportElement x="120" y="662" width="89" height="12" uuid="3c371afb-ae8f-4ddb-8070-513e8a5ad802">
-					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.taxId($P{creditorContact})!=null]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.taxId($P{creditorContact})]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="80" y="662" width="38" height="12" uuid="6d12cafa-397f-43de-96d1-9a540c25084c">
-					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.taxId($P{creditorContact})!=null]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$R{invoice.orgNo}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="216" y="662" width="38" height="12" uuid="c10098f8-7d4e-4047-a227-b07164847dd7">
-					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.phone($P{creditorContact})!=null]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$R{invoice.phone}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="352" y="662" width="38" height="12" uuid="9f715671-ac16-4a9c-a7c8-c7182f594b7c">
-					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.email($P{creditorContact})!=null]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$R{invoice.email}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="257" y="662" width="89" height="12" uuid="a1111cea-5738-487a-ba00-8dc123e88ac2">
-					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.phone($P{creditorContact})!=null]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.phone($P{creditorContact})]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="394" y="662" width="143" height="12" uuid="28675e7b-b64c-4ae3-959a-6762950b28d5">
-					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.email($P{creditorContact})!=null]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="8"/>
-				</textElement>
-				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.email($P{creditorContact})]]></textFieldExpression>
-			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="330" y="140" width="214" height="52" uuid="1b9cb61d-124d-41d9-a43d-422ac126d74a"/>
+				<reportElement x="312" y="140" width="239" height="52" uuid="1b9cb61d-124d-41d9-a43d-422ac126d74a"/>
 				<textElement>
 					<paragraph lineSpacing="Fixed" lineSpacingSize="13.0"/>
 				</textElement>
 				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.addressLines($V{location})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="50" y="200" width="72" height="13" uuid="91f1a6f9-3030-4398-bfc9-1aae738ff92b">
+				<reportElement x="54" y="200" width="72" height="13" uuid="91f1a6f9-3030-4398-bfc9-1aae738ff92b">
 					<printWhenExpression><![CDATA[$F{contractStartDate}!=null]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[$R{invoice.period}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="127" y="200" width="160" height="13" uuid="dc58442a-6742-4312-86e6-c10127b2231b">
+				<reportElement x="130" y="200" width="160" height="13" uuid="dc58442a-6742-4312-86e6-c10127b2231b">
 					<printWhenExpression><![CDATA[$F{contractStartDate}!=null]]></printWhenExpression>
 				</reportElement>
 				<textFieldExpression><![CDATA[$V{dfmt}.format($F{contractStartDate}) + " - " + $V{dfmt}.format($F{contractEndDate})]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="49" y="109" width="231" height="63" uuid="4c12a005-18af-46bd-8f9b-91580612f5fc"/>
+				<reportElement x="54" y="109" width="231" height="63" uuid="4c12a005-18af-46bd-8f9b-91580612f5fc"/>
 				<textElement>
 					<font size="9"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$F{comment}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="251" y="633" width="300" height="12" uuid="5e0b8f0a-2c4d-4e8a-9b51-6f3d2a7c1e01">
+				<reportElement x="251" y="698" width="300" height="12" uuid="5e0b8f0a-2c4d-4e8a-9b51-6f3d2a7c1e01">
 					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.hasDomesticReverseCharge($F{lines})]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -423,131 +407,23 @@
 				<textFieldExpression><![CDATA[$R{invoice.reverseCharge}]]></textFieldExpression>
 			</textField>
 			<textField isBlankWhenNull="true">
-				<reportElement x="251" y="645" width="300" height="12" uuid="5e0b8f0a-2c4d-4e8a-9b51-6f3d2a7c1e02">
+				<reportElement x="54" y="698" width="240" height="12" uuid="5e0b8f0a-2c4d-4e8a-9b51-6f3d2a7c1e02">
 					<printWhenExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.hasDomesticReverseCharge($F{lines}) && org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.vatNo($F{businessPartner})!=null]]></printWhenExpression>
 				</reportElement>
-				<textElement textAlignment="Right">
+				<textElement textAlignment="Left">
 					<font size="8"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.buyerVatNo} + " " + org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.vatNo($F{businessPartner})]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="54" y="694" width="300" height="14" uuid="c356fd1b-5ce3-473f-b7d0-a5986d812fb4"/>
+				<reportElement x="54" y="718" width="300" height="14" uuid="c356fd1b-5ce3-473f-b7d0-a5986d812fb4"/>
 				<textElement>
 					<font fontName="Helvetica" isBold="true"/>
 				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.paymentInfo}]]></textFieldExpression>
 			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="54" y="710" width="90" height="12" isRemoveLineWhenBlank="true" uuid="76cbd535-4b0e-4304-bf0a-42208111b8fc">
-					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToAccount()!=null && !$P{creditorContact}.getRemitToAccount().trim().isEmpty()]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font fontName="Helvetica" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["PG".equals($P{creditorContact}.getRemitToAccountType()) ? "Plusgiro" : "Bankgiro"]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="150" y="710" width="250" height="12" isRemoveLineWhenBlank="true" uuid="1a4beaff-dac8-4e60-b59d-74b36cc5d417">
-					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToAccount()!=null && !$P{creditorContact}.getRemitToAccount().trim().isEmpty()]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{creditorContact}.getRemitToAccount()]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="54" y="722" width="90" height="12" isRemoveLineWhenBlank="true" uuid="76c9315b-8b89-4b31-b909-d6d49ef3b078">
-					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()!=null && !$P{creditorContact}.getRemitToIBAN().trim().isEmpty()]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font fontName="Helvetica" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["IBAN"]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="150" y="722" width="250" height="12" isRemoveLineWhenBlank="true" uuid="61bdf046-430c-465e-97ed-86cb3221247f">
-					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()!=null && !$P{creditorContact}.getRemitToIBAN().trim().isEmpty()]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="54" y="734" width="90" height="12" isRemoveLineWhenBlank="true" uuid="796053f9-2de6-4256-8d34-eb39fca1c8e1">
-					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToBIC()!=null && !$P{creditorContact}.getRemitToBIC().trim().isEmpty()]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font fontName="Helvetica" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA["BIC"]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="150" y="734" width="250" height="12" isRemoveLineWhenBlank="true" uuid="437c0087-a24a-436f-b88c-3153225dcdb6">
-					<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToBIC()!=null && !$P{creditorContact}.getRemitToBIC().trim().isEmpty()]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{creditorContact}.getRemitToBIC()]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="54" y="746" width="90" height="12" isRemoveLineWhenBlank="true" uuid="d3ffabba-3b05-4dca-8e20-a33c174c9e3f">
-					<printWhenExpression><![CDATA[!"AG".equals($F{paymentTermKey})]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font fontName="Helvetica" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$R{invoice.reference}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="150" y="746" width="250" height="12" isRemoveLineWhenBlank="true" uuid="dc868401-0c8e-4677-af28-fd6ba73ac907">
-					<printWhenExpression><![CDATA[!"AG".equals($F{paymentTermKey})]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[($F{ocr}!=null && !$F{ocr}.trim().isEmpty()) ? $F{ocr} : $F{documentKey}]]></textFieldExpression>
-			</textField>
 			<textField>
-				<reportElement x="54" y="758" width="90" height="12" isRemoveLineWhenBlank="true" uuid="c6184e34-d0b1-4683-9596-10386615f687">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font fontName="Helvetica" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$R{invoice.dueDate}]]></textFieldExpression>
-			</textField>
-			<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
-				<reportElement x="150" y="758" width="250" height="12" isRemoveLineWhenBlank="true" uuid="197ee29e-e06e-4b38-a512-73f78e4fbca8">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{dueDate}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="54" y="770" width="90" height="12" isRemoveLineWhenBlank="true" uuid="975c60f3-d61f-4ac9-bf15-b18744495155">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font fontName="Helvetica" size="9" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$R{invoice.amountToPay}]]></textFieldExpression>
-			</textField>
-			<textField isBlankWhenNull="true">
-				<reportElement x="150" y="770" width="250" height="12" isRemoveLineWhenBlank="true" uuid="1f3345ff-d18c-46b2-a902-bffb1987f221">
-					<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
-				</reportElement>
-				<textElement>
-					<font size="9"/>
-				</textElement>
-				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.formatAmount($F{grandTotal}, $P{REPORT_LOCALE}) + " " + ($F{currency}!=null ? $F{currency} : "SEK")]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="54" y="784" width="480" height="11" isRemoveLineWhenBlank="true" uuid="1c5adf00-0190-404c-afbf-a2c0b19b7eb3">
+				<reportElement x="54" y="770" width="497" height="11" isRemoveLineWhenBlank="true" uuid="1c5adf00-0190-404c-afbf-a2c0b19b7eb3">
 					<printWhenExpression><![CDATA[$F{grandTotal}>=0f && !"AG".equals($F{paymentTermKey})]]></printWhenExpression>
 				</reportElement>
 				<textElement>
@@ -556,7 +432,7 @@
 				<textFieldExpression><![CDATA[$R{invoice.referenceHint}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="54" y="784" width="480" height="11" isRemoveLineWhenBlank="true" uuid="62e07686-7a9b-4b25-875d-ad592821a683">
+				<reportElement x="54" y="770" width="497" height="11" isRemoveLineWhenBlank="true" uuid="62e07686-7a9b-4b25-875d-ad592821a683">
 					<printWhenExpression><![CDATA["AG".equals($F{paymentTermKey})]]></printWhenExpression>
 				</reportElement>
 				<textElement>
@@ -564,12 +440,139 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$R{invoice.autogiro}]]></textFieldExpression>
 			</textField>
+			<frame>
+				<reportElement x="54" y="733" width="250" height="36" uuid="b7e3a910-4c52-4d8e-a6f1-0c9d2e7f1a01"/>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="70" height="12" isRemoveLineWhenBlank="true" uuid="76cbd535-4b0e-4304-bf0a-42208111b8fc">
+						<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToAccount()!=null && !$P{creditorContact}.getRemitToAccount().trim().isEmpty()]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font fontName="Helvetica" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["PG".equals($P{creditorContact}.getRemitToAccountType()) ? "Plusgiro" : "Bankgiro"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="75" y="0" width="175" height="12" isRemoveLineWhenBlank="true" uuid="1a4beaff-dac8-4e60-b59d-74b36cc5d417">
+						<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToAccount()!=null && !$P{creditorContact}.getRemitToAccount().trim().isEmpty()]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{creditorContact}.getRemitToAccount()]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="12" width="70" height="12" isRemoveLineWhenBlank="true" uuid="76c9315b-8b89-4b31-b909-d6d49ef3b078">
+						<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()!=null && !$P{creditorContact}.getRemitToIBAN().trim().isEmpty()]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font fontName="Helvetica" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["IBAN"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="75" y="12" width="175" height="12" isRemoveLineWhenBlank="true" uuid="61bdf046-430c-465e-97ed-86cb3221247f">
+						<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()!=null && !$P{creditorContact}.getRemitToIBAN().trim().isEmpty()]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{creditorContact}.getRemitToIBAN()]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="24" width="70" height="12" isRemoveLineWhenBlank="true" uuid="796053f9-2de6-4256-8d34-eb39fca1c8e1">
+						<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToBIC()!=null && !$P{creditorContact}.getRemitToBIC().trim().isEmpty()]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font fontName="Helvetica" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA["BIC"]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="75" y="24" width="175" height="12" isRemoveLineWhenBlank="true" uuid="437c0087-a24a-436f-b88c-3153225dcdb6">
+						<printWhenExpression><![CDATA[$P{creditorContact}.getRemitToBIC()!=null && !$P{creditorContact}.getRemitToBIC().trim().isEmpty()]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$P{creditorContact}.getRemitToBIC()]]></textFieldExpression>
+				</textField>
+			</frame>
+			<frame>
+				<reportElement x="312" y="733" width="239" height="36" uuid="b7e3a910-4c52-4d8e-a6f1-0c9d2e7f1a02"/>
+				<textField isBlankWhenNull="true">
+					<reportElement x="0" y="0" width="70" height="12" isRemoveLineWhenBlank="true" uuid="d3ffabba-3b05-4dca-8e20-a33c174c9e3f">
+						<printWhenExpression><![CDATA[!"AG".equals($F{paymentTermKey})]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font fontName="Helvetica" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$R{invoice.reference}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="75" y="0" width="164" height="12" isRemoveLineWhenBlank="true" uuid="dc868401-0c8e-4677-af28-fd6ba73ac907">
+						<printWhenExpression><![CDATA[!"AG".equals($F{paymentTermKey})]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[($F{ocr}!=null && !$F{ocr}.trim().isEmpty()) ? $F{ocr} : $F{documentKey}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="12" width="70" height="12" isRemoveLineWhenBlank="true" uuid="c6184e34-d0b1-4683-9596-10386615f687">
+						<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font fontName="Helvetica" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$R{invoice.dueDate}]]></textFieldExpression>
+				</textField>
+				<textField pattern="yyyy-MM-dd" isBlankWhenNull="true">
+					<reportElement x="75" y="12" width="164" height="12" isRemoveLineWhenBlank="true" uuid="197ee29e-e06e-4b38-a512-73f78e4fbca8">
+						<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$F{dueDate}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="0" y="24" width="70" height="12" isRemoveLineWhenBlank="true" uuid="975c60f3-d61f-4ac9-bf15-b18744495155">
+						<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font fontName="Helvetica" size="9" isBold="true"/>
+					</textElement>
+					<textFieldExpression><![CDATA[$R{invoice.amountToPay}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="75" y="24" width="164" height="12" isRemoveLineWhenBlank="true" uuid="1f3345ff-d18c-46b2-a902-bffb1987f221">
+						<printWhenExpression><![CDATA[$F{grandTotal}>=0f]]></printWhenExpression>
+					</reportElement>
+					<textElement>
+						<font size="9"/>
+					</textElement>
+					<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.formatAmount($F{grandTotal}, $P{REPORT_LOCALE}) + " " + ($F{currency}!=null ? $F{currency} : "SEK")]]></textFieldExpression>
+				</textField>
+			</frame>
+			<line>
+				<reportElement x="44" y="785" width="507" height="1" uuid="b7e3a910-4c52-4d8e-a6f1-0c9d2e7f1a03"/>
+				<graphicElement>
+					<pen lineWidth="0.2"/>
+				</graphicElement>
+			</line>
 			<textField isBlankWhenNull="true">
-				<reportElement x="44" y="675" width="506" height="11" uuid="7a1c3e52-0b6d-4f1e-9a2b-3c4d5e6f7a03"/>
+				<reportElement x="44" y="788" width="507" height="11" uuid="7a1c3e52-0b6d-4f1e-9a2b-3c4d5e6f7a03"/>
 				<textElement textAlignment="Center">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.taxRegistration($P{creditorContact}, $P{REPORT_RESOURCE_BUNDLE})]]></textFieldExpression>
+				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.sellerRegistration($P{creditorContact}, $P{REPORT_RESOURCE_BUNDLE})]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="44" y="799" width="507" height="11" uuid="7a1c3e52-0b6d-4f1e-9a2b-3c4d5e6f7a04"/>
+				<textElement textAlignment="Center">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper.sellerContact($P{creditorContact}, $P{REPORT_RESOURCE_BUNDLE})]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

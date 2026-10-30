@@ -1,6 +1,8 @@
 package org.notima.businessobjects.adapter.jasperreports.junit;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
+import org.notima.businessobjects.adapter.jasperreports.InvoiceReportHelper;
 import org.notima.businessobjects.adapter.jasperreports.JasperInvoiceFormatter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Invoice;
@@ -50,6 +53,8 @@ public class TestInvoiceLanguage {
 		BusinessPartner customer = new BusinessPartner();
 		customer.setName("Customer Ltd");
 		customer.setIdentityNo("1001");
+		customer.setTaxId("556123-4567");
+		customer.setVatNo("SE556123456701");
 		Location loc = new Location();
 		loc.setAddress1("High Street 2");
 		loc.setPostal("SW1A 1AA");
@@ -113,6 +118,29 @@ public class TestInvoiceLanguage {
 	}
 
 	@Test
+	@SuppressWarnings({ "rawtypes" })
+	public void testCustomerIdentity() {
+		BusinessPartner company = new BusinessPartner();
+		company.setTaxId("556123-4567");
+		assertEquals("556123-4567", InvoiceReportHelper.customerTaxId(company));
+		assertEquals("SE556123456701", InvoiceReportHelper.customerVatNo(company));
+
+		// A foreign registration number isn't a Swedish VAT number
+		company.setCountryCode("GB");
+		assertEquals("556123-4567", InvoiceReportHelper.customerTaxId(company));
+		assertNull(InvoiceReportHelper.customerVatNo(company));
+
+		BusinessPartner person = new BusinessPartner();
+		person.setTaxId("19800101-1234");
+		assertNull(InvoiceReportHelper.customerTaxId(person));
+		assertNull(InvoiceReportHelper.customerVatNo(person));
+
+		// A sole trader's organisation number is a personal identity number
+		person.setCompany(true);
+		assertEquals("19800101-1234", InvoiceReportHelper.customerTaxId(person));
+	}
+
+	@Test
 	public void testLanguages() throws Exception {
 		Path dir = Files.createTempDirectory("invoice-language");
 		for (String template : JasperInvoiceFormatter.TEMPLATES) {
@@ -137,6 +165,12 @@ public class TestInvoiceLanguage {
 			assertTrue(template + " contact:\n" + text, text.contains("Telefon:") && text.contains("08-123 45 67")
 					&& text.contains("E-post:") && text.contains("info@acme.se"));
 		}
+
+		// InvoicePlain has the seller's registration on one line and the customer's ids
+		String plain = format("InvoicePlain", null, dir, false, true);
+		assertTrue(plain, plain.contains("556123-4567") && plain.contains("SE556123456701"));
+		assertTrue(plain, plain.contains("Org nr: 556000-0001     Momsreg.nr: SE556000000101     Godkänd för F-skatt"));
+		assertTrue(plain, plain.contains("Telefon: 08-123 45 67     E-post: info@acme.se"));
 
 		// InvoiceBasic shows the credit title next to its title
 		assertTrue(format("InvoiceBasic", "en_US", dir, true).contains("CREDIT"));
