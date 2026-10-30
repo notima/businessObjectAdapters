@@ -7,6 +7,7 @@
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Invoice Samples DS"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="462"/>
 	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="529"/>
+	<style name="Default" isDefault="true" fontName="Arial"/>
 	<parameter name="creditorContact" class="org.notima.generic.businessobjects.BusinessPartner" isForPrompting="false">
 		<defaultValueExpression><![CDATA[org.notima.businessobjects.adapter.jasperreports.ds.InvoiceListXmlDataSource.getCreditor()]]></defaultValueExpression>
 	</parameter>

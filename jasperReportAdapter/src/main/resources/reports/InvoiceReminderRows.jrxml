@@ -4,6 +4,7 @@
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
+	<style name="Default" isDefault="true" fontName="Arial"/>
 	<parameter name="reminderFee" class="java.lang.Double" isForPrompting="false">
 		<defaultValueExpression><![CDATA[60.0]]></defaultValueExpression>
 	</parameter>
