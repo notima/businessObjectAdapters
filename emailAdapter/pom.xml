@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.notima.generic.businessobjects.adapter</groupId>
 		<artifactId>businessObjectAdapters</artifactId>
-		<version>1.10.1</version>
+		<version>1.10.2-SNAPSHOT</version>
 	</parent>
 	
 	<modelVersion>4.0.0</modelVersion>
@@ -12,19 +12,9 @@
 	<packaging>bundle</packaging>
 	<name>Email Sender</name>
 	
-	<dependencyManagement>
-	
-		<dependencies>
-		
-	  		<dependency>
-	  			<groupId>me.sniggle</groupId>
-	  			<artifactId>simple-pgp-java</artifactId>
-	  			<version>0.1.0</version>
-	  		</dependency>
-		
-		</dependencies>
-	
-	</dependencyManagement>
+	<properties>
+		<bouncycastle.version>1.79</bouncycastle.version>
+	</properties>
 
 	<dependencies>
 
@@ -50,25 +40,19 @@
 	        <scope>provided</scope>
 	    </dependency>		
 		
-		<dependency>
-			<groupId>me.sniggle</groupId>
-			<artifactId>simple-pgp-java</artifactId>
-		</dependency>
-		
-		<!-- Below two are only needed for BCPGPEmailMessageSender -->
-		<!--
+		<!-- OpenPGP, only the lightweight API is used (no JCE provider) -->
 		<dependency>
 		    <groupId>org.bouncycastle</groupId>
-		    <artifactId>bcpg-jdk15on</artifactId>
-		    <version>1.70</version>
+		    <artifactId>bcpg-jdk18on</artifactId>
+		    <version>${bouncycastle.version}</version>
 		</dependency>
 		
 		<dependency>
 		    <groupId>org.bouncycastle</groupId>
-		    <artifactId>bcprov-jdk15on</artifactId>
-		    <version>1.70</version>
+		    <artifactId>bcprov-jdk18on</artifactId>
+		    <version>${bouncycastle.version}</version>
 		</dependency>		
-		-->
+
 		<dependency>
 		    <groupId>javax.jms</groupId>
 		    <artifactId>javax.jms-api</artifactId>
@@ -76,11 +60,30 @@
 		    <scope>provided</scope>
 		</dependency>
 		
+		<!-- SMTP server for the tests -->
 		<dependency>
-		    <groupId>com.github.livesense</groupId>
-		    <artifactId>org.liveSense.fragment.sun.security</artifactId>
-		    <version>1.0.5</version>
-		</dependency>		
+			<groupId>com.icegreen</groupId>
+			<artifactId>greenmail</artifactId>
+			<version>1.6.15</version>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun.mail</groupId>
+					<artifactId>jakarta.mail</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.sun.activation</groupId>
+					<artifactId>jakarta.activation</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.36</version>
+			<scope>test</scope>
+		</dependency>
 		
 	</dependencies>
 
@@ -95,10 +98,7 @@
 					<instructions>
 						<Bundle-Activator>org.notima.generic.pgp.Activator</Bundle-Activator>	
 						<Export-Package>
-							org.notima.generic.pgp.*,
-							me.sniggle.pgp.crypt.*,
-							org.bouncycastle.openpgp.*,
-							sun.security.util
+							org.notima.generic.pgp.*
 						</Export-Package>
 						<Import-Package>
 							org.glassfish.hk2.osgiresourcelocator;resolution:=optional,
@@ -129,7 +129,18 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			
+
+			<!-- JUnit 5 tests, not an AllTests suite (JUnit 4) as in the parent -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<includes combine.self="override">
+						<include>**/*Test.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 

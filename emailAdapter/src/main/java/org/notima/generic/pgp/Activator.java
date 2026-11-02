@@ -30,10 +30,6 @@ public class Activator extends BaseActivator {
 
 	@Override
 	public void doStart() throws IOException {
-		// For Bouncy Castle
-//		  Security.addProvider(new BouncyCastleProvider());
-//        EmailMessageSender emailSender = new BCPGPEmailMessageSender();
-		
         EmailMessageSender emailSender = new PGPEmailMessageSender();
         ConfigurationAdmin configurationAdmin = null;
 		ServiceReference<ConfigurationAdmin> reference = bundleContext.getServiceReference(ConfigurationAdmin.class);
@@ -51,12 +47,10 @@ public class Activator extends BaseActivator {
                     emailSender.setEmailPass((String)properties.get("emailPass"));
                     emailSender.setEmailPort((String)properties.get("emailPort"));
                     emailSender.setEmailName((String)properties.get("emailName"));
-                    try{
-                        emailSender.setSenderPublicKey(new File((String)properties.get("senderPublicKey")));
-                        emailSender.setSenderPrivateKey(new File((String)properties.get("senderPrivateKey")));
-                    } catch (NullPointerException npe){
-                        log.error("Keypair not properly set up in EmailProperties.cfg", npe);
-                    }
+                    emailSender.setEmailStartTls(Boolean.parseBoolean(String.valueOf(properties.get("emailStartTls")).trim()));
+                    emailSender.setEmailSsl(Boolean.parseBoolean(String.valueOf(properties.get("emailSsl")).trim()));
+                    emailSender.setSenderPublicKey(toFile(properties.get("senderPublicKey")));
+                    emailSender.setSenderPrivateKey(toFile(properties.get("senderPrivateKey")));
                     emailSender.setSenderPrivateKeyPassword((String)properties.get("senderPrivateKeyPassword"));
                 }
             }
@@ -66,4 +60,11 @@ public class Activator extends BaseActivator {
 		register(MessageSender.class, emailSender);
         log.info("Email message sender registered");
     }
+
+	/**
+	 * A key file of the configuration, null if not set
+	 */
+	private static File toFile(Object path) {
+		return path == null || path.toString().trim().isEmpty() ? null : new File(path.toString().trim());
+	}
 }

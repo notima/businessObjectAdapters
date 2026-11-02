@@ -14,9 +14,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
-import me.sniggle.pgp.crypt.PGPKeyPairGenerator;
-
-//import me.sniggle.pgp.crypt.PGPKeyPairGenerator;
+import org.notima.generic.pgp.PGPKeys;
 
 @Service
 @Command(scope = "notima", name = "generate-keypair", description = "Generates GPG keypair for email encryption. Default values from EmailProperties.cfg will be used if flags are omitted.")
@@ -57,11 +55,20 @@ public class GenerateKeyPair implements Action {
         if(userId == null)
             userId = getProperty(PROP_PGP_USER_ID);
             
-        new PGPKeyPairGenerator().generateKeyPair(
-            userId, 
-            privateKeyPass, 
-            new FileOutputStream(new File(publicKeyFile)), 
-            new FileOutputStream(new File(privateKeyFile)));
+        if (publicKeyFile == null || privateKeyFile == null)
+            throw new Exception("No key file locations: set senderPublicKey and senderPrivateKey in EmailProperties.cfg, or use -pu and -pr");
+        if (new File(publicKeyFile).exists() || new File(privateKeyFile).exists())
+            throw new Exception("A key file already exists, not overwritten: " + publicKeyFile + ", " + privateKeyFile);
+
+        try (FileOutputStream publicOut = new FileOutputStream(new File(publicKeyFile));
+             FileOutputStream privateOut = new FileOutputStream(new File(privateKeyFile))) {
+            PGPKeys.generateKeyPair(userId, privateKeyPass, publicOut, privateOut);
+        }
+        File privateKey = new File(privateKeyFile);	// only the owner may read it
+        privateKey.setReadable(false, false);
+        privateKey.setWritable(false, false);
+        privateKey.setReadable(true, true);
+        privateKey.setWritable(true, true);
 
         sess.getConsole().printf("private key : %s\npublic key  : %s\n", privateKeyFile, publicKeyFile);
         sess.getConsole().println("keypair generated");
