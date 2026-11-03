@@ -21,7 +21,7 @@
 		<apache.poi.version>3.17</apache.poi.version>
 		<notima-util.version>1.0.2</notima-util.version>
 		<businessobjects.version>1.1.2</businessobjects.version>
-		<fortnox4j.version>2.0.4</fortnox4j.version>
+		<fortnox4j.version>2.0.5-SNAPSHOT</fortnox4j.version>
 		<gson.version>2.11.0</gson.version>
 		<siefilelib.version>1.0.6</siefilelib.version>
 		<commons-csv.version>1.6</commons-csv.version>
