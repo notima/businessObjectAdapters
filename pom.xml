@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.notima.generic.businessobjects.adapter</groupId>
 	<artifactId>businessObjectAdapters</artifactId>
-	<version>1.10.2-SNAPSHOT</version>
+	<version>1.10.2</version>
 	<packaging>pom</packaging>
 
 	<distributionManagement>
@@ -21,7 +21,7 @@
 		<apache.poi.version>3.17</apache.poi.version>
 		<notima-util.version>1.0.2</notima-util.version>
 		<businessobjects.version>1.1.2</businessobjects.version>
-		<fortnox4j.version>2.0.5-SNAPSHOT</fortnox4j.version>
+		<fortnox4j.version>2.0.5</fortnox4j.version>
 		<gson.version>2.11.0</gson.version>
 		<siefilelib.version>1.0.6</siefilelib.version>
 		<commons-csv.version>1.6</commons-csv.version>
