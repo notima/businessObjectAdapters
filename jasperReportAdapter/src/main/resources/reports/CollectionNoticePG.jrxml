@@ -12,6 +12,14 @@
 	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
 		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
 	</parameter>
+	<parameter name="CollectionFee" class="java.lang.Double" isForPrompting="false">
+		<parameterDescription><![CDATA[Collection cost (inkassokostnad)]]></parameterDescription>
+		<defaultValueExpression><![CDATA[Double.valueOf(180.0)]]></defaultValueExpression>
+	</parameter>
+	<parameter name="InterestRate" class="java.lang.Double" isForPrompting="false">
+		<parameterDescription><![CDATA[Yearly late payment interest (dröjsmålsränta), 0.08 = 8 %]]></parameterDescription>
+		<defaultValueExpression><![CDATA[Double.valueOf(0.08)]]></defaultValueExpression>
+	</parameter>
 	<queryString>
 		<![CDATA[]]>
 	</queryString>
@@ -29,9 +37,6 @@
 	</field>
 	<field name="bgNoDigitsOnly" class="java.lang.Integer">
 		<fieldDescription><![CDATA[bgNoDigitsOnly]]></fieldDescription>
-	</field>
-	<field name="class" class="java.lang.Class">
-		<fieldDescription><![CDATA[class]]></fieldDescription>
 	</field>
 	<field name="grandTotal" class="java.lang.Double">
 		<fieldDescription><![CDATA[grandTotal]]></fieldDescription>
@@ -80,6 +85,9 @@
 	</field>
 	<field name="totalLegalCost" class="java.lang.Double">
 		<fieldDescription><![CDATA[totalLegalCost]]></fieldDescription>
+	</field>
+	<field name="reminderFee" class="java.lang.Double">
+		<fieldDescription><![CDATA[reminderFee]]></fieldDescription>
 	</field>
 	<field name="creditor" class="org.notima.generic.businessobjects.BusinessPartner">
 		<fieldDescription><![CDATA[creditor]]></fieldDescription>
@@ -374,19 +382,19 @@
 				</textElement>
 				<text><![CDATA[#]]></text>
 			</staticText>
-			<textField evaluationTime="Column" pattern="###0">
+			<textField evaluationTime="Column">
 				<reportElement x="239" y="782" width="55" height="14" uuid="61d03d25-1889-4fb9-a524-6f0e304e9779"/>
 				<textElement textAlignment="Right">
 					<font fontName="OCRB"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$V{toPay}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[String.valueOf(Math.round($V{toPay} * 100.0) / 100)]]></textFieldExpression>
 			</textField>
-			<textField pattern="">
+			<textField evaluationTime="Column">
 				<reportElement x="296" y="782" width="21" height="14" uuid="d16fd82e-a65f-4270-8273-cecd59803746"/>
 				<textElement textAlignment="Right">
 					<font fontName="OCRB"/>
 				</textElement>
-				<textFieldExpression><![CDATA["00"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[String.format("%02d", Math.round($V{toPay} * 100.0) % 100)]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Column">
 				<reportElement x="329" y="782" width="15" height="14" uuid="2810dec9-25e1-4b91-9910-810f49863c93"/>
@@ -411,6 +419,15 @@
 			</textField>
 			<subreport>
 				<reportElement x="44" y="245" width="506" height="228" uuid="53f4bbfe-245f-4bc3-ac5f-0581e1237548"/>
+				<subreportParameter name="ReminderFee">
+					<subreportParameterExpression><![CDATA[$F{reminderFee} != null ? $F{reminderFee} : Double.valueOf(60.0)]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="CollectionFee">
+					<subreportParameterExpression><![CDATA[$P{CollectionFee}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="InterestRate">
+					<subreportParameterExpression><![CDATA[$P{InterestRate}]]></subreportParameterExpression>
+				</subreportParameter>
 				<dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.data.JRBeanCollectionDataSource($F{invoices})]]></dataSourceExpression>
 				<returnValue subreportVariable="grandTotal_1" toVariable="toPay"/>
 				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "CollectionNotice_Detail.jasper"]]></subreportExpression>

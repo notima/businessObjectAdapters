@@ -9,7 +9,7 @@ import org.junit.runners.Suite.SuiteClasses;
  * part of the repository.
  */
 @RunWith(Suite.class)
-@SuiteClasses({ TestInvoiceLanguage.class })
+@SuiteClasses({ TestInvoiceLanguage.class, TestCollectionNoticeToPDF.class })
 public class AllTests {
 
 }

@@ -1,5 +1,7 @@
 package org.notima.businessobjects.adapter.tools;
 
+import org.notima.generic.ifacebusinessobjects.CollectionNoticeFormatter;
+
 public interface FormatterFactory {
 
 	/**
@@ -34,6 +36,14 @@ public interface FormatterFactory {
 	 * @return	An invoice reminder formatter (if any).
 	 */
 	public InvoiceReminderFormatter getInvoiceReminderFormatter(String format);
+	
+	/**
+	 * Returns a collection notice formatter for given format.
+	 * 
+	 * @param format		The format.
+	 * @return	A collection notice formatter (if any).
+	 */
+	public CollectionNoticeFormatter getCollectionNoticeFormatter(String format);
 	
 
 	/**

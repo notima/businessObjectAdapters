@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.notima.generic.ifacebusinessobjects.CollectionNoticeFormatter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -20,6 +21,7 @@ public class FormatterFactoryImpl implements FormatterFactory {
 	private Map<String, InvoiceListFormatter> invoiceListFormatters = new TreeMap<String, InvoiceListFormatter>();
 	private Map<String, InvoiceFormatter> invoiceFormatters = new TreeMap<String, InvoiceFormatter>();
 	private Map<String, InvoiceReminderFormatter> invoiceReminderServices = new TreeMap<String, InvoiceReminderFormatter>();
+	private Map<String, CollectionNoticeFormatter> collectionNoticeFormatters = new TreeMap<String, CollectionNoticeFormatter>();
 	// The class name is the key
 	private Map<String, ReportFormatter<?>> basicReportFormatters = new TreeMap<String, ReportFormatter<?>>();
 
@@ -85,6 +87,23 @@ public class FormatterFactoryImpl implements FormatterFactory {
 				if (formats!=null) {
 					for (String s : formats) {
 						invoiceReminderServices.put(s, srv);
+					}
+				}
+			}
+		}
+		
+		Collection<ServiceReference<CollectionNoticeFormatter>> cnrefs = ctx.getServiceReferences(CollectionNoticeFormatter.class, null);
+		
+		collectionNoticeFormatters.clear();
+		
+		if (cnrefs!=null) {
+			CollectionNoticeFormatter srv;
+			for (ServiceReference<CollectionNoticeFormatter> sr : cnrefs) {
+				srv = ctx.getService(sr);
+				String[] formats = srv.getFormats();
+				if (formats!=null) {
+					for (String s : formats) {
+						collectionNoticeFormatters.put(s, srv);
 					}
 				}
 			}
@@ -212,6 +231,25 @@ public class FormatterFactoryImpl implements FormatterFactory {
 		try {
 			resetServices();
 			return invoiceReminderServices.get(format);
+		} catch (Exception ee) {
+			ee.printStackTrace();
+		}
+		
+		return null;
+		
+	}
+	
+	/**
+	 * Returns a collection notice formatter for given format.
+	 * 
+	 * @param format		The format.
+	 * @return	A collection notice formatter (if any).
+	 */
+	public CollectionNoticeFormatter getCollectionNoticeFormatter(String format) {
+		
+		try {
+			resetServices();
+			return collectionNoticeFormatters.get(format);
 		} catch (Exception ee) {
 			ee.printStackTrace();
 		}

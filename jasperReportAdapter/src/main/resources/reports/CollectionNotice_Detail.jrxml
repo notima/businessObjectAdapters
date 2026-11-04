@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.4.3.final using JasperReports Library version 6.4.3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Inkassokrav_Invoice" pageWidth="506" pageHeight="300" columnWidth="506" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="10" uuid="21c56f78-a00f-4bd9-b754-ddbc682bff27">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[""]]></defaultValueExpression>
+	</parameter>
+	<parameter name="ReminderFee" class="java.lang.Double" isForPrompting="false">
+		<defaultValueExpression><![CDATA[Double.valueOf(60.0)]]></defaultValueExpression>
+	</parameter>
+	<parameter name="CollectionFee" class="java.lang.Double" isForPrompting="false">
+		<parameterDescription><![CDATA[Collection cost (inkassokostnad)]]></parameterDescription>
+		<defaultValueExpression><![CDATA[Double.valueOf(180.0)]]></defaultValueExpression>
+	</parameter>
+	<parameter name="InterestRate" class="java.lang.Double" isForPrompting="false">
+		<parameterDescription><![CDATA[Yearly late payment interest (dröjsmålsränta), 0.08 = 8 %]]></parameterDescription>
+		<defaultValueExpression><![CDATA[Double.valueOf(0.08)]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="creditNote" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[creditNote]]></fieldDescription>
+	</field>
+	<field name="invoice" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[invoice]]></fieldDescription>
+	</field>
+	<field name="order" class="java.lang.Boolean">
+		<fieldDescription><![CDATA[order]]></fieldDescription>
+	</field>
+	<field name="freightAmount" class="java.lang.Double">
+		<fieldDescription><![CDATA[freightAmount]]></fieldDescription>
+	</field>
+	<field name="grandTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[grandTotal]]></fieldDescription>
+	</field>
+	<field name="netTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[netTotal]]></fieldDescription>
+	</field>
+	<field name="openAmt" class="java.lang.Double">
+		<fieldDescription><![CDATA[openAmt]]></fieldDescription>
+	</field>
+	<field name="vatTotal" class="java.lang.Double">
+		<fieldDescription><![CDATA[vatTotal]]></fieldDescription>
+	</field>
+	<field name="roundingDecimals" class="java.lang.Integer">
+		<fieldDescription><![CDATA[roundingDecimals]]></fieldDescription>
+	</field>
+	<field name="currency" class="java.lang.String">
+		<fieldDescription><![CDATA[currency]]></fieldDescription>
+	</field>
+	<field name="documentKey" class="java.lang.String">
+		<fieldDescription><![CDATA[documentKey]]></fieldDescription>
+	</field>
+	<field name="invoiceKey" class="java.lang.String">
+		<fieldDescription><![CDATA[invoiceKey]]></fieldDescription>
+	</field>
+	<field name="ocr" class="java.lang.String">
+		<fieldDescription><![CDATA[ocr]]></fieldDescription>
+	</field>
+	<field name="orderKey" class="java.lang.String">
+		<fieldDescription><![CDATA[orderKey]]></fieldDescription>
+	</field>
+	<field name="ourCustomerNo" class="java.lang.String">
+		<fieldDescription><![CDATA[ourCustomerNo]]></fieldDescription>
+	</field>
+	<field name="paymentTermKey" class="java.lang.String">
+		<fieldDescription><![CDATA[paymentTermKey]]></fieldDescription>
+	</field>
+	<field name="poDocumentNo" class="java.lang.String">
+		<fieldDescription><![CDATA[poDocumentNo]]></fieldDescription>
+	</field>
+	<field name="pricelistId" class="java.lang.String">
+		<fieldDescription><![CDATA[pricelistId]]></fieldDescription>
+	</field>
+	<field name="shipmentNo" class="java.lang.String">
+		<fieldDescription><![CDATA[shipmentNo]]></fieldDescription>
+	</field>
+	<field name="status" class="java.lang.String">
+		<fieldDescription><![CDATA[status]]></fieldDescription>
+	</field>
+	<field name="warehouseId" class="java.lang.String">
+		<fieldDescription><![CDATA[warehouseId]]></fieldDescription>
+	</field>
+	<field name="descriptionKey" class="java.lang.String">
+		<fieldDescription><![CDATA[descriptionKey]]></fieldDescription>
+	</field>
+	<field name="contractEndDate" class="java.util.Date">
+		<fieldDescription><![CDATA[contractEndDate]]></fieldDescription>
+	</field>
+	<field name="contractStartDate" class="java.util.Date">
+		<fieldDescription><![CDATA[contractStartDate]]></fieldDescription>
+	</field>
+	<field name="documentDate" class="java.util.Date">
+		<fieldDescription><![CDATA[documentDate]]></fieldDescription>
+	</field>
+	<field name="dueDate" class="java.util.Date">
+		<fieldDescription><![CDATA[dueDate]]></fieldDescription>
+	</field>
+	<field name="invoiceDate" class="java.util.Date">
+		<fieldDescription><![CDATA[invoiceDate]]></fieldDescription>
+	</field>
+	<field name="attributes" class="java.util.List">
+		<fieldDescription><![CDATA[attributes]]></fieldDescription>
+	</field>
+	<field name="lines" class="java.util.List">
+		<fieldDescription><![CDATA[lines]]></fieldDescription>
+	</field>
+	<field name="orderInvoiceLines" class="java.util.List">
+		<fieldDescription><![CDATA[orderInvoiceLines]]></fieldDescription>
+	</field>
+	<field name="bankAccountDetails" class="java.util.Map">
+		<fieldDescription><![CDATA[bankAccountDetails]]></fieldDescription>
+	</field>
+	<field name="billBpartner" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[billBpartner]]></fieldDescription>
+	</field>
+	<field name="businessPartner" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[businessPartner]]></fieldDescription>
+	</field>
+	<field name="sender" class="org.notima.generic.businessobjects.BusinessPartner">
+		<fieldDescription><![CDATA[sender]]></fieldDescription>
+	</field>
+	<field name="billLocation" class="org.notima.generic.businessobjects.Location">
+		<fieldDescription><![CDATA[billLocation]]></fieldDescription>
+	</field>
+	<field name="shipLocation" class="org.notima.generic.businessobjects.Location">
+		<fieldDescription><![CDATA[shipLocation]]></fieldDescription>
+	</field>
+	<field name="billPerson" class="org.notima.generic.businessobjects.Person">
+		<fieldDescription><![CDATA[billPerson]]></fieldDescription>
+	</field>
+	<field name="ourReference" class="org.notima.generic.businessobjects.Person">
+		<fieldDescription><![CDATA[ourReference]]></fieldDescription>
+	</field>
+	<field name="factoringReservation" class="org.notima.generic.ifacebusinessobjects.FactoringReservation">
+		<fieldDescription><![CDATA[factoringReservation]]></fieldDescription>
+	</field>
+	<variable name="netTotal_1" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$F{openAmt}]]></variableExpression>
+	</variable>
+	<variable name="vatTotal_1" class="java.lang.Double" resetType="Page" calculation="Sum">
+		<variableExpression><![CDATA[$F{vatTotal}]]></variableExpression>
+	</variable>
+	<variable name="interest" class="java.lang.Double" incrementType="Column">
+		<variableExpression><![CDATA[$F{dueDate} != null && $F{openAmt} != null && $F{openAmt} > 0 && $P{InterestRate} != null ? Double.valueOf(org.notima.generic.businessobjects.util.InterestCalculator.calculateFixedRate($F{dueDate}, java.util.Calendar.getInstance().getTime(), $F{openAmt}, $P{InterestRate}, 0)) : Double.valueOf(0.0)]]></variableExpression>
+	</variable>
+	<variable name="interestTotal" class="java.lang.Double" calculation="Sum">
+		<variableExpression><![CDATA[$V{interest}]]></variableExpression>
+	</variable>
+	<variable name="grandTotal_1" class="java.lang.Double">
+		<variableExpression><![CDATA[Math.round(($V{netTotal_1} + $V{interestTotal} + ($P{ReminderFee} != null ? $P{ReminderFee} : 0.0) + ($P{CollectionFee} != null ? $P{CollectionFee} : 0.0)) * 100.0) / 100.0]]></variableExpression>
+	</variable>
+	<variable name="grandTotal_rounded" class="java.lang.Double">
+		<variableExpression><![CDATA[$V{grandTotal_1}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<pageHeader>
+		<band height="5"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="20">
+			<staticText>
+				<reportElement x="0" y="0" width="128" height="20" uuid="c74e7ca2-b7f5-4a21-b5ec-aeeaeb152855"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Skulden avser]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="207" y="0" width="53" height="20" uuid="de184de9-8a4c-4b9d-bc98-160da67198be"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[FakturaNr]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="424" y="0" width="82" height="20" uuid="febf7610-6dcb-487a-b1fc-891a24d33b9b"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Kapitalbelopp]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="19" width="506" height="1" uuid="1f231b9f-7d11-4c9c-86bf-2f3a76523138"/>
+			</line>
+			<staticText>
+				<reportElement x="260" y="0" width="61" height="20" uuid="f28dbf5e-44e7-4b57-bc23-4573b55461f2"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fakturadat]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="321" y="0" width="61" height="20" uuid="e1a6765b-f9e5-4785-8725-c5c2d8eb7784"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Förfallodat]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="382" y="0" width="42" height="20" uuid="7ff29476-48f7-4d90-aab1-5d0d6342a39c"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ränta]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="207" y="0" width="53" height="20" uuid="4930766c-ba29-4a98-9d95-c7a0562679e8"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{invoiceKey}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="424" y="0" width="82" height="20" uuid="695a1d41-0172-46a7-8a8f-06958de51438"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{openAmt}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="19" width="506" height="1" uuid="913f7a33-66d0-44aa-a88d-aa4f5aeb4289"/>
+			</line>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="207" height="20" uuid="ef0ac71a-c1d5-40de-b709-2b8ca9aecf5c"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{descriptionKey}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="260" y="0" width="61" height="20" uuid="3398ae0d-8a6e-4f96-84ea-86ea6add462f"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("yyyy-MM-dd").format($F{invoiceDate})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="321" y="0" width="61" height="20" uuid="87cf809b-36a6-44f8-a56e-42140e901550"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[new SimpleDateFormat("yyyy-MM-dd").format($F{dueDate})]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="382" y="0" width="42" height="20" uuid="bba36b1c-d54b-49b7-bba7-9acfe94b246f"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{interest}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="103">
+			<line>
+				<reportElement x="283" y="77" width="223" height="1" uuid="1b06de9e-1e79-41e8-9b5f-b188539eb96e"/>
+			</line>
+			<textField pattern="#,##0.00">
+				<reportElement x="372" y="61" width="106" height="12" uuid="2cd780e0-b117-4b6d-a253-2a60351377cd"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{CollectionFee} != null ? $P{CollectionFee} : Double.valueOf(0.0)]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="272" y="49" width="100" height="12" uuid="2545070a-f0e5-44df-81e9-d11d14c6712d"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[Dröjsmålsränta:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="272" y="25" width="100" height="12" uuid="9c200828-27b5-435b-88f8-126a19374b7f"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[Kapitalbelopp:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="272" y="61" width="100" height="12" uuid="e1b20839-0f1f-44a3-a4bd-7e2a3af4c6df"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[Inkassokostnad:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="272" y="80" width="100" height="19" uuid="ae6d4134-bd5e-4b43-b614-443854ab77e8"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ATT BETALA:]]></text>
+			</staticText>
+			<textField pattern="#,##0.00">
+				<reportElement x="372" y="25" width="106" height="12" uuid="107565f4-eca2-4427-8145-dd71dcc7e445"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{netTotal_1}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="372" y="49" width="106" height="12" uuid="623d7bc8-2e7c-4185-b6d9-8571f105447d"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{interestTotal}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="372" y="80" width="106" height="19" uuid="6419e04c-2126-4a26-9b81-5574c7e81871"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" isBold="true" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{grandTotal_1}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="0" y="19" width="506" height="1" uuid="f082b605-4a73-4896-bde8-f0f4767ce193"/>
+			</line>
+			<staticText>
+				<reportElement x="0" y="0" width="100" height="20" uuid="dcb31906-b45c-4e64-b36f-a12d1c8e375c"/>
+				<textElement verticalAlignment="Bottom">
+					<font fontName="Arial" size="13" isBold="true"/>
+				</textElement>
+				<text><![CDATA[ATT BETALA]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="478" y="25" width="25" height="12" uuid="fe495c2c-cf62-4f6f-811a-4f49ab40936c"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{currency} != null ? $F{currency} : "SEK"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="478" y="49" width="25" height="12" uuid="41bcf2a6-82c8-4dbb-b288-098252ad27d3"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{currency} != null ? $F{currency} : "SEK"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="478" y="61" width="25" height="12" uuid="0ef1b3ba-6862-42f5-b8ff-c28e566a2fed"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{currency} != null ? $F{currency} : "SEK"]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="478" y="80" width="25" height="19" uuid="95921646-8b6c-4104-b46f-8f02578086cd"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{currency} != null ? $F{currency} : "SEK"]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="272" y="37" width="100" height="12" uuid="fbb9b3f4-10eb-47e8-996d-b4525afcec44"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<text><![CDATA[Påminnelseavgift:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="478" y="37" width="25" height="12" uuid="a6881f1e-be94-4518-b809-c858de841fc5"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{currency} != null ? $F{currency} : "SEK"]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00">
+				<reportElement x="372" y="37" width="106" height="12" uuid="54b68b8b-c3de-4f6f-9050-07a745ed198f"/>
+				<textElement textAlignment="Right">
+					<font fontName="Arial"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ReminderFee} != null ? $P{ReminderFee} : Double.valueOf(0.0)]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
