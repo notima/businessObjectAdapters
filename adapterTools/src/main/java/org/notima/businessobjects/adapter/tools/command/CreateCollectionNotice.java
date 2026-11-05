@@ -22,7 +22,10 @@ import org.notima.businessobjects.adapter.tools.FormatterFactory;
 import org.notima.businessobjects.adapter.tools.command.completer.AdapterCompleter;
 import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.businessobjects.adapter.tools.dunning.DunningRunFilter;
+import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.CollectionNoticeInfo;
 import org.notima.generic.businessobjects.DunningEntry;
+import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.DunningRun;
 import org.notima.generic.businessobjects.Invoice;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
@@ -36,7 +39,8 @@ import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
  * <p>
  * The invoices are taken from the adapter's dunning run, ie unpaid overdue invoices, so
  * that the debtor, creditor and payment account are the same as on the reminders. One
- * notice is created per debtor. The notices are formatted by the registered
+ * notice is created per debtor. The tenant information's collection notice info, if any,
+ * overrides the creditor's phone, e-mail and account. The notices are formatted by the registered
  * {@link CollectionNoticeFormatter} for the format (the jasperReportAdapter's for pdf).
  */
 @Command(scope = "notima", name = "create-collection-notice", description = "Create collection notices (inkassokrav) for the given overdue invoices, one per debtor")
@@ -121,7 +125,12 @@ public class CreateCollectionNotice implements Action {
 			return null;
 		}
 
-		boolean usePlusgiro = applyTenantPaymentInformation() || plusgiro;
+		boolean usePlusgiro = applyTenantPaymentInformation();
+		Boolean collectionPlusgiro = applyCollectionNoticeInfo();
+		if (collectionPlusgiro != null) {
+			usePlusgiro = collectionPlusgiro;
+		}
+		usePlusgiro = usePlusgiro || plusgiro;
 
 		Properties props = new Properties();
 		props.setProperty(CollectionNoticeFormatter.TEMPLATE, usePlusgiro ? CollectionNoticeFormatter.TEMPLATE_PLUSGIRO
@@ -225,6 +234,52 @@ public class CreateCollectionNotice implements Action {
 
 	}
 
+	/**
+	 * Applies the tenant information's collection notice info: phone and e-mail of the
+	 * creditor, and the account to pay to.
+	 * 
+	 * @return	Whether the collection notice account is a plusgiro account, null if
+	 * 			no account is set.
+	 */
+	private Boolean applyCollectionNoticeInfo() {
+		
+		CollectionNoticeInfo cni = tenantInformation != null ? tenantInformation.getCollectionNoticeInfo() : null;
+		if (cni == null || cni.isEmpty()) {
+			return null;
+		}
+		for (DunningEntry<?,?> entry : dunningRun.getEntries()) {
+			BusinessPartner<?> creditor = entry.getCreditor();
+			if (creditor != null && (cni.hasPhone() || cni.hasEmail())) {
+				Location loc = creditor.getAddressOfficial();
+				if (loc == null) {
+					loc = new Location();
+					creditor.setAddressOfficial(loc);
+				}
+				if (cni.hasPhone()) loc.setPhone(cni.getPhone().trim());
+				if (cni.hasEmail()) loc.setEmail(cni.getEmail().trim());
+			}
+			if (cni.hasRemitToAccount()) {
+				entry.setBgNo(cni.getRemitToAccount().trim());
+				if (creditor != null) {
+					creditor.setRemitToAccount(cni.getRemitToAccount().trim());
+					creditor.setRemitToAccountType(cni.getRemitToAccountType());
+				}
+			}
+		}
+		if (cni.hasPhone() || cni.hasEmail()) {
+			sess.getConsole().println("Contact on the notices: "
+					+ (cni.hasPhone() ? cni.getPhone().trim() : "") + (cni.hasPhone() && cni.hasEmail() ? ", " : "")
+					+ (cni.hasEmail() ? cni.getEmail().trim() : "") + " (from collection notice info)");
+		}
+		if (!cni.hasRemitToAccount()) {
+			return null;
+		}
+		sess.getConsole().println("Payment to " + (cni.isPlusgiro() ? "plusgiro " : "bankgiro ") + cni.getRemitToAccount().trim()
+				+ " (from collection notice info)");
+		return cni.isPlusgiro();
+		
+	}
+	
 	private String getOutputDirectory() {
 		if (outputDirectory != null) return outputDirectory;
 		if (tenantInformation != null && tenantInformation.getDefaultOutputDirectory() != null

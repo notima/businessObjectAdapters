@@ -38,7 +38,7 @@ public class SetTenantInfo extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
 
-	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear))", required = true, multiValued = false)
+	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear), collectionNoticeInfo.phone / .email / .remitToAccount / .remitToAccountType (BG or PG) for collection notices ('none' to clear))", required = true, multiValued = false)
 	@Completion(TenantInfoAttributeCompleter.class)
 	private String attribute;
 
@@ -124,16 +124,44 @@ public class SetTenantInfo extends AbstractAction {
 			case "lastDunningDate":
 				ti.setLastDunningDate("none".equalsIgnoreCase(value.trim()) ? null : dfmt.parse(value.trim()));
 				break;
+			case "collectionNoticeInfo.phone":
+				ti.getOrCreateCollectionNoticeInfo().setPhone(noneToNull(value));
+				break;
+			case "collectionNoticeInfo.email":
+				ti.getOrCreateCollectionNoticeInfo().setEmail(noneToNull(value));
+				break;
+			case "collectionNoticeInfo.remitToAccount":
+				ti.getOrCreateCollectionNoticeInfo().setRemitToAccount(noneToNull(value));
+				break;
+			case "collectionNoticeInfo.remitToAccountType":
+				String type = noneToNull(value);
+				if (type != null && !"BG".equalsIgnoreCase(type) && !"PG".equalsIgnoreCase(type)) {
+					sess.getConsole().println("The remit to account type must be BG or PG: " + value);
+					return null;
+				}
+				ti.getOrCreateCollectionNoticeInfo().setRemitToAccountType(type != null ? type.toUpperCase() : null);
+				break;
 			default:
 				sess.getConsole().println("Unknown attribute: " + attribute);
 				sess.getConsole().println("Available attributes: " + String.join(", ", TenantInfoAttributeCompleter.ATTRIBUTES));
 				return null;
 		}
 
+		if (ti.getCollectionNoticeInfo() != null && ti.getCollectionNoticeInfo().isEmpty()) {
+			ti.setCollectionNoticeInfo(null);
+		}
+
 		tif.persistTenantInformation(ti);
 		sess.getConsole().println("Tenant information updated for " + tenantId + ".");
 
 		return null;
+	}
+
+	/** Null for 'none' or a blank value. */
+	private static String noneToNull(String value) {
+		if (value == null) return null;
+		String v = value.trim();
+		return v.isEmpty() || "none".equalsIgnoreCase(v) ? null : v;
 	}
 
 }

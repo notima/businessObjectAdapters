@@ -13,6 +13,7 @@ import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
 import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerList;
+import org.notima.generic.businessobjects.CollectionNoticeInfo;
 import org.notima.generic.businessobjects.SuspenseAccountType;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.TenantInformation;
@@ -122,6 +123,16 @@ public class ShowTenantInfo extends AbstractAction {
 			}
 		} else {
 			sess.getConsole().println("  Suspense accounts : (not set)");
+		}
+		CollectionNoticeInfo cni = ti.getCollectionNoticeInfo();
+		if (cni != null && !cni.isEmpty()) {
+			sess.getConsole().println("  Collection notices:");
+			sess.getConsole().println("    Phone           : " + (cni.hasPhone() ? cni.getPhone() : "(not set)"));
+			sess.getConsole().println("    E-mail          : " + (cni.hasEmail() ? cni.getEmail() : "(not set)"));
+			sess.getConsole().println("    Remit To Account: " + (cni.hasRemitToAccount() ? cni.getRemitToAccount() : "(not set)")
+					+ (cni.getRemitToAccountType() != null ? " (" + cni.getRemitToAccountType() + ")" : ""));
+		} else {
+			sess.getConsole().println("  Collection notices: (no overrides)");
 		}
 	}
 

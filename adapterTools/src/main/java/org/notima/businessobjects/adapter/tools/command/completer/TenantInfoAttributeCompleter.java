@@ -32,6 +32,10 @@ public class TenantInfoAttributeCompleter implements Completer {
 		"suspenseAccounts.UNIDENTIFIED",
 		"suspenseAccounts.IDENTIFIED",
 		"suspenseAccounts.OWNER_SETTLEMENT",
+		"collectionNoticeInfo.phone",
+		"collectionNoticeInfo.email",
+		"collectionNoticeInfo.remitToAccount",
+		"collectionNoticeInfo.remitToAccountType",
 	};
 
 	@Override
