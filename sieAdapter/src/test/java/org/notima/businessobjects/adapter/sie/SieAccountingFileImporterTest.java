@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.sie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,12 +17,14 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.notima.generic.businessobjects.AccountElement;
+import org.notima.generic.businessobjects.AccountElement.AccountElementType;
 import org.notima.generic.businessobjects.AccountingFileData;
 import org.notima.generic.businessobjects.AccountingPeriodData;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.accounting.LedgerCalculator;
+import org.notima.generic.businessobjects.accounting.LedgerSummary;
 import org.notima.generic.businessobjects.accounting.rule.CountryRuleSetRegistry;
 import org.notima.util.json.JsonUtil;
 
@@ -204,6 +207,99 @@ public class SieAccountingFileImporterTest {
 		assertTrue(r.getAddedLater());
 		assertEquals("CH", r.getAddedBy());
 		assertEquals(0, BigDecimal.valueOf(218).compareTo(v.getTotalDebet()), "the struck line doesn't count");
+	}
+
+	/** This year with a voucher and the previous year with balances and results only, as Fortnox exports. */
+	private static final String TWO_YEARS_SIE =
+			"#FLAGGA 0\r\n" +
+			"#FORMAT PC8\r\n" +
+			"#SIETYP 4\r\n" +
+			"#PROGRAM \"Test\" 1.0\r\n" +
+			"#GEN 20250801\r\n" +
+			"#FNAMN \"Test AB\"\r\n" +
+			"#ORGNR 556000-0000\r\n" +
+			"#RAR 0 20240701 20250630\r\n" +
+			"#RAR -1 20230701 20240630\r\n" +
+			"#KONTO 1930 \"Bank\"\r\n" +
+			"#KONTO 2099 \"Arets resultat\"\r\n" +
+			"#KONTO 3010 \"Intakter\"\r\n" +
+			"#KONTO 5010 \"Lokalhyra\"\r\n" +
+			"#IB -1 1930 0.00\r\n" +
+			"#UB -1 1930 500.00\r\n" +
+			"#UB -1 2099 -500.00\r\n" +
+			"#IB 0 1930 500.00\r\n" +
+			"#IB 0 2099 -500.00\r\n" +
+			"#UB 0 1930 1100.00\r\n" +
+			"#UB 0 2099 -1100.00\r\n" +
+			"#RES -1 3010 -800.00\r\n" +
+			"#RES -1 5010 300.00\r\n" +
+			"#RES 0 3010 -1000.00\r\n" +
+			"#RES 0 5010 400.00\r\n" +
+			"#VER A 1 20250115 \"Forsaljning\"\r\n" +
+			"{\r\n" +
+			"#TRANS 1930 {} 1000.00\r\n" +
+			"#TRANS 3010 {} -1000.00\r\n" +
+			"}\r\n" +
+			"#VER A 2 20250120 \"Hyra\"\r\n" +
+			"{\r\n" +
+			"#TRANS 5010 {} 400.00\r\n" +
+			"#TRANS 1930 {} -400.00\r\n" +
+			"}\r\n";
+
+	/**
+	 * The previous year has no vouchers, so its profit and loss comes from #RES.
+	 * Both years' results are kept apart.
+	 */
+	@Test
+	public void testResultRecordsOfBothYears() throws Exception {
+		File tmp = Files.createTempFile("sie-res-", ".se").toFile();
+		tmp.deleteOnExit();
+		Files.write(tmp.toPath(), TWO_YEARS_SIE.getBytes("IBM437"));
+
+		AccountingFileData result = new SieAccountingFileImporter().importFile(tmp);
+		CountryRuleSetRegistry.withDefaults().applyTo(result.getCountryCode(), result.getPeriods());
+		AccountingPeriodData previous = result.getPeriods().get(0);
+		AccountingPeriodData current = result.getPeriods().get(1);
+		assertEquals(LocalDate.of(2023, 7, 1), previous.getPeriodStart());
+		assertTrue(previous.getVouchers().isEmpty());
+
+		assertEquals(-800.0, findAccount(previous, "3010").getEndingBalance(), 0.001);
+		assertEquals(-1000.0, findAccount(current, "3010").getEndingBalance(), 0.001);
+
+		LedgerSummary prevPl = LedgerCalculator.summarize(previous, AccountElementType.PLAcct, null, null);
+		assertEquals(800.0, prevPl.getAccount("3010").getCredit(), 0.001);
+		assertEquals(300.0, prevPl.getAccount("5010").getDebit(), 0.001);
+		assertEquals(500.0, prevPl.total().getResult(), 0.001);
+		LedgerSummary prevBs = LedgerCalculator.summarize(previous, AccountElementType.BalanceAcct, null, null);
+		assertEquals(500.0, prevBs.getAccount("1930").getBalanceAtTo(), 0.001);
+
+		// The current year is calculated from its vouchers, which agree with #RES
+		LedgerSummary curPl = LedgerCalculator.summarize(current, AccountElementType.PLAcct, null, null);
+		assertEquals(600.0, curPl.total().getResult(), 0.001);
+	}
+
+	/** A period without vouchers is exported with its results as #RES, not #UB. */
+	@Test
+	public void testResultsExportedAsRes() throws Exception {
+		File in = Files.createTempFile("sie-res-in-", ".se").toFile();
+		in.deleteOnExit();
+		Files.write(in.toPath(), TWO_YEARS_SIE.getBytes("IBM437"));
+		AccountingFileData imported = new SieAccountingFileImporter().importFile(in);
+		CountryRuleSetRegistry.withDefaults().applyTo(imported.getCountryCode(), imported.getPeriods());
+		AccountingPeriodData previous = imported.getPeriods().get(0);
+
+		File out = Files.createTempFile("sie-res-out-", ".se").toFile();
+		out.deleteOnExit();
+		new SieAccountingFileExporter().exportFile(out, previous, imported.getCompany(), true);
+		String sie = new String(Files.readAllBytes(out.toPath()), "IBM437");
+		assertTrue(sie.contains("#RES 0 3010 -800"), sie);
+		assertTrue(sie.contains("#RES 0 5010 300"), sie);
+		assertTrue(sie.contains("#UB 0 1930 500"), sie);
+		assertFalse(sie.contains("#UB 0 3010"), sie);
+
+		AccountingPeriodData back = new SieAccountingFileImporter().importFile(out).getPeriods().get(0);
+		CountryRuleSetRegistry.withDefaults().applyTo("SE", java.util.Arrays.asList(back));
+		assertEquals(500.0, LedgerCalculator.summarize(back, AccountElementType.PLAcct, null, null).total().getResult(), 0.001);
 	}
 
 	private static AccountingVoucherLine line(String acctNo, Integer debit, Integer credit) {

@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.sie;
 
 import org.notima.generic.businessobjects.AccountElement;
+import org.notima.generic.businessobjects.AccountElement.AccountElementType;
 import org.notima.generic.businessobjects.AccountingPeriodData;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
@@ -10,6 +11,7 @@ import org.notima.sie.AccountRec;
 import org.notima.sie.BalanceRec;
 import org.notima.sie.ObjRec;
 import org.notima.sie.RARRec;
+import org.notima.sie.ResRec;
 import org.notima.sie.SIEFileType4;
 import org.notima.sie.TransRec;
 import org.notima.sie.VerRec;
@@ -83,7 +85,10 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
             if (ae.getOpeningBalance() != 0.0) {
                 sieFile.addBalanceRecord(new BalanceRec(ae.getAccountNo(), ae.getOpeningBalance()));
             }
-            if (ae.getEndingBalance() != 0.0) {
+            if (ae.getEndingBalance() != 0.0 && ae.getAccountElementType() == AccountElementType.PLAcct) {
+                // The ending balance of a P&L account is its result
+                sieFile.addResultRecord(new ResRec(ae.getAccountNo(), ae.getEndingBalance()));
+            } else if (ae.getEndingBalance() != 0.0) {
                 BalanceRec ub = new BalanceRec(ae.getAccountNo(), ae.getEndingBalance());
                 ub.setInBalance(false);
                 sieFile.addBalanceRecord(ub);

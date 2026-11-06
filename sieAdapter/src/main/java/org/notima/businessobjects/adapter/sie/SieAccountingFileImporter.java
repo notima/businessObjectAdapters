@@ -12,6 +12,7 @@ import org.notima.sie.BalanceRec;
 import org.notima.sie.DimRec;
 import org.notima.sie.ObjRec;
 import org.notima.sie.RARRec;
+import org.notima.sie.ResRec;
 import org.notima.sie.SIEFileType4;
 import org.notima.sie.TransRec;
 import org.notima.sie.VerRec;
@@ -22,6 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -163,6 +165,28 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
                         else                   ae.setEndingBalance(rec.getBalance());
                     }
                 }
+            }
+        }
+
+        // The result (#RES) of a P&L account is its ending balance: a period without
+        // vouchers (typically the previous year) then still has a profit and loss.
+        for (Map.Entry<Integer, AccountingPeriodData> entry : offsetToPeriod.entrySet()) {
+            List<ResRec> resRecs = sieFile.getResultRecords(entry.getKey());
+            if (resRecs.isEmpty()) continue;
+            Map<String, AccountElement> byNo = new HashMap<>();
+            for (AccountElement ae : entry.getValue().getChartOfAccounts()) {
+                byNo.put(ae.getAccountNo(), ae);
+            }
+            for (ResRec rec : resRecs) {
+                AccountElement ae = byNo.get(rec.getAccountNo());
+                if (ae == null) {
+                    // An account with a result but no #KONTO record
+                    ae = new AccountElement(rec.getAccountNo());
+                    ae.setName("");
+                    entry.getValue().getChartOfAccounts().add(ae);
+                    byNo.put(ae.getAccountNo(), ae);
+                }
+                ae.setEndingBalance(rec.getBalance());
             }
         }
 
