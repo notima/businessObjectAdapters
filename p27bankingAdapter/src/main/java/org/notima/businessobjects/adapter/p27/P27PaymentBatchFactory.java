@@ -100,12 +100,12 @@ public class P27PaymentBatchFactory extends DirectoryPaymentBatchFactory {
 
 	@Override
 	public void setDestination(String dest) throws Exception {
-		// Writing payment files (pain.001) is not supported yet.
+		// Payment files (pain.001) are written by P27PaymentInstructionWriter.
 	}
 
 	@Override
 	public PaymentBatch writePaymentBatch(PaymentBatch batch) throws Exception {
-		// Writing payment files (pain.001) is not supported yet.
+		// Payment files (pain.001) are written by P27PaymentInstructionWriter.
 		return null;
 	}
 
