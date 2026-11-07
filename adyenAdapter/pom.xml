@@ -22,6 +22,9 @@
 
 		<resources>
 			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
 				<directory>src/test/resources</directory>
 				<excludes>
 					<exclude>*</exclude>
