@@ -83,6 +83,7 @@ public class FortnoxCustomerFileImporter implements BusinessPartnerFileImporter 
 
 		BusinessPartnerFileData result = new BusinessPartnerFileData();
 		result.setSourceFormat(getFormatName());
+		result.setSourceSystem(FortnoxAdapter.SYSTEMNAME);
 		result.setBusinessPartners(partners);
 		return result;
 	}

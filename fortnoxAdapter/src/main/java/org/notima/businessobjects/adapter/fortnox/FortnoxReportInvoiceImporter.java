@@ -114,6 +114,7 @@ public abstract class FortnoxReportInvoiceImporter implements InvoiceFileImporte
 
 		InvoiceFileData result = new InvoiceFileData();
 		result.setSourceFormat(getFormatName());
+		result.setSourceSystem(FortnoxAdapter.SYSTEMNAME);
 		result.setAsOfDate(extractReportDate(lines));
 		result.setOpenItemsOnly(true);
 		result.setInvoices(invoices);
