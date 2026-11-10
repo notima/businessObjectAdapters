@@ -648,8 +648,121 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		if (o instanceof org.notima.generic.businessobjects.BusinessPartner) {
 			return persistBusinessPartner((org.notima.generic.businessobjects.BusinessPartner)o);
 		}
+		if (o instanceof org.notima.generic.businessobjects.Order) {
+			return persistCanonicalOrder((org.notima.generic.businessobjects.Order<?>)o);
+		}
 		
 		return null;
+	}
+	
+	/**
+	 * Saves the supplied order in Fortnox. The business partner of the order must 
+	 * already exist in Fortnox (identityNo is the Fortnox customer number).
+	 * 
+	 * @param order		The order to persist.
+	 * @return			The order with document key set to the Fortnox order number.
+	 * @throws Exception	If something goes wrong.
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected Order<?> persistCanonicalOrder(Order<?> order) throws Exception {
+		
+		org.notima.api.fortnox.entities3.Order dst = convertToFortnoxOrder(order);
+		
+		if (debugOn) {
+			StringWriter stringWriter = new StringWriter();
+			JAXB.marshal(dst, stringWriter);
+			writeToDebugFile("order.xml", stringWriter.getBuffer());
+			order.setDocumentKey("DEBUG");
+		} else {
+			dst = fortnoxClient.setOrder(dst);
+			if (dst==null) {
+				throw new Exception("Order not saved: " + order.getOrderKey());
+			}
+			order.setDocumentKey(dst.getDocumentNumber());
+		}
+		((Order)order).setNativeOrder(dst);
+		
+		return order;
+	}
+	
+	/**
+	 * Converts a canonical order to a Fortnox order.
+	 * 
+	 * The order key (the order's reference in the source system) is written to 
+	 * ExternalInvoiceReference1 and is used to recognize orders already written.
+	 * 
+	 * @param src			The order to convert.
+	 * @return				A Fortnox order that can be saved.
+	 * @throws Exception	If something goes wrong.
+	 */
+	public org.notima.api.fortnox.entities3.Order convertToFortnoxOrder(Order<?> src) throws Exception {
+		
+		org.notima.api.fortnox.entities3.Order dst = new org.notima.api.fortnox.entities3.Order();
+		
+		if (src.getDocumentKey()!=null && src.getDocumentKey().trim().length()>0)
+			dst.setDocumentNumber(src.getDocumentKey());
+		
+		BusinessPartner<?> bp = src.getBillBpartner()!=null ? src.getBillBpartner() : src.getBusinessPartner();
+		if (bp==null || bp.getIdentityNo()==null || bp.getIdentityNo().trim().length()==0) {
+			throw new Exception("Order " + src.getOrderKey() + " has no Fortnox customer number");
+		}
+		dst.setCustomerNumber(bp.getIdentityNo());
+		
+		if (src.getDateOrdered()!=null) {
+			dst.setOrderDate(FortnoxClient3.s_dfmt.format(src.getDateOrdered()));
+		}
+		if (src.getDatePromised()!=null) {
+			dst.setDeliveryDate(FortnoxClient3.s_dfmt.format(src.getDatePromised()));
+		}
+		if (src.getPaymentTermKey()!=null && src.getPaymentTermKey().trim().length()>0) {
+			dst.setTermsOfPayment(src.getPaymentTermKey());
+		}
+		dst.setCurrency(src.getCurrency());
+		dst.setExternalInvoiceReference1(src.getOrderKey());
+		dst.setExternalInvoiceReference2(src.getExternalReference2());
+		dst.setYourOrderNumber(src.getYourOrderNumber());
+		if (src.getBillPerson()!=null && src.getBillPerson().getName()!=null) {
+			dst.setYourReference(src.getBillPerson().getName());
+		}
+		if (src.getStatusComment()!=null && src.getStatusComment().trim().length()>0) {
+			dst.setRemarks(src.getStatusComment());
+		}
+		if (src.getProject()!=null && src.getProject().trim().length()>0) {
+			dst.setProject(src.getProject());
+		}
+		if (src.getCostCenter()!=null && src.getCostCenter().trim().length()>0) {
+			dst.setCostCenter(src.getCostCenter());
+		}
+		
+		Location ship = src.getShipLocation();
+		if (ship!=null) {
+			dst.setDeliveryName(ship.getName());
+			dst.setDeliveryAddress1(ship.getAddress1());
+			dst.setDeliveryAddress2(ship.getAddress2());
+			dst.setDeliveryZipCode(ship.getPostal());
+			dst.setDeliveryCity(ship.getCity());
+		}
+		
+		org.notima.api.fortnox.entities3.OrderRows rows = new org.notima.api.fortnox.entities3.OrderRows();
+		List<OrderRow> rowList = new ArrayList<OrderRow>();
+		rows.setOrderRow(rowList);
+		dst.setOrderRows(rows);
+		
+		for (OrderLine ol : src.getLines()) {
+			addCanonicalOrderLineToFortnoxOrderRow(src, ol, rowList);
+		}
+		
+		dst.setVATIncluded(Boolean.valueOf(src.isShowPricesIncludingVAT()));
+		
+		return dst;
+	}
+	
+	@Override
+	public OrderInvoiceOperationResult writeOrders(List<Order<?>> canonicalOrders, OrderInvoiceWriterOptions opts) throws Exception {
+		
+		FortnoxOrderWriter writer = new FortnoxOrderWriter(this, opts);
+		return writer.writeOrders(canonicalOrders);
+		
 	}
 	
 	/**
@@ -724,7 +837,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	
 	public org.notima.generic.businessobjects.BusinessPartner<Customer> persistBusinessPartner(org.notima.generic.businessobjects.BusinessPartner<Customer> bpartner) throws Exception {
 		
-		if (!bpartner.getIsVendor()) {
+		if (!Boolean.TRUE.equals(bpartner.getIsVendor())) {
 		
 			Customer dstContact = convertFromBusinessPartner(bpartner);
 	
@@ -809,10 +922,18 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			dstContact.setZipCode(loc.getPostal());
 			dstContact.setCountryCode(loc.getCountryCode());
 			
-			if (EmailUtils.isValidEmail(dstContact.getEmail()))
+			if (EmailUtils.isValidEmail(loc.getEmail()))
 				dstContact.setEmail(loc.getEmail());
 			if (dstContact.getPhone1()==null)
 				dstContact.setPhone1(loc.getPhone());
+		}
+		
+		// Use the contact's e-mail and phone if not set on the address
+		if (contact!=null) {
+			if (dstContact.getEmail()==null && EmailUtils.isValidEmail(contact.getEmail()))
+				dstContact.setEmail(contact.getEmail());
+			if (dstContact.getPhone1()==null)
+				dstContact.setPhone1(contact.getPhone());
 		}
 
 		Location delLoc = bpartner.getAddressShipping();
@@ -823,7 +944,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 			if (delLoc.getAddress1()==null || delLoc.getAddress1().trim().length()==0) {
 				dstContact.setDeliveryAddress1(delLoc.getStreet());
 				if (delLoc.getHouseNo()!=null && delLoc.getHouseNo().trim().length()>0) {
-					dstContact.setDeliveryAddress1(dstContact.getAddress1() + " " + delLoc.getHouseNo());
+					dstContact.setDeliveryAddress1(dstContact.getDeliveryAddress1() + " " + delLoc.getHouseNo());
 				}
 			}
 			if (delLoc.getCo()!=null && delLoc.getCo().trim().length()>0) {
@@ -831,9 +952,9 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 						(dstContact.getDeliveryAddress2()!=null && dstContact.getDeliveryAddress2().trim().length()>0 ? " " + dstContact.getDeliveryAddress2() : ""));
 				dstContact.setDeliveryAddress1(delLoc.getCo());
 			}
-			dstContact.setCity(delLoc.getCity());
-			dstContact.setZipCode(delLoc.getPostal());
-			dstContact.setCountryCode(delLoc.getCountryCode());
+			dstContact.setDeliveryCity(delLoc.getCity());
+			dstContact.setDeliveryZipCode(delLoc.getPostal());
+			dstContact.setDeliveryCountryCode(delLoc.getCountryCode());
 			
 		}
 		
@@ -1158,6 +1279,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 		row = new OrderRow();
 		row.setArticleNumber(il.getProductKey());
 		row.setDescription(il.getName()!=null ? il.getName() : il.getDescription());
+		row.setOrderedQuantity((double)il.getQtyEntered());
 		row.setDeliveredQuantity((double)il.getQtyEntered());
 		if (row.getDescription()==null || row.getDescription().trim().length()==0) {
 			// Empty description if missing
@@ -1705,8 +1827,7 @@ public class FortnoxAdapter extends BasicBusinessObjectFactory<
 	@Override
 	public org.notima.api.fortnox.entities3.Order persistNativeOrder(
 			org.notima.api.fortnox.entities3.Order order) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return fortnoxClient.setOrder(order);
 	}
 
 	@Override

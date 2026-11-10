@@ -1,226 +1,192 @@
 package org.notima.businessobjects.adapter.fortnox;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 
-import org.notima.api.fortnox.FortnoxUtil;
+import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.entities3.Customer;
-import org.notima.api.fortnox.entities3.InvoiceSubset;
-import org.notima.api.fortnox.entities3.OrderRow;
-import org.notima.api.fortnox.entities3.OrderRows;
+import org.notima.api.fortnox.entities3.OrderSubset;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.OrderInvoiceOperationResult;
 import org.notima.generic.businessobjects.OrderInvoiceWriterOptions;
-import org.notima.generic.businessobjects.OrderLine;
-import org.notima.generic.businessobjects.TaxSubjectIdentifier;
+import org.notima.generic.businessobjects.OrderList;
+import org.notima.generic.businessobjects.Person;
 import org.notima.util.LocalDateUtils;
 
+/**
+ * Writes canonical (sales) orders to Fortnox.
+ *
+ * <p>The order key of each order (its reference in the source system, e.g. a web shop's
+ * order id) is written to ExternalInvoiceReference1. An order whose order key is already
+ * found on an order in Fortnox is skipped, so the same orders can be written again without
+ * creating duplicates.
+ *
+ * <p>The customer of each order is looked up in this order:
+ * <ol>
+ *   <li>Customer number (identityNo of the business partner) if set.</li>
+ *   <li>Organisation number (taxId) for companies.</li>
+ *   <li>E-mail address.</li>
+ * </ol>
+ * If no customer is found, a new customer is created if
+ * {@link OrderInvoiceWriterOptions#isCreateBusinessPartner()} is set, otherwise the order
+ * is not written.
+ */
 public class FortnoxOrderWriter extends FortnoxObjectWriter {
 
 	private OrderInvoiceOperationResult result = new OrderInvoiceOperationResult();
-	
-	private OrderInvoiceWriterOptions	options;
-	
-	
-	
-	public FortnoxOrderWriter(FortnoxAdapter adapter, OrderInvoiceWriterOptions opts) {
-		
-		this.adapter = adapter;
-		options = opts;
-		fortnoxClient = adapter.getClient();
-		
-	}
-	
-	
-	public OrderInvoiceOperationResult writeOrders(List<Order<?>> canonicalOrders) throws Exception {
-		
-		initDates();
-		
-		// Set export revenue account
-		// ((FortnoxBusinessObjectFactoryV3)fortnox3).setExportRevenueAccount("3105");
-		adapter.setDefaultRevenueAccount("3011");
-		
-		refreshCustomerMaps();
-		
-		int ocount = 0;
-		String custNo;
-		BusinessPartner<?> bp;
-		BusinessPartner<?> lookedUpBp;
-		Location loc;
-		// Make sure all business partners are imported
-		for (Order<?> canonicalInvoice : canonicalOrders) {
-			custNo = null;
-			lookedUpBp = null;
-			
-			bp = canonicalInvoice.getBusinessPartner();
 
-			if (bp.getIdentityNo()!=null && bp.getIdentityNo().trim().length()>0) {
-				lookedUpBp = custMapById.get(bp.getIdentityNo());
-			}
-			if (lookedUpBp==null)  {
-				if (bp.hasLocations()) {
-					loc = bp.getAddressShipping()!=null ? bp.getAddressShipping() : bp.getAddressOfficial();
-					custNo = custMap.get(loc.getAddress1().trim().toUpperCase());
-					if (custNo!=null) {
-						bp.setIdentityNo(custNo);
-					}
-				} else if (bp.hasTaxId()) {
-					lookedUpBp = custMapByTaxId.get(new TaxSubjectIdentifier(FortnoxUtil.convertTaxIdToFortnoxFormat(bp.getTaxId()),bp.getCountryCode()));
-					if (lookedUpBp!=null) {
-						bp.setIdentityNo(lookedUpBp.getIdentityNo());
-					}
-				} else {
-					if (!options.isCreateBusinessPartner()) {
-						throw new Exception("Can't find business partner " + custNo + " " + bp.getName());
-					}
-					// New customer
-					bp.setIdentityNo(custNo);
-					FortnoxAdapter.logger.info("Persisting new customer " + bp.getName());
-					adapter.persist(bp);
-				}
-			}
-			ocount++;
-			
-		}
-		
-		// Get existing invoices
-		Map<Object,Object> invoiceMap = adapter.lookupList("InvoiceSubset-ExternalInvoiceReference2", true);
-		
-		ocount = 0;
-		InvoiceSubset is = null;
-		org.notima.api.fortnox.entities3.Order finvoice = null;
-		
-		Customer fcustomer = null;
-		
+	public FortnoxOrderWriter(FortnoxAdapter adapter, OrderInvoiceWriterOptions opts) {
+
+		this.adapter = adapter;
+		this.options = opts!=null ? opts : new OrderInvoiceWriterOptions();
+		fortnoxClient = adapter.getClient();
+
+	}
+
+	/**
+	 * Writes the orders to Fortnox.
+	 *
+	 * @param canonicalOrders	The orders to write.
+	 * <p>An order that can't be written is logged and the remaining orders are written.
+	 * Orders not written have no document key afterwards; orders written now or before have
+	 * the Fortnox order number as document key.
+	 *
+	 * @return					The result, not successful if any order failed. Created orders
+	 * 							are found in affected orders.
+	 * @throws Exception		If something goes wrong.
+	 */
+	public OrderInvoiceOperationResult writeOrders(List<Order<?>> canonicalOrders) throws Exception {
+
+		OrderList affected = new OrderList();
+		result.setAffectedOrders(affected);
+
+		int ocount = 0;
+		int failed = 0;
+
 		for (Order<?> o : canonicalOrders) {
-			
-			is = (InvoiceSubset)invoiceMap.get(o.getOrderKey());
-			fcustomer = getFortnoxCustomer(o);
-			
-			if (is==null) {
-				// Get customer as named in Fortnox
-				bp = o.getBusinessPartner();
-				bp.setName(fcustomer.getName());
-				bp.setIdentityNo(fcustomer.getCustomerNumber());
-				o.setDateOrdered(LocalDateUtils.asDate(options.getInvoiceDate()));
-				FortnoxAdapter.logger.info("Persisting order " + o.getOrderKey());
-				adapter.persist(o);
-				result.incrementCreated();
-				
-				ocount++;
-			} else {
-				// Update existing
-				 finvoice = adapter.getClient().getOrder(is.getDocumentNumber());
-				 if (updateOrder(o, finvoice)) {
-					 adapter.persistNativeOrder(finvoice);
-					 FortnoxAdapter.logger.info("Updated order " + finvoice.getDocumentNumber());
-					 result.incrementUpdated();
-				 }
-			}
+
 			if (options.getCreateLimit()>0 && ocount>=options.getCreateLimit()) {
 				FortnoxAdapter.logger.info("Create limit " + options.getCreateLimit() + " reached.");
 				break;
 			}
 
-		}	
-		
+			try {
+				if (writeOrder(o)) {
+					result.incrementCreated();
+					affected.getOrderList().add(o);
+					ocount++;
+				}
+			} catch (Exception e) {
+				failed++;
+				FortnoxAdapter.logger.error("Order " + o.getOrderKey() + " could not be written: " + e.getMessage(), e);
+			}
+
+		}
+
+		result.setSuccessful(failed==0);
 		return result;
-	}
-	
-	private void initDates() {
-		
-		if (options.getOrderDate()==null) {
-			options.setOrderDate(LocalDateUtils.asLocalDate(Calendar.getInstance().getTime()));
-		}
-		
-		if (options.getDueDate()==null) {
-			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.DATE, 10);
-			options.setDueDate(LocalDateUtils.asLocalDate(cal.getTime()));
-		}
-		
 	}
 
 	/**
-	 * Only updates prices on existing invoices
-	 * 
-	 * @param src
-	 * @param dst
-	 * @return	true if anything was updated.
+	 * Writes one order.
+	 *
+	 * @param o				The order.
+	 * @return				True if the order was created. False if it already exists or
+	 * 						its customer is not found (and may not be created).
+	 * @throws Exception	If the order can't be written.
 	 */
-	private boolean updateOrder(Order<?> src, org.notima.api.fortnox.entities3.Order dst) {
+	private boolean writeOrder(Order<?> o) throws Exception {
 
-		boolean result = false;
-		List<OrderLine> srcLines = src.getLines();
-		OrderRows ir = dst.getOrderRows();
-		List<OrderRow> dstLines = ir.getOrderRow();
-		if (dstLines==null) {
-			dstLines = new ArrayList<OrderRow>();
-			ir.setOrderRow(dstLines);
+		List<OrderSubset> existing = fortnoxClient.getOrdersByExternalInvoiceReference1(o.getOrderKey());
+		if (!existing.isEmpty()) {
+			o.setDocumentKey(existing.get(0).getDocumentNumber());
+			FortnoxAdapter.logger.info("Order " + o.getOrderKey() + " already exists as Fortnox order "
+					+ existing.get(0).getDocumentNumber() + ", skipping.");
+			return false;
 		}
-		
-		OrderRow dstLine;
-		for (OrderLine srcLine : srcLines) {
-			
-			dstLine = getCorrespondingRow(srcLine, dstLines);
-			if (dstLine!=null && srcLine.getPriceActual()!=dstLine.getPrice()) {
-				dstLine.setPrice(srcLine.getPriceActual());
-				dstLine.setTotal(null); // Don't update total on line level
-				result = true;
+
+		BusinessPartner<?> bp = o.getBusinessPartner();
+		Customer customer = lookupCustomer(bp);
+		if (customer==null) {
+			if (!options.isCreateBusinessPartner()) {
+				FortnoxAdapter.logger.warn("Customer " + (bp!=null ? bp.getName() : "")
+						+ " of order " + o.getOrderKey() + " not found in Fortnox, order not written.");
+				return false;
 			}
-			if (dstLine==null) {
-				// Create a new line
-				try {
-					adapter.addCanonicalOrderLineToFortnoxOrderRow(src, srcLine, dstLines);
-				} catch (Exception ee) {
-					ee.printStackTrace();
+			FortnoxAdapter.logger.info("Creating new customer " + bp.getName());
+			bp.setIdentityNo(null);
+			adapter.persist(bp);
+		} else {
+			bp.setIdentityNo(customer.getCustomerNumber());
+		}
+
+		if (o.getDateOrdered()==null && options.getOrderDate()!=null) {
+			o.setDateOrdered(LocalDateUtils.asDate(options.getOrderDate()));
+		}
+
+		adapter.persist(o);
+		FortnoxAdapter.logger.info("Order " + o.getOrderKey() + " written as Fortnox order " + o.getDocumentKey());
+		return true;
+	}
+
+	/**
+	 * Looks up the Fortnox customer of the business partner.
+	 *
+	 * @param bp			The business partner.
+	 * @return				The customer, null if not found.
+	 * @throws Exception	If something goes wrong.
+	 */
+	protected Customer lookupCustomer(BusinessPartner<?> bp) throws Exception {
+
+		if (bp==null)
+			throw new Exception("Order without business partner");
+
+		Customer c = null;
+
+		if (bp.getIdentityNo()!=null && bp.getIdentityNo().trim().length()>0) {
+			c = fortnoxClient.getCustomerByCustNo(bp.getIdentityNo().trim());
+			if (c!=null) return c;
+		}
+
+		if (bp.isCompany() && bp.hasTaxId()) {
+			try {
+				c = fortnoxClient.getCustomerByTaxId(bp.getTaxId(), true);
+				if (c!=null) return c;
+			} catch (Exception e) {
+				// Not found
+			}
+		}
+
+		String email = getEmail(bp);
+		if (email!=null) {
+			c = fortnoxClient.getCustomerByEmail(email);
+		}
+
+		return c;
+	}
+
+	private String getEmail(BusinessPartner<?> bp) {
+		Location loc = bp.getAddressOfficial();
+		if (loc!=null && loc.getEmail()!=null && loc.getEmail().trim().length()>0) {
+			return loc.getEmail().trim();
+		}
+		if (bp.getContacts()!=null) {
+			for (Person p : bp.getContacts()) {
+				if (p.getEmail()!=null && p.getEmail().trim().length()>0) {
+					return p.getEmail().trim();
 				}
 			}
-			
 		}
-		if (result) {
-			dst.setTotal(0D); // Don't update total
-		}
-		return result;
-		
-	}
-	
-	/**
-	 * Returns corresponding row. Null if no corresponding row is found.
-	 * 
-	 * @param srcLine
-	 * @return
-	 */
-	private OrderRow getCorrespondingRow(OrderLine srcLine, List<OrderRow> rows) {
-
-		if (rows==null || srcLine==null)
-			return null;
-		OrderRow result = null;
-		for (OrderRow r : rows) {
-			if (srcLine.getProductKey()==null || srcLine.getDescription()==null) 
-				continue;
-			if (srcLine.getProductKey().equals(r.getArticleNumber()) && srcLine.getDescription().equals(r.getDescription())) {
-				// Lets assume same product and description equals the same line
-				result = r;
-				break;
-			}
-		}
-		return result;
+		return null;
 	}
 
 	public OrderInvoiceOperationResult getResult() {
 		return result;
 	}
 
-	public void setResult(OrderInvoiceOperationResult result) {
-		this.result = result;
+	public FortnoxClient3 getFortnoxClient() {
+		return fortnoxClient;
 	}
 
-	
-	
-	
 }
