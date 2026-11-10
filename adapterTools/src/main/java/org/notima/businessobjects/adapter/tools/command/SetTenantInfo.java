@@ -40,7 +40,7 @@ public class SetTenantInfo extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
 
-	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear), collectionNoticeInfo.phone / .email / .remitToAccount / .remitToAccountType (BG or PG) for collection notices ('none' to clear), vatCode.<account> the account's VAT code for show-vat-report, ie vatCode.3010 MP1, 'exclude' to leave the account out of the VAT return ('none' to clear))", required = true, multiValued = false)
+	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear), collectionNoticeInfo.phone / .email / .remitToAccount / .remitToAccountType (BG or PG) for collection notices ('none' to clear), vatCode.<account> the account's tax key for show-vat-report: a key of the tax rules (MP1, MP2, MP3, MF, VTEU, FTEU, REVD, IREVD, IEUV25, IEUT25, IIMT25 ...), a box number (ie 23), settlement, rounding, or exclude to leave the account out ('none' to clear))", required = true, multiValued = false)
 	@Completion(TenantInfoAttributeCompleter.class)
 	private String attribute;
 

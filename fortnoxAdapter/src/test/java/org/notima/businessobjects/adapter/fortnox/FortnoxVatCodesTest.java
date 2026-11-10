@@ -28,19 +28,26 @@ public class FortnoxVatCodesTest {
 		AccountElement own = new AccountElement("3020");
 		own.setTaxKey("MP2");
 		AccountElement bank = new AccountElement("1930");
+		AccountElement sub = new AccountElement("4610");
+		AccountElement settle = new AccountElement("2650");
+		AccountElement odd = new AccountElement("4999");
 		AccountingPeriodData p = new AccountingPeriodData();
-		p.setChartOfAccounts(new ArrayList<AccountElement>(Arrays.asList(sales, own, bank)));
+		p.setChartOfAccounts(new ArrayList<AccountElement>(Arrays.asList(sales, own, bank, sub, settle, odd)));
 		AccountingFileData data = new AccountingFileData();
 		data.setPeriods(new ArrayList<AccountingPeriodData>(Arrays.asList(p)));
 		Accounts accounts = new Accounts();
 		accounts.setAccountSubset(new ArrayList<AccountSubset>(Arrays.asList(
-				account(3010, " MP1 "), account(3020, "MP1"), account(1930, ""))));
+				account(3010, " MP1 "), account(3020, "MP1"), account(1930, ""), account(4610, "IT"), account(2650, "R2"),
+				account(4999, "XYZ"))));
 
 		FortnoxAccountingModelProvider.applyVatCodes(data, accounts);
 
 		assertEquals("MP1", sales.getTaxKey());
 		assertEquals("MP2", own.getTaxKey());	// a key in the model is kept
 		assertNull(bank.getTaxKey());
+		assertEquals("IREVD", sub.getTaxKey());	// translated to the tax rules
+		assertEquals("SETTLEMENT", settle.getTaxKey());
+		assertEquals("XYZ", odd.getTaxKey());	// unknown: kept, to show as unknown
 	}
 
 }

@@ -102,7 +102,8 @@ public class FortnoxAccountingModelProvider implements AccountingModelProvider {
 	}
 
 	/**
-	 * Sets the VAT code of each account in Fortnox as the tax key of the account in the model
+	 * Sets the VAT code of each account in Fortnox, translated to the tax keys of the canonical
+	 * model ({@link FortnoxVatCodes}), as the tax key of the account in the model
 	 * ({@link AccountElement#getTaxKey()}), where the model has none, ie for the VAT return.
 	 */
 	static void applyVatCodes(AccountingFileData data, Accounts accounts) {
@@ -110,7 +111,7 @@ public class FortnoxAccountingModelProvider implements AccountingModelProvider {
 		Map<String, String> codes = new HashMap<String, String>();
 		for (AccountSubset a : accounts.getAccountSubset()) {
 			if (a.getNumber() == null || a.getVATCode() == null || a.getVATCode().trim().isEmpty()) continue;
-			codes.put(a.getNumber().toString(), a.getVATCode().trim());
+			codes.put(a.getNumber().toString(), FortnoxVatCodes.toTaxKey(a.getVATCode()));
 		}
 		for (AccountingPeriodData p : data.getPeriods()) {
 			if (p.getChartOfAccounts() == null) continue;
