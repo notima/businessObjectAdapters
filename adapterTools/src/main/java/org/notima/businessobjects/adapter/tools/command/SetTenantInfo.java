@@ -12,6 +12,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.notima.businessobjects.adapter.tools.AdapterToolsSettings;
 import org.notima.businessobjects.adapter.tools.CanonicalObjectFactory;
+import org.notima.generic.businessobjects.tax.vatreport.VatReportDefinition;
 import org.notima.businessobjects.adapter.tools.command.completer.OrgNoCompleter;
 import org.notima.businessobjects.adapter.tools.command.completer.TenantInfoAttributeCompleter;
 import org.notima.generic.businessobjects.SuspenseAccountType;
@@ -24,6 +25,7 @@ import org.notima.generic.ifacebusinessobjects.TenantInformationFactory;
 public class SetTenantInfo extends AbstractAction {
 
 	static final String SUSPENSE_ACCOUNTS_PREFIX = "suspenseAccounts.";
+	static final String VAT_CODE_PREFIX = "vatCode.";
 
 	@Reference
 	private CanonicalObjectFactory cof;
@@ -38,7 +40,7 @@ public class SetTenantInfo extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
 
-	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear), collectionNoticeInfo.phone / .email / .remitToAccount / .remitToAccountType (BG or PG) for collection notices ('none' to clear))", required = true, multiValued = false)
+	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear), collectionNoticeInfo.phone / .email / .remitToAccount / .remitToAccountType (BG or PG) for collection notices ('none' to clear), vatCode.<account> the account's VAT code for show-vat-report, ie vatCode.3010 MP1, 'exclude' to leave the account out of the VAT return ('none' to clear))", required = true, multiValued = false)
 	@Completion(TenantInfoAttributeCompleter.class)
 	private String attribute;
 
@@ -89,6 +91,22 @@ public class SetTenantInfo extends AbstractAction {
 			tif.persistTenantInformation(ti);
 			sess.getConsole().println("Suspense accounts " + type + " of " + tenantId + ": "
 					+ (accounts.isEmpty() ? "(none)" : String.join(", ", accounts)));
+			return null;
+		}
+
+		// VAT code of an account for the VAT return, ie vatCode.3010 MP1
+		if (attribute.trim().startsWith(VAT_CODE_PREFIX)) {
+			String account = attribute.trim().substring(VAT_CODE_PREFIX.length()).trim();
+			if (account.isEmpty()) {
+				sess.getConsole().println("Give the account after " + VAT_CODE_PREFIX + ", ie " + VAT_CODE_PREFIX + "3010");
+				return null;
+			}
+			String code = noneToNull(value);
+			ti.setVatCode(account, code);
+			tif.persistTenantInformation(ti);
+			String shown = code == null ? "(none: placed by the chart of accounts, else BAS)"
+					: VatReportDefinition.EXCLUDED.equalsIgnoreCase(code) ? "EXCLUDE (not part of the VAT return)" : code.toUpperCase();
+			sess.getConsole().println("VAT code of account " + account + " of " + tenantId + ": " + shown);
 			return null;
 		}
 

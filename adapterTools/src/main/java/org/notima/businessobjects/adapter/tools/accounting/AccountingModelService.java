@@ -161,6 +161,31 @@ public class AccountingModelService {
 		return periodOf(model(provider, tenant, fy, maxAge), fy);
 	}
 
+	/**
+	 * The periods of the fiscal years that overlap a date range, ie for a VAT return that
+	 * spans the turn of a year. Each fiscal year's model is read as by {@link #model}.
+	 *
+	 * @param from	First day of the range.
+	 * @param to	Last day of the range.
+	 * @return	The periods, oldest first; empty if the tenant has no fiscal year in the range.
+	 */
+	public List<AccountingPeriodData> periodsBetween(AccountingModelProvider provider, TaxSubjectIdentifier tenant,
+			LocalDate from, LocalDate to, Duration maxAge) throws Exception {
+		List<AccountingPeriodData> result = new ArrayList<AccountingPeriodData>();
+		for (AccountingPeriod fy : fiscalYears(provider, tenant, maxAge)) {
+			if (fy.getPeriodStart() == null || fy.getPeriodEnd() == null) continue;
+			if (fy.getPeriodStart().isAfter(to) || fy.getPeriodEnd().isBefore(from)) continue;
+			AccountingPeriodData period = periodOf(model(provider, tenant, fy, maxAge), fy);
+			if (period != null) result.add(period);
+		}
+		return result;
+	}
+
+	/** The country rules the models are classified by. */
+	public CountryRuleSetRegistry getRuleSets() {
+		return ruleSets;
+	}
+
 	/** @return	The period of {@code data} that starts when {@code fiscalYear} does, else the one that contains its start; null if none. */
 	public static AccountingPeriodData periodOf(AccountingFileData data, AccountingPeriod fiscalYear) {
 		if (data == null || data.getPeriods() == null) return null;

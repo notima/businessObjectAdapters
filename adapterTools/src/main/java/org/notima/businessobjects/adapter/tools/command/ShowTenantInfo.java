@@ -124,6 +124,16 @@ public class ShowTenantInfo extends AbstractAction {
 		} else {
 			sess.getConsole().println("  Suspense accounts : (not set)");
 		}
+		if (ti.getVatCodes() != null && !ti.getVatCodes().isEmpty()) {
+			StringBuilder codes = new StringBuilder();
+			for (java.util.Map.Entry<String, String> e : new java.util.TreeMap<String, String>(ti.getVatCodes()).entrySet()) {
+				if (codes.length() > 0) codes.append(", ");
+				codes.append(e.getKey()).append(' ').append(e.getValue());
+			}
+			sess.getConsole().println("  VAT codes         : " + codes);
+		} else {
+			sess.getConsole().println("  VAT codes         : (from the accounting system)");
+		}
 		CollectionNoticeInfo cni = ti.getCollectionNoticeInfo();
 		if (cni != null && !cni.isEmpty()) {
 			sess.getConsole().println("  Collection notices:");

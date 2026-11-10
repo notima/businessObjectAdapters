@@ -5,16 +5,22 @@ import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.notima.api.fortnox.FortnoxClient3;
 import org.notima.api.fortnox.clients.FortnoxClientInfo;
 import org.notima.api.fortnox.clients.FortnoxClientManager;
+import org.notima.api.fortnox.entities3.AccountSubset;
+import org.notima.api.fortnox.entities3.Accounts;
 import org.notima.api.fortnox.entities3.FinancialYearSubset;
 import org.notima.api.fortnox.entities3.FinancialYears;
 import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
+import org.notima.generic.businessobjects.AccountElement;
 import org.notima.generic.businessobjects.AccountingFileData;
+import org.notima.generic.businessobjects.AccountingPeriodData;
 import org.notima.generic.businessobjects.AccountingPeriod;
 import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.ifacebusinessobjects.AccountingFileImporter;
@@ -85,7 +91,35 @@ public class FortnoxAccountingModelProvider implements AccountingModelProvider {
 		if (sie == null) return null;
 		byte[] bytes = new byte[sie.remaining()];
 		sie.duplicate().get(bytes);
-		return importer.importStream(new ByteArrayInputStream(bytes), "fortnox-" + fy.getId() + ".se");
+		AccountingFileData data = importer.importStream(new ByteArrayInputStream(bytes), "fortnox-" + fy.getId() + ".se");
+		// The SIE export has no VAT codes: take them from the chart of accounts of the year
+		try {
+			applyVatCodes(data, client.getAccounts(fy.getId()));
+		} catch (Exception e) {
+			FortnoxAdapter.logger.warn("Could not read the VAT codes of the accounts of " + tenant.getTaxId() + ": " + e.getMessage());
+		}
+		return data;
+	}
+
+	/**
+	 * Sets the VAT code of each account in Fortnox as the tax key of the account in the model
+	 * ({@link AccountElement#getTaxKey()}), where the model has none, ie for the VAT return.
+	 */
+	static void applyVatCodes(AccountingFileData data, Accounts accounts) {
+		if (data == null || data.getPeriods() == null || accounts == null || accounts.getAccountSubset() == null) return;
+		Map<String, String> codes = new HashMap<String, String>();
+		for (AccountSubset a : accounts.getAccountSubset()) {
+			if (a.getNumber() == null || a.getVATCode() == null || a.getVATCode().trim().isEmpty()) continue;
+			codes.put(a.getNumber().toString(), a.getVATCode().trim());
+		}
+		for (AccountingPeriodData p : data.getPeriods()) {
+			if (p.getChartOfAccounts() == null) continue;
+			for (AccountElement ae : p.getChartOfAccounts()) {
+				if (ae.getTaxKey() != null && !ae.getTaxKey().trim().isEmpty()) continue;
+				String code = ae.getAccountNo() != null ? codes.get(ae.getAccountNo()) : null;
+				if (code != null) ae.setTaxKey(code);
+			}
+		}
 	}
 
 	/** The client info of the tenant, by its org number as given or as NNNNNN-NNNN. */

@@ -36,6 +36,7 @@ public class TenantInfoAttributeCompleter implements Completer {
 		"collectionNoticeInfo.email",
 		"collectionNoticeInfo.remitToAccount",
 		"collectionNoticeInfo.remitToAccountType",
+		"vatCode.",
 	};
 
 	@Override
