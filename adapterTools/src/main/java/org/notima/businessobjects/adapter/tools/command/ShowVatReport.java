@@ -1,5 +1,8 @@
 package org.notima.businessobjects.adapter.tools.command;
 
+import org.notima.businessobjects.adapter.tools.table.InputVatCheckTable;
+import org.notima.generic.businessobjects.tax.vatreport.InputVatChecks;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -95,7 +98,15 @@ public class ShowVatReport implements Action {
 		TenantInformationFactory tif = cof != null ? cof.lookupTenantInformationFactory() : null;
 		TenantInformation ti = tif != null ? tif.getTenantInformation(tenant) : null;
 		java.util.Map<String, String> vatCodes = ti != null ? ti.getVatCodes() : null;
-		TenantVatReporter.Result result = reporter.report(systemName, tenant, from, to, vatCodes);
+		// Accounts whose input VAT must be deducted (set-tenant-info orgNo inputVat.4520 25)
+		java.util.Map<String, java.math.BigDecimal> inputVatChecks;
+		try {
+			inputVatChecks = InputVatChecks.parse(ti != null ? ti.getInputVatChecks() : null);
+		} catch (NumberFormatException e) {
+			sess.getConsole().println("A rate of the tenant's inputVat settings isn't a number: " + ti.getInputVatChecks());
+			return null;
+		}
+		TenantVatReporter.Result result = reporter.report(systemName, tenant, from, to, vatCodes, inputVatChecks);
 		if (!result.isOk()) {
 			sess.getConsole().println(result.getStatusText());
 			return null;
@@ -103,7 +114,8 @@ public class ShowVatReport implements Action {
 
 		sess.getConsole().println(result.getReport().getDefinition().getName() + " " + orgNo + " " + from + " - " + to
 				+ " (" + result.getSystemName() + ", " + String.join(", ", result.getFiscalYears())
-				+ (vatCodes != null && !vatCodes.isEmpty() ? ", " + vatCodes.size() + " VAT codes from the tenant's settings" : "") + ")");
+				+ (vatCodes != null && !vatCodes.isEmpty() ? ", " + vatCodes.size() + " VAT codes from the tenant's settings" : "")
+				+ (!inputVatChecks.isEmpty() ? ", input VAT checked on " + String.join(", ", inputVatChecks.keySet()) : "") + ")");
 		new VatReportTable(result.getReport(), showAll, showAccounts).getShellTable().print(sess.getConsole());
 		sess.getConsole().println();
 		sess.getConsole().println(VatReportTable.toPay(result.getReport()) + "  (" + result.getReport().getVoucherCount()
@@ -111,8 +123,14 @@ public class ShowVatReport implements Action {
 		if (!result.getReport().getDeviations().isEmpty()) {
 			sess.getConsole().println();
 			sess.getConsole().println("Vouchers whose VAT differs from base x rate (reverse charge in boxes 20-24 and 50; "
-					+ "sales in boxes 05-08 with a known rate; VAT booked on a separate voucher shows as both missing and without base):");
+					+ "sales in boxes 05-08 with a known rate; input VAT on the accounts where it must be deducted; "
+					+ "VAT booked on a separate voucher shows as both missing and without base):");
 			new VatDeviationTable(result.getReport().getDeviations()).getShellTable().print(sess.getConsole());
+		}
+		if (!result.getReport().getInputVatChecks().isEmpty()) {
+			sess.getConsole().println();
+			sess.getConsole().println("Accounts whose input VAT must be deducted:");
+			new InputVatCheckTable(result.getReport().getInputVatChecks()).getShellTable().print(sess.getConsole());
 		}
 		String checks = VatReportTable.checks(result.getReport());
 		if (!checks.isEmpty()) {

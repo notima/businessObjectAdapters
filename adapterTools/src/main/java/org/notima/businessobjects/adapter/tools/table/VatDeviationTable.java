@@ -31,7 +31,7 @@ public class VatDeviationTable extends GenericTable {
 			addRow().addContent(
 					nvl(v.getVoucherSeries()) + nvl(v.getVoucherNo()),
 					v.getAcctDate() != null ? v.getAcctDate().toString() : "",
-					d.isInputVat() ? "input" : d.getVatBox(),
+					box(d),
 					nfmt.format(d.getBase()),
 					nfmt.format(d.getExpected()),
 					nfmt.format(d.getBooked()),
@@ -42,7 +42,19 @@ public class VatDeviationTable extends GenericTable {
 
 	}
 
+	private static String box(VatReport.Deviation d) {
+		switch (d.getType()) {
+			case DEDUCTED_INPUT_VAT:		return "48 (" + String.join(",", d.getBaseAccounts()) + ")";
+			case SELF_ASSESSED_INPUT_VAT:	return "input";
+			default:						return d.getVatBox();
+		}
+	}
+
 	private static String problem(VatReport.Deviation d) {
+		if (d.getType() == VatReport.Deviation.Type.DEDUCTED_INPUT_VAT) {
+			if (d.getKind() == VatReport.Deviation.Kind.MISSING_VAT) return "Input VAT not deducted";
+			return d.getDifference().signum() * d.getExpected().signum() < 0 ? "Too little input VAT deducted" : "Too much input VAT deducted";
+		}
 		switch (d.getKind()) {
 			case MISSING_VAT:  return d.isInputVat() ? "Input VAT not booked" : "Reverse charge not booked";
 			case MISSING_BASE: return d.isInputVat() ? "Input VAT without base" : "VAT without base";

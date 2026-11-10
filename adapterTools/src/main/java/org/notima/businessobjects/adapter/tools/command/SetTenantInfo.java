@@ -26,6 +26,7 @@ public class SetTenantInfo extends AbstractAction {
 
 	static final String SUSPENSE_ACCOUNTS_PREFIX = "suspenseAccounts.";
 	static final String VAT_CODE_PREFIX = "vatCode.";
+	static final String INPUT_VAT_PREFIX = "inputVat.";
 
 	@Reference
 	private CanonicalObjectFactory cof;
@@ -40,7 +41,7 @@ public class SetTenantInfo extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
 	private String orgNo;
 
-	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear), collectionNoticeInfo.phone / .email / .remitToAccount / .remitToAccountType (BG or PG) for collection notices ('none' to clear), vatCode.<account> the account's tax key for show-vat-report: a key of the tax rules (MP1, MP2, MP3, MF, VTEU, FTEU, REVD, IREVD, IEUV25, IEUT25, IIMT25 ...), a box number (ie 23), settlement, rounding, or exclude to leave the account out ('none' to clear))", required = true, multiValued = false)
+	@Argument(index = 1, name = "attribute", description = "The attribute to set (taxId, countryCode, legalName, defaultOutputDirectory, reportDirectory, remitToAccount, remitToAccountType, remitToIBAN, remitToBIC, lastDunningDate (yyyy-MM-dd, or 'none' to clear), suspenseAccounts.UNIDENTIFIED / .IDENTIFIED / .OWNER_SETTLEMENT (accounts separated by commas, or 'none' to clear), collectionNoticeInfo.phone / .email / .remitToAccount / .remitToAccountType (BG or PG) for collection notices ('none' to clear), vatCode.<account> the account's tax key for show-vat-report: a key of the tax rules (MP1, MP2, MP3, MF, VTEU, FTEU, REVD, IREVD, IEUV25, IEUT25, IIMT25 ...), a box number (ie 23), settlement, rounding, or exclude to leave the account out ('none' to clear)), inputVat.<account> the rate (ie 25) of the input VAT that must be deducted on purchases booked on the account, checked by show-vat-report, for mixed activity ('none' to clear))", required = true, multiValued = false)
 	@Completion(TenantInfoAttributeCompleter.class)
 	private String attribute;
 
@@ -53,7 +54,7 @@ public class SetTenantInfo extends AbstractAction {
 		TenantInformationFactory tif = cof.lookupTenantInformationFactory();
 		if (tif == null) {
 			if (settings.getTenantInformationAdapter() != null) {
-				sess.getConsole().println("No TenantInformationFactory registered for configured tenantInformationAdapter " + settings.getTenantInformationAdapter() 
+				sess.getConsole().println("No TenantInformationFactory registered for configured tenantInformationAdapter " + settings.getTenantInformationAdapter()
 					+ ". Available: " + cof.listTenantInformationFactoryNames());
 			} else {
 				sess.getConsole().println("No TenantInformationFactory registered. Is the notima-json feature installed?");
@@ -107,6 +108,26 @@ public class SetTenantInfo extends AbstractAction {
 			String shown = code == null ? "(none: placed by the chart of accounts, else BAS)"
 					: VatReportDefinition.EXCLUDED.equalsIgnoreCase(code) ? "EXCLUDE (not part of the VAT return)" : code.toUpperCase();
 			sess.getConsole().println("VAT code of account " + account + " of " + tenantId + ": " + shown);
+			return null;
+		}
+
+		// Input VAT that must be deducted on an account (mixed activity), ie inputVat.4520 25
+		if (attribute.trim().startsWith(INPUT_VAT_PREFIX)) {
+			String account = attribute.trim().substring(INPUT_VAT_PREFIX.length()).trim();
+			if (account.isEmpty()) {
+				sess.getConsole().println("Give the account after " + INPUT_VAT_PREFIX + ", ie " + INPUT_VAT_PREFIX + "4520");
+				return null;
+			}
+			String rate = noneToNull(value);
+			try {
+				ti.setInputVatCheck(account, rate);
+			} catch (NumberFormatException e) {
+				sess.getConsole().println("The rate is given in percent, ie 25: " + value);
+				return null;
+			}
+			tif.persistTenantInformation(ti);
+			sess.getConsole().println("Input VAT on account " + account + " of " + tenantId + ": "
+					+ (rate == null ? "(not checked)" : "must be deducted at " + ti.getInputVatChecks().get(account) + " %"));
 			return null;
 		}
 

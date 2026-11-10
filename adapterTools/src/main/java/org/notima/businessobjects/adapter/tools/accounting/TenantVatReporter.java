@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.accounting;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import org.notima.generic.businessobjects.TaxSubjectIdentifier;
 import org.notima.generic.businessobjects.accounting.rule.CountryRuleSet;
 import org.notima.generic.businessobjects.tax.vatreport.VatReport;
 import org.notima.generic.businessobjects.tax.vatreport.VatReportCalculator;
+import org.notima.generic.businessobjects.tax.vatreport.InputVatChecks;
 import org.notima.generic.businessobjects.tax.vatreport.TaxKeyOverrides;
 import org.notima.generic.businessobjects.tax.vatreport.VatReportDefinition;
 import org.notima.generic.ifacebusinessobjects.AccountingModelProvider;
@@ -82,11 +84,22 @@ public class TenantVatReporter {
 	 */
 	public Result report(String systemName, TaxSubjectIdentifier tenant, LocalDate from, LocalDate to,
 			Map<String, String> vatCodes) throws Exception {
+		return report(systemName, tenant, from, to, vatCodes, null);
+	}
+
+	/**
+	 * @param inputVatChecks	The accounts whose input VAT must be deducted and the rate in
+	 * 							percent (mixed activity), ie from its {@code TenantInformation}; null
+	 * 							for none.
+	 * @see #report(String, TaxSubjectIdentifier, LocalDate, LocalDate, Map)
+	 */
+	public Result report(String systemName, TaxSubjectIdentifier tenant, LocalDate from, LocalDate to,
+			Map<String, String> vatCodes, Map<String, BigDecimal> inputVatChecks) throws Exception {
 		Result result = new Result();
 
 		CountryRuleSet rules = service.getRuleSets().lookup(tenant.getCountryCode());
 		VatReportDefinition definition = rules != null ? rules.getVatReportDefinition() : null;
-		if (definition != null) definition = TaxKeyOverrides.of(definition, vatCodes);
+		if (definition != null) definition = InputVatChecks.of(TaxKeyOverrides.of(definition, vatCodes), inputVatChecks);
 		if (definition == null) {
 			return result.fail(TenantAccountingStatus.NOT_CONFIGURED, "No VAT report for country " + tenant.getCountryCode());
 		}

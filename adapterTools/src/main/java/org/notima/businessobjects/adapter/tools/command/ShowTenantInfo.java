@@ -103,7 +103,7 @@ public class ShowTenantInfo extends AbstractAction {
 		String outDir = ti.getDefaultOutputDirectory();
 		sess.getConsole().println("  Default Output Dir: " + (outDir != null ? outDir : "(not set)"));
 		String reportDir = ti.getReportDirectory();
-		sess.getConsole().println("  Report Dir        : " + (reportDir != null ? reportDir 
+		sess.getConsole().println("  Report Dir        : " + (reportDir != null ? reportDir
 				: (outDir != null ? "(not set, uses default output dir)" : "(not set)")));
 		if (ti.hasPaymentInformation() || ti.getRemitToBIC() != null) {
 			sess.getConsole().println("  Remit To Account  : " + (ti.getRemitToAccount() != null ? ti.getRemitToAccount() : "(not set)")
@@ -133,6 +133,14 @@ public class ShowTenantInfo extends AbstractAction {
 			sess.getConsole().println("  VAT codes         : " + codes);
 		} else {
 			sess.getConsole().println("  VAT codes         : (from the accounting system)");
+		}
+		if (ti.getInputVatChecks() != null && !ti.getInputVatChecks().isEmpty()) {
+			StringBuilder checks = new StringBuilder();
+			for (java.util.Map.Entry<String, String> e : new java.util.TreeMap<String, String>(ti.getInputVatChecks()).entrySet()) {
+				if (checks.length() > 0) checks.append(", ");
+				checks.append(e.getKey()).append(' ').append(e.getValue()).append(" %");
+			}
+			sess.getConsole().println("  Input VAT checked : " + checks);
 		}
 		CollectionNoticeInfo cni = ti.getCollectionNoticeInfo();
 		if (cni != null && !cni.isEmpty()) {

@@ -37,6 +37,7 @@ public class TenantInfoAttributeCompleter implements Completer {
 		"collectionNoticeInfo.remitToAccount",
 		"collectionNoticeInfo.remitToAccountType",
 		"vatCode.",
+		"inputVat.",
 	};
 
 	@Override
