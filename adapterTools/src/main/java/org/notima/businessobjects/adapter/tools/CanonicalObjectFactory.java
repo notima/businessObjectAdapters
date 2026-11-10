@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Properties;
 
 import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
@@ -18,45 +19,57 @@ import org.notima.generic.ifacebusinessobjects.TaxRateProvider;
 
 /**
  * Used to lookup canonical objects from active adapters.
- * 
+ *
  * @author Daniel Tamm
  *
  */
 public interface CanonicalObjectFactory {
 
 	@SuppressWarnings("rawtypes")
-	public BusinessObjectFactory lookupAdapter(String adapterName);	
-	
+	public BusinessObjectFactory lookupAdapter(String adapterName);
+
 	@SuppressWarnings("rawtypes")
 	public BusinessObjectConverter lookupConverter(String adapterName);
-	
+
 	public PaymentFactory lookupPaymentFactory(String systemName);
-	
+
 	public PaymentBatchFactory lookupPaymentBatchFactory(String systemName);
 
 	public PaymentBatchGenerator lookupPaymentBatchGenerator(String systemName);
 
 	public Collection<PaymentFactory> listPaymentFactories();
-	
+
 	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName);
-	
+
 	public Collection<PaymentBatchProcessor> listPaymentBatchProcessors();
-	
+
 	public TaxRateProvider lookupTaxRateProvider(String systemName);
-	
+
 	public AccountingVoucherConverter<?> lookupAccountingVoucherConverter(String systemName);
-	
+
 	public Collection<TaxRateProvider> listTaxRateProviders();
-	
+
 	public Invoice<?> lookupCustomerInvoice(String adapterName, String orgNo, String countryCode, String invoiceNo) throws NoSuchTenantException;
-	
+
+	/**
+	 * Looks up an order in the given adapter and tenant.
+	 *
+	 * @param adapterName		The adapter.
+	 * @param orgNo				The tenant.
+	 * @param countryCode		The tenant's country code, may be null.
+	 * @param orderNo			The order, as the adapter identifies it.
+	 * @return					The order, null if the adapter or the order is not found.
+	 * @throws Exception		If the tenant is not found or the lookup fails.
+	 */
+	public Order<?> lookupOrder(String adapterName, String orgNo, String countryCode, String orderNo) throws Exception;
+
 	public PaymentBatchChannelFactory lookupFirstPaymentBatchChannelFactory();
 
 	/**
 	 * Returns the TenantInformationFactory to use. If tenantInformationAdapter is set
 	 * in the AdapterTools config, the factory registered with that SystemName is returned.
 	 * Otherwise the first registered factory (by SystemName) is returned.
-	 * 
+	 *
 	 * @return	The factory, or null if none (or not the configured one) is registered.
 	 */
 	public TenantInformationFactory lookupTenantInformationFactory();
@@ -69,12 +82,12 @@ public interface CanonicalObjectFactory {
 
 	/**
 	 * Converts a canonical invoice to a given adapter format.
-	 * 
+	 *
 	 * @param adapterName		The adapter name
 	 * @param source			The source invoice
 	 * @param props				Properties sent to the converter.
 	 * @return		A string representation of the adapter format.
 	 */
 	public Object convertToNativeInvoice(String adapterName, Invoice<?> source, Properties props) throws Exception;
-	
+
 }

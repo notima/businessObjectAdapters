@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 
 import org.notima.generic.businessobjects.Invoice;
+import org.notima.generic.businessobjects.Order;
 import org.notima.generic.businessobjects.exception.NoSuchTenantException;
 import org.notima.generic.ifacebusinessobjects.AccountingVoucherConverter;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectConverter;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
-	private Logger log = LoggerFactory.getLogger(CanonicalObjectFactoryImpl.class);	
+	private Logger log = LoggerFactory.getLogger(CanonicalObjectFactoryImpl.class);
 
 	@SuppressWarnings("rawtypes")
 	private Map<String, BusinessObjectFactory> services = new TreeMap<String, BusinessObjectFactory>();
@@ -36,7 +37,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, BusinessObjectConverter> converters = new TreeMap<String, BusinessObjectConverter>();
 
 	private Map<String, AccountingVoucherConverter<?>> accountingVoucherConverters = new TreeMap<String, AccountingVoucherConverter<?>>();
-	
+
 	private Map<String, PaymentFactory> paymentFactories = new TreeMap<String, PaymentFactory>();
 
 	private Map<String, PaymentBatchFactory> paymentBatchFactories = new TreeMap<String, PaymentBatchFactory>();
@@ -44,11 +45,11 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	private Map<String, PaymentBatchGenerator> paymentBatchGenerators = new TreeMap<String, PaymentBatchGenerator>();
 
 	private Map<String, TimeRecordServiceFactory> timeRecordServiceFactories = new TreeMap<String, TimeRecordServiceFactory>();
-	
+
 	private Map<String, PaymentBatchProcessor> paymentBatchProcessors = new TreeMap<String, PaymentBatchProcessor>();
-	
+
 	private Map<String, TaxRateProvider> taxRateProviders = new TreeMap<String, TaxRateProvider>();
-	
+
 	private Map<String, PaymentBatchChannelFactory> paymentBatchChannelFactories = new TreeMap<String, PaymentBatchChannelFactory>();
 
 	private Map<String, TenantInformationFactory> tenantInformationFactories = new TreeMap<String, TenantInformationFactory>();
@@ -64,10 +65,10 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 	public void setSettings(AdapterToolsSettings settings) {
 		this.settings = settings;
 	}
-	
+
 	/**
 	 * Resets the services by re-reading the service references for WebpayProvisioningService
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	@SuppressWarnings("rawtypes")
@@ -75,11 +76,11 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<BusinessObjectFactory>> references = ctx.getServiceReferences(BusinessObjectFactory.class, null);		
+
+		Collection<ServiceReference<BusinessObjectFactory>> references = ctx.getServiceReferences(BusinessObjectFactory.class, null);
 
 		services.clear();
-		
+
 		if (references!=null) {
 			BusinessObjectFactory srv;
 			for (ServiceReference<BusinessObjectFactory> sr : references) {
@@ -92,7 +93,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 	/**
 	 * Resets the services by re-reading the service references for WebpayProvisioningService
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	@SuppressWarnings("rawtypes")
@@ -100,11 +101,11 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<BusinessObjectConverter>> references = ctx.getServiceReferences(BusinessObjectConverter.class, null);		
+
+		Collection<ServiceReference<BusinessObjectConverter>> references = ctx.getServiceReferences(BusinessObjectConverter.class, null);
 
 		services.clear();
-		
+
 		if (references!=null) {
 			BusinessObjectConverter srv;
 			for (ServiceReference<BusinessObjectConverter> sr : references) {
@@ -114,10 +115,10 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
-	
+
 	/**
 	 * Resets the accounting voucher converters
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	@SuppressWarnings("rawtypes")
@@ -125,11 +126,11 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<AccountingVoucherConverter>> references = ctx.getServiceReferences(AccountingVoucherConverter.class, null);		
+
+		Collection<ServiceReference<AccountingVoucherConverter>> references = ctx.getServiceReferences(AccountingVoucherConverter.class, null);
 
 		accountingVoucherConverters.clear();
-		
+
 		if (references!=null) {
 			AccountingVoucherConverter srv;
 			for (ServiceReference<AccountingVoucherConverter> sr : references) {
@@ -139,22 +140,22 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
-	
-	
+
+
 	/**
 	 * Resets the services by re-reading the service references for PaymentFactories
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	public void resetPaymentFactories() throws InvalidSyntaxException {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<PaymentFactory>> references = ctx.getServiceReferences(PaymentFactory.class, null);		
+
+		Collection<ServiceReference<PaymentFactory>> references = ctx.getServiceReferences(PaymentFactory.class, null);
 
 		paymentFactories.clear();
-		
+
 		if (references!=null) {
 			PaymentFactory srv;
 			for (ServiceReference<PaymentFactory> sr : references) {
@@ -164,21 +165,21 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
-	
+
 	/**
 	 * Resets the services by re-reading the service references for PaymentFactories
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	public void resetPaymentBatchFactories() throws InvalidSyntaxException {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<PaymentBatchFactory>> references = ctx.getServiceReferences(PaymentBatchFactory.class, null);		
+
+		Collection<ServiceReference<PaymentBatchFactory>> references = ctx.getServiceReferences(PaymentBatchFactory.class, null);
 
 		paymentBatchFactories.clear();
-		
+
 		if (references!=null) {
 			PaymentBatchFactory srv;
 			for (ServiceReference<PaymentBatchFactory> sr : references) {
@@ -216,18 +217,18 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 	/**
 	 * Resets the services by re-reading the service references for TimeRecordServices
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	public void resetTimeRecordServices() throws InvalidSyntaxException {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<TimeRecordServiceFactory>> references = ctx.getServiceReferences(TimeRecordServiceFactory.class, null);		
+
+		Collection<ServiceReference<TimeRecordServiceFactory>> references = ctx.getServiceReferences(TimeRecordServiceFactory.class, null);
 
 		timeRecordServiceFactories.clear();
-		
+
 		if (references!=null) {
 			TimeRecordServiceFactory srv;
 			for (ServiceReference<TimeRecordServiceFactory> sr : references) {
@@ -237,22 +238,22 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
-	
-	
+
+
 	/**
 	 * Resets the services by re-reading the service references for PaymentFactories
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	public void resetPaymentBatchChannelFactories() throws InvalidSyntaxException {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<PaymentBatchChannelFactory>> references = ctx.getServiceReferences(PaymentBatchChannelFactory.class, null);		
+
+		Collection<ServiceReference<PaymentBatchChannelFactory>> references = ctx.getServiceReferences(PaymentBatchChannelFactory.class, null);
 
 		paymentFactories.clear();
-		
+
 		if (references!=null) {
 			PaymentBatchChannelFactory srv;
 			for (ServiceReference<PaymentBatchChannelFactory> sr : references) {
@@ -262,22 +263,22 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
-	
+
 
 	/**
 	 * Resets the services by re-reading the service references for PaymentBatchProcessors
-	 * 
+	 *
 	 * @throws InvalidSyntaxException
 	 */
 	public void resetPaymentBatchProcessors() throws InvalidSyntaxException {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<PaymentBatchProcessor>> references = ctx.getServiceReferences(PaymentBatchProcessor.class, null);		
+
+		Collection<ServiceReference<PaymentBatchProcessor>> references = ctx.getServiceReferences(PaymentBatchProcessor.class, null);
 
 		paymentBatchProcessors.clear();
-		
+
 		if (references!=null) {
 			PaymentBatchProcessor srv;
 			for (ServiceReference<PaymentBatchProcessor> sr : references) {
@@ -287,16 +288,16 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 
 	}
-	
+
 	public void resetTaxRateProviders() throws InvalidSyntaxException {
 
 		if (ctx==null)
 			ctx = FrameworkUtil.getBundle(getClass()).getBundleContext();
-		
-		Collection<ServiceReference<TaxRateProvider>> references = ctx.getServiceReferences(TaxRateProvider.class, null);		
+
+		Collection<ServiceReference<TaxRateProvider>> references = ctx.getServiceReferences(TaxRateProvider.class, null);
 
 		taxRateProviders.clear();
-		
+
 		if (references!=null) {
 			TaxRateProvider srv;
 			for (ServiceReference<TaxRateProvider> sr : references) {
@@ -304,10 +305,10 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 				taxRateProviders.put(srv.getSystemName(), srv);
 			}
 		}
-		
-		
+
+
 	}
-	
+
 	public Collection<PaymentBatchProcessor> listPaymentBatchProcessors() {
 		try {
 			resetPaymentBatchProcessors();
@@ -318,7 +319,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			return null;
 		}
 	}
-	
+
 	public Collection<PaymentFactory> listPaymentFactories() {
 		try {
 			resetPaymentFactories();
@@ -329,9 +330,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			return null;
 		}
 	}
-	
+
 	public Collection<TimeRecordServiceFactory> listTimeRecordServices() {
-		
+
 		try {
 			resetTimeRecordServices();
 			return timeRecordServiceFactories.values();
@@ -339,15 +340,15 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Looks up an adapter with given name.
-	 * 
-	 * @param adapterName			The name of the adapter to find.		
+	 *
+	 * @param adapterName			The name of the adapter to find.
 	 * @return		Null if not found. The adapter if found.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -360,9 +361,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		BusinessObjectFactory bf = null;
-		
+
 		if (adapterName==null) {
 			return null;
 		} else {
@@ -370,11 +371,11 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		if (bf==null)
 			log.warn("Adapter {} not found.", adapterName);
-		
+
 		return bf;
-		
+
 	}
-	
+
 	@Override
 	public TaxRateProvider lookupTaxRateProvider(String adapterName) {
 
@@ -385,9 +386,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		TaxRateProvider trp = null;
-		
+
 		if (adapterName==null) {
 			return null;
 		} else {
@@ -395,16 +396,16 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		if (trp==null)
 			log.warn("Tax rate provider: {} not found.", adapterName);
-		
+
 		return trp;
-		
+
 	}
-	
-	
+
+
 	/**
 	 * Looks up an adapter with given name.
-	 * 
-	 * @param adapterName			The name of the adapter to find.		
+	 *
+	 * @param adapterName			The name of the adapter to find.
 	 * @return		Null if not found. The adapter if found.
 	 */
 	@SuppressWarnings("rawtypes")
@@ -417,9 +418,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		BusinessObjectConverter cv = null;
-		
+
 		if (adapterName==null) {
 			return null;
 		} else {
@@ -427,14 +428,14 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		if (cv==null)
 			log.warn("Converter {} not found.", adapterName);
-		
+
 		return cv;
-		
+
 	}
 
 	@Override
 	public AccountingVoucherConverter<?> lookupAccountingVoucherConverter(String adapterName) {
-		
+
 		try {
 			resetAccountingVoucherConverters();
 		} catch (Exception e) {
@@ -442,9 +443,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		AccountingVoucherConverter<?> cv = null;
-		
+
 		if (adapterName==null) {
 			return null;
 		} else {
@@ -452,13 +453,13 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		if (cv==null)
 			log.warn("Accounting converter {} not found.", adapterName);
-		
+
 		return cv;
-		
+
 	}
-	
+
 	public PaymentFactory lookupPaymentFactory(String systemName) {
-		
+
 		try {
 			resetPaymentFactories();
 		} catch (Exception e) {
@@ -466,9 +467,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		PaymentFactory pp = null;
-		
+
 		if (systemName==null) {
 			return null;
 		} else {
@@ -476,13 +477,13 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		if (pp==null)
 			log.warn("Payment Factory {} not found.", systemName);
-		
+
 		return pp;
-		
+
 	}
-	
+
 	public PaymentBatchFactory lookupPaymentBatchFactory(String systemName) {
-		
+
 		try {
 			resetPaymentBatchFactories();
 		} catch (Exception e) {
@@ -490,9 +491,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		PaymentBatchFactory pp = null;
-		
+
 		if (systemName==null) {
 			return null;
 		} else {
@@ -532,7 +533,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 
 
 	public PaymentBatchProcessor lookupPaymentBatchProcessor(String systemName) {
-		
+
 		try {
 			resetPaymentBatchProcessors();
 		} catch (Exception e) {
@@ -540,9 +541,9 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 		PaymentBatchProcessor pp = null;
-		
+
 		if (systemName==null) {
 			return null;
 		} else {
@@ -550,20 +551,20 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 		if (pp==null)
 			log.warn("Payment Batch Processor {} not found.", systemName);
-		
+
 		return pp;
-		
-		
+
+
 	}
-	
-	
-	
+
+
+
 	@Override
-	@SuppressWarnings("rawtypes")	
+	@SuppressWarnings("rawtypes")
 	public Invoice<?> lookupCustomerInvoice(String adapterName, String orgNo, String countryCode, String invoiceNo) throws NoSuchTenantException {
 
 		BusinessObjectFactory bf = lookupAdapter(adapterName);
-		
+
 		if (bf==null) return null;
 
 		// Set tenant
@@ -574,34 +575,47 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		} catch (Exception e) {
 			log.error("Error looking up customer invoice " + invoiceNo + " for " + orgNo + " in adapter " + adapterName);
 		}
-		
+
 		return invoice;
 	}
-	
-	
+
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public Order<?> lookupOrder(String adapterName, String orgNo, String countryCode, String orderNo) throws Exception {
+
+		BusinessObjectFactory bf = lookupAdapter(adapterName);
+		if (bf==null) return null;
+
+		synchronized (bf) {
+			bf.setTenant(orgNo, countryCode);
+			return bf.lookupOrder(orderNo);
+		}
+	}
+
 	/**
 	 * Converts a canonical invoice to a given adapter format.
-	 * 
+	 *
 	 * @param adapterName		The adapter name
 	 * @param source			The source invoice
 	 * @param props				Properties sent to the converter.
 	 * @return		A string representation of the adapter format.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object convertToNativeInvoice(String adapterName, Invoice<?> source, Properties props) throws Exception {
-		
+
 		BusinessObjectConverter cv = lookupConverter(adapterName);
-		
+
 		if (cv==null) {
 			log.warn("Converter for {} not found");
 			return null;
 		}
-		
+
 		Object result = cv.toNativeInvoice(source);
-		
+
 		return result;
-		
+
 	}
 
 	@Override
@@ -616,7 +630,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 		}
 	}
 
-	
+
 	@Override
 	public PaymentBatchChannelFactory lookupFirstPaymentBatchChannelFactory() {
 		try {
@@ -666,7 +680,7 @@ public class CanonicalObjectFactoryImpl implements CanonicalObjectFactory {
 			resetTenantInformationFactories();
 			if (!tenantInformationFactories.isEmpty()) {
 				if (tenantInformationFactories.size()>1) {
-					log.warn("Several TenantInformationFactories registered {}. Using {}. Set tenantInformationAdapter in {}.cfg to choose.", 
+					log.warn("Several TenantInformationFactories registered {}. Using {}. Set tenantInformationAdapter in {}.cfg to choose.",
 							tenantInformationFactories.keySet(), tenantInformationFactories.keySet().iterator().next(), AdapterToolsSettings.PID);
 				}
 				return tenantInformationFactories.get(tenantInformationFactories.keySet().iterator().next());
