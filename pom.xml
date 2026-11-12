@@ -48,6 +48,7 @@
 		<module>adapterPersistence</module>
 		<module>time4uAdapter</module>
 		<module>adapterRs</module>
+		<module>financialInfoAdapter</module>
 	</modules>
 
 	<dependencyManagement>
