@@ -90,7 +90,7 @@ public class ReadInvoices extends AbstractAction {
 	@Completion(OrgNoCompleter.class)
     private String orgNo;
 
-	@Argument(index = 2, name = "invoiceFile", description ="The canonical invoice to write to (xml-format). If omitted, the file is auto-generated using the default output directory configured for the tenant.", required = false, multiValued = false)
+	@Argument(index = 2, name = "invoiceFile", description ="The canonical invoice to write to (xml-format). If omitted or 'default', the file is written to the tenant's default output directory as <tenant>-invoices-<yyyyMMdd-HHmmss>.xml", required = false, multiValued = false)
 	@Completion(FileCompleter.class)
 	private String invoiceFile;
 
@@ -100,6 +100,9 @@ public class ReadInvoices extends AbstractAction {
 
 	private boolean	unpostedOnly = true;
 	private boolean salesOnly = true;
+
+	/** invoiceFile value that writes to the tenant's default output directory. */
+	public static final String DEFAULT_FILE = "default";
 
 	/** Max number of invoices that can be read using --invoices */
 	private static final int MAX_SELECTED_INVOICES = 10000;
@@ -144,21 +147,31 @@ public class ReadInvoices extends AbstractAction {
 
 	}
 
+	/**
+	 * @return	The file to write to. If no file or 'default' is given, a new file in the tenant's
+	 * 			default output directory: {@code <tenant>-[vendor-]invoices-<yyyyMMdd-HHmmss>.xml}.
+	 */
 	private String resolveInvoiceFile() throws IOException {
-		if (invoiceFile != null && invoiceFile.trim().length() > 0) {
-			return invoiceFile;
+		if (invoiceFile != null && invoiceFile.trim().length() > 0 && !DEFAULT_FILE.equalsIgnoreCase(invoiceFile.trim())) {
+			File file = new File(invoiceFile.trim());
+			File parent = file.getAbsoluteFile().getParentFile();
+			if (parent != null && !parent.isDirectory()) {
+				throw new IOException("Directory " + parent.getPath() + " doesn't exist");
+			}
+			return file.getPath();
 		}
 		TenantInformation ti = lookupTenantInformation();
-		if (ti != null && ti.getDefaultOutputDirectory() != null && ti.getDefaultOutputDirectory().trim().length() > 0) {
-			String tenantName = (ti.getTenant() != null && ti.getTenant().hasName())
-					? ti.getTenant().getLegalName().replaceAll("[^a-zA-Z0-9_\\-]", "_")
-					: orgNo;
-			String dateStr = new SimpleDateFormat("yyyyMMdd").format(new Date());
-			File dir = new File(ti.getDefaultOutputDirectory());
-			dir.mkdirs();
-			return new File(dir, tenantName + "-" + dateStr + ".xml").getPath();
+		if (ti == null || ti.getDefaultOutputDirectory() == null || ti.getDefaultOutputDirectory().trim().length() == 0) {
+			throw new IOException("No default output directory configured for tenant " + getTenantId()
+					+ ". Set it with set-tenant-info or give a file name.");
 		}
-		throw new IOException("No invoiceFile specified and no default output directory configured for tenant " + getTenantId());
+		String tenantName = (ti.getTenant() != null && ti.getTenant().hasName())
+				? ti.getTenant().getLegalName().replaceAll("[^a-zA-Z0-9_\\-]", "_")
+				: orgNo;
+		String timestamp = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+		File dir = new File(ti.getDefaultOutputDirectory().trim());
+		dir.mkdirs();
+		return new File(dir, tenantName + (vendor ? "-vendor-invoices-" : "-invoices-") + timestamp + ".xml").getPath();
 	}
 
 	private TaxSubjectIdentifier getTenantId() {
