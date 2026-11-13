@@ -8,7 +8,6 @@ import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.ifacebusinessobjects.AccountingFileImporter;
 import org.notima.sie.AccountRec;
-import org.notima.sie.SRURec;
 import org.notima.sie.BalanceRec;
 import org.notima.sie.DimRec;
 import org.notima.sie.ObjRec;
@@ -97,14 +96,18 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
     private List<AccountElement> buildChartOfAccounts(SIEFileType4 sieFile) {
         List<AccountElement> result = new ArrayList<>();
         Map<String, AccountRec> accountMap = sieFile.getAccountMap();
-        Map<String, SRURec> sruMap = sieFile.getSruMap();
+        Map<String, List<String>> sruCodes = sieFile.getSruCodes();
         if (accountMap != null) {
             // TreeMap is already sorted by account number
             for (AccountRec rec : accountMap.values()) {
                 AccountElement ae = new AccountElement(rec.getAccountNo());
                 ae.setName(rec.getAccountName());
-                SRURec sru = sruMap.get(rec.getAccountNo());
-                if (sru != null && sru.getSRU() != null && !sru.getSRU().isEmpty()) ae.setReportingCode(sru.getSRU());
+                // The first #SRU is the account's code (INK2R), further ones (SRU code 2) ie INK2S
+                List<String> codes = sruCodes.get(rec.getAccountNo());
+                if (codes != null && !codes.isEmpty()) {
+                    ae.setReportingCode(codes.get(0));
+                    if (codes.size() > 1) ae.setAdditionalReportingCodes(codes.subList(1, codes.size()));
+                }
                 result.add(ae);
             }
         }
@@ -205,6 +208,7 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
             ae.setAccountClass(src.getAccountClass());
             ae.setTaxKey(src.getTaxKey());
             ae.setReportingCode(src.getReportingCode());
+            ae.setAdditionalReportingCodes(src.getAdditionalReportingCodes());
             ae.setOpeningBalance(src.getOpeningBalance());
             ae.setEndingBalance(src.getEndingBalance());
             copy.add(ae);

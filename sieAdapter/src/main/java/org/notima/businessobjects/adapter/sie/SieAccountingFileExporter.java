@@ -85,6 +85,9 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
             sieFile.addAccountRecord(new AccountRec(ae.getAccountNo(), name));
             if (ae.getReportingCode() != null && !ae.getReportingCode().trim().isEmpty()) {
                 sieFile.addSruRecord(new SRURec(ae.getAccountNo(), ae.getReportingCode().trim()));
+                for (String code : ae.getAdditionalReportingCodes()) {
+                    if (code != null && !code.trim().isEmpty()) sieFile.addSruRecord(new SRURec(ae.getAccountNo(), code.trim()));
+                }
             }
             if (ae.getOpeningBalance() != 0.0) {
                 sieFile.addBalanceRecord(new BalanceRec(ae.getAccountNo(), ae.getOpeningBalance()));

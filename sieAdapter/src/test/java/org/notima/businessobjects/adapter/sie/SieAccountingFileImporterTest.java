@@ -167,6 +167,11 @@ public class SieAccountingFileImporterTest {
 		tax.setName("Skatt som belastar årets resultat");
 		tax.setReportingCode("7528");
 		coa.add(tax);
+		AccountElement entertainment = new AccountElement("6072");
+		entertainment.setName("Representation, ej avdragsgill");
+		entertainment.setReportingCode("7513");
+		entertainment.setAdditionalReportingCodes(java.util.Arrays.asList("7653"));
+		coa.add(entertainment);
 		AccountElement bank = new AccountElement("1930");
 		bank.setName("Bank");
 		coa.add(bank);
@@ -184,6 +189,8 @@ public class SieAccountingFileImporterTest {
 		AccountingPeriodData reimported = new SieAccountingFileImporter().importFile(tmp).getPeriods().get(0);
 		assertEquals("7528", findAccount(reimported, "8910").getReportingCode());
 		assertNull(findAccount(reimported, "1930").getReportingCode());
+		assertEquals("7513", findAccount(reimported, "6072").getReportingCode());
+		assertEquals(java.util.Arrays.asList("7653"), findAccount(reimported, "6072").getAdditionalReportingCodes());
 	}
 
 	@Test
