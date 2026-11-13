@@ -6,13 +6,17 @@ import org.notima.generic.businessobjects.AccountingPeriodData;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.Person;
 import org.notima.generic.ifacebusinessobjects.AccountingFileImporter;
 import org.notima.sie.AccountRec;
+import org.notima.sie.AdressRec;
 import org.notima.sie.BalanceRec;
 import org.notima.sie.DimRec;
 import org.notima.sie.ObjRec;
 import org.notima.sie.RARRec;
 import org.notima.sie.ResRec;
+import org.notima.sie.SIEFile;
 import org.notima.sie.SIEFileType4;
 import org.notima.sie.TransRec;
 import org.notima.sie.VerRec;
@@ -34,7 +38,7 @@ import java.util.TreeMap;
  *
  * <p>Conversion logic:
  * <ol>
- *   <li>Company info ({@code #FNAMN}, {@code #ORGNR}) → {@link BusinessPartner}</li>
+ *   <li>Company info ({@code #FNAMN}, {@code #ORGNR}, {@code #ADRESS}) → {@link BusinessPartner}</li>
  *   <li>Fiscal years ({@code #RAR}) → one {@link AccountingPeriodData} each</li>
  *   <li>{@code #KONTO} records → {@link AccountElement} list copied to every period</li>
  *   <li>{@code #IB}/{@code #UB} records → {@code openingBalance}/{@code endingBalance}
@@ -80,12 +84,48 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
     // -------------------------------------------------------------------------
 
     private BusinessPartner<?> buildBusinessPartner(SIEFileType4 sieFile) {
-        BusinessPartner<?> bp = new BusinessPartner<>();
+        return companyOf(sieFile);
+    }
+
+    /**
+     * Reads the company of an SIE file: its name ({@code #FNAMN}), organisation number
+     * ({@code #ORGNR}) and address ({@code #ADRESS}: street, postal code and city, phone and
+     * contact person) if any.
+     */
+    public static BusinessPartner<Object> readCompanyInformation(File file) throws Exception {
+        SIEFileType4 sieFile = new SIEFileType4(file.getAbsolutePath());
+        sieFile.readFile();
+        return companyOf(sieFile);
+    }
+
+    /** The company of a read SIE file; see {@link #readCompanyInformation(File)}. */
+    public static BusinessPartner<Object> companyOf(SIEFile sieFile) {
+        BusinessPartner<Object> bp = new BusinessPartner<>();
         bp.setName(sieFile.getFNamn());
         bp.setTaxId(sieFile.getOrgNr());
         bp.setCompany(true);
         bp.setActive(true);
         bp.setCountryCode("SE");   // SIE is a Swedish-only format
+
+        AdressRec a = sieFile.getAdressRec();
+        if (a != null && !a.isEmpty()) {
+            Location loc = new Location();
+            loc.setName(sieFile.getFNamn());
+            loc.setAddress1(a.getStreet());
+            loc.setPostal(a.getPostalCode());
+            loc.setCity(a.getCity());
+            loc.setPhone(a.getPhone());
+            loc.setCountryCode("SE");
+            bp.setAddressOfficial(loc);
+            if (a.getContact() != null) {
+                Person contact = new Person();
+                contact.setName(a.getContact());
+                contact.setPhone(a.getPhone());
+                List<Person> contacts = new ArrayList<>();
+                contacts.add(contact);
+                bp.setContacts(contacts);
+            }
+        }
         return bp;
     }
 

@@ -6,8 +6,10 @@ import org.notima.generic.businessobjects.AccountingPeriodData;
 import org.notima.generic.businessobjects.AccountingVoucher;
 import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BusinessPartner;
+import org.notima.generic.businessobjects.Location;
 import org.notima.generic.ifacebusinessobjects.AccountingFileExporter;
 import org.notima.sie.AccountRec;
+import org.notima.sie.AdressRec;
 import org.notima.sie.SRURec;
 import org.notima.sie.BalanceRec;
 import org.notima.sie.ObjRec;
@@ -49,6 +51,8 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
         if (company != null) {
             if (company.getTaxId() != null) sieFile.setOrgNr(company.getTaxId());
             if (company.getName()  != null) sieFile.setFNamn(company.getName());
+            AdressRec adress = adressOf(company);
+            if (adress != null) sieFile.setAdressRec(adress);
         }
 
         addRarRecord(sieFile, period);
@@ -64,6 +68,23 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    /** The {@code #ADRESS} of the company's official address; null if it has none. */
+    static AdressRec adressOf(BusinessPartner<?> company) {
+        Location loc = company.getAddressOfficial();
+        String contact = null;
+        if (company.getContacts() != null && !company.getContacts().isEmpty()) contact = company.getContacts().get(0).getName();
+        if (loc == null && contact == null) return null;
+        String street = loc != null ? join(loc.getAddress1(), loc.getAddress2()) : null;
+        String postal = loc != null ? join(loc.getPostal(), loc.getCity()) : null;
+        AdressRec a = new AdressRec(contact, street, postal, loc != null ? loc.getPhone() : null);
+        return a.isEmpty() ? null : a;
+    }
+
+    private static String join(String a, String b) {
+        String s = ((a != null ? a.trim() : "") + " " + (b != null ? b.trim() : "")).trim();
+        return s.isEmpty() ? null : s;
+    }
 
     private void addRarRecord(SIEFileType4 sieFile, AccountingPeriodData period) {
         LocalDate start = period.getPeriodStart();
@@ -85,8 +106,10 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
             sieFile.addAccountRecord(new AccountRec(ae.getAccountNo(), name));
             if (ae.getReportingCode() != null && !ae.getReportingCode().trim().isEmpty()) {
                 sieFile.addSruRecord(new SRURec(ae.getAccountNo(), ae.getReportingCode().trim()));
-                for (String code : ae.getAdditionalReportingCodes()) {
-                    if (code != null && !code.trim().isEmpty()) sieFile.addSruRecord(new SRURec(ae.getAccountNo(), code.trim()));
+                if (ae.getAdditionalReportingCodes() != null) {
+                    for (String code : ae.getAdditionalReportingCodes()) {
+                        if (code != null && !code.trim().isEmpty()) sieFile.addSruRecord(new SRURec(ae.getAccountNo(), code.trim()));
+                    }
                 }
             }
             if (ae.getOpeningBalance() != 0.0) {

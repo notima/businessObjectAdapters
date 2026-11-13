@@ -109,9 +109,17 @@ Object> {
 	}
 
 	@Override
+	/**
+	 * The company of the SIE file given by {@link #setDefaultImportFile(String)}, or else by the
+	 * setting {@value #PROP_SIE_FILE_PATH}: its name, organisation number and address
+	 * ({@code #ADRESS}) if any. Null if there is no such file.
+	 */
 	public BusinessPartner<Object> lookupThisCompanyInformation() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		String path = defaultImportFile != null ? defaultImportFile : getSetting(PROP_SIE_FILE_PATH);
+		if (path == null) return null;
+		File file = new File(path);
+		if (!file.isFile()) return null;
+		return SieAccountingFileImporter.readCompanyInformation(file);
 	}
 
 	@Override

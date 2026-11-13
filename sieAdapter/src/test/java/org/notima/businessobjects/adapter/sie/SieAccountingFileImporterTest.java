@@ -355,4 +355,50 @@ public class SieAccountingFileImporterTest {
 		return null;
 	}
 
+	@Test
+	public void testCompanyAddress() throws Exception {
+		File tmp = Files.createTempFile("sie-adress-", ".si").toFile();
+		tmp.deleteOnExit();
+		String sie = "#FLAGGA 0\r\n#SIETYP 4\r\n#FNAMN \"Test AB\"\r\n"
+				+ "#ADRESS \"Sven Svensson\" \"Box 21\" \"211 20 MALMÖ\" \"040-12345\"\r\n"
+				+ "#ORGNR 556000-0000\r\n#RAR 0 20250101 20251231\r\n#KONTO 1930 \"Bank\"\r\n";
+		Files.write(tmp.toPath(), sie.getBytes("Cp437"));
+
+		BusinessPartner<?> bp = new SieAccountingFileImporter().importFile(tmp).getCompany();
+		assertEquals("Test AB", bp.getName());
+		assertEquals("556000-0000", bp.getTaxId());
+		assertEquals("Box 21", bp.getAddressOfficial().getAddress1());
+		assertEquals("211 20", bp.getAddressOfficial().getPostal());
+		assertEquals("MALMÖ", bp.getAddressOfficial().getCity());
+		assertEquals("040-12345", bp.getAddressOfficial().getPhone());
+		assertEquals("Sven Svensson", bp.getContacts().get(0).getName());
+
+		SieAdapter adapter = new SieAdapter();
+		adapter.setDefaultImportFile(tmp.getAbsolutePath());
+		BusinessPartner<?> looked = adapter.lookupThisCompanyInformation();
+		assertEquals("MALMÖ", looked.getAddressOfficial().getCity());
+
+		// Written back on export
+		AccountingPeriodData period = new AccountingPeriodData();
+		period.setName("2025");
+		period.setPeriodStart(LocalDate.of(2025, 1, 1));
+		period.setPeriodEnd(LocalDate.of(2025, 12, 31));
+		period.setChartOfAccounts(new ArrayList<>());
+		File out = Files.createTempFile("sie-adress-out-", ".si").toFile();
+		out.deleteOnExit();
+		new SieAccountingFileExporter().exportFile(out, period, bp, false);
+		assertTrue(new String(Files.readAllBytes(out.toPath()), "Cp437")
+				.contains("#ADRESS \"Sven Svensson\" \"Box 21\" \"211 20 MALMÖ\" \"040-12345\""));
+	}
+
+	@Test
+	public void testNoAddress() throws Exception {
+		File tmp = Files.createTempFile("sie-noadress-", ".si").toFile();
+		tmp.deleteOnExit();
+		Files.write(tmp.toPath(), "#FLAGGA 0\r\n#SIETYP 4\r\n#FNAMN \"Test AB\"\r\n#RAR 0 20250101 20251231\r\n".getBytes("Cp437"));
+		BusinessPartner<?> bp = new SieAccountingFileImporter().importFile(tmp).getCompany();
+		assertNull(bp.getAddressOfficial());
+		assertNull(new SieAdapter().lookupThisCompanyInformation());
+	}
+
 }
