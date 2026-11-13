@@ -105,19 +105,31 @@ public class FortnoxAccountingModelProvider implements AccountingModelProvider {
 	 * Sets the VAT code of each account in Fortnox, translated to the tax keys of the canonical
 	 * model ({@link FortnoxVatCodes}), as the tax key of the account in the model
 	 * ({@link AccountElement#getTaxKey()}), where the model has none, ie for the VAT return.
+	 * Likewise the SRU code of each account as its reporting code
+	 * ({@link AccountElement#getReportingCode()}), for the corporate income tax.
 	 */
 	static void applyVatCodes(AccountingFileData data, Accounts accounts) {
 		if (data == null || data.getPeriods() == null || accounts == null || accounts.getAccountSubset() == null) return;
 		Map<String, String> codes = new HashMap<String, String>();
+		Map<String, String> sruCodes = new HashMap<String, String>();
 		for (AccountSubset a : accounts.getAccountSubset()) {
-			if (a.getNumber() == null || a.getVATCode() == null || a.getVATCode().trim().isEmpty()) continue;
+			if (a.getNumber() == null) continue;
+			if (a.getSRU() != null && !a.getSRU().trim().isEmpty() && !"0".equals(a.getSRU().trim())) {
+				sruCodes.put(a.getNumber().toString(), a.getSRU().trim());
+			}
+			if (a.getVATCode() == null || a.getVATCode().trim().isEmpty()) continue;
 			codes.put(a.getNumber().toString(), FortnoxVatCodes.toTaxKey(a.getVATCode()));
 		}
 		for (AccountingPeriodData p : data.getPeriods()) {
 			if (p.getChartOfAccounts() == null) continue;
 			for (AccountElement ae : p.getChartOfAccounts()) {
+				if (ae.getAccountNo() == null) continue;
+				if (ae.getReportingCode() == null || ae.getReportingCode().trim().isEmpty()) {
+					String sru = sruCodes.get(ae.getAccountNo());
+					if (sru != null) ae.setReportingCode(sru);
+				}
 				if (ae.getTaxKey() != null && !ae.getTaxKey().trim().isEmpty()) continue;
-				String code = ae.getAccountNo() != null ? codes.get(ae.getAccountNo()) : null;
+				String code = codes.get(ae.getAccountNo());
 				if (code != null) ae.setTaxKey(code);
 			}
 		}

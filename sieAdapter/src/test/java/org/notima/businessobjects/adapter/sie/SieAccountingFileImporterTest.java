@@ -155,6 +155,37 @@ public class SieAccountingFileImporterTest {
 		assertEquals("10", l2.getCostCenter());
 	}
 
+	/** The SRU codes (#SRU) of the accounts are their reporting codes, and are exported again. */
+	@Test
+	public void testSruCodesRoundTrip() throws Exception {
+		AccountingPeriodData period = new AccountingPeriodData();
+		period.setName("2025");
+		period.setPeriodStart(LocalDate.of(2025, 1, 1));
+		period.setPeriodEnd(LocalDate.of(2025, 12, 31));
+		List<AccountElement> coa = new ArrayList<>();
+		AccountElement tax = new AccountElement("8910");
+		tax.setName("Skatt som belastar årets resultat");
+		tax.setReportingCode("7528");
+		coa.add(tax);
+		AccountElement bank = new AccountElement("1930");
+		bank.setName("Bank");
+		coa.add(bank);
+		period.setChartOfAccounts(coa);
+
+		BusinessPartner<?> company = new BusinessPartner<>();
+		company.setName("Test AB");
+		company.setTaxId("556000-0000");
+
+		File tmp = Files.createTempFile("sie-sru-", ".si").toFile();
+		tmp.deleteOnExit();
+		new SieAccountingFileExporter().exportFile(tmp, period, company, true);
+		assertTrue(new String(Files.readAllBytes(tmp.toPath()), "Cp437").contains("#SRU 8910 7528"));
+
+		AccountingPeriodData reimported = new SieAccountingFileImporter().importFile(tmp).getPeriods().get(0);
+		assertEquals("7528", findAccount(reimported, "8910").getReportingCode());
+		assertNull(findAccount(reimported, "1930").getReportingCode());
+	}
+
 	@Test
 	public void testCorrectionsRoundTrip() throws Exception {
 		AccountingPeriodData period = new AccountingPeriodData();

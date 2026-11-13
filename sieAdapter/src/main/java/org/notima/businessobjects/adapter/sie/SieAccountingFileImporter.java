@@ -8,6 +8,7 @@ import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.ifacebusinessobjects.AccountingFileImporter;
 import org.notima.sie.AccountRec;
+import org.notima.sie.SRURec;
 import org.notima.sie.BalanceRec;
 import org.notima.sie.DimRec;
 import org.notima.sie.ObjRec;
@@ -96,11 +97,14 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
     private List<AccountElement> buildChartOfAccounts(SIEFileType4 sieFile) {
         List<AccountElement> result = new ArrayList<>();
         Map<String, AccountRec> accountMap = sieFile.getAccountMap();
+        Map<String, SRURec> sruMap = sieFile.getSruMap();
         if (accountMap != null) {
             // TreeMap is already sorted by account number
             for (AccountRec rec : accountMap.values()) {
                 AccountElement ae = new AccountElement(rec.getAccountNo());
                 ae.setName(rec.getAccountName());
+                SRURec sru = sruMap.get(rec.getAccountNo());
+                if (sru != null && sru.getSRU() != null && !sru.getSRU().isEmpty()) ae.setReportingCode(sru.getSRU());
                 result.add(ae);
             }
         }
@@ -200,6 +204,7 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
             ae.setName(src.getName());
             ae.setAccountClass(src.getAccountClass());
             ae.setTaxKey(src.getTaxKey());
+            ae.setReportingCode(src.getReportingCode());
             ae.setOpeningBalance(src.getOpeningBalance());
             ae.setEndingBalance(src.getEndingBalance());
             copy.add(ae);

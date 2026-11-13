@@ -50,4 +50,31 @@ public class FortnoxVatCodesTest {
 		assertEquals("XYZ", odd.getTaxKey());	// unknown: kept, to show as unknown
 	}
 
+	@Test
+	public void sruCodesBecomeReportingCodes() {
+		AccountElement tax = new AccountElement("8910");
+		AccountElement own = new AccountElement("3010");
+		own.setReportingCode("7410");
+		AccountElement none = new AccountElement("1930");
+		AccountingPeriodData p = new AccountingPeriodData();
+		p.setChartOfAccounts(new ArrayList<AccountElement>(Arrays.asList(tax, own, none)));
+		AccountingFileData data = new AccountingFileData();
+		data.setPeriods(new ArrayList<AccountingPeriodData>(Arrays.asList(p)));
+		AccountSubset a8910 = account(8910, null);
+		a8910.setSRU(" 7528 ");
+		AccountSubset a3010 = account(3010, "MP1");
+		a3010.setSRU("7411");
+		AccountSubset a1930 = account(1930, null);
+		a1930.setSRU("0");
+		Accounts accounts = new Accounts();
+		accounts.setAccountSubset(new ArrayList<AccountSubset>(Arrays.asList(a8910, a3010, a1930)));
+
+		FortnoxAccountingModelProvider.applyVatCodes(data, accounts);
+
+		assertEquals("7528", tax.getReportingCode());
+		assertEquals("7410", own.getReportingCode());	// a code in the model is kept
+		assertEquals("MP1", own.getTaxKey());
+		assertNull(none.getReportingCode());			// 0 is no code
+	}
+
 }

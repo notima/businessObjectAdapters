@@ -8,6 +8,7 @@ import org.notima.generic.businessobjects.AccountingVoucherLine;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.ifacebusinessobjects.AccountingFileExporter;
 import org.notima.sie.AccountRec;
+import org.notima.sie.SRURec;
 import org.notima.sie.BalanceRec;
 import org.notima.sie.ObjRec;
 import org.notima.sie.RARRec;
@@ -82,6 +83,9 @@ public class SieAccountingFileExporter implements AccountingFileExporter {
             if (ae.getAccountNo() == null) continue;
             String name = ae.getName() != null ? ae.getName() : "";
             sieFile.addAccountRecord(new AccountRec(ae.getAccountNo(), name));
+            if (ae.getReportingCode() != null && !ae.getReportingCode().trim().isEmpty()) {
+                sieFile.addSruRecord(new SRURec(ae.getAccountNo(), ae.getReportingCode().trim()));
+            }
             if (ae.getOpeningBalance() != 0.0) {
                 sieFile.addBalanceRecord(new BalanceRec(ae.getAccountNo(), ae.getOpeningBalance()));
             }
