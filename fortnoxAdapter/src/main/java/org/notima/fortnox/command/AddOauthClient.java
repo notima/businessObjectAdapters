@@ -205,6 +205,11 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     	if (creator.hasFailed()) {
     		sess.getConsole().println("WARNING: " + creator.getLastError());
     	}
+    	if (!creator.getMissingScopes().isEmpty()) {
+    		sess.getConsole().println("WARNING: Fortnox did not grant: " + String.join(",", creator.getMissingScopes())
+    				+ ". Calls needing these will fail with \"Har inte behörighet för scope\".");
+    		sess.getConsole().println("Enable them on the integration (client id " + clientId + ") in Fortnox Developer Portal and run again with --renew.");
+    	}
     	sess.getConsole().println((fc.getOrgName()!=null ? fc.getOrgName() : orgNo) + " created" 
     			+ (fc.getOrgName()==null ? ", but the connection could not be verified." : "."));
     	

@@ -106,7 +106,10 @@ public class FortnoxOrderWriter extends FortnoxObjectWriter {
 			return false;
 		}
 
-		BusinessPartner<?> bp = o.getBusinessPartner();
+		// The bill business partner is the Fortnox customer of the order (see FortnoxAdapter.convertToFortnoxOrder).
+		// It falls back on the business partner when not set. Note that an order read from XML
+		// has two separate objects (both are marshalled), so the customer number must be set on both.
+		BusinessPartner<?> bp = o.getBillBpartner();
 		Customer customer = lookupCustomer(bp);
 		if (customer==null) {
 			if (!options.isCreateBusinessPartner()) {
@@ -117,9 +120,14 @@ public class FortnoxOrderWriter extends FortnoxObjectWriter {
 			FortnoxAdapter.logger.info("Creating new customer " + bp.getName());
 			bp.setIdentityNo(null);
 			adapter.persist(bp);
+			if (bp.getIdentityNo()==null || bp.getIdentityNo().trim().length()==0) {
+				throw new Exception("Customer " + bp.getName() + " was created but no customer number was returned by Fortnox");
+			}
+			FortnoxAdapter.logger.info("Created customer " + bp.getIdentityNo() + " " + bp.getName());
 		} else {
 			bp.setIdentityNo(customer.getCustomerNumber());
 		}
+		setCustomerNumberOnBusinessPartner(o, bp);
 
 		if (o.getDateOrdered()==null && options.getOrderDate()!=null) {
 			o.setDateOrdered(LocalDateUtils.asDate(options.getOrderDate()));
@@ -128,6 +136,19 @@ public class FortnoxOrderWriter extends FortnoxObjectWriter {
 		adapter.persist(o);
 		FortnoxAdapter.logger.info("Order " + o.getOrderKey() + " written as Fortnox order " + o.getDocumentKey());
 		return true;
+	}
+
+	/**
+	 * Sets the customer number also on the order's business partner if it is a separate
+	 * object without customer number (e.g. a copy of the bill business partner read from XML).
+	 */
+	private void setCustomerNumberOnBusinessPartner(Order<?> o, BusinessPartner<?> billBp) {
+		BusinessPartner<?> other = o.getBusinessPartner();
+		if (other!=null && other!=billBp 
+				&& (other.getIdentityNo()==null || other.getIdentityNo().trim().length()==0)
+				&& (other.getName()==null || other.getName().equals(billBp.getName()))) {
+			other.setIdentityNo(billBp.getIdentityNo());
+		}
 	}
 
 	/**
