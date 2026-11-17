@@ -31,7 +31,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		TestCompanySettings.class,
 		TestFortnoxAdapterMethods.class,
 		TestFortnoxConnector.class,
-		TestFortnoxVoucherSync.class
+		TestFortnoxVoucherSync.class,
+		TestFortnoxPartnerSync.class
  })
 
 public class AllTests {
