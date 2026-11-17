@@ -29,7 +29,9 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({ 
 		TestCompanySettings.class,
-		TestFortnoxAdapterMethods.class
+		TestFortnoxAdapterMethods.class,
+		TestFortnoxConnector.class,
+		TestFortnoxVoucherSync.class
  })
 
 public class AllTests {
