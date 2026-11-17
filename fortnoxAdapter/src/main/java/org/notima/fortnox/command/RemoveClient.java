@@ -9,6 +9,8 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.api.console.Session;
+import org.notima.api.fortnox.clients.FortnoxCredentials;
+import org.notima.api.fortnox.oauth2.FileCredentialsProvider;
 import org.notima.fortnox.command.completer.FortnoxTenantCompleter;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.ifacebusinessobjects.BusinessObjectFactory;
@@ -74,9 +76,30 @@ public class RemoveClient implements Action {
 			sess.getConsole().println("Removal unsucessful for [" + orgNo + "].");
 		} else {
 			sess.getConsole().println(bp.getTaxId() + " removed.");
+			askToRemoveCredentials();
 		}
 
 		return null;
+	}
+
+	/**
+	 * Asks if the stored credentials for the client should be removed too.
+	 * Needed e.g. when the client is to be re-added with another integration (clientId).
+	 */
+	private void askToRemoveCredentials() throws Exception {
+		FileCredentialsProvider credentialsProvider = new FileCredentialsProvider(orgNo);
+		List<FortnoxCredentials> credentials = credentialsProvider.getAllCredentials();
+		if (credentials==null || credentials.isEmpty()) {
+			sess.getConsole().println("No credentials stored for [" + orgNo + "].");
+			return;
+		}
+		String reply = sess.readLine("Remove also the " + credentials.size() + " stored credential(s) for [ " + orgNo + " ]? (y/n) ", null);
+		if (reply!=null && reply.equalsIgnoreCase("y")) {
+			credentialsProvider.removeAllCredentials();
+			sess.getConsole().println(credentials.size() + " credential(s) removed for [" + orgNo + "].");
+		} else {
+			sess.getConsole().println("Credentials kept.");
+		}
 	}
 	
 }

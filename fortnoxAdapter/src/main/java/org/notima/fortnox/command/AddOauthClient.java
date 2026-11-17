@@ -43,6 +43,9 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     private Fortnox4jCLI		creator;
     
     private boolean				existingClient = false;
+    
+    private String				clientIdSource;
+    private String				scopeSource;
 
 	@Override
 	public Object execute() throws Exception {
@@ -102,14 +105,19 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     
     private boolean hasClientId() {
     	if (clientId!=null) {
+    		clientIdSource = "--clientId";
     		return true;
     	}
     	// Check for default client Id
     	if (clientManager!=null) {
-    		if (fortnoxClientInfo!=null)
+    		if (fortnoxClientInfo!=null) {
     			clientId = fortnoxClientInfo.getClientId();
-    		if (clientId==null)
+    			clientIdSource = "client in fortnoxClients.xml";
+    		}
+    		if (clientId==null) {
     			clientId = clientManager.getDefaultClientId();
+    			clientIdSource = "FortnoxProperties defaultClientId";
+    		}
     	}
     	return clientId!=null;
     }
@@ -130,14 +138,18 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     
     private boolean hasScope() {
     	if (scopeString!=null) {
+    		scopeSource = "--scope";
     		return true;
     	}
     	// Check for scope on client
     	if (clientManager!=null) {
-    		if (fortnoxClientInfo!=null)
+    		if (fortnoxClientInfo!=null) {
     			scopeString = fortnoxClientInfo.getDefaultScope();
+    			scopeSource = "client in fortnoxClients.xml";
+    		}
     		if (scopeString==null) {
     			scopeString = clientManager.getDefaultScopeString();
+    			scopeSource = "FortnoxProperties defaultScope";
     		}
     	}
     	return scopeString!=null;
@@ -155,10 +167,13 @@ public class AddOauthClient extends FortnoxCommand implements Action {
 
     private void createClient() throws Exception {
     	
+    	FortnoxScope scope = new FortnoxScope(scopeString);
+    	printConnectionInfo(scope);
+    	
     	creator = new Fortnox4jCLI();
     	creator.setClientId(clientId);
     	creator.setClientSecret(clientSecret);
-   		creator.setScope(new FortnoxScope(scopeString));
+   		creator.setScope(scope);
     	
     	creator.setFortnoxClientManager(clientManager, orgNo);
     	if (creator.hasAuthenticationCode() && !renew) {
@@ -173,17 +188,45 @@ public class AddOauthClient extends FortnoxCommand implements Action {
     		Thread.sleep(1000);
     	}
     	
+    	if (!creator.hasAccessToken()) {
+    		printFailure(creator.hasFailed() ? creator.getLastError() : "No access token received.");
+    		return;
+    	}
+    	
     	// When all tokens are fetched, the client info is already updated by the login handler.
     	FortnoxClientInfo fc = creator.getFortnoxClientInfo();
     	if (fc==null || fc.getOrgName()==null) {
     		fc = creator.updateFortnoxClientInfo();
     	}
     	if (fc==null) {
-    		sess.getConsole().println("Client " + orgNo + " could not be created.");
+    		printFailure("No client information available.");
     		return;
     	}
-    	sess.getConsole().println((fc.getOrgName()!=null ? fc.getOrgName() : orgNo) + " created.");
+    	if (creator.hasFailed()) {
+    		sess.getConsole().println("WARNING: " + creator.getLastError());
+    	}
+    	sess.getConsole().println((fc.getOrgName()!=null ? fc.getOrgName() : orgNo) + " created" 
+    			+ (fc.getOrgName()==null ? ", but the connection could not be verified." : "."));
     	
+    }
+
+    private void printFailure(String reason) {
+    	sess.getConsole().println("FAILED: Client " + orgNo + " could not be connected.");
+    	sess.getConsole().println("Reason: " + reason);
+    	sess.getConsole().println("Client ID used: " + clientId + " (from " + clientIdSource + ")");
+    	sess.getConsole().println("Run again with --renew to start over with a new authorization code.");
+    }
+    
+    private void printConnectionInfo(FortnoxScope scope) {
+    	sess.getConsole().println("Client ID: " + clientId + " (from " + clientIdSource + ")");
+    	if (scope.hasScopes()) {
+    		sess.getConsole().println("Scope: " + scope.getScopesSeparatedByComma() + " (from " + scopeSource + ")");
+    	} else {
+    		sess.getConsole().println("WARNING: No valid scopes in [" + scopeString + "] (from " + scopeSource + "). Fortnox4j's built-in default scope will be used.");
+    	}
+    	if (scope.hasInvalidScopes()) {
+    		sess.getConsole().println("WARNING: Invalid scope(s) ignored: " + String.join(", ", scope.getInvalidScopes()));
+    	}
     }
 
 }
