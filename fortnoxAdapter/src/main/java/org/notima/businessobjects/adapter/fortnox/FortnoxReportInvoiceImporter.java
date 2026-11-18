@@ -29,6 +29,9 @@ import org.notima.generic.ifacebusinessobjects.InvoiceFileImporter;
  * (partner id, partner name) followed by one or more invoice lines. The report date
  * is taken from the "Per datum" header line.
  *
+ * <p>The amounts in SEK ("Belopp i SEK", "Saldo i SEK") are left out of the report when all
+ * invoices are in SEK; the column header tells which.
+ *
  * <p>The report only lists invoices with a remaining balance, so the result is
  * flagged as {@link InvoiceFileData#isOpenItemsOnly() open items only}.
  */
@@ -86,6 +89,7 @@ public abstract class FortnoxReportInvoiceImporter implements InvoiceFileImporte
 		List<Invoice<?>> invoices = new ArrayList<>();
 
 		BusinessPartner<?> currentPartner = null;
+		int amountCol = -1;		// set when the amounts in SEK are left out (see expandSekColumns)
 		for (String rawLine : lines) {
 			String trimmed = rawLine.trim();
 			if (trimmed.isEmpty()) continue;
@@ -99,10 +103,12 @@ public abstract class FortnoxReportInvoiceImporter implements InvoiceFileImporte
 			String[] cols = rawLine.split("\t", -1);
 			if (cols.length < 2) continue;
 
+			if (isColumnHeader(cols)) amountCol = withoutSekColumns(cols);
+
 			if (isSkippableLine(cols[0].trim())) continue;
 
 			if (isInvoiceLine(cols) && currentPartner != null) {
-				Invoice<?> inv = parseInvoice(cols, currentPartner);
+				Invoice<?> inv = parseInvoice(amountCol >= 0 ? expandSekColumns(cols, amountCol) : cols, currentPartner);
 				if (inv != null) invoices.add(inv);
 				continue;
 			}
@@ -142,6 +148,8 @@ public abstract class FortnoxReportInvoiceImporter implements InvoiceFileImporte
 		inv.setInvoiceKey(invoiceKey);
 		inv.setInvoiceDate(toDate(LocalDate.parse(cols[dateCol].trim(), DATE_FMT)));
 		inv.setDueDate(toDate(LocalDate.parse(cols[dateCol + 1].trim(), DATE_FMT)));
+		// Vernr ("D 23"): to find the voucher the invoice is posted on
+		org.notima.generic.businessobjects.settlement.PostedInvoices.setSourceVoucherNo(inv, clean(cols[dateCol + 2]));
 		inv.setCurrency(cols[dateCol + 3].trim());
 		inv.setGrandTotal(parseSwedishAmount(cols[dateCol + 5].trim()));  // belopp_sek
 		inv.setOpenAmt(parseSwedishAmount(cols[dateCol + 7].trim()));     // saldo_sek
@@ -164,6 +172,44 @@ public abstract class FortnoxReportInvoiceImporter implements InvoiceFileImporte
 	// -------------------------------------------------------------------------
 	// Private helpers
 	// -------------------------------------------------------------------------
+
+	/** The column header of the invoice lines: has a "Belopp" column. */
+	private static boolean isColumnHeader(String[] cols) {
+		for (String c : cols) if (c.trim().equals("Belopp")) return true;
+		return false;
+	}
+
+	/**
+	 * When all invoices are in SEK, Fortnox leaves out the columns "Belopp i SEK" and
+	 * "Saldo i SEK".
+	 *
+	 * @return	The index of "Belopp" in such a header, else -1.
+	 */
+	private static int withoutSekColumns(String[] cols) {
+		int amount = -1;
+		for (int i = 0; i < cols.length; i++) {
+			String c = cols[i].trim();
+			if (c.equals("Belopp")) amount = i;
+			if (c.endsWith("i SEK")) return -1;
+		}
+		return amount;
+	}
+
+	/**
+	 * Gives an invoice line without the amounts in SEK the columns of the full report, with
+	 * the amount and the balance (already in SEK) as the amounts in SEK.
+	 */
+	private static String[] expandSekColumns(String[] cols, int amountCol) {
+		if (cols.length < amountCol + 2) return cols;
+		List<String> result = new ArrayList<>();
+		for (int i = 0; i < amountCol; i++) result.add(cols[i]);
+		result.add(cols[amountCol]);
+		result.add(cols[amountCol]);
+		result.add(cols[amountCol + 1]);
+		result.add(cols[amountCol + 1]);
+		for (int i = amountCol + 2; i < cols.length; i++) result.add(cols[i]);
+		return result.toArray(new String[0]);
+	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private BusinessPartner<?> buildPartner(String id, String name) {

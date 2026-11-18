@@ -1,0 +1,14 @@
+  Leverantörsbetalningar    
+  Testbolaget AB
+ 556100-0001
+ Per datum 2026-11-18
+   Leverantörsreskontralista 	  Utskrivet 2026-11-18 09:18
+Levnr	Leverantör	
+Löpnr	OCR/Fakturanr	Faktdat	Förfdat	Vernr	Valuta	Belopp	Saldo	
+-------------------------
+4749702-9	Exempel Finans AB	
+46	 	2025-07-11	2025-08-01	D 23	SEK	2 129,00	1 000,00	
+103	12345	2025-09-11	2025-10-01	D 74	SEK	2 145,00	2 145,00	
+Antal fakturor	2	
+Summa i SEK	3 145,00	
+-------------------------

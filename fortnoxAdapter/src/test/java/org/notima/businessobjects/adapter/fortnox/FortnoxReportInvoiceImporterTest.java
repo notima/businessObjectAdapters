@@ -79,4 +79,37 @@ public class FortnoxReportInvoiceImporterTest {
 		assertEquals(2813.0, first.getOpenAmt(), 0.001);
 	}
 
+	/** When all invoices are in SEK, Fortnox leaves out the columns "Belopp i SEK" and "Saldo i SEK". */
+	@Test
+	public void testApImportWithoutSekColumns() throws Exception {
+		InvoiceFileData data = new FortnoxApReportImporter().importFile(resourceFile("Report_AP_sek_only.txt"));
+		assertEquals(LocalDate.of(2026, 11, 18), data.getAsOfDate());
+		assertEquals(2, data.getInvoices().size());
+		Invoice<?> first = data.getInvoices().get(0);
+		assertEquals("46", first.getInvoiceKey());
+		assertNull(first.getOcr());
+		assertEquals("SEK", first.getCurrency());
+		assertEquals(2129.0, first.getGrandTotal(), 0.001);
+		assertEquals(1000.0, first.getOpenAmt(), 0.001);
+		assertEquals("4749702-9", first.getBusinessPartner().getIdentityNo());
+		assertEquals("D 23", org.notima.generic.businessobjects.settlement.PostedInvoices.sourceVoucherNo(first));
+		assertFalse(org.notima.generic.businessobjects.settlement.PostedInvoices.isPosted(first), "only a hint");
+		assertEquals("Exempel Finans AB", first.getBusinessPartner().getName());
+		Invoice<?> second = data.getInvoices().get(1);
+		assertEquals("12345", second.getOcr());
+		assertEquals(2145.0, second.getOpenAmt(), 0.001);
+	}
+
+	@Test
+	public void testArImportWithoutSekColumns() throws Exception {
+		assertTrue(new FortnoxArReportImporter().canImport(resourceFile("Report_AR_sek_only.txt")));
+		InvoiceFileData data = new FortnoxArReportImporter().importFile(resourceFile("Report_AR_sek_only.txt"));
+		assertEquals(1, data.getInvoices().size());
+		Invoice<?> inv = data.getInvoices().get(0);
+		assertEquals("1001", inv.getInvoiceKey());
+		assertEquals(1250.0, inv.getGrandTotal(), 0.001);
+		assertEquals(250.0, inv.getOpenAmt(), 0.001);
+		assertEquals("B 5", org.notima.generic.businessobjects.settlement.PostedInvoices.sourceVoucherNo(inv));
+	}
+
 }

@@ -83,6 +83,7 @@ public class Activator extends BaseActivator {
 		register(InvoiceFileImporter.class, new FortnoxArReportImporter(), props);
 		log.info("Registered Fortnox AP / AR report importers");
 		register(BusinessPartnerFileImporter.class, new FortnoxCustomerFileImporter(), props);
+		register(BusinessPartnerFileImporter.class, new FortnoxSupplierFileImporter(), props);
 		log.info("Registered Fortnox customer register importer");
 		
 		// This is only necessary if the configuration admin for some reason wan't loaded (JUnitTest situation).

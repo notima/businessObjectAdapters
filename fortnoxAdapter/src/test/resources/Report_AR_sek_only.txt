@@ -1,0 +1,13 @@
+  Kundbetalningar    
+  Testbolaget AB
+ 556100-0001
+ Per datum 2026-11-18
+   Kundreskontralista 	  Utskrivet 2026-11-18 09:18
+Kundnr	Kund	
+Fakturanr	Faktdat	Förfdat	Vernr	Valuta	Belopp	Saldo	
+-------------------------
+10	Exempel Kund AB	
+1001	2026-10-01	2026-10-31	B 5	SEK	1 250,00	250,00	
+Antal fakturor	1	
+Summa i SEK	250,00	
+-------------------------

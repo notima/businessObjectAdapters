@@ -63,7 +63,8 @@ public class FortnoxConnector implements SieFileProvider, SyncProvider {
 
 	public static final String DEFAULT_SCOPE = FortnoxConstants.SCOPE_BOOKKEEPING + ","
 			+ FortnoxConstants.SCOPE_COMPANYINFORMATION + "," + FortnoxConstants.SCOPE_SETTINGS + ","
-			+ FortnoxConstants.SCOPE_CUSTOMER + "," + FortnoxConstants.SCOPE_SUPPLIER;
+			+ FortnoxConstants.SCOPE_CUSTOMER + "," + FortnoxConstants.SCOPE_SUPPLIER + ","
+			+ FortnoxConstants.SCOPE_INVOICE + "," + FortnoxConstants.SCOPE_SUPPLIERINVOICE;
 
 	private static final String INTEGRATION_FILE = "integration.json";
 	private static final String CREDENTIALS_FILE = "credentials.json";
@@ -121,8 +122,8 @@ public class FortnoxConnector implements SieFileProvider, SyncProvider {
 		List<String> scopes = new ArrayList<String>(new TreeSet<String>(FortnoxConstants.ALL_SCOPES));
 		list.add(new ConnectorSetting(KEY_SCOPE, sv ? "Behörigheter (scopes)" : "Permissions (scopes)", ConnectorSetting.Type.MULTI_CHOICE, getScope().getScopesSeparatedByComma())
 				.setChoices(scopes)
-				.setDescription(sv ? "Måste också vara påslagna på integrationen. SIE och verifikationer kräver bookkeeping, kunder customer och leverantörer supplier."
-						: "Must also be enabled on the integration. SIE and vouchers need bookkeeping, customers customer and suppliers supplier."));
+				.setDescription(sv ? "Måste också vara påslagna på integrationen. SIE och verifikationer kräver bookkeeping, kunder customer, leverantörer supplier, kundfakturor invoice och leverantörsfakturor supplierinvoice."
+						: "Must also be enabled on the integration. SIE and vouchers need bookkeeping, customers customer, suppliers supplier, customer invoices invoice and supplier invoices supplierinvoice."));
 		return list;
 	}
 
@@ -291,7 +292,8 @@ public class FortnoxConnector implements SieFileProvider, SyncProvider {
 	// ------------------------------------------------------------------
 
 	private final List<ObjectSyncHandler<?>> syncHandlers = Collections.unmodifiableList(java.util.Arrays.<ObjectSyncHandler<?>>asList(
-			new FortnoxVoucherSync(this), new FortnoxCustomerSync(this), new FortnoxSupplierSync(this)));
+			new FortnoxVoucherSync(this), new FortnoxCustomerSync(this), new FortnoxSupplierSync(this),
+			new FortnoxCustomerInvoiceSync(this), new FortnoxSupplierInvoiceSync(this)));
 
 	@Override
 	public List<ObjectSyncHandler<?>> getSyncHandlers() {
