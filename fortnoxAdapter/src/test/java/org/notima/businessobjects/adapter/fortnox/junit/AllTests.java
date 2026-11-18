@@ -33,7 +33,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		TestFortnoxConnector.class,
 		TestFortnoxVoucherSync.class,
 		TestFortnoxPartnerSync.class,
-		TestFortnoxInvoiceSync.class
+		TestFortnoxInvoiceSync.class,
+		TestFortnoxArticleSync.class
  })
 
 public class AllTests {

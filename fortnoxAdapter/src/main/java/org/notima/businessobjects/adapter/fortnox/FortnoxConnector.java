@@ -64,7 +64,8 @@ public class FortnoxConnector implements SieFileProvider, SyncProvider {
 	public static final String DEFAULT_SCOPE = FortnoxConstants.SCOPE_BOOKKEEPING + ","
 			+ FortnoxConstants.SCOPE_COMPANYINFORMATION + "," + FortnoxConstants.SCOPE_SETTINGS + ","
 			+ FortnoxConstants.SCOPE_CUSTOMER + "," + FortnoxConstants.SCOPE_SUPPLIER + ","
-			+ FortnoxConstants.SCOPE_INVOICE + "," + FortnoxConstants.SCOPE_SUPPLIERINVOICE;
+			+ FortnoxConstants.SCOPE_INVOICE + "," + FortnoxConstants.SCOPE_SUPPLIERINVOICE + ","
+			+ FortnoxConstants.SCOPE_ARTICLE + "," + FortnoxConstants.SCOPE_PRICE;
 
 	private static final String INTEGRATION_FILE = "integration.json";
 	private static final String CREDENTIALS_FILE = "credentials.json";
@@ -122,8 +123,8 @@ public class FortnoxConnector implements SieFileProvider, SyncProvider {
 		List<String> scopes = new ArrayList<String>(new TreeSet<String>(FortnoxConstants.ALL_SCOPES));
 		list.add(new ConnectorSetting(KEY_SCOPE, sv ? "Behörigheter (scopes)" : "Permissions (scopes)", ConnectorSetting.Type.MULTI_CHOICE, getScope().getScopesSeparatedByComma())
 				.setChoices(scopes)
-				.setDescription(sv ? "Måste också vara påslagna på integrationen. SIE och verifikationer kräver bookkeeping, kunder customer, leverantörer supplier, kundfakturor invoice och leverantörsfakturor supplierinvoice."
-						: "Must also be enabled on the integration. SIE and vouchers need bookkeeping, customers customer, suppliers supplier, customer invoices invoice and supplier invoices supplierinvoice."));
+				.setDescription(sv ? "Måste också vara påslagna på integrationen. SIE och verifikationer kräver bookkeeping, kunder customer, leverantörer supplier, kundfakturor invoice, leverantörsfakturor supplierinvoice och artiklar article och price."
+						: "Must also be enabled on the integration. SIE and vouchers need bookkeeping, customers customer, suppliers supplier, customer invoices invoice, supplier invoices supplierinvoice and articles article and price."));
 		return list;
 	}
 
@@ -293,7 +294,7 @@ public class FortnoxConnector implements SieFileProvider, SyncProvider {
 
 	private final List<ObjectSyncHandler<?>> syncHandlers = Collections.unmodifiableList(java.util.Arrays.<ObjectSyncHandler<?>>asList(
 			new FortnoxVoucherSync(this), new FortnoxCustomerSync(this), new FortnoxSupplierSync(this),
-			new FortnoxCustomerInvoiceSync(this), new FortnoxSupplierInvoiceSync(this)));
+			new FortnoxCustomerInvoiceSync(this), new FortnoxSupplierInvoiceSync(this), new FortnoxArticleSync(this)));
 
 	@Override
 	public List<ObjectSyncHandler<?>> getSyncHandlers() {
