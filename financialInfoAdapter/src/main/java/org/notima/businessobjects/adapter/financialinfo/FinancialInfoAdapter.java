@@ -14,9 +14,12 @@ import java.util.TreeSet;
 
 import org.notima.businessobjects.adapter.financialinfo.ecb.EcbSource;
 import org.notima.businessobjects.adapter.financialinfo.riksbank.RiksbankSource;
+import org.notima.businessobjects.adapter.financialinfo.se.SwedishBaseAmounts;
+import org.notima.generic.businessobjects.BaseAmountResult;
 import org.notima.generic.businessobjects.CurrencyExchangeRateResult;
 import org.notima.generic.businessobjects.InterestRateResult;
 import org.notima.generic.businessobjects.util.ExchangeRateTable;
+import org.notima.generic.ifacebusinessobjects.BaseAmountProvider;
 import org.notima.generic.ifacebusinessobjects.ExchangeRateProvider;
 import org.notima.generic.ifacebusinessobjects.InterestRateProvider;
 import org.slf4j.Logger;
@@ -24,8 +27,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Financial information from open sources: exchange rates of Sveriges Riksbank and the ECB,
- * interest rates of Riksbanken. More kinds (ie index numbers) are added as capability
- * interfaces of {@link org.notima.generic.ifacebusinessobjects.FinancialInfoProvider}.
+ * interest rates of Riksbanken, and the Swedish base amounts ({@link SwedishBaseAmounts}). More
+ * kinds (ie index numbers) are added as capability interfaces of
+ * {@link org.notima.generic.ifacebusinessobjects.FinancialInfoProvider}.
  *
  * <p>Sources are asked in the order of the {@link FinancialInfoSettings settings} (Riksbanken,
  * then the ECB, by default): the first one that has both currencies on the date gives the
@@ -36,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * <p>Registered as a {@code FinancialInfoProvider} service for {@link java.util.ServiceLoader}
  * (accounting-analyzer) and by the {@link Activator} in Karaf.</p>
  */
-public class FinancialInfoAdapter implements ExchangeRateProvider, InterestRateProvider {
+public class FinancialInfoAdapter implements ExchangeRateProvider, InterestRateProvider, BaseAmountProvider {
 
 	public static final String SYSTEM_NAME = "FinancialInfo";
 
@@ -187,6 +191,20 @@ public class FinancialInfoAdapter implements ExchangeRateProvider, InterestRateP
 			if (r != null) result.add(r);
 		}
 		return result;
+	}
+
+	// ------------------------------------------------------------------
+	// Base amounts
+	// ------------------------------------------------------------------
+
+	@Override
+	public Map<String, String> getAvailableBaseAmountKeys() {
+		return SwedishBaseAmounts.keys();
+	}
+
+	@Override
+	public BaseAmountResult getBaseAmount(String key, int year) {
+		return SwedishBaseAmounts.get(key, year);
 	}
 
 }

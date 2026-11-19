@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /** The tests of the build; they use saved responses, not the network. */
 @RunWith(Suite.class)
-@SuiteClasses({ TestFinancialInfoAdapter.class })
+@SuiteClasses({ TestFinancialInfoAdapter.class, TestBaseAmounts.class })
 public class AllTests {
 
 }

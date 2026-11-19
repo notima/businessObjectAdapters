@@ -4,6 +4,7 @@ Financial information from open sources, as a `FinancialInfoProvider` of busines
 
 * **Exchange rates** (`ExchangeRateProvider`): Sveriges Riksbank (SWEA API, about 30 currencies against SEK), with the ECB's euro reference rates for what Riksbanken lacks or when it can't be reached. Cross rates are worked out from either. The rate on a day is the latest published on or before it.
 * **Interest rates** (`InterestRateProvider`): Riksbanken's reference rate (`SE_REF_RATE`) and policy rate (`SE_POLICY_RATE`).
+* **Base amounts** (`BaseAmountProvider`): the Swedish prisbasbelopp (`SE_PBB`), förhöjt prisbasbelopp (`SE_PBB_RAISED`) and inkomstbasbelopp (`SE_IBB`) per year. They are set by ordinance and have no open interface, so they are listed in `SwedishBaseAmounts`: add the next year's each autumn, when the government has set them.
 
 More kinds of information (ie index numbers) are added as capability interfaces of `FinancialInfoProvider`.
 
