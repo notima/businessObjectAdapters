@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.notima.generic.businessobjects.BankAccountDetail;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.Payment;
+import org.notima.generic.businessobjects.PayeeAccount;
 import org.notima.generic.businessobjects.PaymentBatch;
 
 public class TestP27PaymentInstructionWriter {
@@ -82,6 +83,43 @@ public class TestP27PaymentInstructionWriter {
 		PaymentBatch b = batch();
 		b.getPayments().get(1).getBusinessPartner().setRemitToAccountType(null);
 		assertEquals(1, new P27PaymentInstructionWriter().validate(b, company()).size());
+	}
+
+	@Test
+	public void testChosenPayeeAccountIsPaid() throws Exception {
+		PaymentBatch b = batch();
+		// The vendor has a bankgiro as remit-to account, but the payment is to its Swedish bank account
+		PayeeAccount bank = new PayeeAccount("BANK", "123 456 789-0");
+		bank.setCountryCode("SE");
+		bank.setBankCode("8327-9");
+		bank.setAccountHolder("Factoring AB");
+		b.getPayments().get(0).setPayeeAccount(bank);
+		P27PaymentInstructionWriter w = new P27PaymentInstructionWriter();
+		assertTrue(w.validate(b, company()).toString(), w.validate(b, company()).isEmpty());
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		w.writePaymentInstructions(b, company(), out);
+		String xml = out.toString("UTF-8");
+		assertTrue(xml, xml.contains("<Id>1234567890</Id>"));
+		assertTrue(xml, xml.contains("<MmbId>83279</MmbId>"));
+		assertTrue(xml.contains("<Nm>Factoring AB</Nm>"));
+		assertFalse(xml.contains("<Nm>Leverantör Ett AB</Nm>"));
+	}
+
+	@Test
+	public void testAccountsPain001CantCarry() {
+		P27PaymentInstructionWriter w = new P27PaymentInstructionWriter();
+		assertTrue(w.canPayTo(new PayeeAccount("BG", "5050-1055")));
+		assertTrue(w.canPayTo(new PayeeAccount("IBAN", "DE89370400440532013000")));
+		assertFalse(w.canPayTo(new PayeeAccount("SWISH", "1234567890")));
+		PayeeAccount foreignBank = new PayeeAccount("BANK", "31926819");
+		foreignBank.setCountryCode("GB");
+		assertFalse(w.canPayTo(foreignBank));
+
+		PaymentBatch b = batch();
+		b.getPayments().get(0).setPayeeAccount(new PayeeAccount("SWISH", "1234567890"));
+		java.util.List<String> problems = w.validate(b, company());
+		assertEquals(1, problems.size());
+		assertTrue(problems.get(0), problems.get(0).contains("SWISH"));
 	}
 
 }

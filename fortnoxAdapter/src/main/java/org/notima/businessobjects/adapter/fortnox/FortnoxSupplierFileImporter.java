@@ -13,7 +13,9 @@ import org.notima.generic.businessobjects.Location;
  *       {@code vat_number} &rarr; VAT no; a supplier is always a company</li>
  *   <li>{@code invoice_*} &rarr; official address (with {@code email} and {@code invoice_phone});
  *       its country code is also the partner's country code</li>
- *   <li>{@code bg}, else {@code pg} &rarr; the account to pay to; {@code iban}, {@code bic}</li>
+ *   <li>{@code bg}, {@code pg}, {@code bank_account_number} (with {@code clearing_number} and
+ *       {@code bank}), {@code iban} (with {@code bic}) &rarr; payee accounts, bankgiro preferred,
+ *       and the remit-to fields, see {@link FortnoxPayeeAccounts}</li>
  *   <li>{@code active}, {@code currency}, {@code payment_terms} (payment term key),
  *       {@code vat_type}, {@code www} (website) and {@code comment}</li>
  * </ul>
@@ -44,15 +46,15 @@ public class FortnoxSupplierFileImporter extends FortnoxRegisterFileImporter {
 		bp.setWebsite(row.get("www"));
 		bp.setComments(row.get("comment"));
 
-		if (row.get("bg") != null) {
-			bp.setRemitToAccountType("BG");
-			bp.setRemitToAccount(row.get("bg"));
-		} else if (row.get("pg") != null) {
-			bp.setRemitToAccountType("PG");
-			bp.setRemitToAccount(row.get("pg"));
-		}
-		bp.setRemitToIBAN(row.get("iban"));
-		bp.setRemitToBIC(row.get("bic"));
+		FortnoxPayeeAccounts.Fields f = new FortnoxPayeeAccounts.Fields();
+		f.bg = row.get("bg");
+		f.pg = row.get("pg");
+		f.bankAccountNo = row.get("bank_account_number");
+		f.clearingNo = row.get("clearing_number");
+		f.bank = row.get("bank");
+		f.iban = row.get("iban");
+		f.bic = row.get("bic");
+		FortnoxPayeeAccounts.toPartner(bp, f, row.get("invoice_country_code"));
 
 		Location official = new Location();
 		official.setAddress1(row.get("invoice_address"));

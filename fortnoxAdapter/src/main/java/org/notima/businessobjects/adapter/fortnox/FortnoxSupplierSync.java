@@ -12,8 +12,9 @@ import org.notima.generic.businessobjects.Location;
 import org.notima.generic.businessobjects.sync.SyncLink;
 
 /**
- * Syncs suppliers with Fortnox's supplier register, including where to pay them (bankgiro or
- * plusgiro, IBAN and BIC). A new supplier gets the partner's number as supplier number if it has
+ * Syncs suppliers with Fortnox's supplier register, including where to pay them (bankgiro,
+ * plusgiro, bank account with clearing number and bank, IBAN and BIC) as payee accounts, see
+ * {@link FortnoxPayeeAccounts}. A new supplier gets the partner's number as supplier number if it has
  * one and isn't a customer too, else Fortnox assigns the next.
  */
 public class FortnoxSupplierSync extends FortnoxPartnerSync {
@@ -82,15 +83,17 @@ public class FortnoxSupplierSync extends FortnoxPartnerSync {
 		bp.setCurrency(empty(s.getCurrency()));
 		bp.setPaymentTermKey(empty(s.getTermsOfPayment()));
 		bp.setCountryCode(empty(s.getCountryCode()));
-		if (empty(s.getBG())!=null) {
-			bp.setRemitToAccountType("BG");
-			bp.setRemitToAccount(empty(s.getBG()));
-		} else if (empty(s.getPG())!=null) {
-			bp.setRemitToAccountType("PG");
-			bp.setRemitToAccount(empty(s.getPG()));
+		FortnoxPayeeAccounts.Fields f = new FortnoxPayeeAccounts.Fields();
+		f.bg = empty(s.getBG());
+		f.pg = empty(s.getPG());
+		f.bankAccountNo = empty(s.getBankAccountNumber());
+		if (s instanceof Supplier) {
+			f.clearingNo = empty(((Supplier) s).getClearingNumber());
+			f.bank = empty(((Supplier) s).getBank());
 		}
-		bp.setRemitToIBAN(empty(s.getIBAN()));
-		bp.setRemitToBIC(empty(s.getBIC()));
+		f.iban = empty(s.getIBAN());
+		f.bic = empty(s.getBIC());
+		FortnoxPayeeAccounts.toPartner(bp, f, empty(s.getCountryCode()));
 		Location a = new Location();
 		a.setAddress1(empty(s.getAddress1()));
 		a.setAddress2(empty(s.getAddress2()));
@@ -132,14 +135,16 @@ public class FortnoxSupplierSync extends FortnoxPartnerSync {
 		s.setCountryCode(country(bp));
 		s.setCurrency(empty(bp.getCurrency()));
 		s.setTermsOfPayment(empty(bp.getPaymentTermKey()));
-		String type = bp.getRemitToAccountType()!=null ? bp.getRemitToAccountType().trim().toUpperCase() : "";
-		String account = empty(bp.getRemitToAccount());
-		String bg = account!=null && !"PG".equals(type) ? account : null;
-		String pg = account!=null && "PG".equals(type) ? account : null;
-		s.setBG(update ? orClear(bg) : bg);
-		s.setPG(update ? orClear(pg) : pg);
-		s.setIBAN(update ? orClear(bp.getRemitToIBAN()) : empty(bp.getRemitToIBAN()));
-		s.setBIC(update ? orClear(bp.getRemitToBIC()) : empty(bp.getRemitToBIC()));
+		FortnoxPayeeAccounts.Fields f = FortnoxPayeeAccounts.fromPartner(bp);
+		s.setBG(update ? orClear(f.bg) : f.bg);
+		s.setPG(update ? orClear(f.pg) : f.pg);
+		s.setIBAN(update ? orClear(f.iban) : f.iban);
+		s.setBIC(update ? orClear(f.bic) : f.bic);
+		// A partner with only remit-to fields can't tell a bank account: leave Fortnox's
+		boolean clearBank = update && f.bankAccountKnown;
+		s.setBankAccountNumber(clearBank ? orClear(f.bankAccountNo) : f.bankAccountNo);
+		s.setClearingNumber(clearBank ? orClear(f.clearingNo) : f.clearingNo);
+		s.setBank(clearBank ? orClear(f.bank) : f.bank);
 		if (bp.getActive()!=null) s.setActive(bp.getActive());
 		// The partner's number, unless it's a customer too (then it's the customer number, and
 		// the supplier register has its own series): Fortnox assigns the next

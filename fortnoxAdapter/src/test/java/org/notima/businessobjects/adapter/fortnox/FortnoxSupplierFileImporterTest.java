@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.notima.generic.businessobjects.BusinessPartner;
 import org.notima.generic.businessobjects.BusinessPartnerFileData;
 import org.notima.generic.businessobjects.Location;
+import org.notima.generic.businessobjects.PayeeAccount;
+import org.notima.generic.businessobjects.PayeeAccountType;
 
 public class FortnoxSupplierFileImporterTest {
 
@@ -69,6 +71,17 @@ public class FortnoxSupplierFileImporterTest {
 		assertEquals("PG", pg.getRemitToAccountType());
 		assertEquals("4749702-9", pg.getRemitToAccount());
 		assertEquals("REVERSE", pg.getVatType());
+		// and a bank account, as payee accounts
+		assertEquals(2, pg.getPayeeAccounts().size());
+		assertTrue(pg.getPayeeAccounts().get(0).isType("PG"));
+		assertTrue(pg.getPayeeAccounts().get(0).isPreferred());
+		PayeeAccount bank = pg.getPayeeAccounts().get(1);
+		assertTrue(bank.isType("BANK"));
+		assertEquals("123 456 789-0", bank.getAccountNo());
+		assertEquals("8327-9", bank.getBankCode());
+		assertEquals("Swedbank", bank.getBankName());
+		assertEquals("SE", bank.getCountryCode());
+		assertTrue(PayeeAccountType.problemsOf(bank).isEmpty());
 		assertNull(pg.getAddressOfficial().getAddress1());
 		assertNull(pg.getPaymentTermKey());
 
@@ -82,6 +95,7 @@ public class FortnoxSupplierFileImporterTest {
 		assertEquals("FI2112345600000785", foreign.getRemitToIBAN());
 		assertEquals("NDEAFIHH", foreign.getRemitToBIC());
 		assertNull(foreign.getRemitToAccountType());
+		assertEquals("NDEAFIHH", foreign.getPayeeAccounts().get(0).getBic());
 	}
 
 }
