@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.Services;
-import org.notima.businessobjects.adapter.tools.accounting.AccountingModelCache;
+import org.notima.generic.businessobjects.accounting.AccountingModelCache;
 import org.notima.businessobjects.adapter.tools.accounting.AccountingModelService;
 import org.notima.businessobjects.adapter.tools.accounting.ModelAccountingReportProvider;
 import org.notima.businessobjects.adapter.tools.task.FileTaskLockManager;

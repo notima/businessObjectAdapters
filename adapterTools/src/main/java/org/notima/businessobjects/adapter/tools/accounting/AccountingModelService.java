@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.accounting;
 
+import org.notima.generic.businessobjects.accounting.AccountingModelCache;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;

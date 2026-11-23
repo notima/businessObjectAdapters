@@ -1,5 +1,6 @@
 package org.notima.businessobjects.adapter.tools.accounting;
 
+import org.notima.generic.businessobjects.accounting.AccountingModelCache;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
