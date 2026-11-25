@@ -12,6 +12,8 @@ public class AdyenReport implements PaymentReportGeneric {
 
 	private	String					fullPath;
 	private	LocalDate				settlementDate;
+	private LocalDate				periodFrom;
+	private LocalDate				periodTo;
 	private String					shopId;
 	private String					shopName;
 	private TaxSubjectIdentifier 	taxSubject;
@@ -33,6 +35,25 @@ public class AdyenReport implements PaymentReportGeneric {
 	}
 	public void setSettlementDate(LocalDate settlementDate) {
 		this.settlementDate = settlementDate;
+	}
+	/**
+	 * @return	The first date of the period the report covers (when the batch was opened), even if it has no payments.
+	 */
+	public LocalDate getPeriodFrom() {
+		return periodFrom;
+	}
+	public void setPeriodFrom(LocalDate periodFrom) {
+		this.periodFrom = periodFrom;
+	}
+	/**
+	 * @return	The last date of the period the report covers: the day before the batch was closed,
+	 * 			since the next batch starts the same day. Set even if the report has no payments.
+	 */
+	public LocalDate getPeriodTo() {
+		return periodTo;
+	}
+	public void setPeriodTo(LocalDate periodTo) {
+		this.periodTo = periodTo;
 	}
 	public String getShopId() {
 		return shopId;

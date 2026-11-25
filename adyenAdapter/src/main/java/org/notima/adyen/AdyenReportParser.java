@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -35,6 +38,8 @@ public class AdyenReportParser {
 	private static Workbook		 lastWorkbook;
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";    
+    // Older reports are named by date, ie settlement_detail_report_2025-09-01.xlsx or ..._2025-03-26_2025-04-01.xlsx
+    private static final Pattern FILE_NAME_DATE = Pattern.compile("(\\d{4}-\\d{2}-\\d{2})");
 	
 	private String 			filename;
 	private AdyenReport	report;
@@ -46,6 +51,9 @@ public class AdyenReportParser {
     private List<PayoutFee> feeLines;
     private List<PaymentReportRow> reportRows;
     private Map<String, List<AdyenReportRow>> pspReferenceMap;
+    // The first and last booking dates of the batch
+    private LocalDate batchOpened;
+    private LocalDate batchClosed;
     
     public static AdyenReport createFromFile(String filename) throws IOException, Exception {
     	AdyenReportParser parser = new AdyenReportParser(filename);
@@ -107,6 +115,7 @@ public class AdyenReportParser {
 		}
 		
 		checkSettlementDate();
+		checkPeriod();
 		
     }
     
@@ -123,9 +132,60 @@ public class AdyenReportParser {
     	
     }
 
+    /**
+     * Sets the period the report covers from when the batch was opened and closed.
+     * 
+     * A batch is opened when the previous batch is closed (balance transfer from the previous batch)
+     * and closed at Adyen's cutoff, normally around 02:15 (balance transfer to the next batch, payout).
+     * The next batch starts the same day, so the period ends the day before the batch was closed.
+     * Batches opened and closed at the same time (only passing the balance on) cover the day before.
+     * 
+     * If the report has no booking rows (only a header), the dates in the file name are used as
+     * close dates.
+     */
+    private void checkPeriod() {
+    	
+    	if (batchClosed==null) {
+    		Matcher m = FILE_NAME_DATE.matcher(new File(filename).getName());
+    		while (m.find()) {
+    			try {
+    				LocalDate d = LocalDate.parse(m.group(1));
+    				addToBatchTimes(d.minusDays(1));
+    				addToBatchTimes(d);
+    			} catch (Exception e) {
+    				// Not a valid date, ignore
+    			}
+    		}
+    	}
+    	if (batchClosed==null) return;
+    	
+    	LocalDate periodTo = batchClosed.minusDays(1);
+    	report.setPeriodTo(periodTo);
+    	report.setPeriodFrom(batchOpened.isAfter(periodTo) ? periodTo : batchOpened);
+    	
+    }
+    
+    /**
+     * Extends the batch's open and close dates to include the date.
+     */
+    private void addToBatchTimes(LocalDate date) {
+    	if (date==null) return;
+    	if (batchOpened==null || date.isBefore(batchOpened)) {
+    		batchOpened = date;
+    	}
+    	if (batchClosed==null || date.isAfter(batchClosed)) {
+    		batchClosed = date;
+    	}
+    }
+
     private void addReportRow(AdyenReportRow reportRow) {
     	
     	reportLines.add(reportRow);
+    	// Payment rows are dated when the payment was created, which can be before the batch
+    	// was opened. The other rows (balance transfers, fees, payouts) are dated when booked in the batch.
+    	if (!reportRow.hasPaymentReference()) {
+    		addToBatchTimes(LocalDateUtils.asLocalDate(reportRow.getCreationDate()));
+    	}
     	if (reportRow.isFee() || reportRow.isDepositAdjustment()) {
     		addFeeLine(reportRow);
     	}
