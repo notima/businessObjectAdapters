@@ -65,6 +65,43 @@ public class SieAccountingFileImporterTest {
 	 * Imported from a stream (as from an accounting system), the data survives a round trip
 	 * through JSON (the format accounting models are cached in) with the same balances.
 	 */
+	/** A payroll export: vouchers and the accounts they use, but no years or balances. */
+	private static final String PAYROLL_SIE =
+			"#FLAGGA 0\r\n#PROGRAM \"Lön\" 1.0\r\n#FORMAT PC8\r\n#GEN 20261125\r\n#SIETYP 4\r\n"
+			+ "#ORGNR 556419-6383\r\n#FNAMN \"Helukabel AB\"\r\n"
+			+ "#KONTO 7210 \"Löner tjänstemän\"\r\n#KONTO 2710 \"Personalskatt\"\r\n#KONTO 1930 \"Bank\"\r\n"
+			+ "#VER L 1 20261125 \"Lön november\"\r\n{\r\n"
+			+ "   #TRANS 7210 {} 30000.00\r\n   #TRANS 2710 {} -9000.00\r\n   #TRANS 1930 {} -21000.00\r\n}\r\n";
+
+	@Test
+	public void testPayrollFileIsVoucherImport() throws Exception {
+		File file = writeTemp(PAYROLL_SIE);
+		AccountingFileData result = new SieAccountingFileImporter().importFile(file);
+		assertTrue(result.isVoucherImport());
+		assertEquals(1, result.getPeriods().size());
+		assertEquals(1, result.getPeriods().get(0).getVouchers().size());
+	}
+
+	@Test
+	public void testYearFileIsNotVoucherImport() throws Exception {
+		File file = new File(getClass().getResource(SAMPLE_SIE).toURI());
+		assertFalse(new SieAccountingFileImporter().importFile(file).isVoucherImport());
+		// Any year record makes it a year file
+		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(
+				PAYROLL_SIE.replace("#KONTO 7210", "#RAR 0 20260101 20261231\r\n#KONTO 7210"))));
+		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(PAYROLL_SIE + "#IB 0 1930 100.00\r\n")));
+		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(PAYROLL_SIE + "#RES 0 7210 30000.00\r\n")));
+		// Accounts only, no vouchers
+		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(PAYROLL_SIE.substring(0, PAYROLL_SIE.indexOf("#VER")))));
+	}
+
+	private static File writeTemp(String content) throws Exception {
+		File f = File.createTempFile("payroll", ".se");
+		f.deleteOnExit();
+		Files.write(f.toPath(), content.getBytes("IBM437"));
+		return f;
+	}
+
 	@Test
 	public void testImportStreamAndJsonRoundTrip() throws Exception {
 		AccountingFileData imported;

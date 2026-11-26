@@ -22,14 +22,20 @@ import org.notima.sie.TransRec;
 import org.notima.sie.VerRec;
 import org.notima.util.LocalDateUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -49,6 +55,10 @@ import java.util.TreeMap;
  * </ol>
  *
  * <p>If no {@code #RAR} records are present, vouchers are grouped by calendar year.
+ *
+ * <p>A file with vouchers but no fiscal years, balances or results ({@link #isVoucherFile(File)}),
+ * ie a payroll export, is a voucher import ({@link AccountingFileData#isVoucherImport()}): its
+ * vouchers are to be added to an existing accounting rather than replace a year.
  */
 public class SieAccountingFileImporter implements AccountingFileImporter {
 
@@ -76,7 +86,46 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
         result.setCountryCode(getCountryCode());
         result.setCompany(bp);
         result.setPeriods(periods);
+        result.setVoucherImport(isVoucherFile(file));
         return result;
+    }
+
+    /** Records that only a file describing fiscal years has: years, balances, results, budgets. */
+    private static final String[] YEAR_RECORDS = {
+        "#RAR", "#IB", "#UB", "#OIB", "#OUB", "#RES", "#PSALDO", "#PBUDGET"
+    };
+
+    /**
+     * True when the file has at least one {@code #VER} and none of the records that describe
+     * a fiscal year ({@code #RAR}, {@code #IB}, {@code #UB}, {@code #OIB}, {@code #OUB},
+     * {@code #RES}, {@code #PSALDO}, {@code #PBUDGET}): it then only holds vouchers (and
+     * possibly the accounts they use) to add, and can't be an export of a whole year.
+     */
+    public static boolean isVoucherFile(File file) throws IOException {
+        boolean hasVoucher = false;
+        // The record tags are ASCII, so the charset (IBM437) doesn't matter for them
+        try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(file),
+                StandardCharsets.ISO_8859_1))) {
+            String line;
+            while ((line = r.readLine()) != null) {
+                String tag = tagOf(line);
+                if (tag == null) continue;
+                for (String y : YEAR_RECORDS) {
+                    if (y.equals(tag)) return false;
+                }
+                if ("#VER".equals(tag)) hasVoucher = true;
+            }
+        }
+        return hasVoucher;
+    }
+
+    /** The record tag of a line ("#VER"), upper case; null if the line isn't a record. */
+    private static String tagOf(String line) {
+        String s = line.trim();
+        if (!s.startsWith("#")) return null;
+        int end = 1;
+        while (end < s.length() && !Character.isWhitespace(s.charAt(end))) end++;
+        return s.substring(0, end).toUpperCase(Locale.ROOT);
     }
 
     // -------------------------------------------------------------------------
