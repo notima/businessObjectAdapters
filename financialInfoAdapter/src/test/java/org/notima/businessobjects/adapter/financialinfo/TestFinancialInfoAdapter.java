@@ -136,6 +136,49 @@ public class TestFinancialInfoAdapter {
 	}
 
 	@Test
+	public void referenceRateHistoryOfAYear() throws Exception {
+		http.responses.clear();
+		http.serve("/Observations/SECBREFEFF/", "riksbank-ref-year.json");
+		FinancialInfoAdapter a = adapter("riksbank");
+		java.util.List<InterestRateResult> h = a.getInterestRateHistory(RiksbankSource.SE_REF_RATE,
+				LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
+		assertEquals(3, h.size());
+		// In force on 1 January: the one published last before it
+		assertEquals(2.0, h.get(0).getInterestRate().getRate(), 1e-9);
+		assertEquals(LocalDate.of(2025, 12, 30), h.get(0).getInterestRate().getValidFrom());
+		assertEquals(LocalDate.of(2026, 6, 30), h.get(0).getInterestRate().getValidUntil());
+		assertEquals(1.75, h.get(1).getInterestRate().getRate(), 1e-9);
+		assertEquals(LocalDate.of(2026, 7, 1), h.get(1).getInterestRate().getValidFrom());
+		assertEquals(LocalDate.of(2026, 11, 2), h.get(1).getInterestRate().getValidUntil());
+		assertEquals(1.5, h.get(2).getInterestRate().getRate(), 1e-9);
+		assertNull(h.get(2).getInterestRate().getValidUntil());
+		assertEquals(1, http.callsTo("/Observations/SECBREFEFF/2025-12-01/2026-12-31"));
+		assertTrue(a.getInterestRateHistory("NO_SUCH_RATE", LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31)).isEmpty());
+	}
+
+	@Test
+	public void referenceRateChangesOnNewYearsDayThoughFirstPublishedLater() throws Exception {
+		http.responses.clear();
+		http.serve("/Observations/SECBREFEFF/", "riksbank-ref-newyear.json");
+		FinancialInfoAdapter a = adapter("riksbank");
+		java.util.List<InterestRateResult> h = a.getInterestRateHistory(RiksbankSource.SE_REF_RATE,
+				LocalDate.of(2025, 12, 1), LocalDate.of(2026, 1, 31));
+		assertEquals(2, h.size());
+		assertEquals(LocalDate.of(2025, 12, 31), h.get(0).getInterestRate().getValidUntil());
+		assertEquals(LocalDate.of(2026, 1, 1), h.get(1).getInterestRate().getValidFrom());
+		// On 1 January, before Riksbanken has published: the rate of the new half year
+		InterestRateResult r = a.getInterestRate(RiksbankSource.SE_REF_RATE, LocalDate.of(2026, 1, 1));
+		assertEquals(3.0, r.getInterestRate().getRate(), 1e-9);
+		assertEquals(LocalDate.of(2026, 1, 1), r.getInterestRate().getValidFrom());
+		// Of the year only: the rate of the year before ended on 31 December
+		java.util.List<InterestRateResult> year = a.getInterestRateHistory(RiksbankSource.SE_REF_RATE,
+				LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
+		assertEquals(1, year.size());
+		assertEquals(3.0, year.get(0).getInterestRate().getRate(), 1e-9);
+		assertEquals(4.0, a.getInterestRate(RiksbankSource.SE_REF_RATE, LocalDate.of(2025, 12, 31)).getInterestRate().getRate(), 1e-9);
+	}
+
+	@Test
 	public void availableCurrencies() throws Exception {
 		FinancialInfoAdapter a = adapter("riksbank", "ecb");
 		assertTrue(a.getAvailableCurrencies().containsKey("SEK"));

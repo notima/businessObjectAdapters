@@ -184,6 +184,15 @@ public class FinancialInfoAdapter implements ExchangeRateProvider, InterestRateP
 	}
 
 	@Override
+	public List<InterestRateResult> getInterestRateHistory(String rateKey, LocalDate from, LocalDate to) throws Exception {
+		if (rateKey == null || from == null || to == null) return Collections.emptyList();
+		for (InterestRateSource s : interestSources) {
+			if (s.getInterestRateKeys().containsKey(rateKey)) return s.getInterestRateHistory(rateKey, from, to);
+		}
+		return Collections.emptyList();
+	}
+
+	@Override
 	public List<InterestRateResult> getInterestRates(LocalDate date) throws Exception {
 		List<InterestRateResult> result = new ArrayList<InterestRateResult>();
 		for (String key : getAvailableInterestRateKeys().keySet()) {

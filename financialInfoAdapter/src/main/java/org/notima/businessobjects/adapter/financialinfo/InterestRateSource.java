@@ -1,6 +1,7 @@
 package org.notima.businessobjects.adapter.financialinfo;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import org.notima.generic.businessobjects.InterestRateResult;
@@ -18,5 +19,13 @@ public interface InterestRateSource {
 	 * @throws Exception	If the source couldn't be read.
 	 */
 	InterestRateResult getInterestRate(String rateKey, LocalDate date) throws Exception;
+
+	/**
+	 * @return	The periods of {@code rateKey} from {@code from} to {@code to}, as
+	 * 			{@link org.notima.generic.ifacebusinessobjects.InterestRateProvider#getInterestRateHistory}
+	 * 			says; empty if unknown.
+	 * @throws Exception	If the source couldn't be read.
+	 */
+	List<InterestRateResult> getInterestRateHistory(String rateKey, LocalDate from, LocalDate to) throws Exception;
 
 }

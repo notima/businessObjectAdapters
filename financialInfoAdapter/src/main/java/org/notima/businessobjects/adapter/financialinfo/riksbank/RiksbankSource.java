@@ -3,13 +3,17 @@ package org.notima.businessobjects.adapter.financialinfo.riksbank;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.notima.businessobjects.adapter.financialinfo.ExchangeRateSource;
 import org.notima.businessobjects.adapter.financialinfo.HttpFetcher;
@@ -17,6 +21,7 @@ import org.notima.businessobjects.adapter.financialinfo.InterestRateSource;
 import org.notima.generic.businessobjects.InterestRate;
 import org.notima.generic.businessobjects.InterestRateResult;
 import org.notima.generic.businessobjects.util.ExchangeRateTable;
+import org.notima.generic.ifacebusinessobjects.InterestRateProvider;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -50,9 +55,9 @@ public class RiksbankSource implements ExchangeRateSource, InterestRateSource {
 	public static final String BASE_URL = "https://api.riksbank.se/swea/v1";
 
 	/** Key of the reference rate (referensräntan). */
-	public static final String SE_REF_RATE = "SE_REF_RATE";
+	public static final String SE_REF_RATE = InterestRateProvider.SE_REFERENCE_RATE;
 	/** Key of the policy rate (styrräntan). */
-	public static final String SE_POLICY_RATE = "SE_POLICY_RATE";
+	public static final String SE_POLICY_RATE = InterestRateProvider.SE_POLICY_RATE;
 
 	static final int LOOKBACK_DAYS = 10;
 	/** Interest rates are looked further back: some are only published when they change. */
@@ -162,24 +167,83 @@ public class RiksbankSource implements ExchangeRateSource, InterestRateSource {
 		return keys;
 	}
 
+	/**
+	 * The latest rate published on or before {@code date}. The reference rate is set for half
+	 * a year from 1 January and 1 July (räntelagen 9 §), which are holidays or come before the
+	 * first banking day: in the days before the first rate of the half year is published, it
+	 * is looked up after them, and is in force from the start of the half year.
+	 */
 	@Override
 	public InterestRateResult getInterestRate(String rateKey, LocalDate date) throws IOException {
 		String[] rate = rateKey != null ? RATES.get(rateKey) : null;
-		if (rate == null) return null;
-		String url = baseUrl + "/Observations/" + rate[0] + "/" + date.minusDays(INTEREST_LOOKBACK_DAYS) + "/" + date;
-		LocalDate day = null;
-		BigDecimal value = null;
+		if (rate == null || date == null) return null;
+		Map.Entry<LocalDate, BigDecimal> latest = observations(rate[0], date.minusDays(INTEREST_LOOKBACK_DAYS), date).floorEntry(date);
+		if (SE_REF_RATE.equals(rateKey)) {
+			LocalDate half = halfYearStart(date);
+			if (latest == null || latest.getKey().isBefore(half)) {
+				Map.Entry<LocalDate, BigDecimal> first = observations(rate[0], half, half.plusDays(INTEREST_LOOKBACK_DAYS)).ceilingEntry(half);
+				if (first != null) return result(rateKey, rate[1], first.getValue(), half);
+			}
+		}
+		return latest != null ? result(rateKey, rate[1], latest.getValue(), latest.getKey()) : null;
+	}
+
+	/**
+	 * One call for the whole range (from {@value #INTEREST_LOOKBACK_DAYS} days before
+	 * {@code from}, for the rate in force on it). A period starts on the first day Riksbanken
+	 * published its rate, so the first one may start before {@code from}, but no earlier than
+	 * the lookback; a new reference rate starts on the first day of its half year.
+	 */
+	@Override
+	public List<InterestRateResult> getInterestRateHistory(String rateKey, LocalDate from, LocalDate to) throws IOException {
+		List<InterestRateResult> result = new ArrayList<InterestRateResult>();
+		String[] rate = rateKey != null ? RATES.get(rateKey) : null;
+		if (rate == null || from == null || to == null || to.isBefore(from)) return result;
+		TreeMap<LocalDate, BigDecimal> observations = observations(rate[0], from.minusDays(INTEREST_LOOKBACK_DAYS), to);
+		// The last one on or before from, and every one after it
+		LocalDate start = observations.floorKey(from);
+		SortedMap<LocalDate, BigDecimal> inRange = start != null ? observations.tailMap(start) : observations;
+		InterestRate current = null;
+		LocalDate previousDay = null;
+		for (Map.Entry<LocalDate, BigDecimal> e : inRange.entrySet()) {
+			LocalDate day = e.getKey();
+			if (current == null || BigDecimal.valueOf(current.getRate()).compareTo(e.getValue()) != 0) {
+				LocalDate validFrom = day;
+				if (current != null && SE_REF_RATE.equals(rateKey) && previousDay.isBefore(halfYearStart(day))) {
+					validFrom = halfYearStart(day);
+				}
+				if (current != null) current.setValidUntil(validFrom.minusDays(1));
+				current = new InterestRate(rateKey, e.getValue().doubleValue()).setName(rate[1]).setValidFrom(validFrom).setCurrency("SEK");
+				result.add(new InterestRateResult(current).setSource(NAME));
+			}
+			previousDay = day;
+		}
+		// A new reference rate on 1 January ends the one before from
+		result.removeIf(r -> r.getInterestRate().getValidUntil() != null && r.getInterestRate().getValidUntil().isBefore(from));
+		return result;
+	}
+
+	/** 1 January or 1 July: the start of the half year of {@code date}. */
+	static LocalDate halfYearStart(LocalDate date) {
+		return LocalDate.of(date.getYear(), date.getMonthValue() < 7 ? 1 : 7, 1);
+	}
+
+	/** The published values of {@code seriesId} from {@code from} to {@code to}, by date. */
+	private TreeMap<LocalDate, BigDecimal> observations(String seriesId, LocalDate from, LocalDate to) throws IOException {
+		String url = baseUrl + "/Observations/" + seriesId + "/" + from + "/" + to;
+		TreeMap<LocalDate, BigDecimal> observations = new TreeMap<LocalDate, BigDecimal>();
 		for (JsonElement e : array(http.get(url, headers))) {
 			JsonObject o = e.getAsJsonObject();
 			String d = string(o, "date");
 			if (d == null || !o.has("value") || o.get("value").isJsonNull()) continue;
-			LocalDate obs = LocalDate.parse(d);
-			if (obs.isAfter(date) || (day != null && !obs.isAfter(day))) continue;
-			day = obs;
-			value = o.get("value").getAsBigDecimal();
+			LocalDate day = LocalDate.parse(d);
+			if (!day.isBefore(from) && !day.isAfter(to)) observations.put(day, o.get("value").getAsBigDecimal());
 		}
-		if (day == null) return null;
-		InterestRate r = new InterestRate(rateKey, value.doubleValue()).setName(rate[1]).setValidFrom(day).setCurrency("SEK");
+		return observations;
+	}
+
+	private static InterestRateResult result(String rateKey, String name, BigDecimal value, LocalDate validFrom) {
+		InterestRate r = new InterestRate(rateKey, value.doubleValue()).setName(name).setValidFrom(validFrom).setCurrency("SEK");
 		return new InterestRateResult(r).setSource(NAME);
 	}
 
