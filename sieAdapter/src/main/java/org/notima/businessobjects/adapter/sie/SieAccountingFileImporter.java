@@ -56,8 +56,8 @@ import java.util.TreeMap;
  *
  * <p>If no {@code #RAR} records are present, vouchers are grouped by calendar year.
  *
- * <p>A file with vouchers but no fiscal years, balances or results ({@link #isVoucherFile(File)}),
- * ie a payroll export, is a voucher import ({@link AccountingFileData#isVoucherImport()}): its
+ * <p>A file with vouchers but no balances or results ({@link #isVoucherFile(File)}), ie a
+ * payroll export or a bookkeeping proposal, is a voucher import ({@link AccountingFileData#isVoucherImport()}): its
  * vouchers are to be added to an existing accounting rather than replace a year.
  */
 public class SieAccountingFileImporter implements AccountingFileImporter {
@@ -90,16 +90,21 @@ public class SieAccountingFileImporter implements AccountingFileImporter {
         return result;
     }
 
-    /** Records that only a file describing fiscal years has: years, balances, results, budgets. */
+    /**
+     * Records that only an export of whole fiscal years has: balances, results, budgets.
+     * {@code #RAR} isn't one of them: voucher files (ie bookkeeping proposals) often state the
+     * fiscal year their vouchers belong to, while an export of a year with vouchers always has
+     * balances or results.
+     */
     private static final String[] YEAR_RECORDS = {
-        "#RAR", "#IB", "#UB", "#OIB", "#OUB", "#RES", "#PSALDO", "#PBUDGET"
+        "#IB", "#UB", "#OIB", "#OUB", "#RES", "#PSALDO", "#PBUDGET"
     };
 
     /**
-     * True when the file has at least one {@code #VER} and none of the records that describe
-     * a fiscal year ({@code #RAR}, {@code #IB}, {@code #UB}, {@code #OIB}, {@code #OUB},
-     * {@code #RES}, {@code #PSALDO}, {@code #PBUDGET}): it then only holds vouchers (and
-     * possibly the accounts they use) to add, and can't be an export of a whole year.
+     * True when the file has at least one {@code #VER} and none of the balance, result and
+     * budget records of a whole year's export ({@code #IB}, {@code #UB}, {@code #OIB},
+     * {@code #OUB}, {@code #RES}, {@code #PSALDO}, {@code #PBUDGET}): it then only holds
+     * vouchers (and possibly the accounts they use and the fiscal year, {@code #RAR}) to add.
      */
     public static boolean isVoucherFile(File file) throws IOException {
         boolean hasVoucher = false;

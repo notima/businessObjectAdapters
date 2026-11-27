@@ -86,9 +86,12 @@ public class SieAccountingFileImporterTest {
 	public void testYearFileIsNotVoucherImport() throws Exception {
 		File file = new File(getClass().getResource(SAMPLE_SIE).toURI());
 		assertFalse(new SieAccountingFileImporter().importFile(file).isVoucherImport());
-		// Any year record makes it a year file
-		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(
+		// A balance or result record makes it a year file
+		// A fiscal year alone doesn't make it a year export (ie a bookkeeping proposal states it)
+		assertTrue(SieAccountingFileImporter.isVoucherFile(writeTemp(
 				PAYROLL_SIE.replace("#KONTO 7210", "#RAR 0 20260101 20261231\r\n#KONTO 7210"))));
+		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(
+				PAYROLL_SIE.replace("#KONTO 7210", "#RAR 0 20260101 20261231\r\n#KONTO 7210") + "#UB 0 1930 100.00\r\n")));
 		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(PAYROLL_SIE + "#IB 0 1930 100.00\r\n")));
 		assertFalse(SieAccountingFileImporter.isVoucherFile(writeTemp(PAYROLL_SIE + "#RES 0 7210 30000.00\r\n")));
 		// Accounts only, no vouchers
