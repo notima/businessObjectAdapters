@@ -65,6 +65,35 @@ public final class FortnoxVatCodes {
 		return key != null ? key : code;
 	}
 
+	/**
+	 * Translates a tax key of the canonical model back to a VAT code of Fortnox, for an account
+	 * written to Fortnox.
+	 *
+	 * <p>Where several codes give the key, the account number decides: of
+	 * {@link VatReportDefinition#SETTLEMENT}, R1 (momsfordran) for an asset account (class 1),
+	 * else R2 (redovisningskonto för moms). A key no code gives is taken to be a Fortnox code
+	 * itself, as {@link #toTaxKey(String)} keeps unknown codes.</p>
+	 *
+	 * @param taxKey	The tax key, or null.
+	 * @param accountNo	The account, to choose among several codes.
+	 * @return			The VAT code; null for no key.
+	 */
+	public static String toVatCode(String taxKey, String accountNo) {
+		if (taxKey == null || taxKey.trim().isEmpty()) return null;
+		String key = taxKey.trim();
+		if (VatReportDefinition.SETTLEMENT.equals(key)) {
+			return accountNo != null && accountNo.trim().startsWith("1") ? "R1" : "R2";
+		}
+		String code = null;
+		for (Map.Entry<String, String> e : KEYS.entrySet()) {
+			if (e.getValue().equals(key)) {
+				// Prefer the code that is the key itself (MP1 -> MP1)
+				if (code == null || e.getKey().equals(key)) code = e.getKey();
+			}
+		}
+		return code != null ? code : key.toUpperCase();
+	}
+
 	/** @return	True if the code is translated, see {@link #toTaxKey(String)}. */
 	public static boolean isKnown(String vatCode) {
 		return vatCode != null && KEYS.containsKey(vatCode.trim().toUpperCase());

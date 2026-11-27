@@ -106,14 +106,17 @@ public class FortnoxAccountingModelProvider implements AccountingModelProvider {
 	 * model ({@link FortnoxVatCodes}), as the tax key of the account in the model
 	 * ({@link AccountElement#getTaxKey()}), where the model has none, ie for the VAT return.
 	 * Likewise the SRU code of each account as its reporting code
-	 * ({@link AccountElement#getReportingCode()}), for the corporate income tax.
+	 * ({@link AccountElement#getReportingCode()}), for the corporate income tax. Accounts that are
+	 * inactive in Fortnox are made inactive ({@link AccountElement#isActive()}).
 	 */
 	static void applyVatCodes(AccountingFileData data, Accounts accounts) {
 		if (data == null || data.getPeriods() == null || accounts == null || accounts.getAccountSubset() == null) return;
 		Map<String, String> codes = new HashMap<String, String>();
 		Map<String, String> sruCodes = new HashMap<String, String>();
+		java.util.Set<String> inactive = new java.util.HashSet<String>();
 		for (AccountSubset a : accounts.getAccountSubset()) {
 			if (a.getNumber() == null) continue;
+			if (Boolean.FALSE.equals(a.getActive())) inactive.add(a.getNumber().toString());
 			if (a.getSRU() != null && !a.getSRU().trim().isEmpty() && !"0".equals(a.getSRU().trim())) {
 				sruCodes.put(a.getNumber().toString(), a.getSRU().trim());
 			}
@@ -124,6 +127,7 @@ public class FortnoxAccountingModelProvider implements AccountingModelProvider {
 			if (p.getChartOfAccounts() == null) continue;
 			for (AccountElement ae : p.getChartOfAccounts()) {
 				if (ae.getAccountNo() == null) continue;
+				if (inactive.contains(ae.getAccountNo())) ae.setActive(false);
 				if (ae.getReportingCode() == null || ae.getReportingCode().trim().isEmpty()) {
 					String sru = sruCodes.get(ae.getAccountNo());
 					if (sru != null) ae.setReportingCode(sru);

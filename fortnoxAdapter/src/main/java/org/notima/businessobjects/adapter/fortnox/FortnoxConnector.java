@@ -294,7 +294,7 @@ public class FortnoxConnector implements SieFileProvider, SyncProvider {
 
 	private final List<ObjectSyncHandler<?>> syncHandlers = Collections.unmodifiableList(java.util.Arrays.<ObjectSyncHandler<?>>asList(
 			new FortnoxVoucherSync(this), new FortnoxCustomerSync(this), new FortnoxSupplierSync(this),
-			new FortnoxCustomerInvoiceSync(this), new FortnoxSupplierInvoiceSync(this), new FortnoxArticleSync(this)));
+			new FortnoxCustomerInvoiceSync(this), new FortnoxSupplierInvoiceSync(this), new FortnoxArticleSync(this), new FortnoxAccountSync(this)));
 
 	@Override
 	public List<ObjectSyncHandler<?>> getSyncHandlers() {
